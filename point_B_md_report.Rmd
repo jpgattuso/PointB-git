@@ -712,12 +712,12 @@ kable(tab_dyf_surf_salinity_AT_year, caption="")
 #                   skip=1, sheet = "Data_DIC_2017-06-19",
 #               trim_ws = TRUE, col_names = TRUE,
 #                   na = c("", "NA"))
-  z <-  read_delim(
-  paste0("../data/", "Data_DIC.csv"),
-  delim = ";",
-  col_names = TRUE,
+z <-  read_delim(
+  paste0(path,"data/", "Data_DIC.csv"),
+  delim = ",",
   na = c("NA", "999999")
-  )
+)
+
 H <- NULL
 z$sampling_date <- as.POSIXct(z$sampling_date, format = "%d/%m/%Y")
 z$measure_date <- as.POSIXct(z$measure_date, format = "%d/%m/%Y")
@@ -1210,7 +1210,7 @@ g <- plot_grid(T1vp, S1vp, AT1vp, CT1vp, pH1vp, pCO21vp, Oa1vp, ncol=1,
                align="v")
 #g <- arrangeGrob(T1vp, S1vp, AT1vp, CT1vp, pH1vp, pCO21vp, Oa1vp, ncol=1)
 #cowplot::
-ggsave(file="../figures/fig4.pdf", g,  width = 8, height = 28, units = "cm")
+ggsave(file=paste0(path,"/figures/fig4.pdf"), g,  width = 8, height = 28, units = "cm")
 g <- plot_grid(T1vp, S1vp, AT1vp, CT1vp, pH1vp, pCO21vp, Oa1vp, ncol=2)
 ggsave(file=paste0(path,"/figures/fig_paper_monthly_means_1m.png"), g, width = 18, height = 14, units = "cm")
 
@@ -1784,7 +1784,7 @@ row.names(reg_ta_no_change) <- var_list
 
 
 ## Interannual changes at 1 m
-![fig_paper_interannual_1m.png](../figures/fig_paper_interannual_1m.png)
+![fig_paper_interannual_1m.png](`r paste0(path,"/figures/fig_paper_interannual_1m.png`)
 ![fig_poc_pon.png](../figures/fig_poc_pon.png)
 ![fig_ta_vs_salinity_month_pointB_0m.png](../figures/fig_ta_vs_salinity_month_pointB_0m.png)
 
