@@ -1,0 +1,168 @@
+---
+title: "Time series of the carbonate chemistry at Point B"
+author: "Jean-Pierre Gattuso, CNRS-UPMC (gattuso@obs-vlfr.fr), Samir Alliouane, Lydia Kapsenberg and Laure Mousseau"
+date: '`r format(Sys.Date(), "%d %B %Y")`'
+output:
+  html_document:
+    code_folding: hide
+    fig_caption: yes
+    toc: yes
+    toc_float: yes
+  pdf_document:
+    toc: yes
+---
+
+
+```{r setup, include=FALSE}
+##
+rm(list = ls())
+require(readxl)
+require(seacarb)
+library(ggplot2)
+library(cowplot)
+library(scales)
+library(RColorBrewer)
+library(gridExtra)
+library(reshape2)
+library(xtable)
+library(zoo)
+library(lubridate)
+library(nlme)
+library(lmtest)
+library(dplyr)
+library(readr)
+library(tidyr)
+library(grid)
+library(viridis)
+library(animation)
+library(directlabels)
+library(tibble)
+require("knitr")
+library(broom)
+
+#define who is the user and define path
+if (Sys.getenv("LOGNAME") == "gattuso") path = "../../pCloud\ Sync/Documents/experiments/exp153_carbonates_point_B/"
+if (Sys.getenv("LOGNAME") == "samir") path = "../../pCloud Sync/exp153_carbonates_point_B/"
+
+Sys.setenv(TZ='UTC')
+dc1 <- "#482173FF" #discrete color 1
+dc2 <- "#51C56AFF" #discrete color 2: 
+dc3 <- "#482173FF" #discrete color 1
+dc4 <- "#51C56AFF" #discrete color 2: 
+
+size_labs <- 6
+face_font <- "plain"
+
+Mytheme <- function(size_labs = 6, face_font="plain", ...) {
+  theme_bw() +
+  theme(axis.text.x = element_text(face=face_font, size=size_labs, color="black"),
+        axis.title.x = element_text(face=face_font, size=size_labs, margin=margin(0,0,0,0,"pt")),
+        axis.text.y = element_text(face=face_font, color="black", size=size_labs),
+        axis.title.y = element_text(face=face_font, size=size_labs),
+        axis.ticks.x = element_line(size=0.1),
+        axis.ticks.y = element_line(size=0.1),
+        axis.ticks.length = unit(1.1, "mm"),
+        panel.grid.major = element_line(size = 0.25, color="black", linetype="dotted"),
+        aspect.ratio = 1 / 3,
+        plot.margin = margin(t = 0, r = 1, b = 0, l = 0, unit = "lines")
+  )
+}
+
+Mytheme_facet <- function(size_labs = 6, face_font="plain") {
+  theme_bw() +
+  theme(axis.text.x = element_text(face=face_font, size=size_labs, color="black"),
+        axis.title.x = element_text(face=face_font, size=size_labs, margin=margin(0,0,0,0,"pt")),
+        axis.text.y = element_text(face=face_font, color="black", size=size_labs),
+        axis.title.y = element_text(face=face_font, size=size_labs),
+        axis.ticks.x = element_line(size=0.1),
+        axis.ticks.y = element_line(size=0.1),
+        axis.ticks.length = unit(1.1, "mm"),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        aspect.ratio = 1,
+        plot.margin = margin(t = 0, r = 1, b = 0, l = 0, unit = "lines")
+  )
+}
+
+######## To add regression line on ggplots
+# use as annotate(aes(x = 25, y = 300, label = lm_eqn(lm(y ~ x, df))), parse = TRUE)
+# http://stackoverflow.com/questions/7549694/ggplot2-adding-regression-line-equation-and-r2-on-graph
+lm_eqn = function(m) {
+  l <- list(a = format(coef(m)[1], digits = 2),
+      b = format(abs(coef(m)[2]), digits = 2),
+      r2 = format(summary(m)$r.squared, digits = 3));
+  if (coef(m)[2] >= 0)  {
+    eq <- substitute(italic(y) == a + b %.% italic(x)*","~~italic(r)^2~"="~r2,l)
+  } else {
+    eq <- substitute(italic(y) == a - b %.% italic(x)*","~~italic(r)^2~"="~r2,l)    
+  }
+  as.character(as.expression(eq));                 
+}
+
+######## function to make regression plot with model I equation in title
+ggreg <- function (fit, point_size=2) {
+  ggplot(fit$model, aes_string(x = names(fit$model)[2],
+                               y = names(fit$model)[1])) +
+    geom_point(size = point_size, col = "blue") +
+    stat_smooth(method = "lm", col = "black") +
+    labs(title = paste(title, "\nAdj R2 = ",signif(summary(fit)$adj.r.squared, 5),
+                       "; Intercept =",signif(fit$coef[[1]],5 ),
+                       "; Slope =",signif(fit$coef[[2]], 5),
+                       "; P =",signif(summary(fit)$coef[2,4], 5))) +
+    theme(plot.title = element_text(size=7))
+}
+
+```
+```{r test regression, include=FALSE}
+# This is to test linear regressions with dates
+# Conclusion is that the slope is per day but I have decided to use decimal_date() to avoid any confusion
+dt <- as_date(c("1916-06-16", "2016-06-15"))
+temp <- c(20, 21)
+dat <- data.frame(dt, temp)
+reg <- lm(data=dat,temp ~ dt)
+slope <- 365*coef(reg)[2]
+```
+
+
+### Les codes de Villefranche (inspirés des codes SOMLIT)
+
+- Codification qflag\_taking concernant le prélèvement des échantillons en mer : (i.e pour l'étape : "qflag\_taking")
+	- 0 : ancien code qui signifie OK
+	- 2 : nouveau code qui signifie OK
+	- 3 : prélèvement douteux
+	- 4 : prélèvement mauvais
+
+- Codification qflag\_final, qui correspond au code "final" des résultats TA et DIC (i.e pour l'étape : "qflag\_final"). Comme TA et DIC sont déterminés par la même titration, qflag\_ta et qflag\_DIC devrait être identiques. Ce n'est pas le cas en décembre 2009 où il manque des qflag\_DIC. On a alors considéré que qflag\_final = qflag\_ta.
+
+	- 0 : Dosage avorté (échantillon perdu)
+	- 2 : résultat OK
+	- 3 : résultat douteux
+	- 4 : résultat mauvais
+
+
+```{r read_data, include=FALSE}
+# read data and create a data frame tbl
+z <-  read_delim(
+  paste0(path,"data/", "radehydro_ctd.csv.gz"),
+  delim = ",",
+  col_names = TRUE,
+  col_types = cols(fluo_calib = "d", fluorescence="d", oxygen_mll="d", oxygen_sat="d", 
+                   oxygen_umolkg="d", par="d", v0="d", v2="d"),
+  na = c("NA")
+)
+```
+
+```{r plot, include=FALSE}
+v <- ggplot(filter(z, date>"2016-01-01", date<"2016-12-31"), 
+            aes(x=date,y=pressure,z=temperature, fill=temperature)) +
+  geom_raster() +
+  scale_y_reverse(expand=c(0,0)) +
+  #scale_fill_gradientn(colours=matlab.like(10), na.value = 'gray', name="Water\nTemp \nºC") + 
+  scale_fill_viridis_d() +
+  scale_x_date(date_breaks = "1 week", 
+                   # limits = as_date(c('2016-12-06','2017-02-25')),
+                   labels=date_format("%b-%d"), expand=c(0,0)) + 
+  ylab("Depth (m)") +
+  xlab("")
+ggsave(filename = "figures/temp.png", plot = v)
+```
