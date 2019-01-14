@@ -14,7 +14,6 @@ output:
 
 
 ```{r setup, include=FALSE}
-##
 rm(list = ls())
 require(readxl)
 require(seacarb)
@@ -615,7 +614,7 @@ p1 <- ggplot(data=dyf_surf) +
         plot.title = element_text(face="bold", size=16)
   )
 
-ggsave(file = paste0(path,"/figures/fig_ta_vs_salinity_0m.png"), p1,
+ggsave(file = "figures/fig_ta_vs_salinity_0m.png", p1,
     width = 20, height = 13, units = "cm")
 
 
@@ -623,7 +622,7 @@ dyf_surf_salinity_AT <- ggplot(data = dyf_surf, aes(x=salinity, y=AT), na.rm=TRU
   geom_point(aes(colour=factor(year)), na.rm=TRUE) + 
   labs(y = "",x="Salinity", title=expression(paste(italic(A)[T] ," ","at <= 12 m"))) +
   stat_smooth(method = lm, na.rm=TRUE)
-ggsave(file = paste0(path,"/figures/dyf_surf_salinity_AT.png"), dyf_surf_salinity_AT,
+ggsave(file = "figures/dyf_surf_salinity_AT.png", dyf_surf_salinity_AT,
     width = 15, height = 10, units = "cm")
 
 # AT as a function of salinity for every year
@@ -672,7 +671,7 @@ dyf_surf_salinity_AT_year <- ggplot(data=dyf_surf) +
         plot.title = element_text(face="bold", size=16)
   )
 
-ggsave(file = paste0(path,"figures/dyf_surf_salinity_AT_year.png"), dyf_surf_salinity_AT_year,
+ggsave(file = "figures/dyf_surf_salinity_AT_year.png", dyf_surf_salinity_AT_year,
     width = 20, height = 20, units = "cm")
 ```
 
@@ -691,7 +690,7 @@ kable(tab_fig_dyf_surf_date_salinity)
 ## AT vs time and salinity at DYFAMED
 These are for surface (< 12 m) values, with outliers removed. The slope of salinity vs time is significant for all years but not post-2007 (P = 0.08), which is the relevant period of interest.
 
-![dyf_surf_salinity_AT_year](../../pCloud Sync/exp153_carbonates_point_B/figures/dyf_surf_salinity_AT_year.png)
+![dyf_surf_salinity_AT_year](figures/dyf_surf_salinity_AT_year.png)
 
 The relationship with salinity is highly significant: 
 <!-- cat(sprintf("%.3f + salinity x %.3f (P = %.3f)", int_dyf, slo_dyf, tab_dyf_surf_salinity_AT[8,3])) -->
@@ -1211,9 +1210,9 @@ g <- plot_grid(T1vp, S1vp, AT1vp, CT1vp, pH1vp, pCO21vp, Oa1vp, ncol=1,
                align="v")
 #g <- arrangeGrob(T1vp, S1vp, AT1vp, CT1vp, pH1vp, pCO21vp, Oa1vp, ncol=1)
 #cowplot::
-ggsave(file=paste0(path,"/figures/fig4.pdf"), g,  width = 8, height = 28, units = "cm")
+ggsave(file="figures/fig4.pdf", g,  width = 8, height = 28, units = "cm")
 g <- plot_grid(T1vp, S1vp, AT1vp, CT1vp, pH1vp, pCO21vp, Oa1vp, ncol=2)
-ggsave(file=paste0(path,"/figures/fig_paper_monthly_means_1m.png"), g, width = 18, height = 14, units = "cm")
+ggsave(file="figures/fig_paper_monthly_means_1m.png", g, width = 18, height = 14, units = "cm")
 
 # prepare data 50m
 tmp <- ungroup(mean50m) %>%
@@ -1321,7 +1320,7 @@ colnames(means_month50m) <-
 ```
 
 ## Monthly means at the surface
-![monthly_means_1m](../../pCloud Sync/exp153_carbonates_point_B/figures/fig_paper_monthly_means_1m.png)
+![monthly_means_1m](figures/fig_paper_monthly_means_1m.png)
 
 ```{r table monthly means}
 kable(means_month0m, digits = 3, caption="Monthly means at the surface")
@@ -1682,8 +1681,8 @@ anOa1p <- ggplot(data = ano_month0m, aes(x = sampling_date, y = OmegaAragonite_a
   annotation_custom(grob_N_bl)
 
 g <- plot_grid(T1p, anT1p, S1p, anS1p, AT1p, anAT1p, CT1p, anCT1p, pH1p, anpH1p, anpHeol1p, anpHptb1p, pCO21p, anpCO21p, Oa1p, anOa1p, align='vh', ncol=2)
-cowplot::ggsave(file=paste0(path,"/figures/fig_paper_interannual_1m.png"), g, width=15, height = 17, units = "cm")
-cowplot::ggsave(file=paste0(path,"/figures/fig2.pdf"), g, width = 18, height = 21, units = "cm")
+cowplot::ggsave(file="figures/fig_paper_interannual_1m.png", g, width=15, height = 17, units = "cm")
+cowplot::ggsave(file="figures/fig2.pdf", g, width = 18, height = 21, units = "cm")
 
 # AT as a function of salinity for every year
 j <- 0
@@ -1785,9 +1784,9 @@ row.names(reg_ta_no_change) <- var_list
 
 
 ## Interannual changes at 1 m
-![interannual_1m](../../pCloud Sync/exp153_carbonates_point_B/figures/fig_paper_interannual_1m.png)
-![poc_pon](../../pCloud Sync/exp153_carbonates_point_B/figures/fig_poc_pon.png)
-![ta_vs_salinity_month_pointB_0m](../../pCloud Sync/exp153_carbonates_point_B/figures/fig_ta_vs_salinity_month_pointB_0m.png)
+![interannual_1m](figures/fig_paper_interannual_1m.png)
+![poc_pon](figures/fig_poc_pon.png)
+![ta_vs_salinity_month_pointB_0m](figures/fig_ta_vs_salinity_month_pointB_0m.png)
 
 The slope of the rate of pH change is `r round(reg_var_1m[5,1], digits=4)` ± `r format(reg_var_1m[5,2], digits=4, scientific=FALSE)` units per year. If the observed total alkalinity data are corrected from their rate of change (i.e. assuming that they have not increased during the period of measurement, but kept their subannual variability), the rate of change is `r round(reg_ta_no_change[1,1], digits=4)` ± `r format(reg_ta_no_change[1,2], digits=4, scientific=FALSE)` units per year.
 
@@ -2135,11 +2134,11 @@ anOa50p <- ggplot(data = ano_month50m, aes(x = sampling_date, y = OmegaAragonite
   annotation_custom(grob_N)
 
 g <- plot_grid(T50p, anT50p, S50p, anS50p, AT50p, anAT50p, CT50p, anCT50p, pH50p, anpH50p, anpHptb50p, pCO250p, anpCO250p, Oa50p, anOa50p, align='vh', ncol=2)
-cowplot::ggsave(file=paste0(path,"/figures/fig_paper_interannual_50m.png"), g, width=15, height = 17, units = "cm")
-cowplot::ggsave(file=paste0(path,"/figures/fig3.pdf"), g, width = 18, height = 21, units = "cm")
+cowplot::ggsave(file="figures/fig_paper_interannual_50m.png", g, width=15, height = 17, units = "cm")
+cowplot::ggsave(file="figures/fig3.pdf", g, width = 18, height = 21, units = "cm")
 ```
 ## Interannual changes at 50 m
-![interannual_50m](../../pCloud Sync/exp153_carbonates_point_B/figures/fig_paper_interannual_50m.png)
+![interannual_50m](figures/fig_paper_interannual_50m.png)
 
 ```{r kable regressions 50 m}
 kable(reg_var_50m, digits = c(4,4,3,3,3,2,3), caption="Regressions on values at 50 m depth.")
@@ -2170,7 +2169,7 @@ ATnoC50p <- ggplot(mean50m, aes(x = sampling_date, y = mean_ta_nocarb), na.rm=TR
   theme(axis.text.x=element_blank()) +
   annotation_custom(grob_B_bl)
 g <- plot_grid(ATnoC1p, ATnoC50p, align='vh', ncol=1)
-cowplot::ggsave(file=paste0(path,"/figures/fig_paper_at_nocarb.png"), g, width=15, height = 17, units = "cm")
+cowplot::ggsave(file="figures/fig_paper_at_nocarb.png", g, width=15, height = 17, units = "cm")
 #cowplot::ggsave(file="../figures/at_nocarb.pdf", g, width = 18, height = 21, units = "cm")
 ```
 
@@ -2192,7 +2191,7 @@ fig_temp_month <- ggplot(data=mean0m_month, aes(x=year, y=Temperature)) +
   scale_color_viridis(name="Month", discrete=TRUE, option="plasma") + 
   theme(legend.position="top") +
   guides(col = guide_legend(ncol = 12, byrow = TRUE))
-ggsave(file=paste0(path,"/figures/fig_temp_month.png"), fig_temp_month, width = 15, height = 10, units = "cm")
+ggsave(file="figures/fig_temp_month.png", fig_temp_month, width = 15, height = 10, units = "cm")
 fig_at_month <- ggplot(data=mean0m_month, aes(x=year, y=at)) + 
   geom_line(aes(color=as.factor(monthd)), size=1) +
   guides(guide_legend(title = "Month")) +
@@ -2201,7 +2200,7 @@ fig_at_month <- ggplot(data=mean0m_month, aes(x=year, y=at)) +
   scale_color_viridis(name="Month", discrete=TRUE, option="plasma") + 
   theme(legend.position="top") +
   guides(col = guide_legend(ncol = 12, byrow = TRUE))
-ggsave(file=paste0(path,"/figures/fig_at_month.png"), fig_at_month, width = 15, height = 10, units = "cm")
+ggsave(file="figures/fig_at_month.png", fig_at_month, width = 15, height = 10, units = "cm")
 fig_pCO2_month <- ggplot(data=mean0m_month, aes(x=year, y=pCO2)) + 
   geom_line(aes(color=as.factor(monthd)), size=1) +
   xlab("Time") + ylab("pCO2") +
@@ -2209,7 +2208,7 @@ fig_pCO2_month <- ggplot(data=mean0m_month, aes(x=year, y=pCO2)) +
   scale_color_viridis(name="Month", discrete=TRUE, option="plasma") + 
   theme(legend.position="top") +
   guides(col = guide_legend(ncol = 12, byrow = TRUE))
-ggsave(file=paste0(path,"/figures/fig_pCO2_month.png"), fig_pCO2_month, width = 15, height = 10, units = "cm")
+ggsave(file="figures/fig_pCO2_month.png", fig_pCO2_month, width = 15, height = 10, units = "cm")
 fig_ct_month <- ggplot(data=mean0m_month, aes(x=year, y=ct)) + 
   geom_line(aes(color=as.factor(monthd)), size=1) +
   xlab("Time") + ylab("Dissolved inorganic carbon") +
@@ -2217,7 +2216,7 @@ fig_ct_month <- ggplot(data=mean0m_month, aes(x=year, y=ct)) +
   scale_color_viridis(name="Month", discrete=TRUE, option="plasma") + 
   theme(legend.position="top") +
   guides(col = guide_legend(ncol = 12, byrow = TRUE))
-ggsave(file=paste0(path,"/figures/fig_ct_month.png"), fig_ct_month, width = 15, height = 10, units = "cm")
+ggsave(file="figures/fig_ct_month.png", fig_ct_month, width = 15, height = 10, units = "cm")
 
 # Regressions annual monthly temperature
 j <- 0
@@ -2331,8 +2330,8 @@ fig_paper_monthly_rate_AT_CT <-
         legend.key = element_rect(colour = 'white', fill = 'white', size = 0),
         legend.background = element_rect(fill=alpha('white', alpha=0))
         )
-ggsave(file=paste0(path,"/figures/fig_paper_monthly_rate_AT_CT.png"), fig_paper_monthly_rate_AT_CT, width = 8, height = 8*2/3, units = "cm")
-ggsave(file=paste0(path,"/figures/fig5.pdf"), fig_paper_monthly_rate_AT_CT, width = 16, height= 10, units = "cm")
+ggsave(file="figures/fig_paper_monthly_rate_AT_CT.png", fig_paper_monthly_rate_AT_CT, width = 8, height = 8*2/3, units = "cm")
+ggsave(file="figures/fig5.pdf", fig_paper_monthly_rate_AT_CT, width = 16, height= 10, units = "cm")
 
 # Quarterly
 mean0m_quart <- mean0m %>%
@@ -2346,7 +2345,7 @@ fig_temp_quarter <- ggplot(data=mean0m_quart, aes(x=year, y=Temperature)) +
   scale_color_viridis(name="Quarter", discrete=TRUE, option="plasma") + 
   theme(legend.position="top") +
   guides(col = guide_legend(ncol = 12, byrow = TRUE))
-ggsave(file=paste0(path,"/figures/fig_temp_quarter.png"), fig_temp_quarter, width = 15, height = 10, units = "cm")
+ggsave(file="figures/fig_temp_quarter.png", fig_temp_quarter, width = 15, height = 10, units = "cm")
 
 fig_at_quarter <- ggplot(data=mean0m_quart, aes(x=year, y=at)) + 
   geom_line(aes(color=as.factor(quarter)), size=1) +
@@ -2355,7 +2354,7 @@ fig_at_quarter <- ggplot(data=mean0m_quart, aes(x=year, y=at)) +
   scale_color_viridis(name="Quarter", discrete=TRUE, option="plasma") + 
   theme(legend.position="top") +
   guides(col = guide_legend(ncol = 12, byrow = TRUE))
-ggsave(file=paste0(path,"/figures/fig_at_quarter.png"), fig_at_quarter, width = 15, height = 10, units = "cm")
+ggsave(file="figures/fig_at_quarter.png", fig_at_quarter, width = 15, height = 10, units = "cm")
 ```
 
 ```{r}
@@ -2365,11 +2364,11 @@ kable(tab_pCO2_month, digits = c(4,4,3,3,3,2,3), caption="Regressions on annual 
 kable(tab_ct_month, digits = c(4,4,3,3,3,2,3), caption="Regressions on annual monthly values of CT at 1 m depth.")
 ```
 
-![temp_month](../../pCloud Sync/exp153_carbonates_point_B/figures/fig_temp_month.png)
-![at_month](../../pCloud Sync/exp153_carbonates_point_B/figures/fig_at_month.png)
-![pCO2_month](../../pCloud Sync/exp153_carbonates_point_B/figures/fig_pCO2_month.png)
-![temp_quarter](../../pCloud Sync/exp153_carbonates_point_B/figures/fig_temp_quarter.png)
-![at_quarter](../../pCloud Sync/exp153_carbonates_point_B/figures/fig_at_quarter.png)
+![temp_month](figures/fig_temp_month.png)
+![at_month](figures/fig_at_month.png)
+![pCO2_month](figures/fig_pCO2_month.png)
+![temp_quarter](figures/fig_temp_quarter.png)
+![at_quarter](figures/fig_at_quarter.png)
 ## Annual, monthly and quarterly ranges of T, AT and pCO2 at 50 m
 
 ```{r monthly and quarterly temperature and AT at 50 m, include=FALSE}
@@ -2527,8 +2526,8 @@ fig_paper_monthly_rate_AT_CT_50m <-
         legend.title = element_blank(),
         legend.key = element_rect(colour = 'white', fill = 'white', size = 0),
         legend.background = element_rect(fill="white", size=0.15, colour="black"))
-ggsave(file=paste0(path,"/figures/fig_paper_monthly_rate_AT_CT_50m.png"), fig_paper_monthly_rate_AT_CT_50m, width = 8, height = 8*2/3, units = "cm")
-ggsave(file=paste0(path,"/figures/fig4b.pdf"), fig_paper_monthly_rate_AT_CT_50m, width = 16, height= 10, units = "cm")
+ggsave(file="figures/fig_paper_monthly_rate_AT_CT_50m.png", fig_paper_monthly_rate_AT_CT_50m, width = 8, height = 8*2/3, units = "cm")
+ggsave(file="figures/fig4b.pdf", fig_paper_monthly_rate_AT_CT_50m, width = 16, height= 10, units = "cm")
 ```
 
 ## Deconvolution of pH changes at 1 m with my approach
@@ -2707,7 +2706,7 @@ fig_deconv_pH_1m <- ggplot(deconv_pH_1m_melt) + geom_point(aes(x=date, y=value, 
   xlab("Time") + ylab("pH (total scale)")+
   Mytheme() +
   scale_colour_discrete(guide="none")
-ggsave(file=paste0(path,"/figures/fig_deconv_pH_1m.png"), fig_deconv_pH_1m, width = 18, height = 20, units = "cm")
+ggsave(file="figures/fig_deconv_pH_1m.png", fig_deconv_pH_1m, width = 18, height = 20, units = "cm")
 
 # Plot with anomalies
 ano_deconv_pH_1m_melt <-  gather(data = select(ano_deconv_pH_1m, -monthd), key = variable, value=value, -date)
@@ -2716,19 +2715,19 @@ fig_deconv_pH_1m_ano <- ggplot(ano_deconv_pH_1m_melt) + geom_point(aes(x=date, y
   xlab("Time") + ylab("pH (total scale)")+
   Mytheme() +
   scale_colour_discrete(guide="none")
-ggsave(file=paste0(path,"/figures/fig_deconv_pH_1m_ano.png"), fig_deconv_pH_1m_ano, width = 18, height = 20, units = "cm")
+ggsave(file="figures/fig_deconv_pH_1m_ano.png", fig_deconv_pH_1m_ano, width = 18, height = 20, units = "cm")
 ```
 García-Ibáñez et al. (2016) provide a method to partition the changes in pH due to changes in salinity, temperature, total alkalinity and dissolved inorganic carbon.
-![garcia-ibanez](../../pCloud Sync/exp153_carbonates_point_B/various/garcia-ibanez.png)
+![garcia-ibanez](various/garcia-ibanez.png)
 
 García-Ibáñez M. I., Zunino P., Fröb F., Carracedo L. I., Ríos A. F., Mercier H., Olsen A. \& Pérez F. F., 2016. Ocean acidification in the North Atlantic: controlling mechanisms. \textit{Biogeosciences Discussions} 1-26.
 
 Below is the deconvolution performed on values. Here, dvar is the monthly mean value of T, S and CT for the entire time-series.
 
-![deconv_pH_1m](../../pCloud Sync/exp153_carbonates_point_B/figures/fig_deconv_pH_1m.png)
+![deconv_pH_1m](figures/fig_deconv_pH_1m.png)
 Below is the deconvolution performed on anomalies Here, dvar is the monthly mean value of the anomalies of T, S and CT for the entire time-series.
 
-![deconv_pH_1m_ano](../../pCloud Sync/exp153_carbonates_point_B/figures/fig_deconv_pH_1m_ano.png)
+![deconv_pH_1m_ano](figures/fig_deconv_pH_1m_ano.png)
 
 
 ```{r kable regressions deconvolution pH 1 m}
@@ -2826,14 +2825,14 @@ fit <- lm(data = d, pH_T_y ~ T)
 fig_dpH_T_dT_y_1m <- ggreg(fit) +
   labs(x="Temperature (yearly mean)", y="pH") +
   Mytheme(size_labs = 10)
-ggsave(file=paste0(path,"/figures/fig_dpH_T_y_dT_1m.png"), fig_dpH_T_dT_y_1m, width = 18, height = 12, units = "cm")
+ggsave(file="figures/fig_dpH_T_y_dT_1m.png", fig_dpH_T_dT_y_1m, width = 18, height = 12, units = "cm")
 
 title <- ""
 fit <- lm(data = deconv_garcia_dat_pH_1m, T ~ sampling_date)
 fig_dT_dt <- ggreg(fit) +
   labs(x="Year", y="Temperature") +
   Mytheme(size_labs = 10)
-ggsave(file=paste0(path,"/figures/fig_dT_dt_1m.png"), fig_dT_dt, width = 18, height = 12, units = "cm")
+ggsave(file="figures/fig_dT_dt_1m.png", fig_dT_dt, width = 18, height = 12, units = "cm")
 
 ### delta pH due to salinity using yearly means for not changing variables
 d <- filter(deconv_garcia_dat_pH_1m, !is.na(yAT), !is.na(yCT), !is.na(S), 
@@ -2864,14 +2863,14 @@ fit <- lm(data = d, pH_S_y ~ S)
 fig_dpH_S_dS_y_1m <- ggreg(fit) +
   labs(x="Salinity (yearly mean)", y="pH") +
   Mytheme(size_labs = 10)
-ggsave(file=paste0(path,"/figures/fig_dpH_S_dS_y_1m.png"), fig_dpH_S_dS_y_1m, width = 18, height = 12, units = "cm")
+ggsave(file="figures/fig_dpH_S_dS_y_1m.png", fig_dpH_S_dS_y_1m, width = 18, height = 12, units = "cm")
 
 title <- ""
 fit <- lm(data = deconv_garcia_dat_pH_1m, S ~ sampling_date)
 fig_dS_dt_1m <- ggreg(fit) +
   labs(x="Year", y="Salinity") +
   Mytheme(size_labs = 10)
-ggsave(file=paste0(path,"/figures/fig_dS_dt_1m.png"), fig_dS_dt_1m, width = 18, height = 12, units = "cm")
+ggsave(file="figures/fig_dS_dt_1m.png", fig_dS_dt_1m, width = 18, height = 12, units = "cm")
 
 ### delta pH due to AT using yearly means for not changing variables
 d <- filter(deconv_garcia_dat_pH_1m, !is.na(AT), !is.na(yCT), !is.na(yS), 
@@ -2902,14 +2901,14 @@ fit <- lm(data = d, pH_AT_y ~ AT)
 fig_dpH_AT_dAT_y_1m <- ggreg(fit) +
   labs(x="AT (yearly mean)", y="pH") +
   Mytheme(size_labs = 10)
-ggsave(file=paste0(path,"/figures/fig_dpH_AT_dT_y_1m.png"), fig_dpH_AT_dAT_y_1m, width = 18, height = 12, units = "cm")
+ggsave(file="figures/fig_dpH_AT_dT_y_1m.png", fig_dpH_AT_dAT_y_1m, width = 18, height = 12, units = "cm")
 
 title <- ""
 fit <- lm(data = deconv_garcia_dat_pH_1m, AT ~ sampling_date)
 fig_dAT_dt_1m <- ggreg(fit) +
   labs(x="Year", y="AT") +
   Mytheme(size_labs = 10)
-ggsave(file=paste0(path,"/figures/fig_dAT_dt_1m.png"), fig_dAT_dt_1m, width = 18, height = 12, units = "cm")
+ggsave(file="figures/fig_dAT_dt_1m.png", fig_dAT_dt_1m, width = 18, height = 12, units = "cm")
 
 ### delta pH due to CT using yearly means for not changing variables
 d <- filter(deconv_garcia_dat_pH_1m, !is.na(yAT), !is.na(CT), !is.na(yS), 
@@ -2939,14 +2938,14 @@ fit <- lm(data = d, pH_CT_y ~ CT)
 fig_dpH_CT_dCT_y_1m <- ggreg(fit) +
   labs(x="CT (yearly mean)", y="pH") +
   Mytheme(size_labs = 10)
-ggsave(file=paste0(path,"/figures/fig_dpH_CT_y_dT_1m.png"), fig_dpH_CT_dCT_y_1m, width = 18, height = 12, units = "cm")
+ggsave(file="figures/fig_dpH_CT_y_dT_1m.png", fig_dpH_CT_dCT_y_1m, width = 18, height = 12, units = "cm")
 
 title <- ""
 fit <- lm(data = deconv_garcia_dat_pH_1m, CT ~ sampling_date)
 fig_dCT_dt_1m <- ggreg(fit) +
   labs(x="Year", y="CT") +
   Mytheme(size_labs = 10)
-ggsave(file=paste0(path,"/figures/fig_dCT_dt_1m.png"), fig_dCT_dt_1m, width = 18, height = 12, units = "cm")
+ggsave(file="figures/fig_dCT_dt_1m.png", fig_dCT_dt_1m, width = 18, height = 12, units = "cm")
 
 deconv_garcia_year <- data_frame(
   means = c("year", "year", "year", "year", "year"),
@@ -2965,19 +2964,19 @@ deconv_garcia_year <- data_frame(
 ```
 
 
-![dpH_CT_dCT_y_1m](../../pCloud Sync/exp153_carbonates_point_B/figures/fig_dpH_T_y_dT_1m.png)
-![dT_dt_1m](../../pCloud Sync/exp153_carbonates_point_B/figures/fig_dT_dt_1m.png)
-![dpH_S_dS_y_1m](../../pCloud Sync/exp153_carbonates_point_B/figures/fig_dpH_S_dS_y_1m.png)
-![dS_dt_1m.](../../pCloud Sync/exp153_carbonates_point_B/figures/fig_dS_dt_1m.png)
-![dpH_AT_dT_y_1m](../../pCloud Sync/exp153_carbonates_point_B/figures/fig_dpH_AT_dT_y_1m.png)
+![dpH_CT_dCT_y_1m](figures/fig_dpH_T_y_dT_1m.png)
+![dT_dt_1m](figures/fig_dT_dt_1m.png)
+![dpH_S_dS_y_1m](figures/fig_dpH_S_dS_y_1m.png)
+![dS_dt_1m.](figures/fig_dS_dt_1m.png)
+![dpH_AT_dT_y_1m](figures/fig_dpH_AT_dT_y_1m.png)
 
-![dAT_dt_1m](../../pCloud Sync/exp153_carbonates_point_B/figures/fig_dAT_dt_1m.png)
-
-
+![dAT_dt_1m](figures/fig_dAT_dt_1m.png)
 
 
-![fig_dpH_CT_y_dT_1m.png](../../pCloud Sync/exp153_carbonates_point_B/figures/fig_dpH_CT_y_dT_1m.png)
-![dCT_dt_1m](../../pCloud Sync/exp153_carbonates_point_B//figures/fig_dCT_dt_1m.png)
+
+
+![fig_dpH_CT_y_dT_1m.png](figures/fig_dpH_CT_y_dT_1m.png)
+![dCT_dt_1m](/figures/fig_dCT_dt_1m.png)
 
 ### Deconvolution of pH changes at 1 m using year/month means for not changing variables
 
@@ -3008,14 +3007,14 @@ fit <- lm(data = d, pH_T_ym ~ T)
 fig_dpH_T_dT_ym_1m <- ggreg(fit) +
   labs(x="Temperature (year/month mean)", y="pH") +
   Mytheme(size_labs = 10)
-ggsave(file=paste0(path,"/figures/fig_dpH_T_ym_dT_1m.png"), fig_dpH_T_dT_ym_1m, width = 18, height = 12, units = "cm")
+ggsave(file="figures/fig_dpH_T_ym_dT_1m.png", fig_dpH_T_dT_ym_1m, width = 18, height = 12, units = "cm")
 
 title <- ""
 fit <- lm(data = deconv_garcia_dat_pH_1m, T ~ sampling_date)
 fig_dT_dt_1m <- ggreg(fit) +
   labs(x="Year", y="Temperature") +
   Mytheme(size_labs = 10)
-ggsave(file=paste0(path,"/figures/fig_dT_dt_1m.png"), fig_dT_dt_1m, width = 18, height = 12, units = "cm")
+ggsave(file="figures/fig_dT_dt_1m.png", fig_dT_dt_1m, width = 18, height = 12, units = "cm")
 
 ### delta pH due to salinity using year/month means for not changing variables
 d <- filter(deconv_garcia_dat_pH_1m, !is.na(ymAT), !is.na(ymCT), !is.na(S), 
@@ -3043,14 +3042,14 @@ fit <- lm(data = d, pH_S_ym ~ S)
 fig_dpH_S_dS_ym_1m <- ggreg(fit) +
   labs(x="Salinity (year/month mean)", y="pH") +
   Mytheme(size_labs = 10)
-ggsave(file=paste0(path,"/figures/fig_dpH_S_dS_ym_1m.png"), fig_dpH_S_dS_ym_1m, width = 18, height = 12, units = "cm")
+ggsave(file="figures/fig_dpH_S_dS_ym_1m.png", fig_dpH_S_dS_ym_1m, width = 18, height = 12, units = "cm")
 
 title <- ""
 fit <- lm(data = deconv_garcia_dat_pH_1m, S ~ sampling_date)
 fig_dS_dt_1m <- ggreg(fit) +
   labs(x="Year", y="Salinity") +
   Mytheme(size_labs = 10)
-ggsave(file=paste0(path,"/figures/fig_dS_dt_1m.png"), fig_dS_dt_1m, width = 18, height = 12, units = "cm")
+ggsave(file="figures/fig_dS_dt_1m.png", fig_dS_dt_1m, width = 18, height = 12, units = "cm")
 
 ### delta pH due to AT using year/month means for not changing variables
 d <- filter(deconv_garcia_dat_pH_1m, !is.na(AT), !is.na(ymCT), !is.na(ymS), 
@@ -3078,14 +3077,14 @@ fit <- lm(data = d, pH_AT_ym ~ AT)
 fig_dpH_AT_dAT_ym_1m <- ggreg(fit) +
   labs(x="AT (year/month mean)", y="pH") +
   Mytheme(size_labs = 10)
-ggsave(file=paste0(path,"/figures/fig_dpH_AT_dT_ym_1m.png"), fig_dpH_AT_dAT_ym_1m, width = 18, height = 12, units = "cm")
+ggsave(file="figures/fig_dpH_AT_dT_ym_1m.png", fig_dpH_AT_dAT_ym_1m, width = 18, height = 12, units = "cm")
 
 title <- ""
 fit <- lm(data = deconv_garcia_dat_pH_1m, AT ~ sampling_date)
 fig_dAT_dt_1m <- ggreg(fit) +
   labs(x="Year", y="AT") +
   Mytheme(size_labs = 10)
-ggsave(file=paste0(path,"/figures/fig_dAT_dt_1m.png"), fig_dAT_dt_1m, width = 18, height = 12, units = "cm")
+ggsave(file="figures/fig_dAT_dt_1m.png", fig_dAT_dt_1m, width = 18, height = 12, units = "cm")
 
 ### delta pH due to CT using year/month means for not changing variables
 d <- filter(deconv_garcia_dat_pH_1m, !is.na(ymAT), !is.na(CT), !is.na(ymS), 
@@ -3113,14 +3112,14 @@ fit <- lm(data = d, pH_CT_ym ~ CT)
 fig_dpH_CT_dCT_ym_1m <- ggreg(fit) +
   labs(x="CT (year/month mean)", y="pH") +
   Mytheme(size_labs = 10)
-ggsave(file=paste0(path,"/figures/fig_dpH_CT_ym_dT_1m.png"), fig_dpH_CT_dCT_ym_1m, width = 18, height = 12, units = "cm")
+ggsave(file="figures/fig_dpH_CT_ym_dT_1m.png", fig_dpH_CT_dCT_ym_1m, width = 18, height = 12, units = "cm")
 
 title <- ""
 fit <- lm(data = deconv_garcia_dat_pH_1m, CT ~ sampling_date)
 fig_dCT_dt_1m <- ggreg(fit) +
   labs(x="Year", y="CT") +
   Mytheme(size_labs = 10)
-ggsave(file=paste0(path,"/figures/fig_dCT_dt_1m.png"), fig_dCT_dt_1m, width = 18, height = 12, units = "cm")
+ggsave(file="figures/fig_dCT_dt_1m.png", fig_dCT_dt_1m, width = 18, height = 12, units = "cm")
 
 deconv_garcia_year_month <- data_frame(
   means = c("year/month", "year/month", "year/month", "year/month", "year/month"),
@@ -3138,14 +3137,14 @@ deconv_garcia_year_month <- data_frame(
 )
 ```
 
-![dpH_T_dT_ym_1m](../../pCloud Sync/exp153_carbonates_point_B/figures/fig_dpH_T_ym_dT_1m.png)
-![dT_dt_1m](../../pCloud Sync/exp153_carbonates_point_B//figures/fig_dT_dt_1m.png)
-![dpH_S_dS_ym_1m](../../pCloud Sync/exp153_carbonates_point_B/figures/fig_dpH_S_dS_ym_1m.png)
-![dS_dt_1m](../../pCloud Sync/exp153_carbonates_point_B/figures/fig_dS_dt_1m.png)
-![fig_dpH_AT_dT_ym_1m.png](../../pCloud Sync/exp153_carbonates_point_B/figures/fig_dpH_AT_dT_ym_1m.png)
-![fig_dAT_dt_1m.png](../../pCloud Sync/exp153_carbonates_point_B/figures/fig_dAT_dt_1m.png)
-![dpH_CT_ym_dT_1m](../../pCloud Sync/exp153_carbonates_point_B/figures/fig_dpH_CT_ym_dT_1m.png)
-![dCT_dt_1m](../../pCloud Sync/exp153_carbonates_point_B/figures/fig_dCT_dt_1m.png)
+![dpH_T_dT_ym_1m](figures/fig_dpH_T_ym_dT_1m.png)
+![dT_dt_1m](/figures/fig_dT_dt_1m.png)
+![dpH_S_dS_ym_1m](figures/fig_dpH_S_dS_ym_1m.png)
+![dS_dt_1m](figures/fig_dS_dt_1m.png)
+![fig_dpH_AT_dT_ym_1m.png](figures/fig_dpH_AT_dT_ym_1m.png)
+![fig_dAT_dt_1m.png](figures/fig_dAT_dt_1m.png)
+![dpH_CT_ym_dT_1m](figures/fig_dpH_CT_ym_dT_1m.png)
+![dCT_dt_1m](figures/fig_dCT_dt_1m.png)
 
 ### Deconvolution of pH changes at 1 m using total means for not changing variables
 
@@ -3180,13 +3179,13 @@ fit <- lm(data = d, pH_T_t ~ T)
 fig_dpH_T_dT_t_1m <- ggreg(fit) +
   labs(x="Temperature (total mean)", y="pH") +
   Mytheme(size_labs = 10)
-ggsave(file=paste0(path,"/figures/fig_dpH_T_t_dT_1m.png"), fig_dpH_T_dT_t_1m, width = 18, height = 12, units = "cm")
+ggsave(file="figures/fig_dpH_T_t_dT_1m.png", fig_dpH_T_dT_t_1m, width = 18, height = 12, units = "cm")
 
 fit <- lm(data = deconv_garcia_dat_pH_1m, T ~ sampling_date)
 fig_dT_dt_1m <- ggreg(fit) +
   labs(x="Year", y="Temperature") +
   Mytheme(size_labs = 10)
-ggsave(file=paste0(path,"/figures/fig_dT_dt_1m.png"), fig_dT_dt_1m, width = 18, height = 12, units = "cm")
+ggsave(file="figures/fig_dT_dt_1m.png", fig_dT_dt_1m, width = 18, height = 12, units = "cm")
 
 title <- ""
 d <- filter(deconv_garcia_dat_pH_1m, !is.na(tAT), !is.na(tCT), !is.na(S), 
@@ -3217,13 +3216,13 @@ fit <- lm(data = d, pH_S_t ~ S)
 fig_dpH_S_dS_t_1m <- ggreg(fit) +
   labs(x="Salinity (total mean)", y="pH") +
   Mytheme(size_labs = 10)
-ggsave(file=paste0(path,"/figures/fig_dpH_S_dS_t_1m.png"), fig_dpH_S_dS_t_1m, width = 18, height = 12, units = "cm")
+ggsave(file="figures/fig_dpH_S_dS_t_1m.png", fig_dpH_S_dS_t_1m, width = 18, height = 12, units = "cm")
 
 fit <- lm(data = deconv_garcia_dat_pH_1m, S ~ sampling_date)
 fig_dS_dt_1m <- ggreg(fit) +
   labs(x="Year", y="Salinity") +
   Mytheme(size_labs = 10)
-ggsave(file=paste0(path,"/figures/fig_dS_dt_1m.png"), fig_dS_dt_1m, width = 18, height = 12, units = "cm")
+ggsave(file="figures/fig_dS_dt_1m.png", fig_dS_dt_1m, width = 18, height = 12, units = "cm")
 
 title <- ""
 d <- filter(deconv_garcia_dat_pH_1m, !is.na(AT), !is.na(tCT), !is.na(tS), 
@@ -3255,14 +3254,14 @@ fit <- lm(data = d, pH_AT_t ~ AT)
 fig_dpH_AT_dAT_t_1m <- ggreg(fit) +
   labs(x="AT (total mean)", y="pH") +
   Mytheme(size_labs = 10)
-ggsave(file=paste0(path,"/figures/fig_dpH_AT_dT_t_1m.png"), fig_dpH_AT_dAT_t_1m, width = 18, height = 12, units = "cm")
+ggsave(file="figures/fig_dpH_AT_dT_t_1m.png", fig_dpH_AT_dAT_t_1m, width = 18, height = 12, units = "cm")
 
 title <- ""
 fit <- lm(data = deconv_garcia_dat_pH_1m, AT ~ sampling_date)
 fig_dAT_dt_1m <- ggreg(fit) +
   labs(x="Year", y="AT") +
   Mytheme(size_labs = 10)
-ggsave(file=paste0(path,"/figures/fig_dAT_dt_1m.png"), fig_dAT_dt_1m, width = 18, height = 12, units = "cm")
+ggsave(file="figures/fig_dAT_dt_1m.png", fig_dAT_dt_1m, width = 18, height = 12, units = "cm")
 
 ### delta pH due to CT using total means for not changing variables
 d <- filter(deconv_garcia_dat_pH_1m, !is.na(tAT), !is.na(CT), !is.na(tS), 
@@ -3294,14 +3293,14 @@ fit <- lm(data = d, pH_CT_t ~ CT)
 fig_dpH_CT_dCT_t_1m <- ggreg(fit) +
   labs(x="CT (total mean)", y="pH") +
   Mytheme(size_labs = 10)
-ggsave(file=paste0(path,"/figures/fig_dpH_CT_t_dT_1m.png"), fig_dpH_CT_dCT_t_1m, width = 18, height = 12, units = "cm")
+ggsave(file="figures/fig_dpH_CT_t_dT_1m.png", fig_dpH_CT_dCT_t_1m, width = 18, height = 12, units = "cm")
 
 title <- ""
 fit <- lm(data = deconv_garcia_dat_pH_1m, CT ~ sampling_date)
 fig_dCT_dt_1m <- ggreg(fit) +
   labs(x="Year", y="CT") +
   Mytheme(size_labs = 10)
-ggsave(file=paste0(path,"/figures/fig_dCT_dt_1m.png"), fig_dCT_dt_1m, width = 18, height = 12, units = "cm")
+ggsave(file="figures/fig_dCT_dt_1m.png", fig_dCT_dt_1m, width = 18, height = 12, units = "cm")
 
 deconv_garcia_total <- data_frame(
   means = c("total", "total", "total", "total", "total"),
@@ -3322,14 +3321,14 @@ deconv_garcia_total <- data_frame(
 )
 ```
 
-![dpH_T_t_dT_1m](../../pCloud Sync/exp153_carbonates_point_B/figures/fig_dpH_T_t_dT_1m.png)
-![dT_dt_1m](../../pCloud Sync/exp153_carbonates_point_B/figures/fig_dT_dt_1m.png)
-![dpH_S_dS_t_1m](../../pCloud Sync/exp153_carbonates_point_B/figures/fig_dpH_S_dS_t_1m.png)
-![dS_dt_1m](../../pCloud Sync/exp153_carbonates_point_B/figures/fig_dS_dt_1m.png)
-![dpH_AT_dT_t_1m](../../pCloud Sync/exp153_carbonates_point_B/figures/fig_dpH_AT_dT_t_1m.png)
-![dAT_dt_1m.png](../../pCloud Sync/exp153_carbonates_point_B/figures/fig_dAT_dt_1m.png)
-![dpH_CT_t_dT_1m](../../pCloud Sync/exp153_carbonates_point_B/figures/fig_dpH_CT_t_dT_1m.png)
-![dCT_dt_1m.](../../pCloud Sync/exp153_carbonates_point_B/figures/fig_dCT_dt_1m.png)
+![dpH_T_t_dT_1m](figures/fig_dpH_T_t_dT_1m.png)
+![dT_dt_1m](figures/fig_dT_dt_1m.png)
+![dpH_S_dS_t_1m](figures/fig_dpH_S_dS_t_1m.png)
+![dS_dt_1m](figures/fig_dS_dt_1m.png)
+![dpH_AT_dT_t_1m](figures/fig_dpH_AT_dT_t_1m.png)
+![dAT_dt_1m.png](figures/fig_dAT_dt_1m.png)
+![dpH_CT_t_dT_1m](figures/fig_dpH_CT_t_dT_1m.png)
+![dCT_dt_1m.](figures/fig_dCT_dt_1m.png)
 
 ###Summary Garcia-Ibanez compared with my approach
 
@@ -3634,7 +3633,7 @@ fig_deconv_pCO2_1m <- ggplot(deconv_pCO2_1m_melt) + geom_point(aes(x=date, y=val
   xlab("Time") + ylab("pCO2 (uatm)")+
   Mytheme() +
   scale_colour_discrete(guide="none")
-ggsave(file=paste0(path,"/figures/fig_deconv_pCO2_1m.png"), fig_deconv_pCO2_1m, width = 18, height = 20, units = "cm")
+ggsave(file="figures/fig_deconv_pCO2_1m.png", fig_deconv_pCO2_1m, width = 18, height = 20, units = "cm")
 
 # Plot with anomalies
 ano_deconv_pCO2_1m_melt <-  gather(data = select(ano_deconv_pCO2_1m, -monthd), key = variable, value=value, -date)
@@ -3643,14 +3642,14 @@ fig_deconv_pCO2_1m_ano <- ggplot(ano_deconv_pCO2_1m_melt) + geom_point(aes(x=dat
   xlab("Time") + ylab("pCO2 (uatm)")+
   Mytheme() +
   scale_colour_discrete(guide="none")
-ggsave(file=paste0(path,"/figures/fig_deconv_pCO2_1m_ano.png"), fig_deconv_pCO2_1m_ano, width = 18, height = 20, units = "cm")
+ggsave(file="figures/fig_deconv_pCO2_1m_ano.png", fig_deconv_pCO2_1m_ano, width = 18, height = 20, units = "cm")
 ```
 Below is the deconvolution performed on values. Here, dvar is the monthly mean value of T, S and CT for the entire time-series.
 
-![deconv_pCO2_1m](../../pCloud Sync/exp153_carbonates_point_B/figures/fig_deconv_pCO2_1m.png)
+![deconv_pCO2_1m](figures/fig_deconv_pCO2_1m.png)
 Below is the deconvolution performed on anomalies Here, dvar is the monthly mean value of the anomalies of T, S and CT for the entire time-series.
 
-![deconv_pCO2_1m_ano](../../pCloud Sync/exp153_carbonates_point_B/figures/fig_deconv_pCO2_1m_ano.png)
+![deconv_pCO2_1m_ano](figures/fig_deconv_pCO2_1m_ano.png)
 
 ```{r kable regressions deconvolution pCO2 1 m}
 kable(reg_deconv_pCO2_1m, digits = c(4,4,11,3,3,2,3), caption="Regressions on values at 1 m depth.")
@@ -3720,13 +3719,13 @@ fit <- lm(data = d, pCO2_T_t ~ T)
 fig_dpCO2_T_dT_t_1m <- ggreg(fit) +
   labs(x="Temperature (total mean)", y="pCO2") +
   Mytheme(size_labs = 10)
-ggsave(file=paste0(path,"/figures/fig_dpCO2_T_t_dT_1m.png"), fig_dpCO2_T_dT_t_1m, width = 18, height = 12, units = "cm")
+ggsave(file="figures/fig_dpCO2_T_t_dT_1m.png", fig_dpCO2_T_dT_t_1m, width = 18, height = 12, units = "cm")
 
 fit <- lm(data = deconv_garcia_dat_pCO2_1m, T ~ sampling_date)
 fig_dT_dt_1m <- ggreg(fit) +
   labs(x="Year", y="Temperature") +
   Mytheme(size_labs = 10)
-ggsave(file=paste0(path,"/figures/fig_dT_dt_1m.png"), fig_dT_dt_1m, width = 18, height = 12, units = "cm")
+ggsave(file="figures/fig_dT_dt_1m.png", fig_dT_dt_1m, width = 18, height = 12, units = "cm")
 
 title <- ""
 d <- filter(deconv_garcia_dat_pCO2_1m, !is.na(tAT), !is.na(tCT), !is.na(S), 
@@ -3758,13 +3757,13 @@ fit <- lm(data = d, pCO2_S_t ~ S)
 fig_dpCO2_S_dS_t_1m <- ggreg(fit) +
   labs(x="Salinity (total mean)", y="pCO2") +
   Mytheme(size_labs = 10)
-ggsave(file=paste0(path,"/figures/fig_dpCO2_S_dS_t_1m.png"), fig_dpCO2_S_dS_t_1m, width = 18, height = 12, units = "cm")
+ggsave(file="figures/fig_dpCO2_S_dS_t_1m.png", fig_dpCO2_S_dS_t_1m, width = 18, height = 12, units = "cm")
 
 fit <- lm(data = deconv_garcia_dat_pCO2_1m, S ~ sampling_date)
 fig_dS_dt_1m <- ggreg(fit) +
   labs(x="Year", y="Salinity") +
   Mytheme(size_labs = 10)
-ggsave(file=paste0(path,"/figures/fig_dS_dt_1m.png"), fig_dS_dt_1m, width = 18, height = 12, units = "cm")
+ggsave(file="figures/fig_dS_dt_1m.png", fig_dS_dt_1m, width = 18, height = 12, units = "cm")
 
 title <- ""
 d <- filter(deconv_garcia_dat_pCO2_1m, !is.na(AT), !is.na(tCT), !is.na(tS), 
@@ -3796,14 +3795,14 @@ fit <- lm(data = d, pCO2_AT_t ~ AT)
 fig_dpCO2_AT_dAT_t_1m <- ggreg(fit) +
   labs(x="AT (total mean)", y="pCO2") +
   Mytheme(size_labs = 10)
-ggsave(file=paste0(path,"/figures/fig_dpCO2_AT_dT_t_1m.png"), fig_dpCO2_AT_dAT_t_1m, width = 18, height = 12, units = "cm")
+ggsave(file="figures/fig_dpCO2_AT_dT_t_1m.png", fig_dpCO2_AT_dAT_t_1m, width = 18, height = 12, units = "cm")
 
 title <- ""
 fit <- lm(data = deconv_garcia_dat_pCO2_1m, AT ~ sampling_date)
 fig_dAT_dt_1m <- ggreg(fit) +
   labs(x="Year", y="AT") +
   Mytheme(size_labs = 10)
-ggsave(file=paste0(path,"/figures/fig_dAT_dt_1m.png"), fig_dAT_dt_1m, width = 18, height = 12, units = "cm")
+ggsave(file="figures/fig_dAT_dt_1m.png", fig_dAT_dt_1m, width = 18, height = 12, units = "cm")
 
 ### delta pCO2 due to CT using total means for not changing variables
 d <- filter(deconv_garcia_dat_pCO2_1m, !is.na(tAT), !is.na(CT), !is.na(tS), 
@@ -3835,14 +3834,14 @@ fit <- lm(data = d, pCO2_CT_t ~ CT)
 fig_dpCO2_CT_dCT_t_1m <- ggreg(fit) +
   labs(x="CT (total mean)", y="pCO2") +
   Mytheme(size_labs = 10)
-ggsave(file=paste0(path,"/figures/fig_dpCO2_CT_t_dT_1m.png"), fig_dpCO2_CT_dCT_t_1m, width = 18, height = 12, units = "cm")
+ggsave(file="figures/fig_dpCO2_CT_t_dT_1m.png", fig_dpCO2_CT_dCT_t_1m, width = 18, height = 12, units = "cm")
 
 title <- ""
 fit <- lm(data = deconv_garcia_dat_pCO2_1m, CT ~ sampling_date)
 fig_dCT_dt_1m <- ggreg(fit) +
   labs(x="Year", y="CT") +
   Mytheme(size_labs = 10)
-ggsave(file=paste0(path,"/figures/fig_dCT_dt_1m.png"), fig_dCT_dt_1m, width = 18, height = 12, units = "cm")
+ggsave(file="figures/fig_dCT_dt_1m.png", fig_dCT_dt_1m, width = 18, height = 12, units = "cm")
 
 deconv_garcia_total_pCO2 <- data_frame(
   means = c("total", "total", "total", "total", "total"),
@@ -4084,7 +4083,7 @@ fig_deconv_pH_50m <- ggplot(deconv_pH_50m_melt) + geom_point(aes(x=date, y=value
   xlab("Time") + ylab("pH (total scale)")+
   Mytheme() +
   scale_colour_discrete(guide="none")
-ggsave(file=paste0(path,"/figures/fig_deconv_pH_50m.png"), fig_deconv_pH_50m, width = 18, height = 20, units = "cm")
+ggsave(file="figures/fig_deconv_pH_50m.png", fig_deconv_pH_50m, width = 18, height = 20, units = "cm")
 
 # Plot with anomalies
 ano_deconv_pH_50m_melt <-  gather(data = select(ano_deconv_pH_50m, -monthd), key = variable, value=value, -date)
@@ -4093,15 +4092,15 @@ fig_deconv_pH_ano_50m <- ggplot(ano_deconv_pH_50m_melt) + geom_point(aes(x=date,
   xlab("Time") + ylab("pH (total scale)")+
   Mytheme() +
   scale_colour_discrete(guide="none")
-ggsave(file=paste0(path,"/figures/fig_deconv_pH_ano_50m.png"), fig_deconv_pH_ano_50m, width = 18, height = 20, units = "cm")
+ggsave(file="figures/fig_deconv_pH_ano_50m.png", fig_deconv_pH_ano_50m, width = 18, height = 20, units = "cm")
 ```
 
 Below is the deconvolution performed on values at 50 m. Here, dvar is the monthly mean value of T, S and CT for the entire time-series.
 
-![deconv_pH_50m](../../pCloud Sync/exp153_carbonates_point_B/figures/fig_deconv_pH_50m.png)
+![deconv_pH_50m](figures/fig_deconv_pH_50m.png)
 Below is the deconvolution performed on anomalies at 50 m. Here, dvar is the monthly mean value of the anomalies of T, S and CT for the entire time-series.
 
-![deconv_pH_ano_50m](../../pCloud Sync/exp153_carbonates_point_B/figures/fig_deconv_pH_ano_50m.png)
+![deconv_pH_ano_50m](figures/fig_deconv_pH_ano_50m.png)
 
 ```{r kable regressions deconvolution pH 50 m}
 kable(reg_deconv_pH_50m, digits = c(4,4,11,3,3,2,3), caption="Regressions on values at 50 m depth.")
@@ -4277,7 +4276,7 @@ fig_deconv_pCO2_50m <- ggplot(deconv_pCO2_50m_melt) + geom_point(aes(x=date, y=v
   xlab("Time") + ylab("pCO2 (uatm)")+
   Mytheme() +
   scale_colour_discrete(guide="none")
-ggsave(file=paste0(path,"/figures/fig_deconv_pCO2_50m.png"), fig_deconv_pCO2_50m, width = 18, height = 20, units = "cm")
+ggsave(file="figures/fig_deconv_pCO2_50m.png", fig_deconv_pCO2_50m, width = 18, height = 20, units = "cm")
 
 # Plot with anomalies
 ano_deconv_pCO2_50m_melt <-  gather(data = select(ano_deconv_pCO2_50m, -monthd), key = variable, value=value, -date)
@@ -4286,14 +4285,14 @@ fig_deconv_pCO2_50m_ano <- ggplot(ano_deconv_pCO2_50m_melt) + geom_point(aes(x=d
   xlab("Time") + ylab("pCO2 (uatm)")+
   Mytheme() +
   scale_colour_discrete(guide="none")
-ggsave(file=paste0(path,"/figures/fig_deconv_pCO2_50m_ano.png"), fig_deconv_pCO2_50m_ano, width = 18, height = 20, units = "cm")
+ggsave(file="figures/fig_deconv_pCO2_50m_ano.png", fig_deconv_pCO2_50m_ano, width = 18, height = 20, units = "cm")
 ```
 Below is the deconvolution performed on values. Here, dvar is the monthly mean value of T, S and CT for the entire time-series.
 
-![deconv_pCO2_50m](../../pCloud Sync/exp153_carbonates_point_B/figures/fig_deconv_pCO2_50m.png)
+![deconv_pCO2_50m](figures/fig_deconv_pCO2_50m.png)
 Below is the deconvolution performed on anomalies Here, dvar is the monthly mean value of the anomalies of T, S and CT for the entire time-series.
 
-![deconv_pCO2_50m_ano](../../pCloud Sync/exp153_carbonates_point_B/figures/fig_deconv_pCO2_50m_ano.png)
+![deconv_pCO2_50m_ano](figures/fig_deconv_pCO2_50m_ano.png)
 
 ```{r kable regressions deconvolution pCO2 50 m}
 kable(reg_deconv_pCO2_50m, digits = c(4,4,11,3,3,2,3), caption="Regressions on values at 50 m depth.")
@@ -4366,13 +4365,13 @@ fit <- lm(data = d, pH_T_t ~ T)
 fig_dpH_T_dT_t_50m <- ggreg(fit) +
   labs(x="Temperature (total mean)", y="pH") +
   Mytheme(size_labs = 10)
-ggsave(file=paste0(path,"/figures/fig_dpH_T_t_dT_50m.png"), fig_dpH_T_dT_t_50m, width = 18, height = 12, units = "cm")
+ggsave(file="figures/fig_dpH_T_t_dT_50m.png", fig_dpH_T_dT_t_50m, width = 18, height = 12, units = "cm")
 
 fit <- lm(data = deconv_garcia_dat_pH_50m, T ~ sampling_date)
 fig_dT_dt_50m <- ggreg(fit) +
   labs(x="Year", y="Temperature") +
   Mytheme(size_labs = 10)
-ggsave(file=paste0(path,"/figures/fig_dT_dt_50m.png"), fig_dT_dt_50m, width = 18, height = 12, units = "cm")
+ggsave(file="figures/fig_dT_dt_50m.png", fig_dT_dt_50m, width = 18, height = 12, units = "cm")
 
 title <- ""
 d <- filter(deconv_garcia_dat_pH_50m, !is.na(tAT), !is.na(tCT), !is.na(S), 
@@ -4403,13 +4402,13 @@ fit <- lm(data = d, pH_S_t ~ S)
 fig_dpH_S_dS_t_50m <- ggreg(fit) +
   labs(x="Salinity (total mean)", y="pH") +
   Mytheme(size_labs = 10)
-ggsave(file=paste0(path,"/figures/fig_dpH_S_dS_t_50m.png"), fig_dpH_S_dS_t_50m, width = 18, height = 12, units = "cm")
+ggsave(file="figures/fig_dpH_S_dS_t_50m.png", fig_dpH_S_dS_t_50m, width = 18, height = 12, units = "cm")
 
 fit <- lm(data = deconv_garcia_dat_pH_50m, S ~ sampling_date)
 fig_dS_dt_50m <- ggreg(fit) +
   labs(x="Year", y="Salinity") +
   Mytheme(size_labs = 10)
-ggsave(file=paste0(path,"/figures/fig_dS_dt_50m.png"), fig_dS_dt_50m, width = 18, height = 12, units = "cm")
+ggsave(file="figures/fig_dS_dt_50m.png", fig_dS_dt_50m, width = 18, height = 12, units = "cm")
 
 title <- ""
 d <- filter(deconv_garcia_dat_pH_50m, !is.na(AT), !is.na(tCT), !is.na(tS), 
@@ -4441,14 +4440,14 @@ fit <- lm(data = d, pH_AT_t ~ AT)
 fig_dpH_AT_dAT_t_50m <- ggreg(fit) +
   labs(x="AT (total mean)", y="pH") +
   Mytheme(size_labs = 10)
-ggsave(file=paste0(path,"/figures/fig_dpH_AT_dT_t_50m.png"), fig_dpH_AT_dAT_t_50m, width = 18, height = 12, units = "cm")
+ggsave(file="figures/fig_dpH_AT_dT_t_50m.png", fig_dpH_AT_dAT_t_50m, width = 18, height = 12, units = "cm")
 
 title <- ""
 fit <- lm(data = deconv_garcia_dat_pH_50m, AT ~ sampling_date)
 fig_dAT_dt_50m <- ggreg(fit) +
   labs(x="Year", y="AT") +
   Mytheme(size_labs = 10)
-ggsave(file=paste0(path,"/figures/fig_dAT_dt_50m.png"), fig_dAT_dt_50m, width = 18, height = 12, units = "cm")
+ggsave(file="figures/fig_dAT_dt_50m.png", fig_dAT_dt_50m, width = 18, height = 12, units = "cm")
 
 ### delta pH due to CT using total means for not changing variables
 d <- filter(deconv_garcia_dat_pH_50m, !is.na(tAT), !is.na(CT), !is.na(tS), 
@@ -4480,14 +4479,14 @@ fit <- lm(data = d, pH_CT_t ~ CT)
 fig_dpH_CT_dCT_t_50m <- ggreg(fit) +
   labs(x="CT (total mean)", y="pH") +
   Mytheme(size_labs = 10)
-ggsave(file=paste0(path,"/figures/fig_dpH_CT_t_dT_50m.png"), fig_dpH_CT_dCT_t_50m, width = 18, height = 12, units = "cm")
+ggsave(file="figures/fig_dpH_CT_t_dT_50m.png", fig_dpH_CT_dCT_t_50m, width = 18, height = 12, units = "cm")
 
 title <- ""
 fit <- lm(data = deconv_garcia_dat_pH_50m, CT ~ sampling_date)
 fig_dCT_dt_50m <- ggreg(fit) +
   labs(x="Year", y="CT") +
   Mytheme(size_labs = 10)
-ggsave(file=paste0(path,"/figures/fig_dCT_dt_50m.png"), fig_dCT_dt_50m, width = 18, height = 12, units = "cm")
+ggsave(file="figures/fig_dCT_dt_50m.png", fig_dCT_dt_50m, width = 18, height = 12, units = "cm")
 
 deconv_garcia_total_50m <- data_frame(
   means = c("total", "total", "total", "total", "total"),
@@ -4508,14 +4507,14 @@ deconv_garcia_total_50m <- data_frame(
 )
 ```
 
-![dpH_T_t_dT_50m](../../pCloud Sync/exp153_carbonates_point_B/figures/fig_dpH_T_t_dT_50m.png)
-![dT_dt_50m](../../pCloud Sync/exp153_carbonates_point_B/figures/fig_dT_dt_50m.png)
-![dpH_S_dS_t_50m](../../pCloud Sync/exp153_carbonates_point_B/figures/fig_dpH_S_dS_t_50m.png)
-![dS_dt_50m](../../pCloud Sync/exp153_carbonates_point_B/figures/fig_dS_dt_50m.png)
-![dpH_AT_dT_t_50m](../../pCloud Sync/exp153_carbonates_point_B/figures/fig_dpH_AT_dT_t_50m.png)
-![dAT_dt_50m](../../pCloud Sync/exp153_carbonates_point_B/figures/fig_dAT_dt_50m.png)
-![dpH_CT_t_dT_50m](../../pCloud Sync/exp153_carbonates_point_B/figures/fig_dpH_CT_t_dT_50m.png)
-![dCT_dt_50m](../../pCloud Sync/exp153_carbonates_point_B/figures/fig_dCT_dt_50m.png)
+![dpH_T_t_dT_50m](figures/fig_dpH_T_t_dT_50m.png)
+![dT_dt_50m](figures/fig_dT_dt_50m.png)
+![dpH_S_dS_t_50m](figures/fig_dpH_S_dS_t_50m.png)
+![dS_dt_50m](figures/fig_dS_dt_50m.png)
+![dpH_AT_dT_t_50m](figures/fig_dpH_AT_dT_t_50m.png)
+![dAT_dt_50m](figures/fig_dAT_dt_50m.png)
+![dpH_CT_t_dT_50m](figures/fig_dpH_CT_t_dT_50m.png)
+![dCT_dt_50m](figures/fig_dCT_dt_50m.png)
 
 ```{r kable Garcia-Ibanez pH 50 m}
 kable(deconv_garcia_total_50m, digits = c(1,4,4,7,4,4,4,4), caption="Contributions of 4 variables to pH change at 50 m")
@@ -4636,13 +4635,13 @@ fit <- lm(data = d, pCO2_T_t ~ T)
 fig_dpCO2_T_dT_t_50m <- ggreg(fit) +
   labs(x="Temperature (total mean)", y="pCO2") +
   Mytheme(size_labs = 10)
-ggsave(file=paste0(path,"/figures/fig_dpCO2_T_t_dT_50m.png"), fig_dpCO2_T_dT_t_50m, width = 18, height = 12, units = "cm")
+ggsave(file="figures/fig_dpCO2_T_t_dT_50m.png", fig_dpCO2_T_dT_t_50m, width = 18, height = 12, units = "cm")
 
 fit <- lm(data = deconv_garcia_dat_pCO2_50m, T ~ sampling_date)
 fig_dT_dt_50m <- ggreg(fit) +
   labs(x="Year", y="Temperature") +
   Mytheme(size_labs = 10)
-ggsave(file=paste0(path,"/figures/fig_dT_dt_50m.png"), fig_dT_dt_50m, width = 18, height = 12, units = "cm")
+ggsave(file="figures/fig_dT_dt_50m.png", fig_dT_dt_50m, width = 18, height = 12, units = "cm")
 
 title <- ""
 d <- filter(deconv_garcia_dat_pCO2_50m, !is.na(tAT), !is.na(tCT), !is.na(S), 
@@ -4674,13 +4673,13 @@ fit <- lm(data = d, pCO2_S_t ~ S)
 fig_dpCO2_S_dS_t_50m <- ggreg(fit) +
   labs(x="Salinity (total mean)", y="pCO2") +
   Mytheme(size_labs = 10)
-ggsave(file=paste0(path,"/figures/fig_dpCO2_S_dS_t_50m.png"), fig_dpCO2_S_dS_t_50m, width = 18, height = 12, units = "cm")
+ggsave(file="figures/fig_dpCO2_S_dS_t_50m.png", fig_dpCO2_S_dS_t_50m, width = 18, height = 12, units = "cm")
 
 fit <- lm(data = deconv_garcia_dat_pCO2_50m, S ~ sampling_date)
 fig_dS_dt_50m <- ggreg(fit) +
   labs(x="Year", y="Salinity") +
   Mytheme(size_labs = 10)
-ggsave(file=paste0(path,"/figures/fig_dS_dt_50m.png"), fig_dS_dt_50m, width = 18, height = 12, units = "cm")
+ggsave(file="figures/fig_dS_dt_50m.png", fig_dS_dt_50m, width = 18, height = 12, units = "cm")
 
 title <- ""
 d <- filter(deconv_garcia_dat_pCO2_50m, !is.na(AT), !is.na(tCT), !is.na(tS), 
@@ -4712,14 +4711,14 @@ fit <- lm(data = d, pCO2_AT_t ~ AT)
 fig_dpCO2_AT_dAT_t_50m <- ggreg(fit) +
   labs(x="AT (total mean)", y="pCO2") +
   Mytheme(size_labs = 10)
-ggsave(file=paste0(path,"/figures/fig_dpCO2_AT_dT_t_50m.png"), fig_dpCO2_AT_dAT_t_50m, width = 18, height = 12, units = "cm")
+ggsave(file="figures/fig_dpCO2_AT_dT_t_50m.png", fig_dpCO2_AT_dAT_t_50m, width = 18, height = 12, units = "cm")
 
 title <- ""
 fit <- lm(data = deconv_garcia_dat_pCO2_50m, AT ~ sampling_date)
 fig_dAT_dt_50m <- ggreg(fit) +
   labs(x="Year", y="AT") +
   Mytheme(size_labs = 10)
-ggsave(file=paste0(path,"/figures/fig_dAT_dt_50m.png"), fig_dAT_dt_50m, width = 18, height = 12, units = "cm")
+ggsave(file="figures/fig_dAT_dt_50m.png", fig_dAT_dt_50m, width = 18, height = 12, units = "cm")
 
 ### delta pCO2 due to CT using total means for not changing variables
 d <- filter(deconv_garcia_dat_pCO2_50m, !is.na(tAT), !is.na(CT), !is.na(tS), 
@@ -4751,14 +4750,14 @@ fit <- lm(data = d, pCO2_CT_t ~ CT)
 fig_dpCO2_CT_dCT_t_50m <- ggreg(fit) +
   labs(x="CT (total mean)", y="pCO2") +
   Mytheme(size_labs = 10)
-ggsave(file=paste0(path,"/figures/fig_dpCO2_CT_t_dT_50m.png"), fig_dpCO2_CT_dCT_t_50m, width = 18, height = 12, units = "cm")
+ggsave(file="figures/fig_dpCO2_CT_t_dT_50m.png", fig_dpCO2_CT_dCT_t_50m, width = 18, height = 12, units = "cm")
 
 title <- ""
 fit <- lm(data = deconv_garcia_dat_pCO2_50m, CT ~ sampling_date)
 fig_dCT_dt_50m <- ggreg(fit) +
   labs(x="Year", y="CT") +
   Mytheme(size_labs = 10)
-ggsave(file=paste0(path,"/figures/fig_dCT_dt_50m.png"), fig_dCT_dt_50m, width = 18, height = 12, units = "cm")
+ggsave(file="figures/fig_dCT_dt_50m.png", fig_dCT_dt_50m, width = 18, height = 12, units = "cm")
 
 deconv_garcia_total_pCO2_50m <- data_frame(
   means = c("total", "total", "total", "total", "total"),
@@ -4912,7 +4911,7 @@ g1 <- plot_grid(p[[1]], p[[2]], p[[3]], p[[4]], p[[5]], p[[6]], p[[7]], p[[8]], 
 grobs <- ggplotGrob(p[[1]] + theme(legend.position="top"))$grobs
 legend_top <- grobs[[which(sapply(grobs, function(x) x$name) == "guide-box")]]
 g <- plot_grid(legend_top, g1, ncol = 1, rel_heights = c(0.15, 1))
-cowplot::ggsave(file=paste0(path,"/figures/fig6.pdf"), g, width = 16, height = 15, units = "cm")
+cowplot::ggsave(file="figures/fig6.pdf", g, width = 16, height = 15, units = "cm")
 
 
 # AT=f(S) with all data
@@ -5020,10 +5019,10 @@ cowplot::ggsave(paste0(path,"/figures/figS2.pdf"),g, width = 8, height = 14, uni
 ```
 
 The relationship between AT and salinity using all data is shown below.
-![ta_vs_salinity_all_pointB_0m](../../pCloud Sync/exp153_carbonates_point_B/figures/fig_ta_vs_salinity_all_pointB_0m.png)
+![ta_vs_salinity_all_pointB_0m](figures/fig_ta_vs_salinity_all_pointB_0m.png)
 
 The relationship between AT and salinity using monthly means is shown below.
-![ta_vs_salinity_monthly_means_pointB_0m.](../../pCloud Sync/exp153_carbonates_point_B/figures/fig_ta_vs_salinity_monthly_means_pointB_0m.png)
+![ta_vs_salinity_monthly_means_pointB_0m.](figures/fig_ta_vs_salinity_monthly_means_pointB_0m.png)
 
 ```{r reg_AT_S_monthly}
   kable(reg_AT_S_monthly, digits = c(3), padding = 0, caption="Regression parameters of the AT=f(S) relationship derived using monthly means.")
@@ -5032,7 +5031,7 @@ The relationship between AT and salinity using monthly means is shown below.
 
 
 Salinity and total alkalinity data were compared with the weekly, from Tuesday to Monday, sum of precipitation data (Nice airport). Note that the analysis is incomplete as the 2015 data are currenly missing.
-![precip](../../pCloud Sync/exp153_carbonates_point_B/figures/precip.png)
+![precip](figures/precip.png)
 
 
 ## Daily and monthly changes in pH and T
@@ -5161,7 +5160,7 @@ plot_range <-
 
 g <- plot_grid(plot_continuous_discrete_pH, plot_continuous_discrete_T, plot_offset, plot_range, plot_zoom, align='vh', ncol=1)
 ggsave(paste0(path,"/figures/fig_paper_time_series.png"), g, width = 18, height = 14, units = "cm")
-cowplot::ggsave(file=paste0(path,"/figures/fig7.pdf"), g, width = 8, height = 16, units = "cm")
+cowplot::ggsave(file="figures/fig7.pdf", g, width = 8, height = 16, units = "cm")
 
 # Per year and week
 range$year_week <- paste0(range$year,"-", week(range$date))
@@ -5194,7 +5193,7 @@ cowplot::ggsave(paste0(path,"/figures/figS1.pdf"), plot_range_pH_Chla_temp, widt
 ```
 
 The average error in pH due to spatiotemporal mismatch between sensor and discrete sample is `r average_offset`.
-![time_series](../../pCloud Sync/exp153_carbonates_point_B/figures/fig_paper_time_series.png)
+![time_series](figures/fig_paper_time_series.png)
 
 The quantiles of interest for the daily pH range of the total scale are `r quant ` (respectively 2.5% and 97.5%).
 
@@ -5207,8 +5206,8 @@ kable(broom::tidy(summary(reg_Chla)), digits = c(5,5,5,3,3), caption="Regression
 ```
 
 
-![_range_pH_Chla_month](../../pCloud Sync/exp153_carbonates_point_B/figures/plot_range_pH_Chla_month.png)
-![range_pH_Chla_temp](../../pCloud Sync/exp153_carbonates_point_B/figures/plot_range_pH_Chla_temp.png)
+![_range_pH_Chla_month](figures/plot_range_pH_Chla_month.png)
+![range_pH_Chla_temp](figures/plot_range_pH_Chla_temp.png)
 
 
 ## CO2
@@ -5314,7 +5313,7 @@ Missing values were filled by linear interpolation between nearest values in ord
 
 The rate of increase of seawater pCO2 (`r round(reg_var_1m[7,1], digit=2)` uatm per year) is much larger than that of atmospheric CO2 (`r round(reg_atm_CO2[1,1], digit=2)` ppm per year).
 
-![atm_CO2](../../pCloud Sync/exp153_carbonates_point_B/figures/fig_atm_CO2.png)
+![atm_CO2](figures/fig_atm_CO2.png)
 
 ```{r Table reg atm CO2}
   kable(reg_atm_CO2, digits = c(2,2), caption="Regressions of atmospheric CO2 (time series and anomalies).")
@@ -5362,7 +5361,7 @@ deff_monthly <- ggplot() +
        y=expression(paste(italic(A)[T]," ","(",mu, mol.kg^-1,")"))) +
   scale_color_viridis(name = "Month", discrete = TRUE, option = "plasma")
   #direct.label(deff_monthly, "top.pieces")
-  ggsave(file = paste0(path,"/figures/fig_deffayes_monthly.png"), deff_monthly,
+  ggsave(file = "figures/fig_deffayes_monthly.png", deff_monthly,
   width = 15, height = 15, units = "cm")
   
 # Yearly Deffayes plot
@@ -5410,6 +5409,6 @@ deff_quarterly <- ggplot() +
 ```
 
 Test of a Deffayes plot.
-![deffayes_monthly](../../pCloud Sync/exp153_carbonates_point_B/figures/fig_deffayes_monthly.png)
+![deffayes_monthly](figures/fig_deffayes_monthly.png)
 
 
