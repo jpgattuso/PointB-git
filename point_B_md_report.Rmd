@@ -1415,7 +1415,7 @@ ATvsCT1p <- ggplot(mean0m, aes(x = sampling_date, y = mean_ta/mean_dic), na.rm=T
            label = lm_eqn(lm(mean_ta/mean_dic ~sampling_date, data=mean0m)), parse = TRUE) +
   coord_fixed() +
   Mytheme(size_labs = 8)
-ggsave(filename = paste0(path,"/figures/ATvsCT1p.png"), plot = ATvsCT1p)
+ggsave(filename = "figures/ATvsCT1p.png", plot = ATvsCT1p)
 
 # Calculate anomalies
 # At 1 m
@@ -1719,7 +1719,7 @@ fig_poc_pon <- ggplot(data = filter(pom_l, depth==1), aes(x = date, y = value), 
   scale_x_datetime(breaks = date_breaks("2 year"), labels = date_format("%Y")) +
   labs(title="Point B at 1 m",x="",y="Particulate organic matter") +
   Mytheme()
-ggsave(file= paste0(path,"/figures/fig_poc_pon.png"), fig_poc_pon, width = 18, height = 20, units = "cm")
+ggsave(file= "figures/fig_poc_pon.png", fig_poc_pon, width = 18, height = 20, units = "cm")
 ```
 
 ```{r Removing the effect of changes in AT at 1m, include=FALSE}
@@ -1882,7 +1882,7 @@ ATvsCT50p <- ggplot(mean50m, aes(x = sampling_date, y = mean_ta/mean_dic), na.rm
   labs(title=NULL,x="",y=expression(paste(A[T]:C[T]))) +
   coord_fixed() +
   Mytheme(size_labs = 8)
-ggsave(filename = paste0(path,"/figures/ATvsCT50p.png"), plot = ATvsCT50p)
+ggsave(filename = "figures/ATvsCT50p.png", plot = ATvsCT50p)
 
 # Calculate monthly means
 tmp <- ungroup(mean50m) %>%
@@ -2718,7 +2718,7 @@ fig_deconv_pH_1m_ano <- ggplot(ano_deconv_pH_1m_melt) + geom_point(aes(x=date, y
 ggsave(file="figures/fig_deconv_pH_1m_ano.png", fig_deconv_pH_1m_ano, width = 18, height = 20, units = "cm")
 ```
 García-Ibáñez et al. (2016) provide a method to partition the changes in pH due to changes in salinity, temperature, total alkalinity and dissolved inorganic carbon.
-![garcia-ibanez](various/garcia-ibanez.png)
+![garcia-ibanez](figures/garcia-ibanez.png)
 
 García-Ibáñez M. I., Zunino P., Fröb F., Carracedo L. I., Ríos A. F., Mercier H., Olsen A. \& Pérez F. F., 2016. Ocean acidification in the North Atlantic: controlling mechanisms. \textit{Biogeosciences Discussions} 1-26.
 
@@ -2976,7 +2976,7 @@ deconv_garcia_year <- data_frame(
 
 
 ![fig_dpH_CT_y_dT_1m.png](figures/fig_dpH_CT_y_dT_1m.png)
-![dCT_dt_1m](/figures/fig_dCT_dt_1m.png)
+![dCT_dt_1m](figures/fig_dCT_dt_1m.png)
 
 ### Deconvolution of pH changes at 1 m using year/month means for not changing variables
 
@@ -3138,7 +3138,7 @@ deconv_garcia_year_month <- data_frame(
 ```
 
 ![dpH_T_dT_ym_1m](figures/fig_dpH_T_ym_dT_1m.png)
-![dT_dt_1m](/figures/fig_dT_dt_1m.png)
+![dT_dt_1m](figures/fig_dT_dt_1m.png)
 ![dpH_S_dS_ym_1m](figures/fig_dpH_S_dS_ym_1m.png)
 ![dS_dt_1m](figures/fig_dS_dt_1m.png)
 ![fig_dpH_AT_dT_ym_1m.png](figures/fig_dpH_AT_dT_ym_1m.png)
@@ -4848,7 +4848,7 @@ p1 <- ggplot(data=dplyr::filter(means_depth, depth== 0)) +
   scale_y_continuous(limits = c(2490, 2600), expand = c(0,0)) +
   labs(title = "Point B (1 m, with month of sampling)", x = "Salinity", y = expression(paste("Total alkalinity (",mu, "mol ", kg^-1,")"))) +
   Mytheme()
-png(file = paste0(path,"/figures/fig_ta_vs_salinity_month_pointB_0m.png"), 
+png(file = "figures/fig_ta_vs_salinity_month_pointB_0m.png", 
     width = 20, height = 13, units = "cm", res = 300)
 print(p1)
 dev.off()
@@ -4863,7 +4863,7 @@ p1 <- ggplot(data=dplyr::filter(means_depth, depth== 0)) +
   scale_y_continuous(limits = c(2490, 2600), expand = c(0,0)) +
   labs(title = NULL, x = "Salinity", y = expression(paste("Total alkalinity (",mu, "mol ", kg^-1,")"))) +
 Mytheme_facet()
-ggsave(p1, file = paste0(path,"/figures/fig_ta_vs_salinity_year_pointB_0m.png"), 
+ggsave(p1, file = "figures/fig_ta_vs_salinity_year_pointB_0m.png", 
     width = 6, height = 6)
 
 # AT versus salinity at the surface per year with loop
@@ -4931,7 +4931,7 @@ p1 <- ggplot(data=mean0m) +
   stat_smooth(method=lm, na.rm=TRUE, show.legend=FALSE, se=FALSE, colour="black", size=0.5) +
   labs(title = "With monthly means", x = "Salinity", y = expression(paste("Total alkalinity (",mu, "mol ", kg^-1,")"))) +
   Mytheme()
-ggsave(p1, filename = paste0(path,"/figures/fig_ta_vs_salinity_all_pointB_0m.png"), width = 20, height = 13, units = "cm")
+ggsave(p1, filename = "figures/fig_ta_vs_salinity_all_pointB_0m.png", width = 20, height = 13, units = "cm")
 
 # AT=f(S) with monthly means
 lms <- summary(lm(data = means_month0m, AT ~ Salinity))
@@ -4951,7 +4951,7 @@ p1 <- ggplot(data=means_month0m) +
   labs(title = "With all data", x = "Salinity", 
        y = expression(paste("Total alkalinity (",mu, "mol ", kg^-1,")"))) +
   Mytheme()
-png(file = paste0(path,"/figures/fig_ta_vs_salinity_monthly_means_pointB_0m.png"), 
+png(file = "figures/fig_ta_vs_salinity_monthly_means_pointB_0m.png", 
     width = 20, height = 13, units = "cm", res = 300)
 print(p1)
 dev.off()
@@ -5014,8 +5014,8 @@ precip_S <- ggplot(w_AT_precip, aes(x = rr_cumsum, y = mean_salinity)) +
 annotation_custom(grob_C_bl)
 
 g <- plot_grid(precip_cumsum, precip_ta, precip_S, ncol=1, align="h")
-ggsave(paste0(path,"/figures/precip.png"),g, width = 18, height = 14, units = "cm")
-cowplot::ggsave(paste0(path,"/figures/figS2.pdf"),g, width = 8, height = 14, units = "cm")
+ggsave("figures/precip.png",g, width = 18, height = 14, units = "cm")
+cowplot::ggsave("figures/figS2.pdf",g, width = 8, height = 14, units = "cm")
 ```
 
 The relationship between AT and salinity using all data is shown below.
@@ -5133,7 +5133,7 @@ plot_range_pH_Chla_month <-  ggplot(data = range_month) +
   geom_text(aes(x = Chla, y = pH_range_month, label = Month)) +
   labs(x = "Chl-a concentration", y = "pH range", title = NULL) +
   theme_bw()
-ggsave(paste0(path,"/figures/plot_range_pH_Chla_month.png"), plot_range_pH_Chla_month)
+ggsave("figures/plot_range_pH_Chla_month.png", plot_range_pH_Chla_month)
 
 plot_range_pH_Temperature <-  ggplot(data = range_month) +
   geom_text(aes(x = Temperature, y = pH_range_month, label = Month), na.rm=TRUE) +
@@ -5146,7 +5146,7 @@ plot_range_pH_Temperature <-  ggplot(data = range_month) +
   theme(aspect.ratio=1/2,
         axis.title.x = element_text(margin=margin(t=0.25, r=0, b=0.25, l=0, unit = "cm"))) +
   annotation_custom(grob_A)
-ggsave(paste0(path,"/figures/plot_range_pH_Temperature.png"), plot_range_pH_Temperature)
+ggsave("figures/plot_range_pH_Temperature.png", plot_range_pH_Temperature)
 
 size_point <- 0.4 # size of data points
 plot_range <-  
@@ -5159,7 +5159,7 @@ plot_range <-
   annotation_custom(grob_D)
 
 g <- plot_grid(plot_continuous_discrete_pH, plot_continuous_discrete_T, plot_offset, plot_range, plot_zoom, align='vh', ncol=1)
-ggsave(paste0(path,"/figures/fig_paper_time_series.png"), g, width = 18, height = 14, units = "cm")
+ggsave("figures/fig_paper_time_series.png", g, width = 18, height = 14, units = "cm")
 cowplot::ggsave(file="figures/fig7.pdf", g, width = 8, height = 16, units = "cm")
 
 # Per year and week
@@ -5183,12 +5183,12 @@ plot_range_pH_Chla_week <-  ggplot(data =  range_year_week) +
   theme(aspect.ratio=1/2,
         axis.title.x = element_text(margin=margin(t=0.25, r=0, b=0.25, l=0, unit = "cm"))) +
   annotation_custom(grob_B)
-ggsave(paste0(path,"/figures/plot_range_pH_Chla_week.png"), plot_range_pH_Chla_week)
+ggsave("figures/plot_range_pH_Chla_week.png", plot_range_pH_Chla_week)
 
 plot_range_pH_Chla_temp <- plot_grid(plot_range_pH_Temperature,
                                      plot_range_pH_Chla_week, ncol = 1, align = "h")
-ggsave(paste0(path,"/figures/plot_range_pH_Chla_temp.png"), plot_range_pH_Chla_temp, width = 8)
-cowplot::ggsave(paste0(path,"/figures/figS1.pdf"), plot_range_pH_Chla_temp, width = 8, height = 8)
+ggsave("figures/plot_range_pH_Chla_temp.png", plot_range_pH_Chla_temp, width = 8)
+cowplot::ggsave("figures/figS1.pdf", plot_range_pH_Chla_temp, width = 8, height = 8)
 
 ```
 
@@ -5297,7 +5297,7 @@ fig_delta_CO2 <- ggplot(data = CO2_pr_i, aes(x = as.POSIXct(dt), y = mean_pCO2 -
   geom_hline(yintercept = 0)
   
 g <- arrangeGrob(fig_CO2_time_series, fig_CO2_ano, ncol=1)
-ggsave(paste0(path,"/figures/fig_atm_CO2.png"), g)
+ggsave("figures/fig_atm_CO2.png", g)
 ```
 
 Atmospheric concentration of CO2 measured at Plateau Rosa from 1993 to 2015 were downloaded from <http://ds.data.jma.go.jp/gmd/wdcgg/cgi-bin/wdcgg/download.cgi?index=PRS645N00-RSE&param=200612120114&select=inventory>. Note that contributors should be contacted for proper acknowledgement for use of the data or offer of co-authorship
