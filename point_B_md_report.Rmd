@@ -753,7 +753,7 @@ z <- z %>%
   dplyr::mutate(ta = mean(ta_dup, na.rm = T),
                 dic =mean(dic_dup, na.rm =T)) 
 
-# Exclude data for 2017 and later
+# Exclude data for 2019 and later
 z <- filter(z, sampling_date < "2018-01-01")
 
 # read POC and PON data
@@ -4870,9 +4870,10 @@ ggsave(p1, file = "figures/fig_ta_vs_salinity_year_pointB_0m.png",
     width = 6, height = 6)
 
 # AT versus salinity at the surface per year with loop
-panel <- c("(a)","(b)","(c)","(d)","(e)","(f)","(g)","(h)","(i)", "(j)", "(k)")
+panel <- c("(a)","(b)","(c)","(d)","(e)","(f)","(g)","(h)","(i)", "(j)", "(k)", "(l)")
 tmp <- filter(means_depth, depth== 0)
 p <- NULL; j <- 0
+#for (i in 1:11) {
 for (i in unique(tmp$year)) {
   #i <- 11
   j <- j+1
@@ -4896,12 +4897,12 @@ for (i in unique(tmp$year)) {
           legend.background = element_rect(fill="white", size=0.15),
           legend.key.width = unit(1, "cm"),
           legend.position='none')
-if (j %in% c(1,4,7, 10)) {p[[j]] <- p[[j]] + labs(y=expression(paste(italic(A)[T], " (",mu, "mol ", kg^-1,")")))}
+if (j %in% c(1,4,7,10)) {p[[j]] <- p[[j]] + labs(y=expression(paste(italic(A)[T], " (",mu, "mol ", kg^-1,")")))}
   else {
     p[[j]] <- p[[j]] + theme(axis.text.y = element_blank())
     p[[j]] <- p[[j]] + theme(plot.margin = margin(t = 0, r = 0.3, b = 0, l = 0, unit = "cm"))
   }
- if (j %in% c(7,8,9)) {p[[j]] <- p[[j]] + labs(x = "Salinity")
+ if (j %in% c(10,11,12)) {p[[j]] <- p[[j]] + labs(x = "Salinity")
  p[[j]] <- p[[j]] + theme(axis.title.x = element_text(margin=margin(t = 0.2, r = 0, b = 0.2, l = 0, unit="cm")))
  }
  else {

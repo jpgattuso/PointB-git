@@ -1,15 +1,15 @@
 ---
 title: "Time series of the carbonate chemistry at Point B"
-author: "Jean-Pierre Gattuso, CNRS-UPMC (gattuso@obs-vlfr.fr), Samir Alliouane, Lydia Kapsenberg and Laure Mousseau"
+author: "Jean-Pierre Gattuso, CNRS-SU (gattuso@obs-vlfr.fr), Samir Alliouane and Laure Mousseau"
 date: '`r format(Sys.Date(), "%d %B %Y")`'
 output:
   html_document:
     code_folding: hide
     fig_caption: yes
-    toc: yes
-    toc_float: yes
+    toc: no
+    toc_float: no
   pdf_document:
-    toc: yes
+    toc: no
 ---
 
 
@@ -39,6 +39,13 @@ library(directlabels)
 library(tibble)
 require("knitr")
 library(broom)
+library(dygraphs)
+library(xts)
+# install.packages("devtools")
+#devtools::install_github("jiho/castr")
+library(castr)
+library(colorspace)
+
 
 #define who is the user and define path
 if (Sys.getenv("LOGNAME") == "gattuso") path = "../../pCloud\ Sync/Documents/experiments/exp153_carbonates_point_B/"
@@ -63,24 +70,9 @@ Mytheme <- function(size_labs = 6, face_font="plain", ...) {
         axis.ticks.y = element_line(size=0.1),
         axis.ticks.length = unit(1.1, "mm"),
         panel.grid.major = element_line(size = 0.25, color="black", linetype="dotted"),
-        aspect.ratio = 1 / 3,
-        plot.margin = margin(t = 0, r = 1, b = 0, l = 0, unit = "lines")
-  )
-}
-
-Mytheme_facet <- function(size_labs = 6, face_font="plain") {
-  theme_bw() +
-  theme(axis.text.x = element_text(face=face_font, size=size_labs, color="black"),
-        axis.title.x = element_text(face=face_font, size=size_labs, margin=margin(0,0,0,0,"pt")),
-        axis.text.y = element_text(face=face_font, color="black", size=size_labs),
-        axis.title.y = element_text(face=face_font, size=size_labs),
-        axis.ticks.x = element_line(size=0.1),
-        axis.ticks.y = element_line(size=0.1),
-        axis.ticks.length = unit(1.1, "mm"),
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
-        aspect.ratio = 1,
-        plot.margin = margin(t = 0, r = 1, b = 0, l = 0, unit = "lines")
+        #aspect.ratio = 1 / 3,
+        plot.margin = margin(t = 0, r = 1, b = 0, l = 0, unit = "lines"),
+        legend.position = "none"
   )
 }
 
@@ -124,45 +116,109 @@ slope <- 365*coef(reg)[2]
 ```
 
 
-### Les codes de Villefranche (inspirés des codes SOMLIT)
-
-- Codification qflag\_taking concernant le prélèvement des échantillons en mer : (i.e pour l'étape : "qflag\_taking")
-	- 0 : ancien code qui signifie OK
-	- 2 : nouveau code qui signifie OK
-	- 3 : prélèvement douteux
-	- 4 : prélèvement mauvais
-
-- Codification qflag\_final, qui correspond au code "final" des résultats TA et DIC (i.e pour l'étape : "qflag\_final"). Comme TA et DIC sont déterminés par la même titration, qflag\_ta et qflag\_DIC devrait être identiques. Ce n'est pas le cas en décembre 2009 où il manque des qflag\_DIC. On a alors considéré que qflag\_final = qflag\_ta.
-
-	- 0 : Dosage avorté (échantillon perdu)
-	- 2 : résultat OK
-	- 3 : résultat douteux
-	- 4 : résultat mauvais
-
 
 ```{r read_data, include=FALSE}
 # read data and create a data frame tbl
-z <-  read_delim(
+dat <-  read_delim(
   paste0(path,"data/", "radehydro_ctd.csv.gz"),
   delim = ",",
   col_names = TRUE,
   col_types = cols(fluo_calib = "d", fluorescence="d", oxygen_mll="d", oxygen_sat="d", 
                    oxygen_umolkg="d", par="d", v0="d", v2="d"),
   na = c("NA")
-)
+) %>%
+  dplyr::rename(depth = pressure) %>%
+  dplyr::filter(station == "B") # only keep Point B
 ```
 
-```{r plot, include=FALSE}
-v <- ggplot(filter(z, date>"2016-01-01", date<"2016-12-31"), 
-            aes(x=date,y=pressure,z=temperature, fill=temperature)) +
-  geom_raster() +
-  scale_y_reverse(expand=c(0,0)) +
-  #scale_fill_gradientn(colours=matlab.like(10), na.value = 'gray', name="Water\nTemp \nºC") + 
-  scale_fill_viridis_d() +
-  scale_x_date(date_breaks = "1 week", 
-                   # limits = as_date(c('2016-12-06','2017-02-25')),
-                   labels=date_format("%b-%d"), expand=c(0,0)) + 
-  ylab("Depth (m)") +
-  xlab("")
-ggsave(filename = "figures/temp.png", plot = v)
+```{r ctds, fig.width=10, fig.height=4, echo=FALSE, message= FALSE, warning = FALSE}
+p <- NULL; j <- 0
+for (i in (1992:2018)) {
+  j <- j + 1
+  p[[j]] <- ggplot(data = filter(dat, year(date) == i)) + 
+  geom_path(aes(x=temperature, y=-depth, group=date, colour = factor(month(date, label = TRUE))), alpha=0.8) +
+   scale_color_discrete_sequential(palette = "Purples 3", nmax = 12) +
+  labs(x = "Temperature", y = "Depth (m)") +
+    xlim(12, 28) + ylim(-100, 0) +
+  annotate("text", x = 26, y = -80, label = as.character(i), size = 4) +
+    Mytheme() +
+        theme(legend.position = "none")
+
+}
+g <- plot_grid(p[[1]], p[[2]], p[[3]], p[[4]], p[[5]], p[[6]], p[[7]], p[[8]], p[[9]], p[[10]], 
+                p[[11]], p[[12]], p[[13]], p[[14]], p[[15]], p[[16]], p[[17]], p[[18]], p[[19]], p[[20]],
+                p[[21]], p[[22]], p[[23]], p[[24]], p[[25]], p[[26]], p[[27]],
+                ncol=1, align="h")
+ggsave(file="figures/ctd.png", g, width = 20, height = 150, units = "cm", limitsize = FALSE)
+
+  # j <- 1
+  # i <- 2017
+  # p[[j]] <- ggplot(data = filter(dat, year(date) == i)) + 
+  # geom_path(aes(x=temperature, y=-depth, group=date, colour = factor(month(date, label = TRUE))), alpha=0.8) +
+  #  scale_color_discrete_sequential(palette = "Purples 3", nmax = 12) +
+  # labs(x = "Temperature", y = "Depth (m)", colour = "Month") +
+  #   xlim(12, 28) + ylim(-100, 0) +
+  # annotate("text", x = 24, y = -80, label = as.character(j), size = 4) +
+  #   theme(legend.position = "none")
+  # p[[j]]
 ```
+![ctd](figures/ctd.png)
+
+
+```{r whole time series, fig.width=10, fig.height=4, echo=FALSE, message= FALSE}
+#Temperature
+temp_xts <- dat %>%
+  dplyr::select(date, temperature)%>%
+  as.xts(temperature, order.by = dat$date)
+dygraph(temp_xts, group = "pointB", main="Temperature", ylab="Temperature") %>%
+      dySeries("temperature", color = "blue", strokeWidth = 0, label = "T") %>%
+      dyHighlight(highlightCircleSize = 8, highlightSeriesBackgroundAlpha =0.2,hideOnMouseOut =TRUE) %>%
+      dyOptions(drawGrid = TRUE, drawPoints = TRUE, pointSize = 2,useDataTimezone = TRUE) %>%
+      dyRangeSelector(height = 30)
+```
+
+```{r thermocline, fig.width=10, fig.height=4, echo=FALSE, message= FALSE}
+stats <- dat %>% group_by(date) %>%
+  summarise(
+    thermocline = clined(temperature, depth, n.smooth=2, k=2)
+#    pycnocline = clined(sigma, depth),
+#    strat_index = stratif(sigma, depth, min.depths=0:5, max.depth=60:65),
+#    DCM = maxd(fluo, depth, n.smooth=2, k=3),
+#    MLD = mld(sigma, depth, ref.depths=0:5, default.depth=80),
+    # it is even possible to use variables computed above to make the
+    # following computations adapted to each cast:
+    # average tempeature in the mixed layer only
+#    temp_avg = integrate(temp, depth, from=0, to=MLD, fun=mean),
+    # stock of Chl a within 10 m of the DCM
+#    chla_dcm_stock = integrate(fluo, depth, from=DCM-10, to=DCM+10)
+  )
+
+therm_xts <- stats %>%
+  dplyr::select(date, thermocline)%>%
+  as.xts(thermocline, order.by = stats$date)
+dygraph(therm_xts, group = "pointB", main="Thermocline", ylab="Thermocline") %>%
+      dySeries("thermocline", color = "blue", strokeWidth = 0, label = "Th") %>%
+      dyHighlight(highlightCircleSize = 8, highlightSeriesBackgroundAlpha =0.2,hideOnMouseOut =TRUE) %>%
+      dyOptions(drawGrid = TRUE, drawPoints = TRUE, pointSize = 2,useDataTimezone = TRUE) %>%
+      dyRangeSelector(height = 30)
+
+# therm_plot <- ggplot(data = stats, aes(x = date, y = thermocline)) + geom_path()
+# ggsave(filename = "figures/therm_plot.png", plot = therm_plot)
+
+
+# v <- ggplot(filter(z, date>"2016-01-01", date<"2016-12-31"), 
+#             aes(x=date,y=pressure,z=temperature, fill=temperature)) +
+#   geom_raster() +
+#   scale_y_reverse(expand=c(0,0)) +
+#   #scale_fill_gradientn(colours=matlab.like(10), na.value = 'gray', name="Water\nTemp \nºC") + 
+#   scale_fill_viridis_d() +
+#   scale_x_date(date_breaks = "1 week", 
+#                    # limits = as_date(c('2016-12-06','2017-02-25')),
+#                    labels=date_format("%b-%d"), expand=c(0,0)) + 
+#   ylab("Depth (m)") +
+#   xlab("")
+# ggsave(filename = "figures/temp.png", plot = v)
+```
+
+
+
