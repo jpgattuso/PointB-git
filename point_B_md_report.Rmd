@@ -622,8 +622,7 @@ dyf_surf_salinity_AT <- ggplot(data = dyf_surf, aes(x=salinity, y=AT), na.rm=TRU
   geom_point(aes(colour=factor(year)), na.rm=TRUE) + 
   labs(y = "",x="Salinity", title=expression(paste(italic(A)[T] ," ","at <= 12 m"))) +
   stat_smooth(method = lm, na.rm=TRUE)
-ggsave(file = "figures/dyf_surf_salinity_AT.png", dyf_surf_salinity_AT,
-    width = 15, height = 10, units = "cm")
+ggsave(file = "figures/dyf_surf_salinity_AT.png", dyf_surf_salinity_AT, width = 15, height = 10, units = "cm")
 
 # AT as a function of salinity for every year
 j <- 0

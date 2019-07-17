@@ -1,6 +1,6 @@
 ---
-title: "Time series of the carbonate chemistry at Point B"
-author: "Jean-Pierre Gattuso, CNRS-SU (gattuso@obs-vlfr.fr), Samir Alliouane and Laure Mousseau"
+title: "Time series at Point B"
+author: "Jean-Pierre Gattuso, CNRS-SU (gattuso@obs-vlfr.fr), Maia Durozier, Jean-Olivier Irisson and Laure Mousseau"
 date: '`r format(Sys.Date(), "%d %B %Y")`'
 output:
   html_document:
@@ -116,11 +116,10 @@ slope <- 365*coef(reg)[2]
 ```
 
 
-
 ```{r read_data, include=FALSE}
 # read data and create a data frame tbl
 dat <-  read_delim(
-  paste0(path,"data/", "radehydro_ctd.csv.gz"),
+  paste0(path,"data/", "radehydro_ctd_20190716.csv"),
   delim = ",",
   col_names = TRUE,
   col_types = cols(fluo_calib = "d", fluorescence="d", oxygen_mll="d", oxygen_sat="d", 
@@ -221,4 +220,34 @@ dygraph(therm_xts, group = "pointB", main="Thermocline", ylab="Thermocline") %>%
 ```
 
 
+```{r averages, fig.width=10, fig.height=4, echo=FALSE, message= FALSE}
+ave_all <- dat %>%
+  dplyr::mutate(month = month(x = date),
+                range = cut(dat$depth, breaks = c(0, 5, 10, 20, 30, 50, 200), include.lowest = TRUE, right = TRUE),
+                range = forcats::fct_explicit_na(range, na_level = "(Missing)")) %>%
+ # dplyr::filter(month == 6 & month == 7) %>%
+  group_by(month, range) %>%
+  summarize(temp = mean(temperature, na.rm = TRUE), n = n())
+ave_all
+
+ave_2019 <- dat %>%
+  dplyr::mutate(month = month(date),
+                year = year(date),
+                range = cut(dat$depth, breaks = c(0, 5, 10, 20, 30, 50, 200), include.lowest = TRUE, right = TRUE),
+                range = forcats::fct_explicit_na(range, na_level = "(Missing)")) %>%
+  dplyr::filter(year == 2019) %>%
+  group_by(month, range) %>%
+  summarize(temp_2019 = mean(temperature, na.rm = TRUE), n = n())
+ave_2019
+
+ext <- left_join(ave_all, ave_2019, by = c("month", "range"))  %>%
+  dplyr::filter(range != "(missing)")
+  
+temp_ts <- ggplot(ext, na.rm = TRUE) +
+  geom_line(aes(x = month, y = temp, group = range, col = range), alpha = 0.2) +
+  geom_line(aes(x = month, y = temp_2019, group = range, col = range)) +
+  scale_x_continuous(breaks=seq(0,12, 1)) +
+  scale_y_continuous(breaks=seq(12,30, 2)) 
+ggsave2(temp_ts, filename = "figures/temp_ts.pdf")
+```
 
