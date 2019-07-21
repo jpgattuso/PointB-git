@@ -16,29 +16,26 @@ output:
 ```{r setup, include=FALSE}
 ##
 rm(list = ls())
+library(tidyverse)
 require(readxl)
 require(seacarb)
-library(ggplot2)
 library(cowplot)
 library(scales)
 library(RColorBrewer)
 library(gridExtra)
-library(reshape2)
 library(xtable)
 library(zoo)
 library(lubridate)
 library(nlme)
 library(lmtest)
-library(dplyr)
-library(readr)
-library(tidyr)
+#library(readr)
 library(grid)
 library(viridis)
 library(animation)
-library(directlabels)
-library(tibble)
-require("knitr")
-library(broom)
+#library(directlabels)
+#library(tibble)
+#require("knitr")
+#library(broom)
 library(dygraphs)
 library(xts)
 # install.packages("devtools")
@@ -242,58 +239,53 @@ dat2 <- dat2 %>%
                 range = forcats::fct_explicit_na(range, na_level = "(Missing)"))
 
 temp_ts <- dat2 %>% # average temperature for the whole time series
-  group_by(month, range) %>%
-  summarize(temp_ts = mean(temperature, na.rm = TRUE)) %>%
-  filter(range != "(Missing)")
+  dplyr::group_by(month, range) %>%
+  dplyr::summarize(temp_ts = mean(temperature, na.rm = TRUE)) %>%
+  dplyr::filter(range != "(Missing)") %>%
+  dplyr::ungroup()
 
 
-# calculate monthly averages for each year
-  temp_yr <- dat2 %>%
+# calculate monthly averages and anomalies for each year
+temp_yr <- dat2 %>%
   group_by(year, month, range) %>%
     summarize(temp = mean(temperature, na.rm = TRUE))
-    ave_yr <- left_join(temp_yr, temp_ts) %>%
-        mutate(temp_ano = temp - temp_ts) #monthly anomalies for each year
+ave_yr <- left_join(temp_yr, temp_ts) %>%
+  mutate(temp_ano = temp - temp_ts) %>% 
+  filter(range != "(Missing)") %>%
+  dplyr::ungroup()
 
- plot_ano <- ave_yr %>%
-   ggplot() +
-  geom_bar(aes(x = month, y = temp_ano, group = range, col = range), alpha = 0.2)
-# calculate monthly anomalies for each year
-#for (yr in c(1992:1993, 1995:2019)) { #no data in 1994, CTD lost
-  #yr = 1992
-#  new_var2 <- paste0("ano", as.character(yr))
-#  ave_yr <- ave_yr %>%
-#    mutate(ano = temp - temp_ts)
-    #zz <- left_join(ave_all, z)
-#}
+# add date
+z <- as_date(paste(ave_yr$year, ave_yr$month, "15", sep = "-"))
+ave_yr <- bind_cols(ave_yr, tibble(date = z))
 
-#ave_all <- ave_all %>%
-#  dplyr::mutate(range = forcats::fct_explicit_na(range, na_level = "(Missing)")) %>%
-#  dplyr::filter(range != "(missing)")
-
-# ave_2019 <- dat %>%
-#   dplyr::mutate(month = month(date),
-#                 year = year(date),
-#                 range = cut(dat$depth, breaks = c(0, 5, 10, 20, 30, 50, 200), include.lowest = TRUE, right = TRUE),
-#                 range = forcats::fct_explicit_na(range, na_level = "(Missing)")) %>%
-#   dplyr::filter(year == 2019) %>%
-#   group_by(month, range) %>%
-#   summarize(temp_2019 = mean(temperature, na.rm = TRUE), n2019 = n())
-# ave_2019
-
-# ext <- left_join(ave_all, ave_2019, by = c("month", "range"))  %>%
-#   dplyr::mutate(range = forcats::fct_explicit_na(range, na_level = "(Missing)")) %>%
-#   dplyr::filter(range != "(missing)")
+# test <- tibble(year = c(2017, 2019),
+#        month = c(1, 7))
+# mutate(test, date = as_date(paste(year, month, "15", sep = "-")))
 
 
-  
+
+plot_temp_ano <- ave_yr %>%
+   mutate(mycolor = ifelse(temp_ano > 0, "type1", "type2")) %>%
+   ggplot(aes(x=date, y=temp_ano)) +
+  geom_segment(aes(x=date, xend=date, y=0, yend=temp_ano, color=mycolor), size=1.3, alpha=0.9) +
+  theme_light() +
+  theme(
+    legend.position = "none") +
+  labs(x = "", y = "",
+       title = "Monthly temperature anomaly in °C at Point B, Villefranche-sur-mer, NW Med.",
+       subtitle = "Reference period is 1992-2019") +
+  scale_x_date(date_breaks = "2 years", date_minor_breaks = "1 month", date_labels = "%Y") +
+  scale_y_continuous(breaks=seq(-4, 4, 2)) +
+  facet_grid(rows = vars(range))
+plot_temp_ano
+ggsave2(plot_temp_ano, filename = "figures/temp_ano.pdf")
+
+
 temp_ts <- ggplot(temp_ts, na.rm = TRUE) +
   geom_line(aes(x = month, y = temp, group = range, col = range), alpha = 0.2) +
   geom_line(aes(x = month, y = temp2019, group = range, col = range)) +
   scale_x_continuous(breaks=seq(0,12, 1)) +
   scale_y_continuous(breaks=seq(12,30, 2)) 
-ggsave2(temp_ts, filename = "figures/temp_ts.pdf")
-
-
-# plot of temperature anomalies
+ggsave2(temp_ts, filename = "figures/temp_ts.pdf", width = 28, height = 20, units = "cm")
 ```
 
