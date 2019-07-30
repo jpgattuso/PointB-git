@@ -17,6 +17,7 @@ output:
 ##
 rm(list = ls())
 library(tidyverse)
+library(knitr)
 require(readxl)
 require(seacarb)
 library(cowplot)
@@ -114,6 +115,7 @@ reg <- lm(data=dat,temp ~ dt)
 slope <- 365*coef(reg)[2]
 ```
 
+There are 3 stations in the dataset: B, B+ and C. The temperature record starts at different dates : 
 
 ```{r read_data, include=FALSE}
 # read data and create a data frame tbl
@@ -125,9 +127,17 @@ dat <-  read_delim(
                    oxygen_umolkg="d", par="d", v0="d", v2="d"),
   na = c("NA")
 ) %>%
-  dplyr::rename(depth = pressure) %>%
-  dplyr::filter(station == "B") # only keep Point B
+  dplyr::rename(depth = pressure)
+start_ts <- dat %>% # beginning of time series
+  group_by(station) %>% summarise(min = min(date))
+kable(start_ts, caption = "Starting dates of time series", col.names = c("Station", "Starting date"))
+z <- dat %>% 
+  dplyr::mutate(station = factor(station)) %>% # station as factor
+  dplyr::filter(station %in% c('B', 'B+')) %>% # only keep Point B and B+
+  dplyr::filter(station == 'B+' | (station == 'B' & date < "2004-12-21")) # eliminate B data when B+ starts
+
 ```
+
 
 ```{r ctds, fig.width=10, fig.height=4, echo=FALSE, message= FALSE, warning = FALSE}
 p <- NULL; j <- 0
@@ -281,11 +291,13 @@ plot_temp_ano
 ggsave2(plot_temp_ano, filename = "figures/temp_ano.pdf")
 
 
-temp_ts <- ggplot(temp_ts, na.rm = TRUE) +
-  geom_line(aes(x = month, y = temp, group = range, col = range), alpha = 0.2) +
-  geom_line(aes(x = month, y = temp2019, group = range, col = range)) +
-  scale_x_continuous(breaks=seq(0,12, 1)) +
-  scale_y_continuous(breaks=seq(12,30, 2)) 
-ggsave2(temp_ts, filename = "figures/temp_ts.pdf", width = 28, height = 20, units = "cm")
+# # no longer works
+# 
+# temp_ts <- ggplot(temp_ts, na.rm = TRUE) +
+#   geom_line(aes(x = month, y = temp, group = range, col = range), alpha = 0.2) +
+#   geom_line(aes(x = month, y = temp2019, group = range, col = range)) +
+#   scale_x_continuous(breaks=seq(0,12, 1)) +
+#   scale_y_continuous(breaks=seq(12,30, 2)) 
+# ggsave2(temp_ts, filename = "figures/temp_ts.pdf", width = 28, height = 20, units = "cm")
 ```
 
