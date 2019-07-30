@@ -1,5 +1,5 @@
 ---
-title: "Time series at Point B"
+title: "Time series at Point B and B+"
 author: "Jean-Pierre Gattuso, CNRS-SU (gattuso@obs-vlfr.fr), Maia Durozier, Jean-Olivier Irisson and Laure Mousseau"
 date: '`r format(Sys.Date(), "%d %B %Y")`'
 output:
@@ -117,7 +117,7 @@ slope <- 365*coef(reg)[2]
 
 There are 3 stations in the dataset: B, B+ and C. The temperature record starts at different dates : 
 
-```{r read_data, include=FALSE}
+```{r read_data, include=TRUE, warning = FALSE, echo = FALSE, message = FALSE}
 # read data and create a data frame tbl
 dat <-  read_delim(
   paste0(path,"data/", "radehydro_ctd_20190716.csv"),
@@ -127,17 +127,31 @@ dat <-  read_delim(
                    oxygen_umolkg="d", par="d", v0="d", v2="d"),
   na = c("NA")
 ) %>%
+  # eliminate duplicate rows
+  dplyr::filter(id != "b18233_01_sbe25plus - Copie"	& id != "b18233_sbe25plus - Copie") %>%
   dplyr::rename(depth = pressure)
 start_ts <- dat %>% # beginning of time series
   group_by(station) %>% summarise(min = min(date))
-kable(start_ts, caption = "Starting dates of time series", col.names = c("Station", "Starting date"))
+knitr::kable(start_ts, caption = "Starting dates of time series", col.names = c("Station", "Starting date"))
 z <- dat %>% 
   dplyr::mutate(station = factor(station)) %>% # station as factor
   dplyr::filter(station %in% c('B', 'B+')) %>% # only keep Point B and B+
   dplyr::filter(station == 'B+' | (station == 'B' & date < "2004-12-21")) # eliminate B data when B+ starts
 
+# add extra profiles of 2018
+# See Profiles_sonde_supplémentaires_aout_2018_point B Samir.xlsx
+supp1 <- read_excel(paste0(path,"data/", "Profiles_sonde_supplémentaires_aout_2018_pointB_Samir.xlsx"), sheet = 1) %>% 
+  select(station, date, depth = PrdM, temperature = Potemp090C, salinity = Sal00) %>%
+  mutate(date = ymd(date))
+supp2 <- read_excel(paste0(path,"data/", "Profiles_sonde_supplémentaires_aout_2018_pointB_Samir.xlsx"), sheet = 2) %>% 
+  select(station, date, depth = PrdM, temperature = Potemp090C, salinity = Sal00) %>%
+  mutate(date = ymd(date))
+supp <- bind_rows(supp1, supp2)
+dat <- bind_rows(dat, supp) %>%
+  arrange(date)
 ```
 
+In the present analysis, I combine the time-series at Point B and Point B+.
 
 ```{r ctds, fig.width=10, fig.height=4, echo=FALSE, message= FALSE, warning = FALSE}
 p <- NULL; j <- 0
