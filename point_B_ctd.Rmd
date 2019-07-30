@@ -115,7 +115,7 @@ reg <- lm(data=dat,temp ~ dt)
 slope <- 365*coef(reg)[2]
 ```
 
-There are 3 stations in the dataset: B, B+ and C. The temperature record starts at different dates : 
+There are 3 stations in the dataset: B (43°41'000 N, 7°19'000 E, depth 86 m), B+ (43°41'000 N, 7°18'830 E, depth 150/180 m) and C (43°40'580 N - 7°18'570 E). The temperature record starts at different dates : 
 
 ```{r read_data, include=TRUE, warning = FALSE, echo = FALSE, message = FALSE}
 # read data and create a data frame tbl
@@ -151,7 +151,7 @@ dat <- bind_rows(dat, supp) %>%
   arrange(date)
 ```
 
-In the present analysis, I combine the time-series at Point B and Point B+.
+The present analysis combines the time-series at Point B (before 2004-12-21) and Point B+ (after 2004-12-21).
 
 ```{r ctds, fig.width=10, fig.height=4, echo=FALSE, message= FALSE, warning = FALSE}
 p <- NULL; j <- 0
