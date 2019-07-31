@@ -120,7 +120,8 @@ There are 3 stations in the dataset: B (43°41'000 N, 7°19'000 E, depth 86 m), 
 ```{r read_data, include=TRUE, warning = FALSE, echo = FALSE, message = FALSE}
 # read data and create a data frame tbl
 dat <-  read_delim(
-  paste0(path,"data/", "radehydro_ctd_20190716.csv"),
+#  paste0(path,"data/", "radehydro_ctd_20190716.csv"),
+  paste0(path,"data/", "radehydro_ctd_20190731.csv"),
   delim = ",",
   col_names = TRUE,
   col_types = cols(fluo_calib = "d", fluorescence="d", oxygen_mll="d", oxygen_sat="d", 
@@ -291,12 +292,12 @@ ave_yr <- bind_cols(ave_yr, tibble(date = z))
 plot_temp_ano <- ave_yr %>%
    mutate(mycolor = ifelse(temp_ano > 0, "type1", "type2")) %>%
    ggplot(aes(x=date, y=temp_ano)) +
-  geom_segment(aes(x=date, xend=date, y=0, yend=temp_ano, color=mycolor), size=1.3, alpha=0.9) +
+  geom_segment(aes(x=date, xend=date, y=0, yend=temp_ano, color=mycolor), size=1.3, alpha=0.9, na.rm = TRUE) +
   theme_light() +
   theme(
     legend.position = "none") +
   labs(x = "", y = "",
-       title = "Monthly temperature anomaly in °C at Point B, Villefranche-sur-mer, NW Med.",
+       title = "Monthly temperature anomaly in °C at Point B/B+, Villefranche-sur-mer, NW Med.",
        subtitle = "Reference period is 1992-2019") +
   scale_x_date(date_breaks = "2 years", date_minor_breaks = "1 month", date_labels = "%Y") +
   scale_y_continuous(breaks=seq(-4, 4, 2)) +
