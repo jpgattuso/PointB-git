@@ -287,8 +287,6 @@ ave_yr <- bind_cols(ave_yr, tibble(date = z))
 #        month = c(1, 7))
 # mutate(test, date = as_date(paste(year, month, "15", sep = "-")))
 
-
-
 plot_temp_ano <- ave_yr %>%
    mutate(mycolor = ifelse(temp_ano > 0, "type1", "type2")) %>%
    ggplot(aes(x=date, y=temp_ano)) +
