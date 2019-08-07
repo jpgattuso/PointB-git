@@ -461,6 +461,18 @@ dyf <- tbl_df(read.table(paste0(path, "/data/carb_dyfamed.txt"),
 dyf$date <- mdy(dyf$date)
 dyf$year <- year(dyf$date)
 
+# Mercuric chloride correction for AT and CT (Dickson et al. 2007, SOP3a)
+# 100 ul of saturated HgCl2 were added before 2019-07-30 whereas
+# 200 ul of 50% saturated HgCl2 were added after that date
+dyf <- dyf %>%
+  mutate(AT = if_else(date < "2019-07-30",
+                    AT * 1.0002,
+                    AT * 1.0004),
+         CT = if_else(date < "2019-07-30",
+                    CT * 1.0002,
+                    CT * 1.0004),
+  )
+
 # remove questionable data (flag = 3)
 dyf$AT[dyf$QF_AT==3 | dyf$QF_AT==4] <- NA 
 dyf$CT[dyf$QF_CT==3 | dyf$QF_AT==4] <- NA 
@@ -477,6 +489,7 @@ dev.off()
 dyf <- dplyr::filter(dyf, salinity > 37)
 dyf$AT[dyf$date=="2005-08-02" & dyf$pressure==90] <- NA # obvious outlier
 dyf$AT[dyf$date=="2005-07-02" & (dyf$pressure>=300 & dyf$pressure<=700)] <- NA # questionable because bad Quality Flag réception flacon
+
 # replot without outliers
 fig_dyf_date_AT <- ggplot(data = dyf, aes(x=date, y=AT)) +
   geom_point(na.rm=TRUE)
@@ -711,14 +724,17 @@ kable(tab_dyf_surf_salinity_AT_year, caption="")
 #                   skip=1, sheet = "Data_DIC_2017-06-19",
 #               trim_ws = TRUE, col_names = TRUE,
 #                   na = c("", "NA"))
+
 z <-  read_delim(
-  paste0(path,"data/", "Data_DIC.csv"),col_types = cols(pH_ta = "d", temp_lab_eol="d", pH_s_eol_temp_lab ="d", qflag_pH_s_eol="d",
-temp_lab_ptb ="d", pH_s_ptb_temp_lab ="d", qflag_pH_s_ptb="d"),
-  delim = ",",
+  paste0(path,"data/", "Data_DIC.csv"), col_types = cols(pH_ta = "d", ta_dup = "d", dic_dup = "d",
+                                                         temp_lab_eol="d", 
+                                                         pH_s_eol_temp_lab ="d", qflag_pH_s_eol="d",
+                                                         temp_lab_ptb ="d", pH_s_ptb_temp_lab ="d",
+                                                         qflag_pH_s_ptb="d"),
+  n_max = 38,
+  delim = ";",
   na = c("NA", "999999")
 )
-
-
 
 H <- NULL
 z$sampling_date <- as.POSIXct(z$sampling_date, format = "%d/%m/%Y")
@@ -736,6 +752,19 @@ z$temp_lab_eol <- as.numeric(z$temp_lab_eol)
 z$pH_s_eol_temp_lab <- as.numeric(z$pH_s_eol_temp_lab)
 z$temp_lab_ptb <- as.numeric(z$temp_lab_ptb)
 z$pH_s_ptb_temp_lab <- as.numeric(z$pH_s_ptb_temp_lab)
+
+
+# Mercuric chloride correction for AT and CT (Dickson et al. 2007, SOP3a)
+# 100 ul of saturated HgCl2 were added before 2019-07-30 whereas
+# 200 ul of 50% saturated HgCl2 were added after that date
+z <- z %>%
+  mutate(ta_dup = if_else(sampling_date < "2019-07-30",
+                    ta_dup * 1.0002,
+                    ta_dup * 1.0004),
+         dic_dup = if_else(sampling_date < "2019-07-30",
+                    dic_dup * 1.0002,
+                    dic_dup * 1.0004),
+  )
 
 # all flags changed into factors
 z$qflag_taking <- as.factor(z$qflag_taking)     
