@@ -120,8 +120,7 @@ There are 3 stations in the dataset: B (43°41'000 N, 7°19'000 E, depth 86 m), 
 ```{r read_data, include=TRUE, warning = FALSE, echo = FALSE, message = FALSE}
 # read data and create a data frame tbl
 dat <-  read_delim(
-#  paste0(path,"data/", "radehydro_ctd_20190716.csv"),
-  paste0(path,"data/", "radehydro_ctd_20190731.csv"),
+  paste0(path,"data/", "radehydro_ctd_20190807.csv"),
   delim = ",",
   col_names = TRUE,
   col_types = cols(fluo_calib = "d", fluorescence="d", oxygen_mll="d", oxygen_sat="d", 
@@ -134,10 +133,12 @@ dat <-  read_delim(
 start_ts <- dat %>% # beginning of time series
   group_by(station) %>% summarise(min = min(date))
 knitr::kable(start_ts, caption = "Starting dates of time series", col.names = c("Station", "Starting date"))
+
+# eliminate B data when B+ starts except on 2019-08-07 when B+ profile is not available
 z <- dat %>% 
   dplyr::mutate(station = factor(station)) %>% # station as factor
   dplyr::filter(station %in% c('B', 'B+')) %>% # only keep Point B and B+
-  dplyr::filter(station == 'B+' | (station == 'B' & date < "2004-12-21")) # eliminate B data when B+ starts
+  dplyr::filter(station == 'B+' | (station == 'B' & date < "2004-12-21") | (station == 'B' & date == "2019-08-06")) 
 
 # add extra profiles of 2018
 # See Profiles_sonde_supplémentaires_aout_2018_point B Samir.xlsx
