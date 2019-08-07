@@ -37,5 +37,7 @@ vignettes/*.pdf
 rsconnect/
 .Rproj.user
 
-# Ignore html
+# Ignore html and others
 *.html
+*.png
+*.pdf
