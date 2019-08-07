@@ -304,7 +304,19 @@ plot_temp_ano <- ave_yr %>%
 plot_temp_ano
 ggsave2(plot_temp_ano, filename = "figures/temp_ano.pdf")
 
-
+ave_yr %>%
+  ggplot(aes(x = date, y = range, fill = temp_ano)) +
+    geom_tile() +
+ #   scale_fill_gradientn(low="blue", high = "red", values = scales::rescale(seq(-5, 5, by = 1)))
+    scale_fill_gradient2(low = "blue", mid = "white", high = "red", midpoint = 0, space = "Lab") +
+    labs(x="", y="", fill = "Temperature anomaly (°C)", 
+                title = "Monthly temperature anomaly in °C at Point B/B+, Villefranche-sur-mer, NW Med.",
+       subtitle = "Reference period is 1992-2019") +
+ #     scale_y_reverse() +
+  #  scale_x_continuous(position = "top") +
+  #  guides(guide_legend(reverse = TRUE)) +
+    theme(legend.position = "top") 
+  
 # # no longer works
 # 
 # temp_ts <- ggplot(temp_ts, na.rm = TRUE) +
