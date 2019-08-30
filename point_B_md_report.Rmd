@@ -5442,8 +5442,8 @@ deff_quarterly <- ggplot() +
 
 Test of a Deffayes plot.
 ![deffayes_monthly](figures/fig_deffayes_monthly.png)
-## pH comparaison
 
+## pH comparaison
 ### **spectro vs calculated pH (T insitu)**
 <br>
 ```{r plots pH spectro15 vs calc15, echo=FALSE, warning = FALSE, message = FALSE, out.width='70%'}
