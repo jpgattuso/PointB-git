@@ -5414,4 +5414,3 @@ deff_quarterly <- ggplot() +
 Test of a Deffayes plot.
 ![deffayes_monthly](figures/fig_deffayes_monthly.png)
 
-
