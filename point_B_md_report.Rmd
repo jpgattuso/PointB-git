@@ -38,6 +38,7 @@ library(directlabels)
 library(tibble)
 require("knitr")
 library(broom)
+library("lmodel2") # modele II regression
 
 #define who is the user and define path
 if (Sys.getenv("LOGNAME") == "gattuso") path = "../../pCloud\ Sync/Documents/experiments/exp153_carbonates_point_B/"
@@ -395,7 +396,35 @@ ggreg <- function (fit, point_size=2) {
     theme(plot.title = element_text(size=7))
 }
 
+########### Regression function 
+####
+# function regression plot with model II equation (MA) in title
+## Dans labs ajout de la variable TITRE pour mettre titre avant chaque graphe
+ggreg2 <- function (fit, xdata, ydata) { # x and y are the names of the variables
+  fit_data <- data.frame(fit$x, fit$y)
+  colnames(fit_data) = c(xdata, ydata)
+reg <- fit$regression.results[2,] #one selects MA only
+intercept <- reg$Intercept
+slope <- reg$Slope
+  ggplot(data = fit_data, aes_string(x = xdata, y = ydata)) + 
+  geom_point(size = 3, col = "blue") +
+  geom_abline(aes(intercept = fit$regression.results[2,2], slope = fit$regression.results[2,3]),
+              colour = "blue")  + 
+  labs(title = paste(titre,"\n Adj R2 = ", signif(fit$rsquare, 3),
+                     "; Intercept =", signif(intercept, 3),
+                     "; Slope =", signif(slope, 3),
+                     "; P =", signif(fit$P.param, 3)))
+}
+
+mytheme <- theme_bw() +
+  theme(axis.text.x=element_text(size=16, color="black"),
+        axis.title.x=element_text(face="bold", size=16),
+        axis.text.y=element_text(size=16, color="black"),
+        axis.title.y=element_text(face="bold", size=16),
+        plot.title = element_text(face="bold", size=14)
+)
 ```
+
 ```{r test regression, include=FALSE}
 # This is to test linear regressions with dates
 # Conclusion is that the slope is per day but I have decided to use decimal_date() to avoid any confusion
@@ -5413,4 +5442,18 @@ deff_quarterly <- ggplot() +
 
 Test of a Deffayes plot.
 ![deffayes_monthly](figures/fig_deffayes_monthly.png)
+## pH comparaison
 
+### **spectro vs calculated pH (T insitu)**
+<br>
+```{r plots pH spectro15 vs calc15, echo=FALSE, warning = FALSE, message = FALSE, out.width='70%'}
+
+fit <- lmodel2(data = continuous_discrete, pHcalc_ptB ~ pHspec_Tptb, nperm = 99)
+titre <- " "
+p_spec_cal <- ggreg2(fit, "pHspec_Tptb", "pHcalc_ptB") +
+  geom_line(aes(x = pHspec_Tptb, y = pHspec_Tptb), linetype = 2) +
+  labs(x=expression(paste("Spectro ",pH[T], ", T in situ")), y=expression(paste("Calculated ",pH[T], ",T in situ"))) +
+  mytheme + theme(legend.position="bottom")
+
+print(p_spec_cal)
+```
