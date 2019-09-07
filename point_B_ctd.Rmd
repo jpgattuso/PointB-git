@@ -120,11 +120,10 @@ There are 3 stations in the dataset: B (43°41'000 N, 7°19'000 E, depth 86 m), 
 ```{r read_data, include=TRUE, warning = FALSE, echo = FALSE, message = FALSE}
 # read data and create a data frame tbl
 dat <-  read_delim(
-  paste0(path,"data/", "radehydro_ctd_20190807.csv"),
+  paste0(path,"data/", "radehydro_ctd_20190906.csv"),
   delim = ",",
   col_names = TRUE,
-  col_types = cols(fluo_calib = "d", fluorescence="d", oxygen_mll="d", oxygen_sat="d", 
-                   oxygen_umolkg="d", par="d", v0="d", v2="d"),
+  col_types = cols(fluo_calib = "d", fluorescence="d", oxygen_mll="d", oxygen_sat="d", oxygen_umolkg="d", par="d", v0="d", v2="d"),
   na = c("NA")
 ) %>%
   # eliminate duplicate rows
