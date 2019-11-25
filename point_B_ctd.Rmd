@@ -120,18 +120,11 @@ There are 3 stations in the dataset: B (43°41'000 N, 7°19'000 E, depth 86 m), 
 ```{r read_data, include=TRUE, warning = FALSE, echo = FALSE, message = FALSE}
 # read data and create a data frame tbl
 dat <-  read_delim(
-<<<<<<< HEAD
   paste0(path,"data/radehydro_ctd/", "radehydro_ctd_20191125.csv"),
   delim = ";",
   col_names = TRUE,
   col_types = cols(id = "c", fluo_calib = "d", fluorescence="d", oxygen_mll="d", oxygen_sat="d", 
                    oxygen_umolkg="d", par="d", v0="d", v2="d"),
-=======
-  paste0(path,"data/radehydro_ctd/", "radehydro_ctd_20190906.csv"),
-  delim = ",",
-  col_names = TRUE,
-  col_types = cols(fluo_calib = "d", fluorescence="d", oxygen_mll="d", oxygen_sat="d", oxygen_umolkg="d", par="d", v0="d", v2="d"),
->>>>>>> 6fed25a4a23220a43b6d09a486b1c7133c325aa7
   na = c("NA")
 ) %>%
   dplyr::select(-date_time) %>%
@@ -154,13 +147,7 @@ z <- dat %>%
 supp1 <- read_excel(paste0(path,"data/radehydro_ctd/", "Profiles_sonde_supplémentaires_aout_2018_pointB_Samir.xlsx"), sheet = 1) %>% 
   select(station, date, depth = PrdM, temperature = Potemp090C, salinity = Sal00) %>%
   mutate(date = ymd(date))
-<<<<<<< HEAD
 supp2 <- read_excel(paste0(path,"data/radehydro_ctd/", "Profiles_sonde_supplémentaires_aout_2018_pointB_Samir.xlsx"), sheet = 2) %>% 
-=======
-
-  supp2 <- read_excel(paste0(path,"data/radehydro_ctd/", "Profiles_sonde_supplémentaires_aout_2018_pointB_Samir.xlsx"), sheet = 2) %>% 
->>>>>>> 6fed25a4a23220a43b6d09a486b1c7133c325aa7
-  select(station, date, depth = PrdM, temperature = Potemp090C, salinity = Sal00) %>%
   mutate(date = ymd(date))
   supp <- bind_rows(supp1, supp2)
 dat <- bind_rows(dat, supp) %>%
@@ -303,11 +290,11 @@ ave_yr <- bind_cols(ave_yr, tibble(date = z))
 # mutate(test, date = as_date(paste(year, month, "15", sep = "-")))
 ```
 ```{r plot min-max, fig.width=10, fig.height=4, echo=FALSE, message= FALSE}
-plot_min-max <- temp_yr %>%
-  dplyr::filter(temp_yr, is.nan == FALSE) %>%
-  ggplot(aes(x = year, y = temp)) +
-  geom_linerange(aes(ymin = max(temp_yr, na.rm = TRUE), 
-                 ymax = min(temp_yr, na.rm = TRUE)))
+# plot_min-max <- temp_yr %>%
+#   #dplyr::filter(temp_yr, is.nan == FALSE) %>%
+#   ggplot(aes(x = year, y = temp)) +
+#   geom_linerange(aes(ymin = max(temp, na.rm = TRUE), 
+#                  ymax = min(temp, na.rm = TRUE)))
 
 ```
 
