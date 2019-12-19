@@ -16,6 +16,7 @@
 
 # RStudio files
 .Rproj.user/
+*.Rproj
 
 # produced vignettes
 vignettes/*.html
@@ -37,8 +38,8 @@ rsconnect/
 .Rproj.user
 
 # Ignore html and others
-.html
+*.html
 *.png
 *.pdf
-figures/.png
+figures/*.png
 figures/*.pdf

@@ -490,6 +490,18 @@ dyf <- tbl_df(read.table(paste0(path, "/data/carb_dyfamed.txt"),
 dyf$date <- mdy(dyf$date)
 dyf$year <- year(dyf$date)
 
+# Mercuric chloride correction for AT and CT (Dickson et al. 2007, SOP3a)
+# 100 ul of saturated HgCl2 were added before 2019-07-30 whereas
+# 200 ul of 50% saturated HgCl2 were added after that date
+dyf <- dyf %>%
+  mutate(AT = if_else(date < "2019-07-30",
+                    AT * 1.0002,
+                    AT * 1.0004),
+         CT = if_else(date < "2019-07-30",
+                    CT * 1.0002,
+                    CT * 1.0004),
+  )
+
 # remove questionable data (flag = 3)
 dyf$AT[dyf$QF_AT==3 | dyf$QF_AT==4] <- NA 
 dyf$CT[dyf$QF_CT==3 | dyf$QF_AT==4] <- NA 
@@ -506,6 +518,7 @@ dev.off()
 dyf <- dplyr::filter(dyf, salinity > 37)
 dyf$AT[dyf$date=="2005-08-02" & dyf$pressure==90] <- NA # obvious outlier
 dyf$AT[dyf$date=="2005-07-02" & (dyf$pressure>=300 & dyf$pressure<=700)] <- NA # questionable because bad Quality Flag réception flacon
+
 # replot without outliers
 fig_dyf_date_AT <- ggplot(data = dyf, aes(x=date, y=AT)) +
   geom_point(na.rm=TRUE)
@@ -651,8 +664,7 @@ dyf_surf_salinity_AT <- ggplot(data = dyf_surf, aes(x=salinity, y=AT), na.rm=TRU
   geom_point(aes(colour=factor(year)), na.rm=TRUE) + 
   labs(y = "",x="Salinity", title=expression(paste(italic(A)[T] ," ","at <= 12 m"))) +
   stat_smooth(method = lm, na.rm=TRUE)
-ggsave(file = "figures/dyf_surf_salinity_AT.png", dyf_surf_salinity_AT,
-    width = 15, height = 10, units = "cm")
+ggsave(file = "figures/dyf_surf_salinity_AT.png", dyf_surf_salinity_AT, width = 15, height = 10, units = "cm")
 
 # AT as a function of salinity for every year
 j <- 0
@@ -736,19 +748,20 @@ kable(tab_dyf_surf_salinity_AT_year, caption="")
 ## Point B
 
 ```{r Initialization Point B, include=FALSE}
-# read data and create a data frame tbl
-# z <- read_excel(path = "../data/Data_DIC_2017-06-20.xls",
-#                   skip=1, sheet = "Data_DIC_2017-06-19",
-#               trim_ws = TRUE, col_names = TRUE,
-#                   na = c("", "NA"))
+# read data and create a tibble
+typ <- c("cccdddddfddfdffdfdffdfdfdfdfdf") # column type
 z <-  read_delim(
-  paste0(path,"data/", "Data_DIC.csv"),col_types = cols(pH_ta = "d", temp_lab_eol="d", pH_s_eol_temp_lab ="d", qflag_pH_s_eol="d",
-temp_lab_ptb ="d", pH_s_ptb_temp_lab ="d", qflag_pH_s_ptb="d"),
+  #paste0(path,"data/", "Data_DIC.csv"), col_types = cols(sampling_date = "D", pH_ta = "d", ta_dup = "d", 
+  #                                                        dic_dup = "d",
+  #                                                        temp_lab_eol="d", 
+  #                                                        pH_s_eol_temp_lab ="d", qflag_pH_s_eol="d",
+  #                                                        temp_lab_ptb ="d", pH_s_ptb_temp_lab ="d",
+  #                                                        qflag_pH_s_ptb="d"),
+paste0(path,"data/", "Data_DIC.csv"), col_types = typ, 
   delim = ",",
   na = c("NA", "999999")
 )
-
-
+# assign("last.warning", NULL, envir = baseenv()) #to clear warnings if they occur
 
 H <- NULL
 z$sampling_date <- as.POSIXct(z$sampling_date, format = "%d/%m/%Y")
@@ -767,6 +780,19 @@ z$pH_s_eol_temp_lab <- as.numeric(z$pH_s_eol_temp_lab)
 z$temp_lab_ptb <- as.numeric(z$temp_lab_ptb)
 z$pH_s_ptb_temp_lab <- as.numeric(z$pH_s_ptb_temp_lab)
 
+
+# Mercuric chloride correction for AT and CT (Dickson et al. 2007, SOP3a)
+# 100 ul of saturated HgCl2 were added before 2019-07-30 whereas
+# 200 ul of 50% saturated HgCl2 were added after that date
+z <- z %>%
+  mutate(ta_dup = if_else(sampling_date < "2019-07-30",
+                    ta_dup * 1.0002,
+                    ta_dup * 1.0004),
+         dic_dup = if_else(sampling_date < "2019-07-30",
+                    dic_dup * 1.0002,
+                    dic_dup * 1.0004),
+  )
+
 # all flags changed into factors
 z$qflag_taking <- as.factor(z$qflag_taking)     
 z$qflag_sample <- as.factor(z$qflag_sample)     
@@ -782,8 +808,8 @@ z <- z %>%
   dplyr::mutate(ta = mean(ta_dup, na.rm = T),
                 dic =mean(dic_dup, na.rm =T)) 
 
-# Exclude data for 2017 and later
-z <- filter(z, sampling_date < "2018-01-01")
+# Exclude data for 2019 and later
+#z <- filter(z, sampling_date < "2019-01-01")
 
 # read POC and PON data
 pom <- read_csv(file = paste0(path,"/data/POC-PON/POC-2007-2015_PtB_1m.csv"), comment="#")
@@ -938,12 +964,22 @@ dat <- rbind(dat, NArows)
 #arrange by dates
 dat <- arrange(dat, sampling_date)
 
-#Prepare data to upload to Pangaea 
+#Prepare data to upload to Pangaea
 pangaea <- select(dat, sampling_date, depth, CSC_flag, salinity_field,
                   temp_field, HCO3, CO3,
                   pH, ta, dic, OmegaCalcite,
                   OmegaAragonite, pCO2, fCO2) %>%
-  dplyr::mutate(depth = replace(depth, depth == 0, 1))
+  dplyr::mutate(depth = replace(depth, depth == 0, 1),
+                HCO3 = round(HCO3*1e6, digits = 1),
+                CO3 = round(CO3*1e6, digits = 1),
+                pH = round(pH, digits = 3),
+                ta = round(ta, digits = 1),
+                dic = round(dic, digits = 1),
+                OmegaCalcite = round(OmegaCalcite, digits = 1),
+                OmegaAragonite = round(OmegaAragonite, digits = 1),
+                pCO2 = round(pCO2, digits = 1),
+                fCO2 = round(fCO2, digits = 1)
+)
   
 #save data
 # write.table(dat, paste0("output/", Sys.Date(), "_output.csv"), sep= ",", dec=".", row.names = FALSE)
@@ -1238,12 +1274,12 @@ Oa1vp <- ggplot(filter(tmp_long, variable=="mean_OmegaAragonite"), aes(x = month
         plot.margin = margin(t = 0, r = 0.2, b = 0.3, l = 0, unit = "cm")) +
   annotation_custom(grob_G)
 
-g <- plot_grid(T1vp, S1vp, AT1vp, CT1vp, pH1vp, pCO21vp, Oa1vp, ncol=1,
+g <- cowplot::plot_grid(T1vp, S1vp, AT1vp, CT1vp, pH1vp, pCO21vp, Oa1vp, ncol=1,
                align="v")
 #g <- arrangeGrob(T1vp, S1vp, AT1vp, CT1vp, pH1vp, pCO21vp, Oa1vp, ncol=1)
 #cowplot::
 ggsave(file="figures/fig4.pdf", g,  width = 8, height = 28, units = "cm")
-g <- plot_grid(T1vp, S1vp, AT1vp, CT1vp, pH1vp, pCO21vp, Oa1vp, ncol=2)
+g <- cowplot::plot_grid(T1vp, S1vp, AT1vp, CT1vp, pH1vp, pCO21vp, Oa1vp, ncol=2)
 ggsave(file="figures/fig_paper_monthly_means_1m.png", g, width = 18, height = 14, units = "cm")
 
 # prepare data 50m
@@ -1712,9 +1748,9 @@ anOa1p <- ggplot(data = ano_month0m, aes(x = sampling_date, y = OmegaAragonite_a
   Mytheme(size_labs = 8) +
   annotation_custom(grob_N_bl)
 
-g <- plot_grid(T1p, anT1p, S1p, anS1p, AT1p, anAT1p, CT1p, anCT1p, pH1p, anpH1p, anpHeol1p, anpHptb1p, pCO21p, anpCO21p, Oa1p, anOa1p, align='vh', ncol=2)
-cowplot::ggsave(file="figures/fig_paper_interannual_1m.png", g, width=15, height = 17, units = "cm")
-cowplot::ggsave(file="figures/fig2.pdf", g, width = 18, height = 21, units = "cm")
+g <- cowplot::plot_grid(T1p, anT1p, S1p, anS1p, AT1p, anAT1p, CT1p, anCT1p, pH1p, anpH1p, anpHeol1p, anpHptb1p, pCO21p, anpCO21p, Oa1p, anOa1p, align='vh', ncol=2)
+ggsave(file="figures/fig_paper_interannual_1m.png", g, width=15, height = 17, units = "cm")
+ggsave(file="figures/fig2.pdf", g, width = 18, height = 21, units = "cm")
 
 # AT as a function of salinity for every year
 j <- 0
@@ -2165,9 +2201,9 @@ anOa50p <- ggplot(data = ano_month50m, aes(x = sampling_date, y = OmegaAragonite
   Mytheme(size_labs = 8) +
   annotation_custom(grob_N)
 
-g <- plot_grid(T50p, anT50p, S50p, anS50p, AT50p, anAT50p, CT50p, anCT50p, pH50p, anpH50p, anpHptb50p, pCO250p, anpCO250p, Oa50p, anOa50p, align='vh', ncol=2)
-cowplot::ggsave(file="figures/fig_paper_interannual_50m.png", g, width=15, height = 17, units = "cm")
-cowplot::ggsave(file="figures/fig3.pdf", g, width = 18, height = 21, units = "cm")
+g <- cowplot::plot_grid(T50p, anT50p, S50p, anS50p, AT50p, anAT50p, CT50p, anCT50p, pH50p, anpH50p, anpHptb50p, pCO250p, anpCO250p, Oa50p, anOa50p, align='vh', ncol=2)
+ggsave(file="figures/fig_paper_interannual_50m.png", g, width=15, height = 17, units = "cm")
+ggsave(file="figures/fig3.pdf", g, width = 18, height = 21, units = "cm")
 ```
 ## Interannual changes at 50 m
 ![interannual_50m](figures/fig_paper_interannual_50m.png)
@@ -2200,8 +2236,8 @@ ATnoC50p <- ggplot(mean50m, aes(x = sampling_date, y = mean_ta_nocarb), na.rm=TR
   Mytheme(size_labs = 8) +
   theme(axis.text.x=element_blank()) +
   annotation_custom(grob_B_bl)
-g <- plot_grid(ATnoC1p, ATnoC50p, align='vh', ncol=1)
-cowplot::ggsave(file="figures/fig_paper_at_nocarb.png", g, width=15, height = 17, units = "cm")
+g <- cowplot::plot_grid(ATnoC1p, ATnoC50p, align='vh', ncol=1)
+ggsave(file="figures/fig_paper_at_nocarb.png", g, width=15, height = 17, units = "cm")
 #cowplot::ggsave(file="../figures/at_nocarb.pdf", g, width = 18, height = 21, units = "cm")
 ```
 
@@ -4899,11 +4935,12 @@ ggsave(p1, file = "figures/fig_ta_vs_salinity_year_pointB_0m.png",
     width = 6, height = 6)
 
 # AT versus salinity at the surface per year with loop
-panel <- c("(a)","(b)","(c)","(d)","(e)","(f)","(g)","(h)","(i)", "(j)", "(k)")
+panel <- c("(a)","(b)","(c)","(d)","(e)","(f)","(g)","(h)","(i)", "(j)", "(k)", "(l)", "(m)")
 tmp <- filter(means_depth, depth== 0)
 p <- NULL; j <- 0
+#for (i in 1:11) {
 for (i in unique(tmp$year)) {
-  #i <- 11
+  #i <- 13
   j <- j+1
   print(j)
   p[[j]] <- ggplot(data=filter(tmp, tmp$year==i), aes(x=mean_salinity, y=mean_ta, colour=month)) +
@@ -4925,12 +4962,12 @@ for (i in unique(tmp$year)) {
           legend.background = element_rect(fill="white", size=0.15),
           legend.key.width = unit(1, "cm"),
           legend.position='none')
-if (j %in% c(1,4,7, 10)) {p[[j]] <- p[[j]] + labs(y=expression(paste(italic(A)[T], " (",mu, "mol ", kg^-1,")")))}
+if (j %in% c(1,5,9,13)) {p[[j]] <- p[[j]] + labs(y=expression(paste(italic(A)[T], " (",mu, "mol ", kg^-1,")")))}
   else {
     p[[j]] <- p[[j]] + theme(axis.text.y = element_blank())
     p[[j]] <- p[[j]] + theme(plot.margin = margin(t = 0, r = 0.3, b = 0, l = 0, unit = "cm"))
   }
- if (j %in% c(7,8,9)) {p[[j]] <- p[[j]] + labs(x = "Salinity")
+ if (j %in% c(10,11,12,13)) {p[[j]] <- p[[j]] + labs(x = "Salinity")
  p[[j]] <- p[[j]] + theme(axis.title.x = element_text(margin=margin(t = 0.2, r = 0, b = 0.2, l = 0, unit="cm")))
  }
  else {
@@ -4939,11 +4976,11 @@ if (j %in% c(1,4,7, 10)) {p[[j]] <- p[[j]] + labs(y=expression(paste(italic(A)[T
   #   #p[[j]] <- p[[j]] + theme(axis.title.x = element_text(margin=margin(t = 0.2, r = 0, b = 0.2, l = 0, unit="cm")))
   #   #p[[j]] <- p[[j]] + theme(plot.margin = margin(t = 0, r = 0, b = 0, l = 0, unit = "cm"))
 }
-g1 <- plot_grid(p[[1]], p[[2]], p[[3]], p[[4]], p[[5]], p[[6]], p[[7]], p[[8]], p[[9]], p[[10]], ncol=3, align="vh")
+g1 <- cowplot::plot_grid(p[[1]], p[[2]], p[[3]], p[[4]], p[[5]], p[[6]], p[[7]], p[[8]], p[[9]], p[[10]], p[[11]], p[[12]], p[[13]], ncol=4, align="vh")
 grobs <- ggplotGrob(p[[1]] + theme(legend.position="top"))$grobs
 legend_top <- grobs[[which(sapply(grobs, function(x) x$name) == "guide-box")]]
-g <- plot_grid(legend_top, g1, ncol = 1, rel_heights = c(0.15, 1))
-cowplot::ggsave(file="figures/fig6.pdf", g, width = 16, height = 15, units = "cm")
+g <- cowplot::plot_grid(legend_top, g1, ncol = 1, rel_heights = c(0.15, 1))
+ggsave(file="figures/fig6.pdf", g, width = 16, height = 15, units = "cm")
 
 
 # AT=f(S) with all data
@@ -5045,9 +5082,9 @@ precip_S <- ggplot(w_AT_precip, aes(x = rr_cumsum, y = mean_salinity)) +
         axis.title.x = element_text(margin=margin(t=0.15, r=0, b=0.25, l=0, unit = "cm"))) +
 annotation_custom(grob_C_bl)
 
-g <- plot_grid(precip_cumsum, precip_ta, precip_S, ncol=1, align="h")
+g <- cowplot::plot_grid(precip_cumsum, precip_ta, precip_S, ncol=1, align="h")
 ggsave("figures/precip.png",g, width = 18, height = 14, units = "cm")
-cowplot::ggsave("figures/figS2.pdf",g, width = 8, height = 14, units = "cm")
+ggsave("figures/figS2.pdf",g, width = 8, height = 14, units = "cm")
 ```
 
 The relationship between AT and salinity using all data is shown below.
@@ -5190,9 +5227,9 @@ plot_range <-
   theme(panel.grid.major.x = element_blank()) +
   annotation_custom(grob_D)
 
-g <- plot_grid(plot_continuous_discrete_pH, plot_continuous_discrete_T, plot_offset, plot_range, plot_zoom, align='vh', ncol=1)
+g <- cowplot::plot_grid(plot_continuous_discrete_pH, plot_continuous_discrete_T, plot_offset, plot_range, plot_zoom, align='vh', ncol=1)
 ggsave("figures/fig_paper_time_series.png", g, width = 18, height = 14, units = "cm")
-cowplot::ggsave(file="figures/fig7.pdf", g, width = 8, height = 16, units = "cm")
+ggsave(file="figures/fig7.pdf", g, width = 8, height = 16, units = "cm")
 
 # Per year and week
 range$year_week <- paste0(range$year,"-", week(range$date))
@@ -5217,10 +5254,10 @@ plot_range_pH_Chla_week <-  ggplot(data =  range_year_week) +
   annotation_custom(grob_B)
 ggsave("figures/plot_range_pH_Chla_week.png", plot_range_pH_Chla_week)
 
-plot_range_pH_Chla_temp <- plot_grid(plot_range_pH_Temperature,
+plot_range_pH_Chla_temp <- cowplot::plot_grid(plot_range_pH_Temperature,
                                      plot_range_pH_Chla_week, ncol = 1, align = "h")
 ggsave("figures/plot_range_pH_Chla_temp.png", plot_range_pH_Chla_temp, width = 8)
-cowplot::ggsave("figures/figS1.pdf", plot_range_pH_Chla_temp, width = 8, height = 8)
+ggsave("figures/figS1.pdf", plot_range_pH_Chla_temp, width = 8, height = 8)
 
 ```
 
