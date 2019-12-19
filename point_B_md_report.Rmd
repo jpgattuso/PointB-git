@@ -964,12 +964,22 @@ dat <- rbind(dat, NArows)
 #arrange by dates
 dat <- arrange(dat, sampling_date)
 
-#Prepare data to upload to Pangaea 
+#Prepare data to upload to Pangaea
 pangaea <- select(dat, sampling_date, depth, CSC_flag, salinity_field,
                   temp_field, HCO3, CO3,
                   pH, ta, dic, OmegaCalcite,
                   OmegaAragonite, pCO2, fCO2) %>%
-  dplyr::mutate(depth = replace(depth, depth == 0, 1))
+  dplyr::mutate(depth = replace(depth, depth == 0, 1),
+                HCO3 = round(HCO3*1e6, digits = 1),
+                CO3 = round(CO3*1e6, digits = 1),
+                pH = round(pH, digits = 3),
+                ta = round(ta, digits = 1),
+                dic = round(dic, digits = 1),
+                OmegaCalcite = round(OmegaCalcite, digits = 1),
+                OmegaAragonite = round(OmegaAragonite, digits = 1),
+                pCO2 = round(pCO2, digits = 1),
+                fCO2 = round(fCO2, digits = 1)
+)
   
 #save data
 # write.table(dat, paste0("output/", Sys.Date(), "_output.csv"), sep= ",", dec=".", row.names = FALSE)
