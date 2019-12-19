@@ -979,7 +979,8 @@ pangaea <- select(dat, sampling_date, depth, CSC_flag, salinity_field,
                 OmegaAragonite = round(OmegaAragonite, digits = 1),
                 pCO2 = round(pCO2, digits = 1),
                 fCO2 = round(fCO2, digits = 1)
-)
+) %>%
+  dplyr::filter(sampling_date < "2018-12-31")
   
 #save data
 # write.table(dat, paste0("output/", Sys.Date(), "_output.csv"), sep= ",", dec=".", row.names = FALSE)
