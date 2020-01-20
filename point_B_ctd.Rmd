@@ -50,6 +50,8 @@ library(colorspace)
 #define who is the user and define path
 if (Sys.getenv("LOGNAME") == "gattuso") path = "../../pCloud\ Sync/Documents/experiments/exp153_carbonates_point_B/"
 if (Sys.getenv("LOGNAME") == "samir") path = "../../pCloud Sync/exp153_carbonates_point_B/"
+if (Sys.getenv("LOGNAME") == "") path = "../../pCloud Sync/Shared/exp153_carbonates_point_B/"
+
 
 Sys.setenv(TZ='UTC')
 dc1 <- "#482173FF" #discrete color 1
@@ -119,16 +121,19 @@ There are 3 stations in the dataset: B (43°41'000 N, 7°19'000 E, depth 86 m), 
 
 ```{r read_data, include=TRUE, warning = FALSE, echo = FALSE, message = FALSE}
 # read data and create a data frame tbl
-dat <-  read_delim(
-  paste0(path,"data/radehydro_ctd/", "radehydro_ctd_20191125.csv"),
-  delim = ";",
-  col_names = TRUE,
-  col_types = cols(id = "c", fluo_calib = "d", fluorescence="d", oxygen_mll="d", oxygen_sat="d", 
-                   oxygen_umolkg="d", par="d", v0="d", v2="d"),
-  na = c("NA")
+# dat <-  read_delim(
+#   paste0(path,"data/radehydro_ctd/", "radehydro_ctd_20191125.csv"),
+#   delim = ";",
+#   col_names = TRUE,
+#   col_types = cols(id = "c", fluo_calib = "d", fluorescence="d", oxygen_mll="d", oxygen_sat="d", 
+#                    oxygen_umolkg="d", par="d", v0="d", v2="d"),
+#   na = c("NA")
+# ) %>%
+dat <-  read_delim("http://www.obs-vlfr.fr/data/files/~radehydro/radehydro_ctd.csv.gz", delim = ",", col_names = TRUE,
+  col_types = cols(id = "c", date = "D", date_time = "T", fluo_calib = "d", fluorescence="d", oxygen_mll="d", oxygen_sat="d", oxygen_umolkg="d", par="d", v0="d", v2="d"), na = c("NA")
 ) %>%
   dplyr::select(-date_time) %>%
-  dplyr::mutate(date = dmy(date)) %>%
+#  dplyr::mutate(date = dmy(date)) %>%
   # eliminate duplicate rows
   #dplyr::filter(id != "b18233_01_sbe25plus - Copie"	& id != "b18233_sbe25plus - Copie") %>%
   dplyr::rename(depth = pressure)
@@ -158,7 +163,7 @@ The present analysis combines the time-series at Point B (before 2004-12-21) and
 
 ```{r ctds, fig.width=10, fig.height=4, echo=FALSE, message= FALSE, warning = FALSE}
 p <- NULL; j <- 0
-for (i in (1992:2018)) {
+for (i in (1992:2019)) {
   j <- j + 1
   p[[j]] <- ggplot(data = filter(dat, year(date) == i)) + 
   geom_path(aes(x=temperature, y=-depth, group=date, colour = factor(month(date, label = TRUE))), alpha=0.8) +
