@@ -50,6 +50,7 @@ library(colorspace)
 #define who is the user and define path
 if (Sys.getenv("LOGNAME") == "gattuso") path = "../../pCloud\ Sync/Documents/experiments/exp153_carbonates_point_B/"
 if (Sys.getenv("LOGNAME") == "samir") path = "../../pCloud Sync/exp153_carbonates_point_B/"
+if (Sys.getenv("LOGNAME") == "Chloe") path = "C:/Users/Chloé/Desktop/Pcloud sync/exp153_carbonates_point_B"
 
 Sys.setenv(TZ='UTC')
 dc1 <- "#482173FF" #discrete color 1
