@@ -149,7 +149,7 @@ z <- dat %>%
 
 # add extra profiles of 2018
 # See Profiles_sonde_supplémentaires_aout_2018_point B Samir.xlsx
-supp1 <- read_excel(paste0(path,"data/radehydro_ctd/", "Profiles_sonde_supplémentaires_aout_2018_pointB_Samir.xlsx"), sheet = 1) %>% 
+supp1 <- read_excel(paste0(path,"data/radehydro_ctd/", "Profiles_sonde_supplementaires_aout_2018_pointB_Samir.xlsx"), sheet = 1) %>% 
   select(station, date, depth = PrdM, temperature = Potemp090C, salinity = Sal00) %>%
   mutate(date = ymd(date))
 supp2 <- read_excel(paste0(path,"data/radehydro_ctd/", "Profiles_sonde_supplémentaires_aout_2018_pointB_Samir.xlsx"), sheet = 2) %>% 
