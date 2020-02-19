@@ -50,8 +50,7 @@ library(colorspace)
 #define who is the user and define path
 if (Sys.getenv("LOGNAME") == "gattuso") path = "../../pCloud\ Sync/Documents/experiments/exp153_carbonates_point_B/"
 if (Sys.getenv("LOGNAME") == "samir") path = "../../pCloud Sync/exp153_carbonates_point_B/"
-if (Sys.getenv("LOGNAME") == "") path = "../../pCloud Sync/Shared/exp153_carbonates_point_B/"
-
+if (Sys.getenv("LOGNAME") == "") path = "../../pCloud_sync/exp153_carbonates_point_B/"
 
 Sys.setenv(TZ='UTC')
 dc1 <- "#482173FF" #discrete color 1
@@ -148,11 +147,11 @@ z <- dat %>%
   dplyr::filter(station == 'B+' | (station == 'B' & date < "2004-12-21") | (station == 'B' & date == "2019-08-06")) 
 
 # add extra profiles of 2018
-# See Profiles_sonde_supplémentaires_aout_2018_point B Samir.xlsx
-supp1 <- read_excel(paste0(path,"data/radehydro_ctd/", "Profiles_sonde_supplémentaires_aout_2018_pointB_Samir.xlsx"), sheet = 1) %>% 
+# See Profiles_sonde_supplémentaires_aout_2018_point B Samir.xlsx
+supp1 <- read_excel(paste0(path,"data/radehydro_ctd/", "Profiles_sonde_supplementaires_aout_2018_pointB_Samir.xlsx"), sheet = 1) %>% 
   select(station, date, depth = PrdM, temperature = Potemp090C, salinity = Sal00) %>%
   mutate(date = ymd(date))
-supp2 <- read_excel(paste0(path,"data/radehydro_ctd/", "Profiles_sonde_supplémentaires_aout_2018_pointB_Samir.xlsx"), sheet = 2) %>% 
+supp2 <- read_excel(paste0(path,"data/radehydro_ctd/", "Profiles_sonde_supplementaires_aout_2018_pointB_Samir.xlsx"), sheet = 2) %>% 
   mutate(date = ymd(date))
   supp <- bind_rows(supp1, supp2)
 dat <- bind_rows(dat, supp) %>%
