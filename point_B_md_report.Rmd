@@ -808,8 +808,8 @@ z <- z %>%
   dplyr::mutate(ta = mean(ta_dup, na.rm = T),
                 dic =mean(dic_dup, na.rm =T)) 
 
-# Exclude data for 2019 and later
-#z <- filter(z, sampling_date < "2019-01-01")
+# Exclude data for 2020 and later
+z <- filter(z, sampling_date < "2020-01-01")
 
 # read POC and PON data
 pom <- read_csv(file = paste0(path,"/data/POC-PON/POC-2007-2015_PtB_1m.csv"), comment="#")
@@ -1756,7 +1756,8 @@ ggsave(file="figures/fig2.pdf", g, width = 18, height = 21, units = "cm")
 # AT as a function of salinity for every year
 j <- 0
 reg <- data.frame()
-for (i in 1:length(unique(mean0m$year))) { #one loops through all years
+for (i in 1:(length(unique(mean0m$year)))) { #one loops through all years, -1 to remove the current year
+  #print(i)
   j <- j + 1
   yr <- unique(mean0m$year)[i]
   d_reg <- filter(mean0m, year==yr)
