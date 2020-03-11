@@ -5488,11 +5488,12 @@ Test of a Deffayes plot.
 ```{r plots pH spectro15 vs calc15, echo=FALSE, warning = FALSE, message = FALSE, out.width='70%'}
 
 fit <- lmodel2(data = continuous_discrete, pHcalc_ptB ~ pHspec_Tptb, nperm = 99)
-titre <- " "
+titre <- "pH calculated from AT and CT vs spec pH, Point B"
 p_spec_cal <- ggreg2(fit, "pHspec_Tptb", "pHcalc_ptB") +
   geom_line(aes(x = pHspec_Tptb, y = pHspec_Tptb), linetype = 2) +
   labs(x=expression(paste("Spectro ",pH[T], ", T in situ")), y=expression(paste("Calculated ",pH[T], ",T in situ"))) +
   mytheme + theme(legend.position="bottom")
+  ggsave(file = "figures/fig_comparison_pH.png", p_spec_cal,  width = 15, height = 15, units = "cm")
 
 print(p_spec_cal)
 ```
