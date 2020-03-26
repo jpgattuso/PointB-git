@@ -808,8 +808,8 @@ z <- z %>%
   dplyr::mutate(ta = mean(ta_dup, na.rm = T),
                 dic =mean(dic_dup, na.rm =T)) 
 
-# Exclude data for 2019 and later
-#z <- filter(z, sampling_date < "2019-01-01")
+# Exclude data for 2020 and later
+z <- filter(z, sampling_date < "2020-01-01")
 
 # read POC and PON data
 pom <- read_csv(file = paste0(path,"/data/POC-PON/POC-2007-2015_PtB_1m.csv"), comment="#")
@@ -1756,7 +1756,8 @@ ggsave(file="figures/fig2.pdf", g, width = 18, height = 21, units = "cm")
 # AT as a function of salinity for every year
 j <- 0
 reg <- data.frame()
-for (i in 1:length(unique(mean0m$year))) { #one loops through all years
+for (i in 1:(length(unique(mean0m$year)))) { #one loops through all years, -1 to remove the current year
+  #print(i)
   j <- j + 1
   yr <- unique(mean0m$year)[i]
   d_reg <- filter(mean0m, year==yr)
@@ -5487,11 +5488,12 @@ Test of a Deffayes plot.
 ```{r plots pH spectro15 vs calc15, echo=FALSE, warning = FALSE, message = FALSE, out.width='70%'}
 
 fit <- lmodel2(data = continuous_discrete, pHcalc_ptB ~ pHspec_Tptb, nperm = 99)
-titre <- " "
+titre <- "pH calculated from AT and CT vs spec pH, Point B"
 p_spec_cal <- ggreg2(fit, "pHspec_Tptb", "pHcalc_ptB") +
   geom_line(aes(x = pHspec_Tptb, y = pHspec_Tptb), linetype = 2) +
   labs(x=expression(paste("Spectro ",pH[T], ", T in situ")), y=expression(paste("Calculated ",pH[T], ",T in situ"))) +
   mytheme + theme(legend.position="bottom")
+  ggsave(file = "figures/fig_comparison_pH.png", p_spec_cal,  width = 15, height = 15, units = "cm")
 
 print(p_spec_cal)
 ```
