@@ -147,11 +147,8 @@ z <- dat %>%
   dplyr::filter(station == 'B+' | (station == 'B' & date < "2004-12-21") | (station == 'B' & date == "2019-08-06")) 
 
 # add extra profiles of 2018
-<<<<<<< HEAD
 # See Profiles_sonde_supplémentaires_aout_2018_point B Samir.xlsx
-=======
-# See Profiles_sonde_supplémentaires_aout_2018_point B Samir.xlsx
->>>>>>> 734db867bc11ddf7c0ca106ff370efaa4d31e9ee
+
 supp1 <- read_excel(paste0(path,"data/radehydro_ctd/", "Profiles_sonde_supplementaires_aout_2018_pointB_Samir.xlsx"), sheet = 1) %>% 
   select(station, date, depth = PrdM, temperature = Potemp090C, salinity = Sal00) %>%
   mutate(date = ymd(date))
