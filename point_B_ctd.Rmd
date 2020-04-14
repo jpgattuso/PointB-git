@@ -220,8 +220,10 @@ ggsave(file="figures/ctd.png", g, width = 20, height = 150, units = "cm", limits
 ```{r whole time series, fig.width=10, fig.height=4, echo=FALSE, message= FALSE, warning= FALSE, out.width="110%"}
 #Temperature
 temp_xts <- dat %>%
-  dplyr::select(date, temperature)%>%
-  as.xts(temperature, order.by = dat$date)
+  dplyr::select(date, temperature, depth)%>%
+  dplyr::filter(depth <= 200) %>%
+  dplyr::select(-depth)
+temp_xts <- as.xts(temp_xts, order.by = temp_xts$date)
 dygraph(temp_xts, group = "pointB", main="Temperature", ylab="Temperature") %>%
       dySeries("temperature", color = "blue", strokeWidth = 0, label = "T") %>%
       dyHighlight(highlightCircleSize = 8, highlightSeriesBackgroundAlpha =0.2,hideOnMouseOut =TRUE) %>%
