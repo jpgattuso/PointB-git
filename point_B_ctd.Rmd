@@ -45,7 +45,7 @@ library(xts)
 library(castr)
 library(colorspace)
 #library(feasts)
-
+library(reshape2)
 
 #define who is the user and define path
 if (Sys.getenv("LOGNAME") == "gattuso") path = "../../pCloud\ Sync/Documents/experiments/exp153_carbonates_point_B/"
@@ -106,15 +106,37 @@ ggreg <- function (fit, point_size=2) {
 }
 
 ```
-```{r test regression, include=FALSE}
-# This is to test linear regressions with dates
-# Conclusion is that the slope is per day but I have decided to use decimal_date() to avoid any confusion
-dt <- as_date(c("1916-06-16", "2016-06-15"))
-temp <- c(20, 21)
-dat <- data.frame(dt, temp)
-reg <- lm(data=dat,temp ~ dt)
-slope <- 365*coef(reg)[2]
-```
+
+<style type="text/css">
+
+body{ /* Normal  */
+      font-size: 18px;
+  }
+h3{ /* Header 3 */
+  font-size: 22px;
+  <!-- font-family: "Times New Roman", Times, serif; -->
+  color: DarkBlue;
+}
+h4{ /* Header 4 */
+  font-size: 18px;
+  <!-- font-family: "Times New Roman", Times, serif; -->
+  color: DarkBlue;
+}
+h5{ /* Header 5 */
+  font-size: 16px;
+  <!-- font-family: "Times New Roman", Times, serif; -->
+  color: DarkBlue;
+}
+</style>
+
+# {.tabset .tabset-fade .tabset-pills}
+
+## Temperatures 
+
+## Thermoclines
+
+## Warning events
+
 
 There are 3 stations in the dataset: B (43°41'000 N, 7°19'000 E, depth 86 m), B+ (43°41'000 N, 7°18'830 E, depth 150/180 m) and C (43°40'580 N - 7°18'570 E). The temperature record starts at different dates : 
 
@@ -128,16 +150,16 @@ There are 3 stations in the dataset: B (43°41'000 N, 7°19'000 E, depth 86 m), 
 #                    oxygen_umolkg="d", par="d", v0="d", v2="d"),
 #   na = c("NA")
 # ) %>%
-dat <-  read_delim("http://www.obs-vlfr.fr/data/files/~radehydro/radehydro_ctd.csv.gz", delim = ",", col_names = TRUE,
-  col_types = cols(id = "c", date = "D", date_time = "T", fluo_calib = "d", fluorescence="d", oxygen_mll="d", oxygen_sat="d", oxygen_umolkg="d", par="d", v0="d", v2="d"), na = c("NA")
-) %>%
-  dplyr::select(-date_time) %>%
+dat <-  read_delim("http://www.obs-vlfr.fr/data/files/~radehydro/radehydro_ctd.csv.gz", delim = ",", col_names = TRUE, col_types = cols(id = "c", date = "D", date_time = "T", fluo_calib = "d", fluorescence="d", oxygen_mll="d", oxygen_sat="d", oxygen_umolkg="d", par="d", v0="d", v2="d"), na = c("NA")) %>%
+    dplyr::select(-date_time) %>%
 #  dplyr::mutate(date = dmy(date)) %>%
   # eliminate duplicate rows
   #dplyr::filter(id != "b18233_01_sbe25plus - Copie"	& id != "b18233_sbe25plus - Copie") %>%
-  dplyr::rename(depth = pressure)
+    dplyr::rename(depth = pressure)
+
 start_ts <- dat %>% # beginning of time series
   group_by(station) %>% summarise(min = min(date))
+
 knitr::kable(start_ts, caption = "Starting dates of time series", col.names = c("Station", "Starting date"))
 
 # eliminate B data when B+ starts except on 2019-08-07 when B+ profile is not available
@@ -195,7 +217,7 @@ ggsave(file="figures/ctd.png", g, width = 20, height = 150, units = "cm", limits
 ![ctd](figures/ctd.png)
 
 
-```{r whole time series, fig.width=10, fig.height=4, echo=FALSE, message= FALSE}
+```{r whole time series, fig.width=10, fig.height=4, echo=FALSE, message= FALSE, warning= FALSE, out.width="110%"}
 #Temperature
 temp_xts <- dat %>%
   dplyr::select(date, temperature)%>%
@@ -205,6 +227,26 @@ dygraph(temp_xts, group = "pointB", main="Temperature", ylab="Temperature") %>%
       dyHighlight(highlightCircleSize = 8, highlightSeriesBackgroundAlpha =0.2,hideOnMouseOut =TRUE) %>%
       dyOptions(drawGrid = TRUE, drawPoints = TRUE, pointSize = 2,useDataTimezone = TRUE) %>%
       dyRangeSelector(height = 30)
+
+#Temperature fonction range depth
+dat <- dat %>%
+  dplyr::mutate(month = month(dat$date),
+                year = year(dat$date), 
+                range = cut(dat$depth, breaks = c(0, 5, 10, 20, 30, 50, 200), include.lowest = TRUE, right = TRUE),
+                range = forcats::fct_explicit_na(range, na_level = "(Missing)"))
+
+temp_range_depth <- ggplot(dat, aes(year, temperature, colour = month)) +
+  geom_point(size = 0.5) +
+  #geom_smooth(method = "loess") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 10),
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        legend.position = "none") +
+  #labs(title = "Monthly  minimum temperature", subtitle = "") +
+facet_grid(month ~ range)
+ggsave2(temp_range_depth, filename = "figures/temp_range_depth.pdf")
+print(temp_range_depth)
+
 ```
 
 ```{r thermocline, fig.width=10, fig.height=4, echo=FALSE, message= FALSE}
@@ -252,19 +294,20 @@ dygraph(therm_xts, group = "pointB", main="Thermocline", ylab="Thermocline") %>%
 
 
 ```{r calculations, fig.width=10, fig.height=4, echo=FALSE, message= FALSE}
+
 dat2 <- dat %>%
-  add_row(station=rep("B",75), date = rep("1992-01-01", 75), depth = 1:75) %>% #to have full year 1992
-  add_row(station=rep("B",75), date = rep("1992-02-01", 75), depth = 1:75) %>%
-  add_row(station=rep("B",75), date = rep("1992-03-01", 75), depth = 1:75) %>%
-  add_row(station=rep("B",75), date = rep("1992-04-01", 75), depth = 1:75) %>%
+  add_row(station=rep("B",75), date = rep(as.Date("1992-01-01"), 75), depth = 1:75) %>% #to have full year 1992
+  add_row(station=rep("B",75), date = rep(as.Date("1992-02-01"), 75), depth = 1:75) %>%
+  add_row(station=rep("B",75), date = rep(as.Date("1992-03-01"), 75), depth = 1:75) %>%
+  add_row(station=rep("B",75), date = rep(as.Date("1992-04-01"), 75), depth = 1:75) %>%
 #  add_row(station=rep("B",75), date = rep("2019-08-01", 75), depth = 1:75) %>%
 #  add_row(station=rep("B",75), date = rep("2019-09-01", 75), depth = 1:75) %>% #to have full year 2019
-  add_row(station=rep("B",75), date = rep("2019-10-01", 75), depth = 1:75) %>%
-  add_row(station=rep("B",75), date = rep("2019-11-01", 75), depth = 1:75) %>%
-  add_row(station=rep("B",75), date = rep("2019-12-01", 75), depth = 1:75) %>%
+  add_row(station=rep("B",75), date = rep(as.Date("2019-10-01"), 75), depth = 1:75) %>%
+  add_row(station=rep("B",75), date = rep(as.Date("2019-11-01"), 75), depth = 1:75) %>%
+  add_row(station=rep("B",75), date = rep(as.Date("2019-12-01"), 75), depth = 1:75) %>%
   dplyr::mutate(year = year(date),
                 month = month(date)) %>%
-  arrange(date)
+  dplyr::arrange(date)
   
 dat2 <- dat2 %>%
   dplyr::mutate(range = cut(dat2$depth, breaks = c(0, 5, 10, 20, 30, 50, 200), include.lowest = TRUE, right = TRUE),
@@ -294,6 +337,7 @@ ave_yr <- bind_cols(ave_yr, tibble(date = z))
 #        month = c(1, 7))
 # mutate(test, date = as_date(paste(year, month, "15", sep = "-")))
 ```
+
 ```{r plot min-max, fig.width=10, fig.height=4, echo=FALSE, message= FALSE}
 # plot_min-max <- temp_yr %>%
 #   #dplyr::filter(temp_yr, is.nan == FALSE) %>%
