@@ -133,10 +133,6 @@ h5{ /* Header 5 */
 
 ## Temperatures 
 
-## Thermoclines
-
-## Warning events
-
 
 There are 3 stations in the dataset: B (43°41'000 N, 7°19'000 E, depth 86 m), B+ (43°41'000 N, 7°18'830 E, depth 150/180 m) and C (43°40'580 N - 7°18'570 E). The temperature record starts at different dates : 
 
@@ -251,6 +247,9 @@ print(temp_range_depth)
 
 ```
 
+## Thermoclines
+
+
 ```{r thermocline, fig.width=10, fig.height=4, echo=FALSE, message= FALSE}
 stats <- dat %>% group_by(date) %>%
   summarise(
@@ -294,6 +293,7 @@ dygraph(therm_xts, group = "pointB", main="Thermocline", ylab="Thermocline") %>%
 # ggsave(filename = "figures/temp.png", plot = v)
 ```
 
+## Warning events
 
 ```{r calculations, fig.width=10, fig.height=4, echo=FALSE, message= FALSE}
 
