@@ -150,7 +150,7 @@ There are 3 stations in the dataset: B (43°41'000 N, 7°19'000 E, depth 86 m), 
 #                    oxygen_umolkg="d", par="d", v0="d", v2="d"),
 #   na = c("NA")
 # ) %>%
-dat <-  read_delim("http://www.obs-vlfr.fr/data/files/~radehydro/radehydro_ctd.csv.gz", delim = ",", col_names = TRUE, col_types = cols(id = "c", date = "D", date_time = "T", fluo_calib = "d", fluorescence="d", oxygen_mll="d", oxygen_sat="d", oxygen_umolkg="d", par="d", v0="d", v2="d"), na = c("NA")) %>%
+dat <-  read_delim("http://www.obs-vlfr.fr/data/files/~radehydro/radehydro_ctd.csv.gz", delim = ",", col_names = TRUE, col_types = cols(id = "c", date = "D", date_time = "T", fluo_calib = "d", fluorescence="d", oxygen_mll="d", oxygen_sat="d", oxygen_umolkg="d", par="d", v0="d", v2="d", v3="d"), na = c("NA")) %>%
     dplyr::select(-date_time) %>%
 #  dplyr::mutate(date = dmy(date)) %>%
   # eliminate duplicate rows
@@ -326,10 +326,34 @@ temp_yr <- dat2 %>%
   group_by(year, month, range) %>%
     summarize(temp = mean(temperature, na.rm = TRUE)) %>%
   dplyr::filter(!is.nan(temp))
+
 ave_yr <- left_join(temp_yr, temp_ts) %>%
   mutate(temp_ano = temp - temp_ts) %>% 
   filter(range != "(Missing)") %>%
   dplyr::ungroup()
+
+temp_mean_range_depth_freescale <- ggplot(temp_yr, aes(year, temp, colour = month)) +
+  geom_point(size = 0.5) +
+  #geom_smooth(method = "loess") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 10),
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        legend.position = "none") +
+  #labs(title = "Monthly  minimum temperature", subtitle = "") +
+facet_grid(month ~ range, scales = "free_y")
+print (temp_mean_range_depth_freescale)
+
+temp_mean_range_depth_scales <- ggplot(temp_yr, aes(year, temp, colour = month)) +
+  geom_point(size = 0.5) +
+  #geom_smooth(method = "loess") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 10),
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        legend.position = "none") +
+  #labs(title = "Monthly  minimum temperature", subtitle = "") +
+facet_grid(month ~ range)
+print (temp_mean_range_depth_scales)
+
 
 # add date
 z <- as_date(paste(ave_yr$year, ave_yr$month, "15", sep = "-"))
