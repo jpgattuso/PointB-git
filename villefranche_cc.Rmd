@@ -2806,8 +2806,8 @@ Salinity and total alkalinity data were compared with the weekly, from Tuesday t
 ## Daily and monthly changes in pH and T
 ```{r Daily and seasonal changes, include=FALSE}
 # Long series
-continuous_discrete <- read_csv(file = paste0(path,"/data/continuous_discrete.csv"), col_types = cols(pHcalc_ptB = "d", pHspec_Tptb="d"), col_names = TRUE)
-continuous_discrete$pHspec_Tptb <- as.numeric(continuous_discrete$pHspec_Tptb)
+continuous_discrete <- read_csv(file = paste0(path,"/data/seafet/continuous_discrete.csv"), col_types = cols(pHcalc_ptB = "d", pHspec_Tptb="d"), col_names = TRUE)
+prcontinuous_discrete$pHspec_Tptb <- as.numeric(continuous_discrete$pHspec_Tptb)
 continuous_discrete <- filter(continuous_discrete, date > "2014-06-27 00:00:00")
 deploy <- as.numeric(as.POSIXct(
    c("2014-01-07 09:00:08",
@@ -3180,12 +3180,12 @@ deff_quarterly <- ggplot() +
 Test of a Deffayes plot.
 ![deffayes_monthly](figures/fig_deffayes_monthly.png)
 ## seafet pH
-```{r seafet pH, echo=FALSE, warning = FALSE, message = FALSE, out.width='70%'}
-
+```{r seafet pH, echo=FALSE, warning = FALSE, message = FALSE, out.width='100%'}
+# the discrete_continuous file is already read in chunk "Daily and seasonal changes"
 ```
 
 ## SAMI pH
-```{r sami pH, echo=FALSE, warning = FALSE, message = FALSE, out.width='70%'}
+```{r sami pH, echo=FALSE, warning = FALSE, message = FALSE, out.width='100%'}
 # read deployment file
 file_list <- list.files(path  = "../../pCloud Sync/piSami-pH/sami_data/sami_processed/Salinity_corrected/PointB/", pattern = "Raw_SAMI.*.txt")
 
@@ -3239,12 +3239,12 @@ dyOptions(
 ## EOL
 Here we read data from the EOL ctd and calculate total alkalinity using the relationship with salinity. We also compare salinity and temperature with the SOMLIT data.
 
-```{r EOL data, echo=FALSE, warning = FALSE, message = FALSE, out.width='70%'}
+```{r EOL data, echo=FALSE, warning = FALSE, message = FALSE, out.width='100%'}
 
 ```
 
 ## ctd_hydro
-```{r ctd_hydro, echo=FALSE, warning = FALSE, message = FALSE, out.width='70%'}
+```{r ctd_hydro, echo=FALSE, warning = FALSE, message = FALSE, out.width='100%'}
 
 ```
 
