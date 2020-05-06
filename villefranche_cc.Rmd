@@ -3217,7 +3217,7 @@ sami$datetime <- mdy_hms(sami$datetime, tz="UTC")
 sami <- sami %>% 
   dplyr::filter(flag_sami == 0 & ph_sami >= 7.95 & ph_sami <= 8.2) 
 
-save(sami, file = "../../pCloud Sync/exp153_carbonates_point_B/data/sami/sami_all_ptb.csv") 
+save(sami, file = paste0(path, "data/sami/sami_all_ptb.csv"))
 
 ## PLOT
 sami_xts <- dplyr::select(sami, datetime, ph_sami, temp_int_sami, temp_ext_sami)
@@ -3240,6 +3240,19 @@ dyOptions(
 Here we read data from the EOL ctd and calculate total alkalinity using the relationship with salinity. We also compare salinity and temperature with the SOMLIT data.
 
 ```{r EOL data, echo=FALSE, warning = FALSE, message = FALSE, out.width='100%'}
+url <- "http://obs-vlfr.fr/data/files/~eol/somlit/"
+files <- httr::GET(url) %>%
+  httr::content(as="parsed") %>%
+  # get all links containing villefranche-eol
+  xml2::xml_find_all("//a[contains(.,'villefranche-eol')]") %>%
+  # in a flat vector
+  xml2::as_list() %>%
+  unlist()
+urls <- str_c(url, files)
+d <- purrr::map_dfr(urls, read_csv, comment="#", col_types=cols(Date="c", Heure="c"))
+d <- dplyr::mutate(d, datetime=str_c(Date, " ", Heure) %>% parse_datetime(format="%Y%m%d %H%M%S"))
+ggplot(d) + geom_point((aes(x=datetime, y=T)))
+saveRDS(d, file = paste0(path, "data/eol/eol_data.rds"))
 
 ```
 
