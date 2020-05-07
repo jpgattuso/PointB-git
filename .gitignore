@@ -47,3 +47,4 @@ figures/*.pdf
 *.csv
 *.Rdata
 old/
+figures/
