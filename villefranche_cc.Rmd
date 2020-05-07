@@ -48,7 +48,10 @@ if (Sys.getenv("LOGNAME") == "gattuso") {
   path = "../../pCloud\ Sync/Documents/experiments/exp153_carbonates_point_B/"
   path_sami = "../../pCloud\ Sync/Documents/experiments/exp176_sami/sami_data/sami_processed/Salinity_corrected/PointB/"
 }
-if (Sys.getenv("LOGNAME") == "samir") path = "../../pCloud Sync/exp153_carbonates_point_B/"
+if (Sys.getenv("LOGNAME") == "samir") {
+  path = "../../pCloud Sync/exp153_carbonates_point_B/"
+  path_sami = "../../pCloud\ Sync/exp176_sami/sami_data/sami_processed/Salinity_corrected/PointB/"
+}
 
 Sys.setenv(TZ='UTC')
 dc1 <- "#482173FF" #discrete color 1
