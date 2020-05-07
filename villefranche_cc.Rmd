@@ -44,7 +44,10 @@ library(stringr)
 library("lmodel2") # modele II regression
 
 #define who is the user and define path
-if (Sys.getenv("LOGNAME") == "gattuso") path = "../../pCloud\ Sync/Documents/experiments/exp153_carbonates_point_B/"
+if (Sys.getenv("LOGNAME") == "gattuso") {
+  path = "../../pCloud\ Sync/Documents/experiments/exp153_carbonates_point_B/"
+  path_sami = "../../pCloud\ Sync/Documents/experiments/exp176_sami/sami_data/sami_processed/Salinity_corrected/PointB/"
+}
 if (Sys.getenv("LOGNAME") == "samir") path = "../../pCloud Sync/exp153_carbonates_point_B/"
 
 Sys.setenv(TZ='UTC')
@@ -2808,7 +2811,7 @@ Salinity and total alkalinity data were compared with the weekly, from Tuesday t
 ```{r Daily and seasonal changes, include=FALSE}
 # Long series
 continuous_discrete <- read_csv(file = paste0(path,"data/seafet/continuous_discrete.csv"), col_types = cols(pHcalc_ptB = "d", pHspec_Tptb="d", T_seaF = "d", T_int ="d"), col_names = TRUE)
-prcontinuous_discrete$pHspec_Tptb <- as.numeric(continuous_discrete$pHspec_Tptb)
+continuous_discrete$pHspec_Tptb <- as.numeric(continuous_discrete$pHspec_Tptb)
 continuous_discrete <- filter(continuous_discrete, date > "2014-06-27 00:00:00")
 deploy <- as.numeric(as.POSIXct(
    c("2014-01-07 09:00:08",
@@ -3188,7 +3191,7 @@ Test of a Deffayes plot.
 ## SAMI pH
 ```{r sami pH, echo=FALSE, warning = FALSE, message = FALSE, out.width='100%'}
 # read deployment file
-file_list <- list.files(path  = "../../pCloud Sync/piSami-pH/sami_data/sami_processed/Salinity_corrected/PointB/", pattern = "Raw_SAMI.*.txt")
+file_list <- list.files(path  = path_sami, pattern = "Raw_SAMI.*.txt")
 
 if (length(file_list) == 0) {stop()} # script does not run if there is no data file to read
 ii <- 0
