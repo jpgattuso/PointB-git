@@ -752,7 +752,7 @@ kable(tab_dyf_surf_salinity_AT_year, caption="")
 
 ```{r Initialization Point B, include=FALSE}
 # read data and create a tibble
-typ <- c("cccdddddfddfdffdfdffdfdfdfdfdf") # column type
+typ <- c("ccccdddddfddfdffdfdffdfdfdfdfdf") # column type
 z <-  read_delim(
   #paste0(path,"data/", "Data_DIC.csv"), col_types = cols(sampling_date = "D", pH_ta = "d", ta_dup = "d", 
   #                                                        dic_dup = "d",
@@ -760,9 +760,10 @@ z <-  read_delim(
   #                                                        pH_s_eol_temp_lab ="d", qflag_pH_s_eol="d",
   #                                                        temp_lab_ptb ="d", pH_s_ptb_temp_lab ="d",
   #                                                        qflag_pH_s_ptb="d"),
-paste0(path,"data/", "Data_DIC.csv"), col_types = typ, 
-  delim = ",",
-  na = c("NA", "999999")
+paste0(path,"data/", "Data_DIC.csv"), 
+delim = ",", 
+col_names = TRUE, col_types = typ,
+na = c("NA", "999999")
 )
 # assign("last.warning", NULL, envir = baseenv()) #to clear warnings if they occur
 
