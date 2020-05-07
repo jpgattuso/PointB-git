@@ -48,7 +48,10 @@ if (Sys.getenv("LOGNAME") == "gattuso") {
   path = "../../pCloud\ Sync/Documents/experiments/exp153_carbonates_point_B/"
   path_sami = "../../pCloud\ Sync/Documents/experiments/exp176_sami/sami_data/sami_processed/Salinity_corrected/PointB/"
 }
-if (Sys.getenv("LOGNAME") == "samir") path = "../../pCloud Sync/exp153_carbonates_point_B/"
+if (Sys.getenv("LOGNAME") == "samir") {
+  path = "../../pCloud Sync/exp153_carbonates_point_B/"
+  path_sami = "../../pCloud\ Sync/exp176_sami/sami_data/sami_processed/Salinity_corrected/PointB/"
+}
 
 Sys.setenv(TZ='UTC')
 dc1 <- "#482173FF" #discrete color 1
@@ -3197,7 +3200,7 @@ if (length(file_list) == 0) {stop()} # script does not run if there is no data f
 ii <- 0
 for (file in file_list){ 
   ii <- ii + 1
-  tmp <- read.table(paste("../../pCloud Sync/piSami-pH/sami_data/sami_processed/Salinity_corrected/PointB/", file, sep = ""), header = F, dec = ".", as.is = T, sep = "\t", skip = 4, fill = TRUE)
+  tmp <- read.table(paste(path_sami, file, sep = ""), header = F, dec = ".", as.is = T, sep = "\t", skip = 4, fill = TRUE)
   if (ii == 1) {sami <- tmp} else {sami <- rbind(sami, tmp)}
 }
 
