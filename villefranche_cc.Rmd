@@ -30,14 +30,17 @@ library(nlme)
 library(lmtest)
 library(dplyr)
 library(readr)
+library(dygraphs)
 library(tidyr)
 library(grid)
 library(viridis)
 library(animation)
 library(directlabels)
 library(tibble)
+library(xts)
 require("knitr")
 library(broom)
+library(stringr)
 library("lmodel2") # modele II regression
 
 #define who is the user and define path
@@ -2803,8 +2806,8 @@ Salinity and total alkalinity data were compared with the weekly, from Tuesday t
 ## Daily and monthly changes in pH and T
 ```{r Daily and seasonal changes, include=FALSE}
 # Long series
-continuous_discrete <- read_csv(file = paste0(path,"/data/continuous_discrete.csv"), col_types = cols(pHcalc_ptB = "d", pHspec_Tptb="d"), col_names = TRUE)
-continuous_discrete$pHspec_Tptb <- as.numeric(continuous_discrete$pHspec_Tptb)
+continuous_discrete <- read_csv(file = paste0(path,"data/seafet/continuous_discrete.csv"), col_types = cols(pHcalc_ptB = "d", pHspec_Tptb="d", T_seaF = "d", T_int ="d"), col_names = TRUE)
+prcontinuous_discrete$pHspec_Tptb <- as.numeric(continuous_discrete$pHspec_Tptb)
 continuous_discrete <- filter(continuous_discrete, date > "2014-06-27 00:00:00")
 deploy <- as.numeric(as.POSIXct(
    c("2014-01-07 09:00:08",
@@ -3177,25 +3180,114 @@ deff_quarterly <- ggplot() +
 Test of a Deffayes plot.
 ![deffayes_monthly](figures/fig_deffayes_monthly.png)
 ## seafet pH
-```{r seafet pH, echo=FALSE, warning = FALSE, message = FALSE, out.width='70%'}
-
+```{r seafet pH, echo=FALSE, warning = FALSE, message = FALSE, out.width='100%'}
+# the discrete_continuous file is already read in chunk "Daily and seasonal changes"
 ```
 
 ## SAMI pH
-```{r sami pH, echo=FALSE, warning = FALSE, message = FALSE, out.width='70%'}
+```{r sami pH, echo=FALSE, warning = FALSE, message = FALSE, out.width='100%'}
+# read deployment file
+file_list <- list.files(path  = "../../pCloud Sync/piSami-pH/sami_data/sami_processed/Salinity_corrected/PointB/", pattern = "Raw_SAMI.*.txt")
 
+if (length(file_list) == 0) {stop()} # script does not run if there is no data file to read
+ii <- 0
+for (file in file_list){ 
+  ii <- ii + 1
+  tmp <- read.table(paste("../../pCloud Sync/piSami-pH/sami_data/sami_processed/Salinity_corrected/PointB/", file, sep = ""), header = F, dec = ".", as.is = T, sep = "\t", skip = 4, fill = TRUE)
+  if (ii == 1) {sami <- tmp} else {sami <- rbind(sami, tmp)}
+}
+
+colnames(sami)  <- c("datetime","ph_sami", "ph_error_sami", "temp_int_sami", "temp_ext_sami","flag_sami")
+
+# add deployment period = Fisrt, Add manualy the deployement number in the title file and take last digit in the title file
+sami$deployment_sami <- as.numeric(substr(str_extract(file, "-[0-9][0-9]"),2,3))
+
+# # put the file in the processed file
+# if (length(file_list) > 0) {
+#   for (file in file_list){ 
+#     # move new zip files from PointB to processed PointB 
+#     system(paste0("mv ../../pCloud Sync/piSami-pH/sami_data/sami_processed/Salinity_corrected/PointB/", file, " ../../pCloud Sync/piSami-pH/sami_data/sami_processed/Salinity_corrected/PointB/PointB_processed"))
+#   }
+# }
+
+# Convert datetime
+sami$datetime <- mdy_hms(sami$datetime, tz="UTC")
+
+# supprimer les données erronées 
+sami <- sami %>% 
+  dplyr::filter(flag_sami == 0 & ph_sami >= 7.95 & ph_sami <= 8.2) 
+
+save(sami, file = paste0(path, "data/sami/sami_all_ptb.csv"))
+
+## PLOT
+sami_xts <- dplyr::select(sami, datetime, ph_sami, temp_int_sami, temp_ext_sami)
+sami_xts <- as.xts(sami_xts, order.by=sami_xts$datetime)
+
+dygraph(sami_xts, ylab = "") %>%
+  dySeries("ph_sami", drawPoints = TRUE, pointSize=2, label = "ph_sami")%>%
+  dySeries(axis = "y2","temp_int_sami", drawPoints = TRUE, pointSize=2, label = "temp_int_sami") %>%
+  dySeries(axis = "y2", "temp_ext_sami", drawPoints = TRUE, pointSize=2, label = "temp_ext_sami") %>%
+ # dyLegend(show = "always", width = 600)%>%
+  #dyAxis("y",valueRange = c(-0.1, 0.11))%>%
+dyOptions(
+    drawGrid = TRUE,
+    drawPoints = TRUE,
+    useDataTimezone = TRUE)%>%
+  dyRangeSelector(height = 30)
 ```
 
 ## EOL
 Here we read data from the EOL ctd and calculate total alkalinity using the relationship with salinity. We also compare salinity and temperature with the SOMLIT data.
 
-```{r EOL data, echo=FALSE, warning = FALSE, message = FALSE, out.width='70%'}
+```{r EOL data, echo=FALSE, warning = FALSE, message = FALSE, out.width='100%'}
+url <- "http://obs-vlfr.fr/data/files/~eol/somlit/"
+files <- httr::GET(url) %>%
+  httr::content(as="parsed") %>%
+  # get all links containing villefranche-eol
+  xml2::xml_find_all("//a[contains(.,'villefranche-eol')]") %>%
+  # in a flat vector
+  xml2::as_list() %>%
+  unlist()
+urls <- str_c(url, files)
+d <- purrr::map_dfr(urls, read_csv, comment="#", col_types=cols(Date="c", Heure="c"))
+d <- dplyr::mutate(d, datetime=str_c(Date, " ", Heure) %>% parse_datetime(format="%Y%m%d %H%M%S"))
+ggplot(d) + geom_point((aes(x=datetime, y=T)))
+saveRDS(d, file = paste0(path, "data/eol/eol_data.rds"))
 
 ```
 
 ## ctd_hydro
-```{r ctd_hydro, echo=FALSE, warning = FALSE, message = FALSE, out.width='70%'}
+```{r ctd_hydro, echo=FALSE, warning = FALSE, message = FALSE, out.width='100%'}
+dat <-  read_delim("http://www.obs-vlfr.fr/data/files/~radehydro/radehydro_ctd.csv.gz", delim = ",", col_names = TRUE, col_types = cols(id = "c", date = "D", date_time = "T", fluo_calib = "d", fluorescence="d", oxygen_mll="d", oxygen_sat="d", oxygen_umolkg="d", par="d", v0="d", v2="d", v3="d"), na = c("NA")) %>%
+    dplyr::select(-date_time) %>%
+#  dplyr::mutate(date = dmy(date)) %>%
+  # eliminate duplicate rows
+  #dplyr::filter(id != "b18233_01_sbe25plus - Copie"	& id != "b18233_sbe25plus - Copie") %>%
+    dplyr::rename(depth = pressure)
 
+start_ts <- dat %>% # beginning of time series
+  dplyr::group_by(station) %>% 
+  dplyr::summarise(min = min(date))
+
+knitr::kable(start_ts, caption = "Starting dates of time series", col.names = c("Station", "Starting date"))
+
+# eliminate B data when B+ starts except on 2019-08-07 when B+ profile is not available
+z <- dat %>% 
+  dplyr::mutate(station = factor(station)) %>% # station as factor
+  dplyr::filter(station %in% c('B', 'B+')) %>% # only keep Point B and B+
+  dplyr::filter(station == 'B+' | (station == 'B' & date < "2004-12-21") | (station == 'B' & date == "2019-08-06")) 
+
+# add extra profiles of 2018
+# See Profiles_sonde_supplémentaires_aout_2018_point B Samir.xlsx
+
+supp1 <- read_excel(paste0(path,"data/radehydro_ctd/", "Profiles_sonde_supplementaires_aout_2018_pointB_Samir.xlsx"), sheet = 1) %>% 
+  select(station, date, depth = PrdM, temperature = Potemp090C, salinity = Sal00) %>%
+  mutate(date = ymd(date))
+supp2 <- read_excel(paste0(path,"data/radehydro_ctd/", "Profiles_sonde_supplementaires_aout_2018_pointB_Samir.xlsx"), sheet = 2) %>% 
+  mutate(date = ymd(date))
+  supp <- bind_rows(supp1, supp2)
+dat <- bind_rows(dat, supp) %>%
+  arrange(date)
 ```
 
 
