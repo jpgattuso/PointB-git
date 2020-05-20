@@ -59,6 +59,26 @@ dc2 <- "#51C56AFF" #discrete color 2:
 dc3 <- "#482173FF" #discrete color 1
 dc4 <- "#51C56AFF" #discrete color 2: 
 
+#################### Regression function 
+####
+# function regression plot with model II equation (MA) in title
+## Dans labs ajout de la variable TITRE pour mettre titre avant chaque graphe
+ggreg2 <- function (fit, xdata, ydata) { # x and y are the names of the variables
+  fit_data <- data.frame(fit$x, fit$y)
+  colnames(fit_data) = c(xdata, ydata)
+reg <- fit$regression.results[2,] #one selects MA only
+intercept <- reg$Intercept
+slope <- reg$Slope
+  ggplot(data = fit_data, aes_string(x = xdata, y = ydata)) + 
+  geom_point(size = 3, col = "blue") +
+  geom_abline(aes(intercept = fit$regression.results[2,2], slope = fit$regression.results[2,3]),
+              colour = "blue")  + 
+  labs(title = paste(titre,"\n Adj R2 = ", signif(fit$rsquare, 3),
+                     "; Intercept =", signif(intercept, 3),
+                     "; Slope =", signif(slope, 3),
+                     "; P =", signif(fit$P.param, 3)))
+}
+
 size_labs <- 6
 face_font <- "plain"
 
@@ -488,271 +508,7 @@ Les "quality flags" "qflag\_sample", "qflag\_ta", "qflag\_DIC" qui apparaissent 
 	- 3 : résultat douteux
 	- 4 : résultat mauvais
 
-
-```{r DYFAMED, include=FALSE}
-# read data and create a data frame tbl
-#getwd()
-dyf <- tbl_df(read.table(paste0(path, "/data/carb_dyfamed.txt"), 
-                       encoding="UTF-8", header=TRUE, sep="", dec=".", 
-                       as.is=TRUE,
-                       na.strings = c("NaN","NA", "999999")))
-dyf$date <- mdy(dyf$date)
-dyf$year <- year(dyf$date)
-
-# Mercuric chloride correction for AT and CT (Dickson et al. 2007, SOP3a)
-# 100 ul of saturated HgCl2 were added before 2019-07-30 whereas
-# 200 ul of 50% saturated HgCl2 were added after that date
-dyf <- dyf %>%
-  mutate(AT = if_else(date < "2019-07-30",
-                    AT * 1.0002,
-                    AT * 1.0004),
-         CT = if_else(date < "2019-07-30",
-                    CT * 1.0002,
-                    CT * 1.0004),
-  )
-
-# remove questionable data (flag = 3)
-dyf$AT[dyf$QF_AT==3 | dyf$QF_AT==4] <- NA 
-dyf$CT[dyf$QF_CT==3 | dyf$QF_AT==4] <- NA 
-dyf <- filter(dyf, date!="2005-03-29") # very high salinities that seem wrong that day
-
-# remove ouliers
-#tmp <- dyf[which(dyf$AT>2625),]
-fig_dyf_date_AT <- ggplot(data = dyf, aes(x=date, y=AT)) +
-  geom_point(na.rm=TRUE)
-png(file = paste0(path,"/figures/fig_dyf_date_AT.png"), 
-    width = 15, height = 10, units = "cm", res = 300)
-print(fig_dyf_date_AT)
-dev.off()
-dyf <- dplyr::filter(dyf, salinity > 37)
-dyf$AT[dyf$date=="2005-08-02" & dyf$pressure==90] <- NA # obvious outlier
-dyf$AT[dyf$date=="2005-07-02" & (dyf$pressure>=300 & dyf$pressure<=700)] <- NA # questionable because bad Quality Flag réception flacon
-
-# replot without outliers
-fig_dyf_date_AT <- ggplot(data = dyf, aes(x=date, y=AT)) +
-  geom_point(na.rm=TRUE)
-png(file = paste0(path,"/figures/fig_dyf_date_AT.png"), 
-    width = 15, height = 10, units = "cm", res = 300)
-print(fig_dyf_date_AT)
-dev.off()
-
-# AT vs salinity at DYFAMED all depths
-lms <- summary(lm(data = dyf, AT ~ salinity)) #all data
-fig_dyf_AT_salinity <- ggplot() +  geom_point(data = dyf, aes(x=salinity, y=AT)) +
-  labs(y = "", x="Salinity", title="DYFAMED all depths") +
-  stat_smooth(method = lm, na.rm=TRUE)
-png(file = paste0(path,"/figures/fig_dyf_AT_salinity.png"), 
-    width = 15, height = 10, units = "cm", res = 300)
-print(fig_dyf_AT_salinity)
-dev.off()
-
-# surface (less than 12 m) data
-dyf_surf <- dyf %>% 
-  dplyr::filter(pressure <= 12) %>%
-  dplyr::mutate(monthd=month(date), year=year(date))
-  
-# Salinity as a function of time
-lms <- summary(lm(data = dyf_surf, salinity ~ decimal_date(date))) #all data
-prob <- pf(lms$fstatistic[1],lms$fstatistic[2],lms$fstatistic[3],lower.tail=FALSE)
-reg <- cbind(as.numeric(c(lms$coefficients[2,1], lms$coefficients[2,2], 
-                               lms$coefficients[2,4], lms$coefficients[1,1], lms$coefficients[1,2],
-                               lms$coefficients[1,4], lms$fstatistic[1], lms$fstatistic[3], lms$r.squared, prob)))
-lms <- summary(lm(data = filter(dyf_surf, year>2002), salinity ~ decimal_date(date))) #all data
-prob <- pf(lms$fstatistic[1],lms$fstatistic[2],lms$fstatistic[3],lower.tail=FALSE)
-reg <- cbind(reg, as.numeric(c(lms$coefficients[2,1], lms$coefficients[2,2], 
-                          lms$coefficients[2,4], lms$coefficients[1,1], lms$coefficients[1,2],
-                          lms$coefficients[1,4], lms$fstatistic[1], lms$fstatistic[3], lms$r.squared, prob)))
-lms <- summary(lm(data = filter(dyf_surf, year>=2007), salinity ~ decimal_date(date))) #all data
-prob <- pf(lms$fstatistic[1],lms$fstatistic[2],lms$fstatistic[3],lower.tail=FALSE)
-reg <- cbind(reg, as.numeric(c(lms$coefficients[2,1], lms$coefficients[2,2], 
-                               lms$coefficients[2,4], lms$coefficients[1,1], lms$coefficients[1,2],
-                               lms$coefficients[1,4], lms$fstatistic[1], lms$fstatistic[3], lms$r.squared, prob)))
-colnames(reg) <- c("Salinity all", "Salinity post 2002", "Salinity post 2007")
-row.names(reg) <- c("Slope", "SE Slope", "P Slope","Intercept","SE int.","P int.", "F", "df",
-                    "R2","P value")
-tab_fig_dyf_surf_date_salinity <- reg
-
-
-# AT as a function of time
-lms <- summary(lm(data = dyf_surf, AT ~ decimal_date(date))) #all data
-prob <- pf(lms$fstatistic[1],lms$fstatistic[2],lms$fstatistic[3],lower.tail=FALSE)
-reg <- cbind(as.numeric(c(lms$coefficients[2,1], lms$coefficients[2,2], 
-                               lms$coefficients[2,4], lms$coefficients[1,1], lms$coefficients[1,2],
-                               lms$coefficients[1,4], lms$fstatistic[1], lms$fstatistic[3], lms$r.squared, prob)))
-lms <- summary(lm(data = filter(dyf_surf, year>2002), AT ~ decimal_date(date))) #all data
-prob <- pf(lms$fstatistic[1],lms$fstatistic[2],lms$fstatistic[3],lower.tail=FALSE)
-reg <- cbind(reg, as.numeric(c(lms$coefficients[2,1], lms$coefficients[2,2], 
-                          lms$coefficients[2,4], lms$coefficients[1,1], lms$coefficients[1,2],
-                          lms$coefficients[1,4], lms$fstatistic[1], lms$fstatistic[3], lms$r.squared, prob)))
-lms <- summary(lm(data = filter(dyf_surf, year>=2007), AT ~ decimal_date(date))) #all data
-prob <- pf(lms$fstatistic[1],lms$fstatistic[2],lms$fstatistic[3],lower.tail=FALSE)
-reg <- cbind(reg, as.numeric(c(lms$coefficients[2,1], lms$coefficients[2,2], 
-                               lms$coefficients[2,4], lms$coefficients[1,1], lms$coefficients[1,2],
-                               lms$coefficients[1,4], lms$fstatistic[1], lms$fstatistic[3], lms$r.squared, prob)))
-colnames(reg) <- c("AT all", "AT post 2002", "AT post 2007")
-row.names(reg) <- c("Slope", "SE Slope", "P Slope","Intercept","SE int.","P int.", "F", "dl", "R2","P value")
-
-# AT as a function of time: transform in latex table and save
-tab_fig_dyf_surf_date_AT <- reg
-
-# table.tex <- xtable(reg, label = "tab:dyf_surf_date_AT")
-# caption(table.tex) <-
-# "Linear regression of total alkalinity at DYFAMED, without interpolation, against time at depths shallower than 12 m."
-# print(
-# table.tex,
-# type = "latex",
-# file = "tables/dyf_surf_date_AT.tex",
-# caption.placement = "top",
-# sanitize.text.function = identity,
-# scalebox = 0.7
-# )
-fig_dyf_surf_date_AT <- ggplot(data = dyf_surf, aes(x=date, y=AT)) +
-  geom_point(na.rm=TRUE) + 
-  labs(y = "",x="Time", title=expression(paste(italic(A)[T] ," ","at <= 12 m"))) +
-  stat_smooth(method = lm, na.rm=TRUE)
-png(file = paste0(path,"/figures/fig_dyf_surf_date_AT.png"), 
-    width = 15, height = 10, units = "cm", res = 300)
-print(fig_dyf_surf_date_AT)
-dev.off()
-
-reg <- NULL
-#all data
-lms <- summary(lm(data = dyf_surf, AT ~ salinity)) #all data
-prob <- pf(lms$fstatistic[1],lms$fstatistic[2],lms$fstatistic[3],lower.tail=FALSE)
-reg <- cbind(as.numeric(c(lms$coefficients[2,1], lms$coefficients[2,2], 
-                          lms$coefficients[2,4], lms$coefficients[1,1], lms$coefficients[1,2],
-                          lms$coefficients[1,4], lms$fstatistic[1],lms$fstatistic[3], lms$r.squared, prob)))
-#2002 to present
-lms <- summary(lm(data = filter(dyf_surf, year>2002), AT ~ salinity)) #all data
-prob <- pf(lms$fstatistic[1],lms$fstatistic[2],lms$fstatistic[3],lower.tail=FALSE)
-reg <- cbind(reg, as.numeric(c(lms$coefficients[2,1], lms$coefficients[2,2], 
-                               lms$coefficients[2,4], lms$coefficients[1,1], lms$coefficients[1,2],
-                               lms$coefficients[1,4], lms$fstatistic[1],lms$fstatistic[3], lms$r.squared, prob)))
-#2007 to present
-lms <- summary(lm(data = filter(dyf_surf, year>=2007), AT ~ salinity)) #all data
-prob <- pf(lms$fstatistic[1],lms$fstatistic[2],lms$fstatistic[3],lower.tail=FALSE)
-reg <- cbind(reg, as.numeric(c(lms$coefficients[2,1], lms$coefficients[2,2], 
-                               lms$coefficients[2,4], lms$coefficients[1,1], lms$coefficients[1,2],
-                               lms$coefficients[1,4], lms$fstatistic[1], lms$fstatistic[3], lms$r.squared, prob)))
-int_dyf <- lms$coefficients[1,1]
-slo_dyf <- lms$coefficients[2,1]
-colnames(reg) <- c("AT all", "AT post 2002", "AT post 2007")
-row.names(reg) <- c("Slope", "SE Slope", "P Slope","Intercept","SE int.","P int.", "F", "df",
-                    "R2", "P value")
-# AT as a function of salinity: transform in latex table and save
-tab_dyf_surf_salinity_AT <- reg
-
-# table.tex <- xtable(reg, label="tab:dyf_surf_salinity_AT")
-# caption(table.tex) <- "Linear regression of total alkalinity at DYFAMED, without interpolation, against salinity at depths shallower than 12 m."
-# print(table.tex, type="latex", file="tables/dyf_surf_salinity_AT.tex", 
-#       caption.placement = "top", sanitize.text.function=identity, scalebox=0.7)
-
-
-# AT as a function of salinity for all years
-p1 <- ggplot(data=dyf_surf) +
-  aes(salinity, AT) +
-  geom_text(na.rm=TRUE, show.legend=FALSE, aes(label=as.character(monthd), colour = factor(year))) +
-  stat_smooth(method=lm, na.rm=TRUE, show.legend=FALSE, se=FALSE, aes(fill=factor(year), colour=factor(year))) +
-  geom_abline(intercept = int_dyf, slope = slo_dyf, linetype="dashed", colour = "black") +
-  facet_wrap(~ year) +
-  scale_x_continuous(limits = c(36.8, 38.4), breaks=c(37, 37.5, 38), expand = c(0,0)) +
-  scale_y_continuous(limits = c(2490, 2600), expand = c(0,0)) +
-  labs(title = "Point B (1 m, with month of sampling; dotted line is Dyfamed, less than 12 m, 2007-2015)", x = "Salinity", y = "Total alkalinity") +
-  theme(axis.text.x=element_text(size=16, color="black"),
-        axis.title.x=element_text(face="bold", size=16),
-        axis.text.y=element_text(size=16, color="black"),
-        axis.title.y=element_text(face="bold", size=16),
-        plot.title = element_text(face="bold", size=16)
-  )
-
-ggsave(file = "figures/fig_ta_vs_salinity_0m.png", p1,
-    width = 20, height = 13, units = "cm")
-
-
-dyf_surf_salinity_AT <- ggplot(data = dyf_surf, aes(x=salinity, y=AT), na.rm=TRUE) +
-  geom_point(aes(colour=factor(year)), na.rm=TRUE) + 
-  labs(y = "",x="Salinity", title=expression(paste(italic(A)[T] ," ","at <= 12 m"))) +
-  stat_smooth(method = lm, na.rm=TRUE)
-ggsave(file = "figures/dyf_surf_salinity_AT.png", dyf_surf_salinity_AT, width = 15, height = 10, units = "cm")
-
-# AT as a function of salinity for every year
-j <- 0
-reg <- data.frame()
-for (i in 1:length(unique(dyf_surf$year))) { #one loops through all years
-  j <- j + 1
-  yr <- unique(dyf_surf$year)[i]
-  d_reg <- filter(dyf_surf, year==yr)
-#  fm <- as.formula(paste0(i, " ~ sampling_date"))
-  #fit[[i]] <- lm(fm, data = mean0m)
-  lms <- summary(lm(data=d_reg, AT ~ salinity))
-  # calculate probability of fstatistic because it cannot be extracted from lms above
-  # see http://stats.stackexchange.com/questions/92824/extracting-the-model-p-value-for-a-multiple-regression-in-r
-  # slope returned by lm is per second
-  prob <- pf(lms$fstatistic[1],lms$fstatistic[2],lms$fstatistic[3],lower.tail=FALSE)
-  reg <- rbind(reg, as.numeric(c(lms$coefficients[2,1], lms$coefficients[2,2], 
-                                 lms$coefficients[2,4], lms$coefficients[1,1], lms$coefficients[1,2],
-                                 lms$coefficients[1,4], lms$fstatistic[1], lms$fstatistic[3], lms$r.squared, prob)))
-}
-names(reg) <- c("Slope", "SE Slope", "P Slope","Intercept","SE int.","P int.", "F", "df",
-                "R2","P value")
-row.names(reg) <- as.character(unique(dyf_surf$year))
-#transform in latex table and save
-tab_dyf_surf_salinity_AT_year <- reg
-
-# table.tex <- xtable(reg, digits=c(0,3,3,2,1,2,3,3,3), label="tab:dyf_surf_salinity_AT_year")
-# caption(table.tex) <- "Linear regressions of total alkalinity at DYFAMED, without interpolation, against salinity at depths shallower than 12 m."
-# print(table.tex, type="latex", fil %>% e="tables/dyf_surf_salinity_AT_year", 
-#       caption.placement = "top", sanitize.text.function=identity, scalebox=0.7)
-
-# DYFAMED plots
-dyf_surf_salinity_AT_year <- ggplot(data=dyf_surf) +
-  aes(salinity, AT) +
-  geom_point(na.rm=TRUE, show.legend=FALSE, aes(colour = factor(year))) +
-  stat_smooth(method=lm, na.rm=TRUE, show.legend=FALSE, se=FALSE, aes(fill=factor(year), colour=factor(year))) +
-#  geom_abline(intercept = int_dyf, slope = slo_dyf, linetype="dashed", colour = "black") +
-  facet_wrap(~ year) +
-#  scale_x_continuous(limits = c(36.8, 38.4), breaks=c(37, 37.5, 38), expand = c(0,0)) +
-#  scale_y_continuous(limits = c(2490, 2600), expand = c(0,0)) +
-  labs(title = "DYFAMED (< 12 m)", x = "Salinity", y = "Total alkalinity") +
-  theme(axis.text.x=element_text(size=16, color="black"),
-        axis.title.x=element_text(face="bold", size=16),
-        axis.text.y=element_text(size=16, color="black"),
-        axis.title.y=element_text(face="bold", size=16),
-        plot.title = element_text(face="bold", size=16)
-  )
-
-ggsave(file = "figures/dyf_surf_salinity_AT_year.png", dyf_surf_salinity_AT_year,
-    width = 20, height = 20, units = "cm")
-```
-
 #Results
-
-## Time series salinity at DYFAMED
-```{r}
-kable(tab_fig_dyf_surf_date_salinity)
-
-```
-
-
-## AT vs salinity at DYFAMED (all depths)[section added 2017-11-21]
-
-
-## AT vs time and salinity at DYFAMED
-These are for surface (< 12 m) values, with outliers removed. The slope of salinity vs time is significant for all years but not post-2007 (P = 0.08), which is the relevant period of interest.
-
-![dyf_surf_salinity_AT_year](figures/dyf_surf_salinity_AT_year.png)
-
-The relationship with salinity is highly significant: 
-<!-- cat(sprintf("%.3f + salinity x %.3f (P = %.3f)", int_dyf, slo_dyf, tab_dyf_surf_salinity_AT[8,3])) -->
-`r int_dyf` + salinity x `r slo_dyf`$ (P = `r tab_dyf_surf_salinity_AT[8,3]`)
-
-```{r DYFAMED AT vs salinity, include=TRUE}
-kable(tab_fig_dyf_surf_date_AT)
-print(dyf_surf_salinity_AT)
-kable(tab_dyf_surf_salinity_AT, caption="")
-print(dyf_surf_salinity_AT_year)
-kable(tab_dyf_surf_salinity_AT_year, caption="")
-```
 
 ## Point B
 
@@ -821,9 +577,6 @@ z <- z %>%
 # Exclude data for 2020 and later
 z <- filter(z, sampling_date < "2020-01-01")
 
-# read POC and PON data
-pom <- read_csv(file = paste0(path,"/data/POC-PON/POC-2007-2015_PtB_1m.csv"), comment="#")
-pom$date <- as.POSIXct(pom$date)
 ```
 
 ```{r Check outliers, include=FALSE}
@@ -1789,17 +1542,6 @@ row.names(reg) <- as.character(unique(mean0m$year))
 #transform in latex table and save
 tab_surf_salinity_AT_year <- reg
 
-# POC and PON
-pom_l <-pom %>% 
-  filter(depth==1 | depth==50) %>%
-  select(-q_poc, -q_pon) %>%
-  gather(key=pom, value=value, poc, pon)
-fig_poc_pon <- ggplot(data = filter(pom_l, depth==1), aes(x = date, y = value), na.rm=TRUE) + 
-  geom_point(aes(colour=pom), na.rm=TRUE, size=size_point) +
-  scale_x_datetime(breaks = date_breaks("2 year"), labels = date_format("%Y")) +
-  labs(title="Point B at 1 m",x="",y="Particulate organic matter") +
-  Mytheme()
-ggsave(file= "figures/fig_poc_pon.png", fig_poc_pon, width = 18, height = 20, units = "cm")
 ```
 
 ```{r Removing the effect of changes in AT at 1m, include=FALSE}
@@ -1865,8 +1607,6 @@ row.names(reg_ta_no_change) <- var_list
 
 ## Interannual changes at 1 m
 ![interannual_1m](figures/fig_paper_interannual_1m.png)
-![poc_pon](figures/fig_poc_pon.png)
-![ta_vs_salinity_month_pointB_0m](figures/fig_ta_vs_salinity_month_pointB_0m.png)
 
 The slope of the rate of pH change is `r round(reg_var_1m[5,1], digits=4)` ± `r format(reg_var_1m[5,2], digits=4, scientific=FALSE)` units per year. If the observed total alkalinity data are corrected from their rate of change (i.e. assuming that they have not increased during the period of measurement, but kept their subannual variability), the rate of change is `r round(reg_ta_no_change[1,1], digits=4)` ± `r format(reg_ta_no_change[1,2], digits=4, scientific=FALSE)` units per year.
 
@@ -2610,206 +2350,6 @@ ggsave(file="figures/fig_paper_monthly_rate_AT_CT_50m.png", fig_paper_monthly_ra
 ggsave(file="figures/fig4b.pdf", fig_paper_monthly_rate_AT_CT_50m, width = 16, height= 10, units = "cm")
 ```
 
-## Issue of total alkalinity
-```{r Total alkalinity Point B, include=FALSE}
-
-# AT versus salinity at the surface per month with facet
-p1 <- ggplot(data=dplyr::filter(means_depth, depth== 0)) +
-  aes(mean_salinity, mean_ta) +
-  geom_point(na.rm=TRUE, size=size_point) +
-  stat_smooth(method=lm, na.rm=TRUE, show.legend=FALSE, se=FALSE, colour="black", size=0.5) +
-  facet_wrap(~ month) +
-  scale_x_continuous(limits = c(36.8, 38.4), breaks=c(37, 37.5, 38), expand = c(0,0)) +
-  scale_y_continuous(limits = c(2490, 2600), expand = c(0,0)) +
-  labs(title = "Point B (1 m, with month of sampling)", x = "Salinity", y = expression(paste("Total alkalinity (",mu, "mol ", kg^-1,")"))) +
-  Mytheme()
-png(file = "figures/fig_ta_vs_salinity_month_pointB_0m.png", 
-    width = 20, height = 13, units = "cm", res = 300)
-print(p1)
-dev.off()
-
-# AT versus salinity at the surface per year with facet
-p1 <- ggplot(data=dplyr::filter(means_depth, depth== 0)) +
-  aes(mean_salinity, mean_ta) +
-  geom_point(na.rm=TRUE, size=size_point) +
-  stat_smooth(method=lm, na.rm=TRUE, show.legend=FALSE, se=FALSE, colour="black", size=0.5) +
-  facet_wrap(~ year) +
-  scale_x_continuous(limits = c(36.8, 38.4), breaks=c(37, 37.5, 38), expand = c(0,0)) +
-  scale_y_continuous(limits = c(2490, 2600), expand = c(0,0)) +
-  labs(title = NULL, x = "Salinity", y = expression(paste("Total alkalinity (",mu, "mol ", kg^-1,")"))) +
-Mytheme_facet()
-ggsave(p1, file = "figures/fig_ta_vs_salinity_year_pointB_0m.png", 
-    width = 6, height = 6)
-
-# AT versus salinity at the surface per year with loop
-panel <- c("(a)","(b)","(c)","(d)","(e)","(f)","(g)","(h)","(i)", "(j)", "(k)", "(l)", "(m)")
-tmp <- filter(means_depth, depth== 0)
-p <- NULL; j <- 0
-#for (i in 1:11) {
-for (i in unique(tmp$year)) {
-  #i <- 13
-  j <- j+1
-  print(j)
-  p[[j]] <- ggplot(data=filter(tmp, tmp$year==i), aes(x=mean_salinity, y=mean_ta, colour=month)) +
-    geom_point(na.rm=TRUE, size=2) +
-    stat_smooth(method=lm, na.rm=TRUE, show.legend=FALSE, se=FALSE, colour="black", size=0.5) +
-    scale_x_continuous(limits = c(36.8, 38.5), breaks=c(37, 37.5, 38, 38.5), expand = c(0,0)) +
-    scale_y_continuous(limits = c(2490, 2600), expand = c(0,0)) +
-    labs(title = NULL, x = NULL, y = NULL) +
-    annotate(geom = "text", x=36.9, y=2495, label= as.character(i), hjust=0, vjust=0, size=3) +
-    annotate(geom = "text", x=36.9, y=2590, label= panel[[j]], hjust=0, vjust=0, size=3) +
-    Mytheme(size_labs = 9) +
-    scale_color_viridis(name="Month", discrete=TRUE, option="plasma") + 
-    theme(aspect.ratio = 1,
-          plot.margin = margin(t = 0, r = 0, b = 0, l = 0, unit = "cm"),
-          panel.grid.major = element_blank(),
-          panel.grid.minor = element_blank(),
-          legend.title = element_blank(),
-          legend.key = element_rect(colour = 'white', fill = 'white', size = 0),
-          legend.background = element_rect(fill="white", size=0.15),
-          legend.key.width = unit(1, "cm"),
-          legend.position='none')
-if (j %in% c(1,5,9,13)) {p[[j]] <- p[[j]] + labs(y=expression(paste(italic(A)[T], " (",mu, "mol ", kg^-1,")")))}
-  else {
-    p[[j]] <- p[[j]] + theme(axis.text.y = element_blank())
-    p[[j]] <- p[[j]] + theme(plot.margin = margin(t = 0, r = 0.3, b = 0, l = 0, unit = "cm"))
-  }
- if (j %in% c(10,11,12,13)) {p[[j]] <- p[[j]] + labs(x = "Salinity")
- p[[j]] <- p[[j]] + theme(axis.title.x = element_text(margin=margin(t = 0.2, r = 0, b = 0.2, l = 0, unit="cm")))
- }
- else {
-    p[[j]] <- p[[j]] + theme(axis.text.x = element_blank())
- }
-  #   #p[[j]] <- p[[j]] + theme(axis.title.x = element_text(margin=margin(t = 0.2, r = 0, b = 0.2, l = 0, unit="cm")))
-  #   #p[[j]] <- p[[j]] + theme(plot.margin = margin(t = 0, r = 0, b = 0, l = 0, unit = "cm"))
-}
-g1 <- cowplot::plot_grid(p[[1]], p[[2]], p[[3]], p[[4]], p[[5]], p[[6]], p[[7]], p[[8]], p[[9]], p[[10]], p[[11]], p[[12]], p[[13]], ncol=4, align="vh")
-grobs <- ggplotGrob(p[[1]] + theme(legend.position="top"))$grobs
-legend_top <- grobs[[which(sapply(grobs, function(x) x$name) == "guide-box")]]
-g <- cowplot::plot_grid(legend_top, g1, ncol = 1, rel_heights = c(0.15, 1))
-ggsave(file="figures/fig6.pdf", g, width = 16, height = 15, units = "cm")
-
-
-# AT=f(S) with all data
-lms <- summary(lm(data = mean0m, mean_ta ~ mean_salinity))
-prob <- pf(lms$fstatistic[1],lms$fstatistic[2],lms$fstatistic[3],lower.tail=FALSE)
-reg_AT_S_all <- cbind(as.numeric(c(lms$coefficients[2,1], lms$coefficients[2,2], 
-                                       lms$coefficients[2,4], lms$coefficients[1,1],
-                                       lms$coefficients[1,2], lms$fstatistic[1], lms$fstatistic[3], 
-                                       lms$coefficients[1,4], lms$r.squared, prob)))
-colnames(reg_AT_S_all) <- c("AT")
-row.names(reg_AT_S_all) <- c("Slope", "SE Slope", "P Slope","Intercept","SE int.","P int.", "F", "df",
-                    "R2","P value")
-
-p1 <- ggplot(data=mean0m) +
-  aes(x= mean_salinity, y=mean_ta) +
-  geom_point(na.rm=TRUE, size=size_point) +
-  stat_smooth(method=lm, na.rm=TRUE, show.legend=FALSE, se=FALSE, colour="black", size=0.5) +
-  labs(title = "With monthly means", x = "Salinity", y = expression(paste("Total alkalinity (",mu, "mol ", kg^-1,")"))) +
-  Mytheme()
-ggsave(p1, filename = "figures/fig_ta_vs_salinity_all_pointB_0m.png", width = 20, height = 13, units = "cm")
-
-# AT=f(S) with monthly means
-lms <- summary(lm(data = means_month0m, AT ~ Salinity))
-prob <- pf(lms$fstatistic[1],lms$fstatistic[2],lms$fstatistic[3],lower.tail=FALSE)
-reg_AT_S_monthly <- cbind(as.numeric(c(lms$coefficients[2,1], lms$coefficients[2,2], 
-                                       lms$coefficients[2,4], lms$coefficients[1,1],
-                                       lms$coefficients[1,2], lms$fstatistic[1], lms$fstatistic[3], 
-                                       lms$coefficients[1,4], lms$r.squared, prob)))
-colnames(reg_AT_S_monthly) <- c("AT")
-row.names(reg_AT_S_monthly) <- c("Slope", "SE Slope", "P Slope","Intercept","SE int.","P int.", "F", "df",
-                    "R2","P value")
-
-p1 <- ggplot(data=means_month0m) +
-  aes(x= Salinity, y=AT) +
-  geom_point(na.rm=TRUE, size=size_point) +
-  stat_smooth(method=lm, na.rm=TRUE, show.legend=FALSE, se=FALSE, colour="black", size=0.5) +
-  labs(title = "With all data", x = "Salinity", 
-       y = expression(paste("Total alkalinity (",mu, "mol ", kg^-1,")"))) +
-  Mytheme()
-png(file = "figures/fig_ta_vs_salinity_monthly_means_pointB_0m.png", 
-    width = 20, height = 13, units = "cm", res = 300)
-print(p1)
-dev.off()
-
-
-# Alkalinity as a function of precipitation
-w <- tbl_df(read.table(paste0(path,"/data/meteo_nice_airport/Meteo_2007_2015.csv"), header=T, sep=",", dec=".", as.is=T, na.strings = c("NA", "-999", "999999")))
-w$sampling_date <- ymd(w$sampling_date)
-w$days <- wday(w$sampling_date, label = TRUE, abbr = FALSE)
-w$group <- format(w$sampling_date - 1, "%Y%W") # Group the weeks tuesday to monday
-w <- w %>%
-   group_by(group) %>%
-   mutate(rr_cumsum =  cumsum(rr)  ) #cumsum of precipitation tuesday to monday
-# take the monday precipitation value (cumsum) and match it with TA of the day after (tuesday).
- w_monday <- w %>%
-   filter(days == "Monday" | days== "Lundi")
- w_monday$group <- as.numeric(w_monday$group)
- w_monday$group <-w_monday$group + 1 # Add + 1 to w$group to match with AT
- 
-#mean0m$days <- wday(mean0m$sampling_date)
-mean0m$group <- format(mean0m$sampling_date, "%Y%W") # Create "group" column in mean0m for AT
-mean0m$group <- as.numeric(mean0m$group)
-
-# merge the 2 df
-w_AT_precip <- left_join(mean0m,w_monday[,c(2,43:45)], by="group") %>%
-  rename(sampling_date=sampling_date.x)
- 
-# PLOTS
-precip_cumsum <-
-  ggplot(w_AT_precip, aes(x = sampling_date, y = rr_cumsum)) +
-  scale_x_datetime(breaks = date_breaks("2 year"), labels = date_format("%Y")) +
-  geom_point(colour = "blue", na.rm=TRUE) +
-  labs(title = NULL, x = "Time", y = "Weekly precipitation (mm)") +
-  Mytheme(size_labs = 9) +
-  theme(aspect.ratio = 1/2,
-        plot.margin = margin(t=0.25, r=0.5, b=0, l=0, unit = "cm"),
-        axis.title.x = element_text(margin=margin(t=0.15, r=0, b=0.25, l=0, unit = "cm"))) +
-  annotation_custom(grob_A)
-  
-precip_ta <- ggplot(w_AT_precip, aes(x = rr_cumsum, y = mean_ta)) +
-  geom_point(colour = "blue", na.rm=TRUE) +
-  labs(title = NULL,
-       x = "Weekly precipitation (mm)", 
-       y = expression(paste(italic(A)[T]," ","(",mu, "mol ", kg^-1,")"))) +
-  Mytheme(size_labs = 9) +
-  theme(aspect.ratio = 1/2,
-        plot.margin = margin(t=0.25, r=0.5, b=0, l=0, unit = "cm"),
-        axis.title.x = element_text(margin=margin(t=0.15, r=0, b=0.25, l=0, unit = "cm"))) +
-  annotation_custom(grob_B_bl)
-
-precip_S <- ggplot(w_AT_precip, aes(x = rr_cumsum, y = mean_salinity)) +
-  geom_point(colour = "blue", na.rm=TRUE) +
-  labs(title = NULL,
-       x = "Weekly precipitation (mm)", 
-       y = "Salinity") +
-  Mytheme(size_labs = 9) +
-    theme(aspect.ratio = 1/2,
-        plot.margin = margin(t=0.25, r=0.5, b=0, l=0, unit = "cm"),
-        axis.title.x = element_text(margin=margin(t=0.15, r=0, b=0.25, l=0, unit = "cm"))) +
-annotation_custom(grob_C_bl)
-
-g <- cowplot::plot_grid(precip_cumsum, precip_ta, precip_S, ncol=1, align="h")
-ggsave("figures/precip.png",g, width = 18, height = 14, units = "cm")
-ggsave("figures/figS2.pdf",g, width = 8, height = 14, units = "cm")
-```
-
-The relationship between AT and salinity using all data is shown below.
-![ta_vs_salinity_all_pointB_0m](figures/fig_ta_vs_salinity_all_pointB_0m.png)
-
-The relationship between AT and salinity using monthly means is shown below.
-![ta_vs_salinity_monthly_means_pointB_0m.](figures/fig_ta_vs_salinity_monthly_means_pointB_0m.png)
-
-```{r reg_AT_S_monthly}
-  kable(reg_AT_S_monthly, digits = c(3), padding = 0, caption="Regression parameters of the AT=f(S) relationship derived using monthly means.")
-  kable(reg_AT_S_all, digits = c(3), padding = 0, caption="Regression parameters of the AT=f(S) relationship derived using all data.")
-```
-
-
-Salinity and total alkalinity data were compared with the weekly, from Tuesday to Monday, sum of precipitation data (Nice airport). Note that the analysis is incomplete as the 2015 data are currenly missing.
-![precip](figures/precip.png)
-
-
 ## Daily and monthly changes in pH and T
 ```{r Daily and seasonal changes, include=FALSE}
 # Long series
@@ -2981,19 +2521,16 @@ kable(broom::tidy(summary(reg_Temperature)), digits = c(5,5,5,3,3), caption="Reg
 kable(broom::tidy(summary(reg_Chla)), digits = c(5,5,5,3,3), caption="Regressions on values monthly means of pH range as a function of Chla")
 ```
 
-
-![_range_pH_Chla_month](figures/plot_range_pH_Chla_month.png)
-![range_pH_Chla_temp](figures/plot_range_pH_Chla_temp.png)
-
-
 ## CO2
 ```{r CO2, include=FALSE}
+typ <- c("Dddd") # column type
 CO2_pr <- tbl_df(
-  read_csv(file=paste0(path,"/data/CO2_data_PlateauRosa_daily_1993-2015_R.csv"), col_names=TRUE, skip=7)
+  read_csv(file=paste0(path,"/data/CO2_data_PlateauRosa_daily_1993-2015_R.csv"), col_names=TRUE, col_types = typ, skip=7)
 ) %>%
-  rename(dt=date) %>%
-  mutate(year=year(dt)) %>%
-  filter(dt >= "2007-01-01")
+#tidyr::unite(col="datetime", year, month, day, sep = "-" )%>%
+dplyr::rename(dt=date) %>%
+  dplyr::mutate(year=year(dt)) %>%
+  dplyr::filter(dt >= "2007-01-01")
 NAs_by_year <- summarise(group_by(CO2_pr, year), NAs=sum(is.na(atm_CO2))) # N NAs per year
 duration <- CO2_pr$dt[length(CO2_pr$dt)] - CO2_pr$dt[1]
 CO2_pr_zoo <- zooreg(CO2_pr$atm_CO2, order.by=CO2_pr$dt) # create zoo time series
@@ -3018,7 +2555,7 @@ ano_atm_CO2 <- left_join(ungroup(CO2_pr_i), tmp, by = "monthd") %>%
 #regression atmospheric CO2
 lms <- summary(lm(data = CO2_pr_i, atm_CO2 ~ decimal_date(dt)))
 prob <- pf(lms$fstatistic[1],lms$fstatistic[2],lms$fstatistic[3],lower.tail=FALSE)
-reg_atm_CO2 <- cbind(as.numeric(c(lms$coefficients[2,1], lms$coefficients[2,2], 
+reg_atm_CO2 <- cbind(as.numeric(c(lms$coefficients[2,1], lms$coefficients[2,2],
                                lms$coefficients[2,4], lms$coefficients[1,1],
                           lms$coefficients[1,2],
                           lms$coefficients[1,4], lms$fstatistic[1], lms$fstatistic[3], lms$r.squared, prob)))
@@ -3029,7 +2566,7 @@ row.names(reg_atm_CO2) <- c("Slope", "SE Slope", "P Slope","Intercept","SE int."
 #regression atmospheric CO2 anomalies
 lms <- summary(lm(data = ano_atm_CO2, atm_CO2_ano ~ decimal_date(dt)))
 prob <- pf(lms$fstatistic[1],lms$fstatistic[2],lms$fstatistic[3],lower.tail=FALSE)
-reg_atm_CO2_ano <- cbind(as.numeric(c(lms$coefficients[2,1], lms$coefficients[2,2], 
+reg_atm_CO2_ano <- cbind(as.numeric(c(lms$coefficients[2,1], lms$coefficients[2,2],
                                lms$coefficients[2,4], lms$coefficients[1,1],
                           lms$coefficients[1,2],
                           lms$coefficients[1,4], lms$fstatistic[1], lms$fstatistic[3], lms$r.squared, prob)))
@@ -3058,7 +2595,7 @@ fig_CO2_time_series <- ggplot(data=CO2_pr_i_melt) +
 
 fig_CO2_ano <- ggplot(data = ano_atm_CO2, aes(x = as.POSIXct(dt), y = atm_CO2_ano)) +
   scale_x_datetime(breaks = date_breaks("2 year"), labels = date_format("%Y")) +
-  geom_point(colour="orange", na.rm=TRUE, size=size_point) + 
+  geom_point(colour="orange", na.rm=TRUE, size=size_point) +
   geom_smooth(method=lm, colour="black", fill="grey", size=0.6) +
   labs(title=NULL, x="Time", y=expression(paste("Atmospheric ", CO[2]))) +
   Mytheme() +
@@ -3066,17 +2603,20 @@ fig_CO2_ano <- ggplot(data = ano_atm_CO2, aes(x = as.POSIXct(dt), y = atm_CO2_an
 
 fig_delta_CO2 <- ggplot(data = CO2_pr_i, aes(x = as.POSIXct(dt), y = mean_pCO2 - atm_CO2), na.rm=TRUE) +
   scale_x_datetime(breaks = date_breaks("2 year"), labels = date_format("%Y")) +
-  geom_point(colour="orange", na.rm=TRUE, size=size_point) + 
+  geom_point(colour="orange", na.rm=TRUE, size=size_point) +
   #geom_smooth(method=lm, colour="black", fill="grey", size=0.6) +
   labs(title="Positive values indicate a source for the atmosphere", x="Time", y=expression(paste("Seawater ", pCO[2], " - atmospheric ", CO[2]))) +
   Mytheme() +
   geom_hline(yintercept = 0)
-  
+
 g <- arrangeGrob(fig_CO2_time_series, fig_CO2_ano, ncol=1)
 ggsave("figures/fig_atm_CO2.png", g)
 ```
 
-Atmospheric concentration of CO2 measured at Plateau Rosa from 1993 to 2015 were downloaded from <http://ds.data.jma.go.jp/gmd/wdcgg/cgi-bin/wdcgg/download.cgi?index=PRS645N00-RSE&param=200612120114&select=inventory>. Note that contributors should be contacted for proper acknowledgement for use of the data or offer of co-authorship
+Atmospheric concentration of CO2 measured at Plateau Rosa from 1993 to 2018 were downloaded from
+<https://gaw.kishou.go.jp/search/file/0064-6039-1001-01-01-9999>
+<!-- <http://ds.data.jma.go.jp/gmd/wdcgg/cgi-bin/wdcgg/download.cgi?index=PRS645N00-RSE&param=200612120114&select=inventory>.  -->
+Note that contributors should be contacted for proper acknowledgement for use of the data or offer of co-authorship
 <http://ds.data.jma.go.jp/gmd/wdcgg/cgi-bin/wdcgg/accessdata.cgi?lang=&contributor_index=200612120057>
 
 There are missing data:
@@ -3095,100 +2635,16 @@ The rate of increase of seawater pCO2 (`r round(reg_var_1m[7,1], digit=2)` uatm 
   kable(reg_atm_CO2, digits = c(2,2), caption="Regressions of atmospheric CO2 (time series and anomalies).")
 ```
 
-```{r deffayes plot}
-ct <- seq(2155e-6, 2300e-6, length.out=20)
-at <- seq(2455e-6, 2600e-6, length.out=20)
-grid_data <- data.frame(ct=ct, at=at)
-zz <- tbl_df(expand.grid(ct,at))
-colnames(zz) <- c("ct", "at")
-zz2 <- carb(flag=15, var1=zz$at, var2=zz$ct, S=38, T=18, P=0)
-zz$pCO2 <- zz2$pCO2
-zz$CO3 <- zz2$CO3
-zz$pH <- zz2$pH
-deff <- ggplot() + 
-  geom_contour(data=zz, aes(x=ct*1e6, y=at*1e6, z=pH), stat = "contour", binwidth = 0.1, na.rm=TRUE) +
-stat_contour(aes(colour=..level..), breaks=c(8, 8.1, 8.2)) +
-  geom_point(data=mean0m, aes(x = mean_dic, y=mean_ta, col=as.factor(year)), na.rm=TRUE) + 
-  scale_color_viridis(name="Year", discrete=TRUE, option="plasma")
-
-deff_monthly <- ggplot() + 
-  stat_contour(data=zz, aes(x=ct*1e6, y=at*1e6, z=pH), breaks=seq(8,8.2, by=0.1), col="blue", na.rm=TRUE) +
-  geom_text(data=mean0m_month, aes(x = ct, y=at, label=monthd, col=as.factor(year)), na.rm=TRUE) + 
-    lims(x=c(2190, 2275), y=c(2510, 2580)) +
-scale_color_viridis(name="Year", discrete=TRUE, option="plasma") +
-    labs(title="Point B", 
-       x=expression(paste(italic(C)[T]," ","(",mu, mol.kg^-1,")")),
-       y=expression(paste(italic(A)[T]," ","(",mu, mol.kg^-1,")")))
-
-deff_monthly <- ggplot() +
-  stat_contour(
-  data = zz,
-  aes(x = ct * 1e6, y = at * 1e6, z = pH),
-  breaks = seq(8, 8.2, by = 0.05),
-  col = "blue",
-  na.rm = TRUE
-  ) +
-  geom_text(data = mean0m_month,
-  aes(x = ct, y = at, label = substr(mean0m_month$year, 3, 4), col = as.factor(monthd)),
-  na.rm = TRUE) +
-  lims(x = c(2190, 2275), y = c(2510, 2580)) +
-  labs(title="Point B, coded with month (color) and year (digits)", 
-       x=expression(paste(italic(C)[T]," ","(",mu, mol.kg^-1,")")),
-       y=expression(paste(italic(A)[T]," ","(",mu, mol.kg^-1,")"))) +
-  scale_color_viridis(name = "Month", discrete = TRUE, option = "plasma")
-  #direct.label(deff_monthly, "top.pieces")
-  ggsave(file = "figures/fig_deffayes_monthly.png", deff_monthly,
-  width = 15, height = 15, units = "cm")
-  
-# Yearly Deffayes plot
-tmp <- summarize_all(group_by(mean0m_month, year), mean)
-deff_yearly <- ggplot() +
-  stat_contour(
-  data = zz,
-  aes(x = ct * 1e6, y = at * 1e6, z = pH),
-  breaks = seq(8, 8.2, by = 0.05),
-  col = "blue",
-  na.rm = TRUE
-  ) +
-  geom_text(data = tmp ,
-  aes(x = ct, y = at, label = substr(tmp$year, 3, 4)),
-  na.rm = TRUE) +
-  lims(x = c(2190, 2275), y = c(2510, 2580)) +
-  labs(title="Point", 
-       x=expression(paste(italic(C)[T]," ","(",mu, mol.kg^-1,")")),
-       y=expression(paste(italic(A)[T]," ","(",mu, mol.kg^-1,")"))) +
-  scale_color_viridis(name = "Month", discrete = TRUE, option = "plasma")
-  #ggsave(file = "../figures/fig_deffayes_monthly.png", deff_monthly, width = 15, height = 15, units = "cm")
-
-# Quarterly Deffayes plot
-tmp <- ungroup(mean0m) %>%
-  select(mean_dic, mean_ta, year, quarter) %>%
-  rename(ct=mean_dic, at=mean_ta) %>%
-  group_by(year, quarter) %>%
-  summarize_all(mean,na.rm=TRUE)
-deff_quarterly <- ggplot() +
-  stat_contour(
-  data = zz,
-  aes(x = ct * 1e6, y = at * 1e6, z = pH),
-  breaks = seq(8, 8.2, by = 0.05),
-  col = "blue",
-  na.rm = TRUE
-  ) +
-  geom_text(data = tmp ,
-  aes(x = ct, y = at, label = tmp$quarter, col=as.factor(tmp$year)),
-  na.rm = TRUE) +
-  lims(x = c(2190, 2275), y = c(2510, 2580)) +
-  labs(title="Point", 
-       x=expression(paste(italic(C)[T]," ","(",mu, mol.kg^-1,")")),
-       y=expression(paste(italic(A)[T]," ","(",mu, mol.kg^-1,")"))) +
-  scale_color_viridis(name = "Month", discrete = TRUE, option = "plasma")
-```
-
-Test of a Deffayes plot.
-![deffayes_monthly](figures/fig_deffayes_monthly.png)
 ## seafet pH
 ```{r seafet pH, echo=FALSE, warning = FALSE, message = FALSE, out.width='100%'}
 # the discrete_continuous file is already read in chunk "Daily and seasonal changes"
+
+#round time into nearest hour
+continuous_discrete$datetime_round <-round_date(continuous_discrete$datetime,unit = "hour" )
+```
+## point B
+```{r point b, echo=FALSE, warning = FALSE, message = FALSE, out.width='100%'}
+y <- read.table("../../pCloud Sync/exp153_carbonates_point_B/data/Data_DIC.csv", header=T, sep=",", dec=".", as.is=T)
 ```
 
 ## SAMI pH
@@ -3256,10 +2712,58 @@ files <- httr::GET(url) %>%
   xml2::as_list() %>%
   unlist()
 urls <- str_c(url, files)
-d <- purrr::map_dfr(urls, read_csv, comment="#", col_types=cols(Date="c", Heure="c"))
-d <- dplyr::mutate(d, datetime=str_c(Date, " ", Heure) %>% parse_datetime(format="%Y%m%d %H%M%S"))
-ggplot(d) + geom_point((aes(x=datetime, y=T)))
-saveRDS(d, file = paste0(path, "data/eol/eol_data.rds"))
+eol <- purrr::map_dfr(urls, read_csv, comment="#", col_types=cols(Date="c", Heure="c"))
+eol <- dplyr::mutate(eol, datetime=str_c(Date, " ", Heure) %>% parse_datetime(format="%Y%m%d %H%M%S"))
+
+# replace outliers O2 data by NA
+eol <- dplyr::mutate(eol, O2 = case_when(O2 >= 999 ~ NA_real_ ,
+                                       TRUE ~ O2))
+
+#round time to nearest hour
+eol$datetime_round <-round_date(eol$datetime,unit = "hour" )
+
+## PLOT 1 = all eol data S T
+eol_xts <- dplyr::select(eol, datetime, S, T, O2)
+eol_xts <- as.xts(eol_xts, order.by=eol_xts$datetime)
+
+dygraph(eol_xts, main = "EOL S T data: all depths, raw time", ylab = "") %>%
+  dySeries("T", drawPoints = TRUE, pointSize=2, label = "Temp")%>%
+  dySeries("O2", drawPoints = TRUE, pointSize=2, label = "oxy")%>%
+  dySeries(axis = "y2","S", drawPoints = TRUE, pointSize=2, label = "Sal") %>%
+ # dyLegend(show = "always", width = 600)%>%
+  #dyAxis("y",valueRange = c(-0.1, 0.11))%>%
+dyOptions(
+    drawGrid = TRUE,
+    drawPoints = TRUE,
+    useDataTimezone = TRUE)%>%
+  dyRangeSelector(height = 30)
+
+#make the mean with same date en rounded time + filter only surface data 0 to 3 m.
+means_eol <- eol %>%
+  group_by( P, datetime_round) %>%
+  dplyr::summarise(
+            mean_sal_eol = mean(S, na.rm=TRUE),
+            mean_temp_eol = mean(T, na.rm=TRUE),
+            mean_O2_eol = mean(O2, na.rm=TRUE)) %>%
+  dplyr::filter(P <= 3)
+
+## PLOT 2 = 0 to 2 m + rounded time to hour
+eol_xts <- dplyr::select(means_eol, datetime_round, mean_sal_eol, mean_temp_eol, mean_O2_eol)
+eol_xts <- as.xts(eol_xts, order.by=eol_xts$datetime_round)
+
+dygraph(eol_xts,  main = "EOL data: 0 to 3 m depth , rounded time to nearest hour", ylab = "") %>%
+  dySeries("mean_temp_eol", drawPoints = TRUE, pointSize=2, label = "Temp")%>%
+  dySeries(axis = "y2","mean_sal_eol", drawPoints = TRUE, pointSize=2, label = "Sal") %>%
+    dySeries("mean_O2_eol", drawPoints = TRUE, pointSize=2, label = "oxy")%>%
+ # dyLegend(show = "always", width = 600)%>%
+  #dyAxis("y",valueRange = c(-0.1, 0.11))%>%
+dyOptions(
+    drawGrid = TRUE,
+    drawPoints = TRUE,
+    useDataTimezone = TRUE)%>%
+  dyRangeSelector(height = 30)
+### SAVE
+saveRDS(eol, file = paste0(path, "data/eol/eol_data.rds"))
 
 ```
 
@@ -3297,7 +2801,39 @@ dat <- bind_rows(dat, supp) %>%
   arrange(date)
 ```
 
+## EOL - point B comparaison
 
+### Temperature
+```{r eol pointb comp, echo=FALSE, warning = FALSE, message = FALSE, out.width='70%'}
+# join PTB data from continuous_discrete to EOL data to compare
+eol_ptb <- left_join(means_eol, continuous_discrete, by="datetime_round")
+
+temperature <- left_join(means_eol%>%select(datetime_round, mean_temp_eol), continuous_discrete%>%select(datetime_round, T_ptb), by="datetime_round")
+
+temperature_xts <- dplyr::select(temperature, datetime_round, T_ptb, mean_temp_eol)
+temperature_xts <- as.xts(temperature_xts, order.by=temperature_xts$datetime_round)
+
+dygraph(temperature_xts,  main = "Temperature comparaison: EOL - PTB", ylab = "") %>%
+  dySeries("mean_temp_eol", drawPoints = TRUE, pointSize=2, label = "Temp EOL")%>%
+  dySeries("T_ptb", drawPoints = TRUE, pointSize=2, label = "Temp PTB") %>%
+ # dyLegend(show = "always", width = 600)%>%
+  #dyAxis("y",valueRange = c(-0.1, 0.11))%>%
+dyOptions(
+    drawGrid = TRUE,
+    drawPoints = TRUE,
+    useDataTimezone = TRUE)%>%
+  dyRangeSelector(height = 30)
+
+###
+titre <- "EOL T vs Point B T"
+fit <- lmodel2(data = temperature, T_ptb ~ mean_temp_eol, nperm = 99)
+p_Tptb_Teol <-  ggreg2(fit, "mean_temp_eol", "T_ptb") +
+  geom_line(aes(x = mean_temp_eol, y = mean_temp_eol), linetype = 2) +
+  mytheme+labs(x="T EOL", y="T Point B")
+
+print(p_Tptb_Teol)
+
+```
 ## pH comparaison
 
 ### **continuous pH time series**
