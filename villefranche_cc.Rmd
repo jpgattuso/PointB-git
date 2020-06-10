@@ -42,6 +42,7 @@ require("knitr")
 library(broom)
 library(stringr)
 library("lmodel2") # modele II regression
+library(plyr)
 
 #define who is the user and define path
 if (Sys.getenv("LOGNAME") == "gattuso") {
@@ -2768,7 +2769,9 @@ saveRDS(eol, file = paste0(path, "data/eol/eol_data.rds"))
 
 ```
 
-## ctd_hydro
+## Rade Hydro, SOMLIT (ctd_hydro, Point B / B+)
+
+Time is not included in dataset. Thus, we decided to add a generic time of 07:00 
 
 ```{r ctd_hydro, echo=FALSE, warning = FALSE, message = FALSE, out.width='100%'}
 dat <-  read_delim("http://www.obs-vlfr.fr/data/files/~radehydro/radehydro_ctd.csv.gz", delim = ",", col_names = TRUE, col_types = cols(id = "c", date = "D", date_time = "T", fluo_calib = "d", fluorescence="d", oxygen_mll="d", oxygen_sat="d", oxygen_umolkg="d", par="d", v0="d", v2="d", v3="d"), na = c("NA")) %>%
@@ -2828,12 +2831,22 @@ rhBplus_surf_mean <- radehydro_Bplus_surf %>%
                    mean_oxy_mll_rhBplus = mean(oxygen_mll, na.rm=TRUE),
                    mean_oxy_umolkg_rhBplus = mean(oxygen_umolkg, na.rm=TRUE))
 # bind the 2 df (B and B+)
-library(plyr)
+
 rh_B_Bplus_mean <- full_join(rhB_surf_mean, rhBplus_surf_mean, by=NULL)
+rh_B_Bplus_mean$date <- as.POSIXct(rh_B_Bplus_mean$date)
+
+# put 09:00:00 as time (local time)
+rh_B_Bplus_mean <- rh_B_Bplus_mean %>%
+  dplyr::mutate(time = " 09:00:00") %>%
+  dplyr::mutate(datetime = paste0(date, time)) 
+rh_B_Bplus_mean$datetime <- ymd_hms(rh_B_Bplus_mean$datetime, tz="Europe/Paris")
+
+# convert local time to UTC time
+rh_B_Bplus_mean$datetime <- with_tz(rh_B_Bplus_mean$datetime, "UTC")
 
 ```
 
-
+### Time series plots
 
 ```{r plot ctd_hydro, echo=FALSE, warning = FALSE, message = FALSE, out.width='100%'}
 # Temp
@@ -2896,6 +2909,9 @@ dyOptions(
     useDataTimezone = TRUE)%>%
   dyRangeSelector(height = 30)
 ```
+
+### Property-property plots
+
 ```{r property plot ctd_hydro, echo=FALSE, warning = FALSE, message = FALSE, out.width='100%'}
 # temp
 titre <- "Temperature Rade Hydro: B vs B+"
@@ -2930,8 +2946,11 @@ p_rh_oxy_umolkg <-  ggreg2(fit, "mean_oxy_umolkg_rhB", "mean_oxy_umolkg_rhBplus"
 print(p_rh_oxy_umolkg)
 ```
 
-## EOL - point B (rade hydro) comparaison
+## EOL - SOMLIT (Point B) comparaison
 
+In this section, T, S and Oxy is compaired between EOL and SOMLIT data. 
+
+EOL data are filtered in the
 ### Temperature
 ```{r eol pointb comp, echo=FALSE, warning = FALSE, message = FALSE, out.width='100%'}
 
