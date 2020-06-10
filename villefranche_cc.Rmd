@@ -2740,17 +2740,19 @@ dyOptions(
     useDataTimezone = TRUE)%>%
   dyRangeSelector(height = 30)
 
-#make the mean with same date en rounded time + filter only surface data 1 to 3 m.
-means_eol <- eol %>%
+#make the mean with same date and rounded time + filter only surface data 1 to 3 m.
+mean_eol <- eol %>%
   group_by( P, datetime_round) %>%
   dplyr::summarise(
             mean_sal_eol = mean(S, na.rm=TRUE),
             mean_temp_eol = mean(T, na.rm=TRUE),
             mean_O2_eol = mean(O2, na.rm=TRUE)) %>%
+  dplyr::rename(datetime = datetime_round) %>%
   dplyr::filter(P >=1 & P <= 3)
 
+
 ## PLOT 2 = 0 to 2 m + rounded time to hour
-eol_xts <- dplyr::select(means_eol, datetime_round, mean_sal_eol, mean_temp_eol, mean_O2_eol)
+eol_xts <- dplyr::select(mean_eol, datetime_round, mean_sal_eol, mean_temp_eol, mean_O2_eol)
 eol_xts <- as.xts(eol_xts, order.by=eol_xts$datetime_round)
 
 dygraph(eol_xts,  main = "EOL data: 0 to 3 m depth , rounded time to nearest hour", ylab = "") %>%
@@ -2946,20 +2948,28 @@ p_rh_oxy_umolkg <-  ggreg2(fit, "mean_oxy_umolkg_rhB", "mean_oxy_umolkg_rhBplus"
 print(p_rh_oxy_umolkg)
 ```
 
-## EOL - SOMLIT (Point B) comparaison
+## Comparaison EOL - SOMLIT (Point B) 
 
-In this section, T, S and Oxy is compaired between EOL and SOMLIT data. 
+In this section, T, S and Oxy are compaired between EOL and SOMLIT data. 
 
-EOL data are filtered in the
+- SOMLIT data are filtered in the "Rade hydro, SOMLIT" section above. Data from B station (not B+) and from 1 m to 3 m were selected. Time was not available at the begining. We decided to add 09:00:00 as a local time. It was convert to UTC time in order to make the comparaison with EOL data.
+
+- EOL data are filtered in the "EOL" section above. Data from 1 m to 3 m were selected.
+
 ### Temperature
-```{r eol pointb comp, echo=FALSE, warning = FALSE, message = FALSE, out.width='100%'}
+
+#### 1st approach (same Point B data during 6 days)
+
+Here, SOMLIT data from Rade hydro were not used. Instead, we took Point B data from Data_dic.csv.  The same S/T value was kept for 3 days before and 3 days after.
+
+```{r eol pointb comp 1st, echo=FALSE, warning = FALSE, message = FALSE, out.width='100%'}
 
 ### 1st approach with pointB data from "continuous_discret" 
 ### 
 # join PTB data from continuous_discrete to EOL data to compare
-eol_ptb <- left_join(means_eol, continuous_discrete, by="datetime_round")
+eol_ptb <- left_join(mean_eol, continuous_discrete, by="datetime_round")
 
-temperature <- left_join(means_eol%>%select(datetime_round, mean_temp_eol), continuous_discrete%>%select(datetime_round, T_ptb), by="datetime_round")
+temperature <- left_join(mean_eol%>%select(datetime_round, mean_temp_eol), continuous_discrete%>%select(datetime_round, T_ptb), by="datetime_round")
 
 temperature_xts <- dplyr::select(temperature, datetime_round, T_ptb, mean_temp_eol)
 temperature_xts <- as.xts(temperature_xts, order.by=temperature_xts$datetime_round)
@@ -2983,11 +2993,44 @@ p_Tptb_Teol <-  ggreg2(fit, "mean_temp_eol", "T_ptb") +
   mytheme+labs(x="T EOL", y="T Point B")
 
 print(p_Tptb_Teol)
+```
+#### 2nd approach
 
+Here, SOmlit data were used and binded with EOL data by datetime in order to compare.
+
+```{r eol pointb comp 1st, echo=FALSE, warning = FALSE, message = FALSE, out.width='100%'}
 ### 2nd approach with pointB data from "rade hydro" 
 ###
+#eol_ptb <- left_join(mean_eol, continuous_discrete, by="datetime_round")
+#eol_ptb <- left_join(  mean_eol%>%select(datetime, mean_temp_eol), rh_B_Bplus_mean%>%select(datetime, mean_temp_rhB),  by="datetime")
 
+eol_ptb <- left_join(rh_B_Bplus_mean, mean_eol , by="datetime")
+
+eol_ptb_xts <- dplyr::select(eol_ptb, datetime, mean_temp_rhB, mean_temp_eol)
+eol_ptb_xts <- as.xts(eol_ptb_xts, order.by=eol_ptb$datetime)
+
+dygraph(eol_ptb_xts,  main = "Temperature comparaison: EOL - PTB", ylab = "") %>%
+    dySeries("mean_temp_rhB", drawPoints = TRUE, pointSize=4, label = "Temp PTB", color ="blue") %>%
+dySeries("mean_temp_eol", drawPoints = TRUE, pointSize=2, label = "Temp EOL", color ="red")%>%
+ # dyLegend(show = "always", width = 600)%>%
+  #dyAxis("y",valueRange = c(-0.1, 0.11))%>%
+dyOptions(
+    drawGrid = TRUE,
+    drawPoints = TRUE,
+    useDataTimezone = TRUE)%>%
+  dyRangeSelector(height = 30)
+
+###
+titre <- "EOL T vs Point B T"
+fit <- lmodel2(data = eol_ptb, mean_temp_rhB ~ mean_temp_eol, nperm = 99)
+p_Tptb_Teol <-  ggreg2(fit, "mean_temp_eol", "mean_temp_rhB") +
+  geom_abline(aes(slope= 1, intercept =0), linetype = 2) +
+  mytheme+labs(x="T EOL", y="T Point B")
+
+print(p_Tptb_Teol)
 ```
+
+
 ## pH comparaison
 
 ### **continuous pH time series**
