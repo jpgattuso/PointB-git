@@ -3033,7 +3033,7 @@ print(p_Tptb_Teol)
 ```{r eol pointb comp Sal, echo=FALSE, warning = FALSE, message = FALSE, out.width='100%'}
 
 eol_ptb_sal_xts <- dplyr::select(eol_ptb, datetime, mean_sal_rhB, mean_sal_eol)
-eol_ptb_sal_xts <- as.xts(eol_ptb_sal_xts, order.by=eol_ptb$datetime)
+eol_ptb_sal_xts <- as.xts(eol_ptb_sal_xts, order.by=eol_ptb_sal_xts$datetime)
 
 dygraph(eol_ptb_sal_xts,  main = "Salinity comparaison: EOL - PTB", ylab = "") %>%
     dySeries("mean_sal_rhB", drawPoints = TRUE, pointSize=4, label = "Sal PTB", color ="blue") %>%
@@ -3056,14 +3056,14 @@ p_Sptb_Seol <-  ggreg2(fit, "mean_sal_eol", "mean_sal_rhB") +
 print(p_Sptb_Seol)
 ```
 ### Oxygen
-```{r eol pointb comp Sal, echo=FALSE, warning = FALSE, message = FALSE, out.width='100%'}
+```{r eol pointb comp Oxy, echo=FALSE, warning = FALSE, message = FALSE, out.width='100%'}
 
 eol_ptb_oxy_xts <- dplyr::select(eol_ptb, datetime, mean_oxy_mll_rhB, mean_oxy_eol)
-eol_ptb_oxy_xts <- as.xts(eol_ptb_oxy_xts, order.by=eol_ptb$datetime)
+eol_ptb_oxy_xts <- as.xts(eol_ptb_oxy_xts, order.by=eol_ptb_oxy_xts$datetime)
 
-dygraph(eol_ptb_oxy_xts,  main = "Salinity comparaison: EOL - PTB", ylab = "") %>%
-    dySeries("mean_oxy_rhB", drawPoints = TRUE, pointSize=4, label = "Sal PTB", color ="blue") %>%
-dySeries("mean_oxy_eol", drawPoints = TRUE, pointSize=2, label = "Sal EOL", color ="red")%>%
+dygraph(eol_ptb_oxy_xts,  main = "Oxygen (ml/l) comparaison: EOL - PTB", ylab = "") %>%
+dySeries("mean_oxy_mll_rhB", drawPoints = TRUE, pointSize=4, label = "Oxy PTB", color ="blue") %>%
+dySeries("mean_O2_eol", drawPoints = TRUE, pointSize=2, label = "Oxy EOL", color ="red")%>%
  # dyLegend(show = "always", width = 600)%>%
   #dyAxis("y",valueRange = c(-0.1, 0.11))%>%
 dyOptions(
@@ -3074,12 +3074,12 @@ dyOptions(
 
 ###
 titre <- "Salinity: EOL vs Point B"
-fit <- lmodel2(data = eol_ptb, mean_sal_rhB ~ mean_sal_eol, nperm = 99)
-p_Sptb_Seol <-  ggreg2(fit, "mean_sal_eol", "mean_sal_rhB") +
+fit <- lmodel2(data = eol_ptb, mean_oxy_mll_rhB ~ mean_O2_eol, nperm = 99)
+p_Oxyptb_Oxyeol <-  ggreg2(fit, "mean_O2_eol", "mean_oxy_mll_rhB") +
   geom_abline(aes(slope= 1, intercept =0), linetype = 2) +
   mytheme+labs(x="Sal EOL", y="Sal Point B")
 
-print(p_Sptb_Seol)
+print(p_Oxyptb_Oxyeol)
 ```
 ## pH comparaison
 
