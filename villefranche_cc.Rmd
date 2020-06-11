@@ -42,6 +42,7 @@ require("knitr")
 library(broom)
 library(stringr)
 library("lmodel2") # modele II regression
+library(plyr)
 
 #define who is the user and define path
 if (Sys.getenv("LOGNAME") == "gattuso") {
@@ -2523,9 +2524,10 @@ kable(broom::tidy(summary(reg_Chla)), digits = c(5,5,5,3,3), caption="Regression
 
 ## CO2
 ```{r CO2, include=FALSE}
-typ <- c("Dddd") # column type
+typ <- c("cccccccdddddddddddddddddddd") # column type
 CO2_pr <- tbl_df(
-  read_csv(file=paste0(path,"/data/CO2_data_PlateauRosa_daily_1993-2015_R.csv"), col_names=TRUE, col_types = typ, skip=7)
+  read_csv(file=paste0(path,"/data/CO2_data_PlateauRosa_daily_1993-2018_R.txt"), comment="#", col_types = typ)
+#read_csv(file=paste0(path,"/data/CO2_data_PlateauRosa_daily_1993-2015_R.csv"), col_names=TRUE, col_types = typ, skip=7)
 ) %>%
 #tidyr::unite(col="datetime", year, month, day, sep = "-" )%>%
 dplyr::rename(dt=date) %>%
@@ -2738,23 +2740,25 @@ dyOptions(
     useDataTimezone = TRUE)%>%
   dyRangeSelector(height = 30)
 
-#make the mean with same date en rounded time + filter only surface data 0 to 3 m.
-means_eol <- eol %>%
+#make the mean with same date and rounded time + filter only surface data 1 to 3 m.
+mean_eol <- eol %>%
   group_by( P, datetime_round) %>%
   dplyr::summarise(
             mean_sal_eol = mean(S, na.rm=TRUE),
             mean_temp_eol = mean(T, na.rm=TRUE),
-            mean_O2_eol = mean(O2, na.rm=TRUE)) %>%
-  dplyr::filter(P <= 3)
+            mean_oxy_eol = mean(O2, na.rm=TRUE)) %>%
+  dplyr::rename(datetime = datetime_round) %>%
+  dplyr::filter(P >=1 & P <= 3)
+
 
 ## PLOT 2 = 0 to 2 m + rounded time to hour
-eol_xts <- dplyr::select(means_eol, datetime_round, mean_sal_eol, mean_temp_eol, mean_O2_eol)
+eol_xts <- dplyr::select(mean_eol, datetime_round, mean_sal_eol, mean_temp_eol, mean_oxy_eol)
 eol_xts <- as.xts(eol_xts, order.by=eol_xts$datetime_round)
 
 dygraph(eol_xts,  main = "EOL data: 0 to 3 m depth , rounded time to nearest hour", ylab = "") %>%
   dySeries("mean_temp_eol", drawPoints = TRUE, pointSize=2, label = "Temp")%>%
   dySeries(axis = "y2","mean_sal_eol", drawPoints = TRUE, pointSize=2, label = "Sal") %>%
-    dySeries("mean_O2_eol", drawPoints = TRUE, pointSize=2, label = "oxy")%>%
+    dySeries("mean_oxy_eol", drawPoints = TRUE, pointSize=2, label = "oxy")%>%
  # dyLegend(show = "always", width = 600)%>%
   #dyAxis("y",valueRange = c(-0.1, 0.11))%>%
 dyOptions(
@@ -2767,7 +2771,10 @@ saveRDS(eol, file = paste0(path, "data/eol/eol_data.rds"))
 
 ```
 
-## ctd_hydro
+## Rade Hydro, SOMLIT (ctd_hydro, Point B / B+)
+
+Time is not included in dataset. Thus, we decided to add a generic time of 07:00 
+
 ```{r ctd_hydro, echo=FALSE, warning = FALSE, message = FALSE, out.width='100%'}
 dat <-  read_delim("http://www.obs-vlfr.fr/data/files/~radehydro/radehydro_ctd.csv.gz", delim = ",", col_names = TRUE, col_types = cols(id = "c", date = "D", date_time = "T", fluo_calib = "d", fluorescence="d", oxygen_mll="d", oxygen_sat="d", oxygen_umolkg="d", par="d", v0="d", v2="d", v3="d"), na = c("NA")) %>%
     dplyr::select(-date_time) %>%
@@ -2799,16 +2806,170 @@ supp2 <- read_excel(paste0(path,"data/radehydro_ctd/", "Profiles_sonde_supplemen
   supp <- bind_rows(supp1, supp2)
 dat <- bind_rows(dat, supp) %>%
   arrange(date)
+
+# select surface (1 m to 3 m) for B or B+ data
+# B
+radehydro_B_surf <- dat %>%
+  dplyr::select(station, date , depth, salinity, temperature, oxygen_mll, oxygen_umolkg) %>%
+  dplyr::filter( (depth >= 1 & depth <= 3))%>%
+  dplyr::filter( station == "B")
+
+rhB_surf_mean <- radehydro_B_surf %>%
+  dplyr::group_by(date) %>%
+  dplyr::summarise(mean_sal_rhB = mean(salinity, na.rm=TRUE),
+                   mean_temp_rhB = mean(temperature, na.rm=TRUE),
+                   mean_oxy_mll_rhB = mean(oxygen_mll, na.rm=TRUE),
+                   mean_oxy_umolkg_rhB = mean(oxygen_umolkg, na.rm=TRUE))
+# B+
+radehydro_Bplus_surf <- dat %>%
+  dplyr::select(station, date , depth, salinity, temperature, oxygen_mll, oxygen_umolkg) %>%
+  dplyr::filter( (depth >= 1 & depth <= 3))%>%
+  dplyr::filter( station == "B+")
+
+rhBplus_surf_mean <- radehydro_Bplus_surf %>%
+  dplyr::group_by(date) %>%
+  dplyr::summarise(mean_sal_rhBplus = mean(salinity, na.rm=TRUE),
+                   mean_temp_rhBplus = mean(temperature, na.rm=TRUE),
+                   mean_oxy_mll_rhBplus = mean(oxygen_mll, na.rm=TRUE),
+                   mean_oxy_umolkg_rhBplus = mean(oxygen_umolkg, na.rm=TRUE))
+# bind the 2 df (B and B+)
+
+rh_B_Bplus_mean <- full_join(rhB_surf_mean, rhBplus_surf_mean, by=NULL)
+rh_B_Bplus_mean$date <- as.POSIXct(rh_B_Bplus_mean$date)
+
+# put 09:00:00 as time (local time)
+rh_B_Bplus_mean <- rh_B_Bplus_mean %>%
+  dplyr::mutate(time = " 09:00:00") %>%
+  dplyr::mutate(datetime = paste0(date, time)) 
+rh_B_Bplus_mean$datetime <- ymd_hms(rh_B_Bplus_mean$datetime, tz="Europe/Paris")
+
+# convert local time to UTC time
+rh_B_Bplus_mean$datetime <- with_tz(rh_B_Bplus_mean$datetime, "UTC")
+
 ```
 
-## EOL - point B comparaison
+### Time series plots
+
+```{r plot ctd_hydro, echo=FALSE, warning = FALSE, message = FALSE, out.width='100%'}
+# Temp
+rh_temp_xts <- dplyr::select(rh_B_Bplus_mean, date, mean_temp_rhBplus, mean_temp_rhB)
+rh_temp_xts <- as.xts(rh_temp_xts, order.by=rh_temp_xts$date)
+
+dygraph(rh_temp_xts,  main = "Temperature comparaison Rade Hydro: B / B+", ylab = "") %>%
+    dySeries("mean_temp_rhB", drawPoints = TRUE, pointSize=4, label = "Temp B", color ="blue") %>%
+   dySeries("mean_temp_rhBplus", drawPoints = TRUE, pointSize=2, label = "Temp B+", color="red")%>%
+ # dyLegend(show = "always", width = 600)%>%
+  #dyAxis("y",valueRange = c(-0.1, 0.11))%>%
+dyOptions(
+    drawGrid = TRUE,
+    drawPoints = TRUE,
+    useDataTimezone = TRUE)%>%
+  dyRangeSelector(height = 30)
+
+# Sal
+rh_sal_xts <- dplyr::select(rh_B_Bplus_mean, date, mean_sal_rhBplus, mean_sal_rhB)
+rh_sal_xts <- as.xts(rh_sal_xts, order.by=rh_sal_xts$date)
+
+dygraph(rh_sal_xts,  main = "Salinity comparaison Rade Hydro: B / B+", ylab = "") %>%
+    dySeries("mean_sal_rhB", drawPoints = TRUE, pointSize=4, label = "Sal B", color ="blue") %>%
+   dySeries("mean_sal_rhBplus", drawPoints = TRUE, pointSize=2, label = "Sal B+", color="red")%>%
+ # dyLegend(show = "always", width = 600)%>%
+  #dyAxis("y",valueRange = c(-0.1, 0.11))%>%
+dyOptions(
+    drawGrid = TRUE,
+    drawPoints = TRUE,
+    useDataTimezone = TRUE)%>%
+  dyRangeSelector(height = 30)
+
+# Oxy ml/l
+rh_oxymll_xts <- dplyr::select(rh_B_Bplus_mean, date, mean_oxy_mll_rhBplus, mean_oxy_mll_rhB)
+rh_oxymll_xts <- as.xts(rh_oxymll_xts, order.by=rh_oxymll_xts$date)
+
+dygraph(rh_oxymll_xts,  main = "Oxygen (ml/l) comparaison Rade Hydro: B / B+", ylab = "") %>%
+    dySeries("mean_oxy_mll_rhB", drawPoints = TRUE, pointSize=4, label = "Oxy_mll B", color ="blue") %>%
+   dySeries("mean_oxy_mll_rhBplus", drawPoints = TRUE, pointSize=2, label = "Oxy_mll B+", color="red")%>%
+ # dyLegend(show = "always", width = 600)%>%
+  #dyAxis("y",valueRange = c(-0.1, 0.11))%>%
+dyOptions(
+    drawGrid = TRUE,
+    drawPoints = TRUE,
+    useDataTimezone = TRUE)%>%
+  dyRangeSelector(height = 30)
+  
+# Oxy umolkg
+rh_oxyumolkg_xts <- dplyr::select(rh_B_Bplus_mean, date, mean_oxy_umolkg_rhBplus, mean_oxy_umolkg_rhB)
+rh_oxyumolkg_xts <- as.xts(rh_oxyumolkg_xts, order.by=rh_oxyumolkg_xts$date)
+
+dygraph(rh_oxyumolkg_xts,  main = "Oxygen (umol/kg) comparaison Rade Hydro: B / B+", ylab = "") %>%
+    dySeries("mean_oxy_umolkg_rhB", drawPoints = TRUE, pointSize=4, label = "Oxy_umolkg B", color ="blue") %>%
+   dySeries("mean_oxy_umolkg_rhBplus", drawPoints = TRUE, pointSize=2, label = "Oxy_umolkg B+", color="red")%>%
+ # dyLegend(show = "always", width = 600)%>%
+  #dyAxis("y",valueRange = c(-0.1, 0.11))%>%
+dyOptions(
+    drawGrid = TRUE,
+    drawPoints = TRUE,
+    useDataTimezone = TRUE)%>%
+  dyRangeSelector(height = 30)
+```
+
+### Property-property plots
+
+```{r property plot ctd_hydro, echo=FALSE, warning = FALSE, message = FALSE, out.width='100%'}
+# temp
+titre <- "Temperature Rade Hydro: B vs B+"
+fit <- lmodel2(data = rh_B_Bplus_mean, mean_temp_rhBplus ~ mean_temp_rhB, nperm = 99)
+p_rh_temp <-  ggreg2(fit, "mean_temp_rhB", "mean_temp_rhBplus") +
+  geom_abline(aes(intercept = 0, slope = 1), linetype = 2) +
+  mytheme+labs(x="Temp Point B", y="Temp Point B+")
+print(p_rh_temp)
+
+# sal
+titre <- "Salinity Rade Hydro: B vs B+"
+fit <- lmodel2(data = rh_B_Bplus_mean, mean_sal_rhBplus ~ mean_sal_rhB, nperm = 99)
+p_rh_sal <-  ggreg2(fit, "mean_sal_rhB", "mean_sal_rhBplus") +
+  geom_abline(aes(intercept = 0, slope = 1), linetype = 2) +
+  mytheme+labs(x="Sal Point B", y="Sal Point B+")
+print(p_rh_sal)
+
+# Oxy mll
+titre <- "Oxygen (ml/l) Rade Hydro: B vs B+"
+fit <- lmodel2(data = rh_B_Bplus_mean, mean_oxy_mll_rhBplus ~ mean_oxy_mll_rhB, nperm = 99)
+p_rh_oxy_mll <-  ggreg2(fit, "mean_oxy_mll_rhB", "mean_oxy_mll_rhBplus") +
+  geom_abline(aes(intercept = 0, slope = 1), linetype = 2) +
+  mytheme+labs(x="Oxy_mll Point B", y="Oxy_mll Point B+")
+print(p_rh_oxy_mll)
+
+# Oxy umolkg
+titre <- "Oxygen (umol/kg) Rade Hydro: B vs B+"
+fit <- lmodel2(data = rh_B_Bplus_mean, mean_oxy_umolkg_rhBplus ~ mean_oxy_umolkg_rhB, nperm = 99)
+p_rh_oxy_umolkg <-  ggreg2(fit, "mean_oxy_umolkg_rhB", "mean_oxy_umolkg_rhBplus") +
+  geom_abline(aes(intercept = 0, slope = 1), linetype = 2) +
+  mytheme+labs(x="Oxy_umolkg Point B", y="Oxy_umolkg Point B+")
+print(p_rh_oxy_umolkg)
+```
+
+## Comparaison EOL - SOMLIT (Point B) 
+
+In this section, T, S and Oxy are compaired between EOL and SOMLIT data. 
+
+- SOMLIT data are filtered in the "Rade hydro, SOMLIT" section above. Data from B station (not B+) and from 1 m to 3 m were selected. Time was not available at the begining. We decided to add 09:00:00 as a local time. It was convert to UTC time in order to make the comparaison with EOL data.
+
+- EOL data are filtered in the "EOL" section above. Data from 1 m to 3 m were selected.
 
 ### Temperature
-```{r eol pointb comp, echo=FALSE, warning = FALSE, message = FALSE, out.width='70%'}
-# join PTB data from continuous_discrete to EOL data to compare
-eol_ptb <- left_join(means_eol, continuous_discrete, by="datetime_round")
 
-temperature <- left_join(means_eol%>%select(datetime_round, mean_temp_eol), continuous_discrete%>%select(datetime_round, T_ptb), by="datetime_round")
+#### 1st approach (same Point B data during 6 days)
+
+Here, SOMLIT data from Rade hydro were not used. Instead, we took Point B data from Data_dic.csv.  The same S/T value was kept for 3 days before and 3 days after.
+
+```{r eol pointb comp Temp 1st, echo=FALSE, warning = FALSE, message = FALSE, out.width='100%'}
+
+### 1st approach with pointB data from "continuous_discret" 
+### 
+# join PTB data from continuous_discrete to EOL data to compare
+eol_ptb <- left_join(mean_eol, continuous_discrete, by="datetime_round")
+
+temperature <- left_join(mean_eol%>%select(datetime_round, mean_temp_eol), continuous_discrete%>%select(datetime_round, T_ptb), by="datetime_round")
 
 temperature_xts <- dplyr::select(temperature, datetime_round, T_ptb, mean_temp_eol)
 temperature_xts <- as.xts(temperature_xts, order.by=temperature_xts$datetime_round)
@@ -2825,14 +2986,100 @@ dyOptions(
   dyRangeSelector(height = 30)
 
 ###
-titre <- "EOL T vs Point B T"
+titre <- "Temperature: EOL vs Point B"
 fit <- lmodel2(data = temperature, T_ptb ~ mean_temp_eol, nperm = 99)
 p_Tptb_Teol <-  ggreg2(fit, "mean_temp_eol", "T_ptb") +
   geom_line(aes(x = mean_temp_eol, y = mean_temp_eol), linetype = 2) +
   mytheme+labs(x="T EOL", y="T Point B")
 
 print(p_Tptb_Teol)
+```
+#### 2nd approach
 
+Here, SOmlit data were used and binded with EOL data by datetime in order to compare.
+
+```{r eol pointb comp Temp 2nd, echo=FALSE, warning = FALSE, message = FALSE, out.width='100%'}
+### 2nd approach with pointB data from "rade hydro" 
+###
+#eol_ptb <- left_join(mean_eol, continuous_discrete, by="datetime_round")
+#eol_ptb <- left_join(  mean_eol%>%select(datetime, mean_temp_eol), rh_B_Bplus_mean%>%select(datetime, mean_temp_rhB),  by="datetime")
+
+eol_ptb <- left_join(rh_B_Bplus_mean, mean_eol , by="datetime")
+
+eol_ptb_temp_xts <- dplyr::select(eol_ptb, datetime, mean_temp_rhB, mean_temp_eol)
+eol_ptb_temp_xts <- as.xts(eol_ptb_temp_xts, order.by=eol_ptb$datetime)
+
+dygraph(eol_ptb_temp_xts,  main = "Temperature comparaison: EOL - PTB", ylab = "") %>%
+    dySeries("mean_temp_rhB", drawPoints = TRUE, pointSize=4, label = "Temp PTB", color ="blue") %>%
+dySeries("mean_temp_eol", drawPoints = TRUE, pointSize=2, label = "Temp EOL", color ="red")%>%
+ # dyLegend(show = "always", width = 600)%>%
+  #dyAxis("y",valueRange = c(-0.1, 0.11))%>%
+dyOptions(
+    drawGrid = TRUE,
+    drawPoints = TRUE,
+    useDataTimezone = TRUE)%>%
+  dyRangeSelector(height = 30)
+
+###
+titre <- "Temperature: EOL vs Point B"
+fit <- lmodel2(data = eol_ptb, mean_temp_rhB ~ mean_temp_eol, nperm = 99)
+p_Tptb_Teol <-  ggreg2(fit, "mean_temp_eol", "mean_temp_rhB") +
+  geom_abline(aes(slope= 1, intercept =0), linetype = 2) +
+  mytheme+labs(x="T EOL", y="T Point B")
+
+print(p_Tptb_Teol)
+```
+### Salinity
+```{r eol pointb comp Sal, echo=FALSE, warning = FALSE, message = FALSE, out.width='100%'}
+
+eol_ptb_sal_xts <- dplyr::select(eol_ptb, datetime, mean_sal_rhB, mean_sal_eol)
+eol_ptb_sal_xts <- as.xts(eol_ptb_sal_xts, order.by=eol_ptb_sal_xts$datetime)
+
+dygraph(eol_ptb_sal_xts,  main = "Salinity comparaison: EOL - PTB", ylab = "") %>%
+    dySeries("mean_sal_rhB", drawPoints = TRUE, pointSize=4, label = "Sal PTB", color ="blue") %>%
+dySeries("mean_sal_eol", drawPoints = TRUE, pointSize=2, label = "Sal EOL", color ="red")%>%
+ # dyLegend(show = "always", width = 600)%>%
+  #dyAxis("y",valueRange = c(-0.1, 0.11))%>%
+dyOptions(
+    drawGrid = TRUE,
+    drawPoints = TRUE,
+    useDataTimezone = TRUE)%>%
+  dyRangeSelector(height = 30)
+
+###
+titre <- "Salinity: EOL vs Point B"
+fit <- lmodel2(data = eol_ptb, mean_sal_rhB ~ mean_sal_eol, nperm = 99)
+p_Sptb_Seol <-  ggreg2(fit, "mean_sal_eol", "mean_sal_rhB") +
+  geom_abline(aes(slope= 1, intercept =0), linetype = 2) +
+  mytheme+labs(x="Sal EOL", y="Sal Point B")
+
+print(p_Sptb_Seol)
+```
+### Oxygen
+```{r eol pointb comp Oxy, echo=FALSE, warning = FALSE, message = FALSE, out.width='100%'}
+
+eol_ptb_oxy_xts <- dplyr::select(eol_ptb, datetime, mean_oxy_mll_rhB, mean_oxy_eol)
+eol_ptb_oxy_xts <- as.xts(eol_ptb_oxy_xts, order.by=eol_ptb_oxy_xts$datetime)
+
+dygraph(eol_ptb_oxy_xts,  main = "Oxygen (ml/l) comparaison: EOL - PTB", ylab = "") %>%
+dySeries("mean_oxy_mll_rhB", drawPoints = TRUE, pointSize=4, label = "Oxy PTB", color ="blue") %>%
+dySeries("mean_O2_eol", drawPoints = TRUE, pointSize=2, label = "Oxy EOL", color ="red")%>%
+ # dyLegend(show = "always", width = 600)%>%
+  #dyAxis("y",valueRange = c(-0.1, 0.11))%>%
+dyOptions(
+    drawGrid = TRUE,
+    drawPoints = TRUE,
+    useDataTimezone = TRUE)%>%
+  dyRangeSelector(height = 30)
+
+###
+titre <- "Salinity: EOL vs Point B"
+fit <- lmodel2(data = eol_ptb, mean_oxy_mll_rhB ~ mean_O2_eol, nperm = 99)
+p_Oxyptb_Oxyeol <-  ggreg2(fit, "mean_O2_eol", "mean_oxy_mll_rhB") +
+  geom_abline(aes(slope= 1, intercept =0), linetype = 2) +
+  mytheme+labs(x="Sal EOL", y="Sal Point B")
+
+print(p_Oxyptb_Oxyeol)
 ```
 ## pH comparaison
 
