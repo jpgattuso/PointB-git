@@ -833,8 +833,8 @@ The average uncertainties of the derived carbonate parameters were calculated ac
 ```{r Monthly means, include=TRUE, message= FALSE, }
 # prepare data 0m
 tmp <- ungroup(mean0m) %>%
-  mutate(month = month(sampling_date, label = TRUE, abb = TRUE)) %>%
-  select(
+  dplyr::mutate(month = month(sampling_date, label = TRUE, abb = TRUE)) %>%
+  dplyr::select(
   month,
   mean_temperature,
   mean_salinity,
@@ -850,8 +850,8 @@ tmp <- ungroup(mean0m) %>%
 tmp$month <- factor(tmp$month)
 
 means_month0m <- ungroup(mean0m) %>%
-  group_by(monthd) %>%
-  summarise(
+  dplyr::group_by(monthd) %>%
+  dplyr::summarise(
   Salinity = mean(mean_salinity, na.rm = TRUE),
   Salinity_sd = sd(mean_salinity, na.rm = TRUE),
   Salinity_n = sum(!is.na(mean_salinity)),
@@ -1049,8 +1049,8 @@ ggsave(file="figures/fig_paper_monthly_means_1m.png", g, width = 18, height = 14
 
 # prepare data 50m
 tmp <- ungroup(mean50m) %>%
-  mutate(month = month(sampling_date, label = TRUE, abb = TRUE)) %>%
-  select(
+  dplyr::mutate(month = month(sampling_date, label = TRUE, abb = TRUE)) %>%
+  dplyr::select(
   month,
   mean_temperature,
   mean_salinity,
@@ -1066,8 +1066,8 @@ tmp <- ungroup(mean50m) %>%
 tmp$month <- factor(tmp$month)
 
 means_month50m <- ungroup(mean50m) %>%
-  group_by(monthd) %>%
-  summarise(
+  dplyr::group_by(monthd) %>%
+  dplyr::summarise(
   Salinity = mean(mean_salinity, na.rm = TRUE),
   Salinity_sd = sd(mean_salinity, na.rm = TRUE),
   Salinity_n = sum(!is.na(mean_salinity)),
@@ -1254,8 +1254,8 @@ ggsave(filename = "figures/ATvsCT1p.png", plot = ATvsCT1p)
 # At 1 m
 # Calculate monthly means
 tmp <- ungroup(mean0m) %>%
-  group_by(monthd) %>%
-  summarise(
+  dplyr::group_by(monthd) %>%
+  dplyr::summarise(
   Salinity_month = mean(mean_salinity, na.rm = TRUE),
   Temperature_month = mean(mean_temperature, na.rm = TRUE),
   dic_month = mean(mean_dic, na.rm = TRUE),
@@ -1272,7 +1272,7 @@ tmp <- ungroup(mean0m) %>%
   )
 # Calculate anomalies
 ano_month0m <- left_join(ungroup(mean0m), tmp, by = "monthd") %>%
-  mutate(
+  dplyr::mutate(
   Salinity_ano = mean_salinity - Salinity_month,
   Temperature_ano = mean_temperature - Temperature_month,
   dic_ano = mean_dic - dic_month,
@@ -1707,8 +1707,8 @@ ggsave(filename = "figures/ATvsCT50p.png", plot = ATvsCT50p)
 
 # Calculate monthly means
 tmp <- ungroup(mean50m) %>%
-  group_by(monthd) %>%
-  summarise(
+  dplyr::group_by(monthd) %>%
+  dplyr::summarise(
   Salinity_month = mean(mean_salinity, na.rm = TRUE),
   Temperature_month = mean(mean_temperature, na.rm = TRUE),
   dic_month = mean(mean_dic, na.rm = TRUE),
@@ -1725,7 +1725,7 @@ tmp <- ungroup(mean50m) %>%
 
 # Calculate anomalies
 ano_month50m <- left_join(ungroup(mean50m), tmp, by = "monthd") %>%
-  mutate(
+  dplyr::mutate(
   Salinity_ano = mean_salinity - Salinity_month,
   Temperature_ano = mean_temperature - Temperature_month,
   dic_ano = mean_dic - dic_month,
@@ -1998,12 +1998,12 @@ ggsave(file="figures/fig_paper_at_nocarb.png", g, width=15, height = 17, units =
 
 ```{r monthly and quarterly temperature and AT at 1 m, include=FALSE}
 mean0m_month <- mean0m %>%
-  group_by(year, monthd) %>%
-  summarise(Temperature = mean(mean_temperature, na.rm=TRUE),
+  dplyr::group_by(year, monthd) %>%
+  dplyr::summarise(Temperature = mean(mean_temperature, na.rm=TRUE),
             at = mean(mean_ta, na.rm=TRUE),
             pCO2 = mean(mean_pCO2, na.rm=TRUE),
             ct = mean(mean_dic, na.rm=TRUE)) %>%
-  mutate(date = ymd(paste(year,monthd,"01")))
+ dplyr:: mutate(date = ymd(paste(year,monthd,"01")))
 
 fig_temp_month <- ggplot(data=mean0m_month, aes(x=year, y=Temperature)) + 
   geom_line(aes(color=as.factor(monthd)), size=1) +
@@ -2120,14 +2120,14 @@ tab_ct_month <- reg
 #Plot monthly increases in AT and CT at 1 m
 #Prepare dataframe
 monthly_rate_AT_CT <- 
-  cbind(rename(select(tab_at_month, Slope), AT=Slope),
-        rename(select(tab_ct_month, Slope), CT=Slope)
+  cbind(dplyr::rename(dplyr::select(tab_at_month, Slope), AT=Slope),
+        dplyr::rename(dplyr::select(tab_ct_month, Slope), CT=Slope)
 ) %>%
-  mutate(month=factor(month.abb, as.character(month.abb))) %>%
+  dplyr::mutate(month=factor(month.abb, as.character(month.abb))) %>%
   gather(key, value, -month) %>%
-  mutate(se=c(tab_at_month[,2], tab_ct_month[,2])) %>%
-  mutate(p=c(tab_at_month[,3], tab_ct_month[,3])) %>%
-  mutate(significance=ifelse(p<=0.05, "*", ""))
+  dplyr::mutate(se=c(tab_at_month[,2], tab_ct_month[,2])) %>%
+  dplyr::mutate(p=c(tab_at_month[,3], tab_ct_month[,3])) %>%
+  dplyr::mutate(significance=ifelse(p<=0.05, "*", ""))
 
 # Scatter plot
 fig_paper_monthly_rate_AT_CT <- 
@@ -2156,8 +2156,8 @@ ggsave(file="figures/fig5.pdf", fig_paper_monthly_rate_AT_CT, width = 16, height
 
 # Quarterly
 mean0m_quart <- mean0m %>%
-  group_by(year, quarter) %>%
-  summarise(Temperature = mean(mean_temperature, na.rm=TRUE),
+  dplyr::group_by(year, quarter) %>%
+  dplyr::summarise(Temperature = mean(mean_temperature, na.rm=TRUE),
             at = mean(mean_ta, na.rm=TRUE))
 fig_temp_quarter <- ggplot(data=mean0m_quart, aes(x=year, y=Temperature)) + 
   geom_line(aes(color=as.factor(quarter)), size=1) +
@@ -2194,12 +2194,12 @@ kable(tab_ct_month, digits = c(4,4,3,3,3,2,3), caption="Regressions on annual mo
 
 ```{r monthly and quarterly temperature and AT at 50 m, include=FALSE}
 mean50m_month <- mean50m %>%
-  group_by(year, monthd) %>%
-  summarise(Temperature = mean(mean_temperature, na.rm=TRUE),
+  dplyr::group_by(year, monthd) %>%
+  dplyr::summarise(Temperature = mean(mean_temperature, na.rm=TRUE),
             at = mean(mean_ta, na.rm=TRUE),
             pCO2 = mean(mean_pCO2, na.rm=TRUE),
             ct = mean(mean_dic, na.rm=TRUE)) %>%
-  mutate(date = ymd(paste(year,monthd,"01")))
+  dplyr::mutate(date = ymd(paste(year,monthd,"01")))
 
 # fig_temp_month <- ggplot(data=mean0m_month, aes(x=year, y=Temperature)) + 
 #   geom_line(aes(color=as.factor(monthd)), size=1) +
@@ -2317,14 +2317,14 @@ tab_ct_month_50m <- reg
 #Plot monthly increases in AT and CT at 50 m
 #Prepare dataframe
 monthly_rate_AT_CT_50m <- 
-  cbind(rename(select(tab_at_month_50m, Slope), AT=Slope),
-        rename(select(tab_ct_month_50m, Slope), CT=Slope)
+  cbind(dplyr::rename(select(tab_at_month_50m, Slope), AT=Slope),
+        dplyr::rename(select(tab_ct_month_50m, Slope), CT=Slope)
 ) %>%
-  mutate(month=factor(month.abb, as.character(month.abb))) %>%
+  dplyr::mutate(month=factor(month.abb, as.character(month.abb))) %>%
   gather(key, value, -month) %>%
-  mutate(se=c(tab_at_month[,2], tab_ct_month[,2])) %>%
-  mutate(p=c(tab_at_month[,3], tab_ct_month[,3])) %>%
-  mutate(significance=ifelse(p<=0.05, "*", ""))
+  dplyr::mutate(se=c(tab_at_month[,2], tab_ct_month[,2])) %>%
+  dplyr::mutate(p=c(tab_at_month[,3], tab_ct_month[,3])) %>%
+  dplyr::mutate(significance=ifelse(p<=0.05, "*", ""))
 
 # Scatter plot
 fig_paper_monthly_rate_AT_CT_50m <- 
@@ -2427,16 +2427,16 @@ plot_offset <- ggplot(data = filter(dat, !is.na(diff_pH))) +
 # Range of daily pH changes
 range <- tbl_df(
   dat %>%
-  group_by(date=as.Date(date), month=month(date, label=TRUE), year=year(date)) %>%
-  summarize(pH_range = max(pHT_sfint) - min(pHT_sfint))
+  dplyr::group_by(date=as.Date(date), month= month(date, label=TRUE), year= year(date)) %>%
+  dplyr::summarize(pH_range = max(pHT_sfint) - min(pHT_sfint))
 )
 quant <- quantile(range$pH_range, probs =c(2.5/100, 97.5/100))
 
 # Per month
 range_month <-
   range %>%
-  group_by(Month = month(date, label=TRUE, abbr=FALSE)) %>%
-  summarize(pH_range_month = mean(pH_range, na.rm=TRUE))
+  dplyr::group_by(Month = month(date, label=TRUE, abbr=FALSE)) %>%
+  dplyr::summarize(pH_range_month = mean(pH_range, na.rm=TRUE))
 # add chla in range_month
 range_month <- inner_join(range_month, select(means_month0m, Month, Temperature, Chla), by="Month")
 range_month$monthd <- c(1:12)
@@ -2482,13 +2482,13 @@ ggsave(file="figures/fig7.pdf", g, width = 8, height = 16, units = "cm")
 # Per year and week
 range$year_week <- paste0(range$year,"-", week(range$date))
 range_year_week <-
-  ungroup(range) %>%
-  group_by(year_week) %>%
-  summarize(pH_range_year_week = mean(pH_range, na.rm=TRUE))
+  dplyr::ungroup(range) %>%
+  dplyr::group_by(year_week) %>%
+  dplyr::summarize(pH_range_year_week = mean(pH_range, na.rm=TRUE))
 # add year_month to weekly data
-tmp <- ungroup(mean0m) %>%
-  mutate(year_week=paste0(year,"-", week(sampling_date))) %>%
-  select(sampling_date, mean_Chla, year_week)
+tmp <- dplyr::ungroup(mean0m) %>%
+  dplyr::mutate(year_week=paste0(year,"-", week(sampling_date))) %>%
+  dplyr::select(sampling_date, mean_Chla, year_week)
 # add chla in range_month
 range_year_week <- inner_join(range_year_week, tmp, by="year_week")
 plot_range_pH_Chla_week <-  ggplot(data =  range_year_week) +
@@ -2717,9 +2717,11 @@ urls <- str_c(url, files)
 eol <- purrr::map_dfr(urls, read_csv, comment="#", col_types=cols(Date="c", Heure="c"))
 eol <- dplyr::mutate(eol, datetime=str_c(Date, " ", Heure) %>% parse_datetime(format="%Y%m%d %H%M%S"))
 
-# replace outliers O2 data by NA
-eol <- dplyr::mutate(eol, O2 = case_when(O2 >= 999 ~ NA_real_ ,
-                                       TRUE ~ O2))
+# replace outliers O2 data by NA + remove O2 > 6 units
+eol <- dplyr::mutate(eol, O2 = case_when(O2 > 6 ~ NA_real_,
+                                         O2 >= 999 ~ NA_real_ ,
+                                       TRUE ~ O2
+                                        ))
 
 #round time to nearest hour
 eol$datetime_round <-round_date(eol$datetime,unit = "hour" )
@@ -2742,18 +2744,18 @@ dyOptions(
 
 #make the mean with same date and rounded time + filter only surface data 1 to 3 m.
 mean_eol <- eol %>%
-  group_by( P, datetime_round) %>%
+  group_by( P, datetime) %>%
   dplyr::summarise(
             mean_sal_eol = mean(S, na.rm=TRUE),
             mean_temp_eol = mean(T, na.rm=TRUE),
             mean_oxy_eol = mean(O2, na.rm=TRUE)) %>%
-  dplyr::rename(datetime = datetime_round) %>%
+  #dplyr::rename(datetime = datetime_round) %>%
   dplyr::filter(P >=1 & P <= 3)
 
 
 ## PLOT 2 = 0 to 2 m + rounded time to hour
-eol_xts <- dplyr::select(mean_eol, datetime_round, mean_sal_eol, mean_temp_eol, mean_oxy_eol)
-eol_xts <- as.xts(eol_xts, order.by=eol_xts$datetime_round)
+eol_xts <- dplyr::select(mean_eol, datetime, mean_sal_eol, mean_temp_eol, mean_oxy_eol)
+eol_xts <- as.xts(eol_xts, order.by=eol_xts$datetime)
 
 dygraph(eol_xts,  main = "EOL data: 0 to 3 m depth , rounded time to nearest hour", ylab = "") %>%
   dySeries("mean_temp_eol", drawPoints = TRUE, pointSize=2, label = "Temp")%>%
@@ -2848,7 +2850,7 @@ rh_B_Bplus_mean$datetime <- with_tz(rh_B_Bplus_mean$datetime, "UTC")
 
 ```
 
-### Time series plots
+### Time series plots (for Point B / B+)
 
 ```{r plot ctd_hydro, echo=FALSE, warning = FALSE, message = FALSE, out.width='100%'}
 # Temp
@@ -2967,7 +2969,7 @@ Here, SOMLIT data from Rade hydro were not used. Instead, we took Point B data f
 ### 1st approach with pointB data from "continuous_discret" 
 ### 
 # join PTB data from continuous_discrete to EOL data to compare
-eol_ptb <- left_join(mean_eol, continuous_discrete, by="datetime_round")
+eol_ptb <- left_join(mean_eol, continuous_discrete, by="datetime")
 
 temperature <- left_join(mean_eol%>%select(datetime_round, mean_temp_eol), continuous_discrete%>%select(datetime_round, T_ptb), by="datetime_round")
 
