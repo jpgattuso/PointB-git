@@ -28,7 +28,7 @@ library(zoo)
 library(lubridate)
 library(nlme)
 library(lmtest)
-library(dplyr)
+library(plyr)
 library(readr)
 library(dygraphs)
 library(tidyr)
@@ -42,7 +42,7 @@ require("knitr")
 library(broom)
 library(stringr)
 library("lmodel2") # modele II regression
-library(plyr)
+library(dplyr)
 
 #define who is the user and define path
 if (Sys.getenv("LOGNAME") == "gattuso") {
@@ -757,7 +757,7 @@ write_rds(dat, paste0(path,"/output/output.rds"))
 
 ```{r Calculate mean values, include=FALSE}
 means_depth <- dat %>%
-  group_by(depth, sampling_date) %>%
+  dplyr::group_by(depth, sampling_date) %>%
   dplyr::summarise(
             mean_salinity=mean(salinity_field, na.rm=TRUE),
             mean_temperature=mean(temp_field, na.rm=TRUE),
@@ -2524,35 +2524,39 @@ kable(broom::tidy(summary(reg_Chla)), digits = c(5,5,5,3,3), caption="Regression
 
 ## CO2
 ```{r CO2, include=FALSE}
-typ <- c("cccccccdddddddddddddddddddd") # column type
+#typ <- c("cccccccdddddddddddddddddddd") # column type
 CO2_pr <- tbl_df(
-  read_csv(file=paste0(path,"/data/CO2_data_PlateauRosa_daily_1993-2018_R.txt"), comment="#", col_types = typ)
+  read_csv(file=paste0(path,"/data/CO2_data_PlateauRosa_daily_1993-2018_R.txt"), comment="#")
+#, col_types = typ)
 #read_csv(file=paste0(path,"/data/CO2_data_PlateauRosa_daily_1993-2015_R.csv"), col_names=TRUE, col_types = typ, skip=7)
 ) %>%
-#tidyr::unite(col="datetime", year, month, day, sep = "-" )%>%
-dplyr::rename(dt=date) %>%
-  dplyr::mutate(year=year(dt)) %>%
-  dplyr::filter(dt >= "2007-01-01")
-NAs_by_year <- summarise(group_by(CO2_pr, year), NAs=sum(is.na(atm_CO2))) # N NAs per year
+unite(col="dt", year, month, day, sep = "-" , remove = FALSE)%>%
+dplyr::rename(atm_CO2= value) %>%
+dplyr::mutate(dt= ymd(dt),
+              atm_CO2 = case_when(atm_CO2 <= -999 ~ NA_real_ ,TRUE ~ atm_CO2)) %>%
+# dplyr::mutate(year=year(dt)) %>%
+dplyr::filter(dt >= "2007-01-01")
+
+NAs_by_year <- dplyr::summarise(group_by(CO2_pr, year), NAs=sum(is.na(atm_CO2))) # N NAs per year
 duration <- CO2_pr$dt[length(CO2_pr$dt)] - CO2_pr$dt[1]
 CO2_pr_zoo <- zooreg(CO2_pr$atm_CO2, order.by=CO2_pr$dt) # create zoo time series
 CO2_pr_zoo_i <- na.approx(CO2_pr_zoo) # interpolate NAs
 CO2_pr_i <- tbl_df(fortify.zoo(CO2_pr_zoo_i)) %>% # change to df
-  rename(dt=Index, atm_CO2=CO2_pr_zoo_i) %>%
-  mutate(year=year(dt), monthd = month(dt), month = month(dt, label = TRUE, abbr = FALSE))
+  dplyr::rename(dt=Index, atm_CO2=CO2_pr_zoo_i) %>%
+  dplyr::mutate(year=year(dt), monthd = month(dt), month = month(dt, label = TRUE, abbr = FALSE))
 # add seawater pCO2
 tmp <- ungroup(mean0m) %>%
-  select(sampling_date, mean_pCO2)
+  dplyr::select(sampling_date, mean_pCO2)
 tmp$dt <- as.Date(tmp$sampling_date)
 CO2_pr_i <- left_join(CO2_pr_i, tmp)
 # Calculate monthly means
 tmp <- CO2_pr_i %>%
-  group_by(monthd) %>%
-  summarise(atm_CO2__month = mean(atm_CO2, na.rm = TRUE))
+  dplyr::group_by(monthd) %>%
+  dplyr::summarise(atm_CO2__month = mean(atm_CO2, na.rm = TRUE))
 
 # Calculate anomalies
 ano_atm_CO2 <- left_join(ungroup(CO2_pr_i), tmp, by = "monthd") %>%
-  mutate(atm_CO2_ano = atm_CO2 - atm_CO2__month)
+  dplyr::mutate(atm_CO2_ano = atm_CO2 - atm_CO2__month)
 
 #regression atmospheric CO2
 lms <- summary(lm(data = CO2_pr_i, atm_CO2 ~ decimal_date(dt)))
@@ -2583,7 +2587,7 @@ reg_atm_CO2 <- cbind(reg_atm_CO2, reg_atm_CO2_ano)
 #   select(dt, atm_CO2, mean_pCO2) %>%
 #   melt(id.var = "dt")
 CO2_pr_i_melt <- CO2_pr_i %>%
-  select(dt, atm_CO2, mean_pCO2) %>%
+  dplyr::select(dt, atm_CO2, mean_pCO2) %>%
   gather(key = variable, value=value, -dt, na.rm = TRUE)
 
 fig_CO2_time_series <- ggplot(data=CO2_pr_i_melt) +
