@@ -3,13 +3,11 @@ title: "Time series of the carbonate chemistry at Point B"
 author: "Jean-Pierre Gattuso, CNRS-UPMC (gattuso@obs-vlfr.fr), Samir Alliouane, Lydia Kapsenberg and Laure Mousseau"
 date: '`r format(Sys.Date(), "%d %B %Y")`'
 output:
-  html_document:
+  rmarkdown::html_document:
     code_folding: hide
     fig_caption: yes
-    toc: yes
-    toc_float: yes
-  pdf_document:
-    toc: yes
+    toc: no
+    toc_float: no
 ---
 
 
@@ -28,7 +26,7 @@ library(zoo)
 library(lubridate)
 library(nlme)
 library(lmtest)
-library(dplyr)
+library(plyr)
 library(readr)
 library(dygraphs)
 library(tidyr)
@@ -42,7 +40,7 @@ require("knitr")
 library(broom)
 library(stringr)
 library("lmodel2") # modele II regression
-library(plyr)
+library(dplyr)
 
 #define who is the user and define path
 if (Sys.getenv("LOGNAME") == "gattuso") {
@@ -465,16 +463,18 @@ reg <- lm(data=dat,temp ~ dt)
 slope <- 365*coef(reg)[2]
 ```
 
-# Material and methods
+# {.tabset .tabset-fade .tabset-pills}
+
+## Material and methods
 
 Samples were collected from XX-l Niskin bottles, transferred to glass bottles, overfilled and then poisoned to maintain the integrity of the sample chemistry as recommended by Dickson et al. (2007).  The _Service National d'Analyse des Paramètres Océaniques du CO$_2$_, at the _Université Pierre et Marie Curie_, determined the concentration of dissolved inorganic carbon ($C_\mathrm{T}$) and total alkalinity ($A_\mathrm{T}$), by potentiometric titration, following the methods described by (Edmond1970) and (DOE1994).
 
 Calculations of the carbonate system parameters were performed using the R package \emph{seacarb} (Lavigne2014). The total concentrations of silicate and phosphate were used when available. Otherwise they were set to 0. The total boron concentration was calculated using the formulation of (Lee2010b). The following constants were used: $K_1$ and $K_2$ from (Lueker2000, $K_f$ from (Perez1987b) and $K_s$ from (Dickson1990).
 
-## Data available and quality control
+### Data available and quality control
 All data are used in the following; none were eliminated according to the quality flags (\textbf{this remains to be done}).
 
-### Les codes du SNAPOCO2
+#### Les codes du SNAPOCO2
 
 Les "quality flags" "qflag\_sample", "qflag\_ta", "qflag\_DIC" qui apparaissent dans les fichiers de données du LOCEAN sont établis sur la base des codes WOCE (World Ocean Circulation Experiment) : WOCE Operations Manual (1994), WHP Office Report 90-1, WOCE Report N.67/91, p52-53. Woods Hole, Mass., USA.
 
@@ -494,7 +494,7 @@ Les "quality flags" "qflag\_sample", "qflag\_ta", "qflag\_DIC" qui apparaissent 
 	- H : pas d'élastique.
 
 
-### Les codes de Villefranche (inspirés des codes SOMLIT)
+#### Les codes de Villefranche (inspirés des codes SOMLIT)
 
 - Codification qflag\_taking concernant le prélèvement des échantillons en mer : (i.e pour l'étape : "qflag\_taking")
 	- 0 : ancien code qui signifie OK
@@ -508,8 +508,6 @@ Les "quality flags" "qflag\_sample", "qflag\_ta", "qflag\_DIC" qui apparaissent 
 	- 2 : résultat OK
 	- 3 : résultat douteux
 	- 4 : résultat mauvais
-
-#Results
 
 ## Point B
 
@@ -757,7 +755,7 @@ write_rds(dat, paste0(path,"/output/output.rds"))
 
 ```{r Calculate mean values, include=FALSE}
 means_depth <- dat %>%
-  group_by(depth, sampling_date) %>%
+  dplyr::group_by(depth, sampling_date) %>%
   dplyr::summarise(
             mean_salinity=mean(salinity_field, na.rm=TRUE),
             mean_temperature=mean(temp_field, na.rm=TRUE),
@@ -833,8 +831,8 @@ The average uncertainties of the derived carbonate parameters were calculated ac
 ```{r Monthly means, include=TRUE, message= FALSE, }
 # prepare data 0m
 tmp <- ungroup(mean0m) %>%
-  mutate(month = month(sampling_date, label = TRUE, abb = TRUE)) %>%
-  select(
+  dplyr::mutate(month = month(sampling_date, label = TRUE, abb = TRUE)) %>%
+  dplyr::select(
   month,
   mean_temperature,
   mean_salinity,
@@ -850,8 +848,8 @@ tmp <- ungroup(mean0m) %>%
 tmp$month <- factor(tmp$month)
 
 means_month0m <- ungroup(mean0m) %>%
-  group_by(monthd) %>%
-  summarise(
+  dplyr::group_by(monthd) %>%
+  dplyr::summarise(
   Salinity = mean(mean_salinity, na.rm = TRUE),
   Salinity_sd = sd(mean_salinity, na.rm = TRUE),
   Salinity_n = sum(!is.na(mean_salinity)),
@@ -1049,8 +1047,8 @@ ggsave(file="figures/fig_paper_monthly_means_1m.png", g, width = 18, height = 14
 
 # prepare data 50m
 tmp <- ungroup(mean50m) %>%
-  mutate(month = month(sampling_date, label = TRUE, abb = TRUE)) %>%
-  select(
+  dplyr::mutate(month = month(sampling_date, label = TRUE, abb = TRUE)) %>%
+  dplyr::select(
   month,
   mean_temperature,
   mean_salinity,
@@ -1066,8 +1064,8 @@ tmp <- ungroup(mean50m) %>%
 tmp$month <- factor(tmp$month)
 
 means_month50m <- ungroup(mean50m) %>%
-  group_by(monthd) %>%
-  summarise(
+  dplyr::group_by(monthd) %>%
+  dplyr::summarise(
   Salinity = mean(mean_salinity, na.rm = TRUE),
   Salinity_sd = sd(mean_salinity, na.rm = TRUE),
   Salinity_n = sum(!is.na(mean_salinity)),
@@ -1152,7 +1150,7 @@ colnames(means_month50m) <-
 
 ```
 
-## Monthly means at the surface
+### Monthly means at the surface
 ![monthly_means_1m](figures/fig_paper_monthly_means_1m.png)
 
 ```{r table monthly means}
@@ -1254,8 +1252,8 @@ ggsave(filename = "figures/ATvsCT1p.png", plot = ATvsCT1p)
 # At 1 m
 # Calculate monthly means
 tmp <- ungroup(mean0m) %>%
-  group_by(monthd) %>%
-  summarise(
+  dplyr::group_by(monthd) %>%
+  dplyr::summarise(
   Salinity_month = mean(mean_salinity, na.rm = TRUE),
   Temperature_month = mean(mean_temperature, na.rm = TRUE),
   dic_month = mean(mean_dic, na.rm = TRUE),
@@ -1272,7 +1270,7 @@ tmp <- ungroup(mean0m) %>%
   )
 # Calculate anomalies
 ano_month0m <- left_join(ungroup(mean0m), tmp, by = "monthd") %>%
-  mutate(
+  dplyr::mutate(
   Salinity_ano = mean_salinity - Salinity_month,
   Temperature_ano = mean_temperature - Temperature_month,
   dic_ano = mean_dic - dic_month,
@@ -1606,7 +1604,7 @@ row.names(reg_ta_no_change) <- var_list
 ```
 
 
-## Interannual changes at 1 m
+### Interannual changes at 1 m
 ![interannual_1m](figures/fig_paper_interannual_1m.png)
 
 The slope of the rate of pH change is `r round(reg_var_1m[5,1], digits=4)` ± `r format(reg_var_1m[5,2], digits=4, scientific=FALSE)` units per year. If the observed total alkalinity data are corrected from their rate of change (i.e. assuming that they have not increased during the period of measurement, but kept their subannual variability), the rate of change is `r round(reg_ta_no_change[1,1], digits=4)` ± `r format(reg_ta_no_change[1,2], digits=4, scientific=FALSE)` units per year.
@@ -1707,8 +1705,8 @@ ggsave(filename = "figures/ATvsCT50p.png", plot = ATvsCT50p)
 
 # Calculate monthly means
 tmp <- ungroup(mean50m) %>%
-  group_by(monthd) %>%
-  summarise(
+  dplyr::group_by(monthd) %>%
+  dplyr::summarise(
   Salinity_month = mean(mean_salinity, na.rm = TRUE),
   Temperature_month = mean(mean_temperature, na.rm = TRUE),
   dic_month = mean(mean_dic, na.rm = TRUE),
@@ -1725,7 +1723,7 @@ tmp <- ungroup(mean50m) %>%
 
 # Calculate anomalies
 ano_month50m <- left_join(ungroup(mean50m), tmp, by = "monthd") %>%
-  mutate(
+  dplyr::mutate(
   Salinity_ano = mean_salinity - Salinity_month,
   Temperature_ano = mean_temperature - Temperature_month,
   dic_ano = mean_dic - dic_month,
@@ -1958,7 +1956,7 @@ g <- cowplot::plot_grid(T50p, anT50p, S50p, anS50p, AT50p, anAT50p, CT50p, anCT5
 ggsave(file="figures/fig_paper_interannual_50m.png", g, width=15, height = 17, units = "cm")
 ggsave(file="figures/fig3.pdf", g, width = 18, height = 21, units = "cm")
 ```
-## Interannual changes at 50 m
+### Interannual changes at 50 m
 ![interannual_50m](figures/fig_paper_interannual_50m.png)
 
 ```{r kable regressions 50 m}
@@ -1994,16 +1992,16 @@ ggsave(file="figures/fig_paper_at_nocarb.png", g, width=15, height = 17, units =
 #cowplot::ggsave(file="../figures/at_nocarb.pdf", g, width = 18, height = 21, units = "cm")
 ```
 
-## Annual, monthly and quarterly ranges of T, AT and pCO2 at 1m
+### Annual, monthly and quarterly ranges of T, AT and pCO2 at 1m
 
 ```{r monthly and quarterly temperature and AT at 1 m, include=FALSE}
 mean0m_month <- mean0m %>%
-  group_by(year, monthd) %>%
-  summarise(Temperature = mean(mean_temperature, na.rm=TRUE),
+  dplyr::group_by(year, monthd) %>%
+  dplyr::summarise(Temperature = mean(mean_temperature, na.rm=TRUE),
             at = mean(mean_ta, na.rm=TRUE),
             pCO2 = mean(mean_pCO2, na.rm=TRUE),
             ct = mean(mean_dic, na.rm=TRUE)) %>%
-  mutate(date = ymd(paste(year,monthd,"01")))
+ dplyr:: mutate(date = ymd(paste(year,monthd,"01")))
 
 fig_temp_month <- ggplot(data=mean0m_month, aes(x=year, y=Temperature)) + 
   geom_line(aes(color=as.factor(monthd)), size=1) +
@@ -2120,14 +2118,14 @@ tab_ct_month <- reg
 #Plot monthly increases in AT and CT at 1 m
 #Prepare dataframe
 monthly_rate_AT_CT <- 
-  cbind(rename(select(tab_at_month, Slope), AT=Slope),
-        rename(select(tab_ct_month, Slope), CT=Slope)
+  cbind(dplyr::rename(dplyr::select(tab_at_month, Slope), AT=Slope),
+        dplyr::rename(dplyr::select(tab_ct_month, Slope), CT=Slope)
 ) %>%
-  mutate(month=factor(month.abb, as.character(month.abb))) %>%
+  dplyr::mutate(month=factor(month.abb, as.character(month.abb))) %>%
   gather(key, value, -month) %>%
-  mutate(se=c(tab_at_month[,2], tab_ct_month[,2])) %>%
-  mutate(p=c(tab_at_month[,3], tab_ct_month[,3])) %>%
-  mutate(significance=ifelse(p<=0.05, "*", ""))
+  dplyr::mutate(se=c(tab_at_month[,2], tab_ct_month[,2])) %>%
+  dplyr::mutate(p=c(tab_at_month[,3], tab_ct_month[,3])) %>%
+  dplyr::mutate(significance=ifelse(p<=0.05, "*", ""))
 
 # Scatter plot
 fig_paper_monthly_rate_AT_CT <- 
@@ -2156,8 +2154,8 @@ ggsave(file="figures/fig5.pdf", fig_paper_monthly_rate_AT_CT, width = 16, height
 
 # Quarterly
 mean0m_quart <- mean0m %>%
-  group_by(year, quarter) %>%
-  summarise(Temperature = mean(mean_temperature, na.rm=TRUE),
+  dplyr::group_by(year, quarter) %>%
+  dplyr::summarise(Temperature = mean(mean_temperature, na.rm=TRUE),
             at = mean(mean_ta, na.rm=TRUE))
 fig_temp_quarter <- ggplot(data=mean0m_quart, aes(x=year, y=Temperature)) + 
   geom_line(aes(color=as.factor(quarter)), size=1) +
@@ -2190,16 +2188,16 @@ kable(tab_ct_month, digits = c(4,4,3,3,3,2,3), caption="Regressions on annual mo
 ![pCO2_month](figures/fig_pCO2_month.png)
 ![temp_quarter](figures/fig_temp_quarter.png)
 ![at_quarter](figures/fig_at_quarter.png)
-## Annual, monthly and quarterly ranges of T, AT and pCO2 at 50 m
+### Annual, monthly and quarterly ranges of T, AT and pCO2 at 50 m
 
 ```{r monthly and quarterly temperature and AT at 50 m, include=FALSE}
 mean50m_month <- mean50m %>%
-  group_by(year, monthd) %>%
-  summarise(Temperature = mean(mean_temperature, na.rm=TRUE),
+  dplyr::group_by(year, monthd) %>%
+  dplyr::summarise(Temperature = mean(mean_temperature, na.rm=TRUE),
             at = mean(mean_ta, na.rm=TRUE),
             pCO2 = mean(mean_pCO2, na.rm=TRUE),
             ct = mean(mean_dic, na.rm=TRUE)) %>%
-  mutate(date = ymd(paste(year,monthd,"01")))
+  dplyr::mutate(date = ymd(paste(year,monthd,"01")))
 
 # fig_temp_month <- ggplot(data=mean0m_month, aes(x=year, y=Temperature)) + 
 #   geom_line(aes(color=as.factor(monthd)), size=1) +
@@ -2317,14 +2315,14 @@ tab_ct_month_50m <- reg
 #Plot monthly increases in AT and CT at 50 m
 #Prepare dataframe
 monthly_rate_AT_CT_50m <- 
-  cbind(rename(select(tab_at_month_50m, Slope), AT=Slope),
-        rename(select(tab_ct_month_50m, Slope), CT=Slope)
+  cbind(dplyr::rename(select(tab_at_month_50m, Slope), AT=Slope),
+        dplyr::rename(select(tab_ct_month_50m, Slope), CT=Slope)
 ) %>%
-  mutate(month=factor(month.abb, as.character(month.abb))) %>%
+  dplyr::mutate(month=factor(month.abb, as.character(month.abb))) %>%
   gather(key, value, -month) %>%
-  mutate(se=c(tab_at_month[,2], tab_ct_month[,2])) %>%
-  mutate(p=c(tab_at_month[,3], tab_ct_month[,3])) %>%
-  mutate(significance=ifelse(p<=0.05, "*", ""))
+  dplyr::mutate(se=c(tab_at_month[,2], tab_ct_month[,2])) %>%
+  dplyr::mutate(p=c(tab_at_month[,3], tab_ct_month[,3])) %>%
+  dplyr::mutate(significance=ifelse(p<=0.05, "*", ""))
 
 # Scatter plot
 fig_paper_monthly_rate_AT_CT_50m <- 
@@ -2351,7 +2349,7 @@ ggsave(file="figures/fig_paper_monthly_rate_AT_CT_50m.png", fig_paper_monthly_ra
 ggsave(file="figures/fig4b.pdf", fig_paper_monthly_rate_AT_CT_50m, width = 16, height= 10, units = "cm")
 ```
 
-## Daily and monthly changes in pH and T
+### Daily and monthly changes in pH and T
 ```{r Daily and seasonal changes, include=FALSE}
 # Long series
 continuous_discrete <- read_csv(file = paste0(path,"data/seafet/continuous_discrete.csv"), col_types = cols(pHcalc_ptB = "d", pHspec_Tptb="d", T_seaF = "d", T_int ="d"), col_names = TRUE)
@@ -2427,16 +2425,16 @@ plot_offset <- ggplot(data = filter(dat, !is.na(diff_pH))) +
 # Range of daily pH changes
 range <- tbl_df(
   dat %>%
-  group_by(date=as.Date(date), month=month(date, label=TRUE), year=year(date)) %>%
-  summarize(pH_range = max(pHT_sfint) - min(pHT_sfint))
+  dplyr::group_by(date=as.Date(date), month= month(date, label=TRUE), year= year(date)) %>%
+  dplyr::summarize(pH_range = max(pHT_sfint) - min(pHT_sfint))
 )
 quant <- quantile(range$pH_range, probs =c(2.5/100, 97.5/100))
 
 # Per month
 range_month <-
   range %>%
-  group_by(Month = month(date, label=TRUE, abbr=FALSE)) %>%
-  summarize(pH_range_month = mean(pH_range, na.rm=TRUE))
+  dplyr::group_by(Month = month(date, label=TRUE, abbr=FALSE)) %>%
+  dplyr::summarize(pH_range_month = mean(pH_range, na.rm=TRUE))
 # add chla in range_month
 range_month <- inner_join(range_month, select(means_month0m, Month, Temperature, Chla), by="Month")
 range_month$monthd <- c(1:12)
@@ -2482,13 +2480,13 @@ ggsave(file="figures/fig7.pdf", g, width = 8, height = 16, units = "cm")
 # Per year and week
 range$year_week <- paste0(range$year,"-", week(range$date))
 range_year_week <-
-  ungroup(range) %>%
-  group_by(year_week) %>%
-  summarize(pH_range_year_week = mean(pH_range, na.rm=TRUE))
+  dplyr::ungroup(range) %>%
+  dplyr::group_by(year_week) %>%
+  dplyr::summarize(pH_range_year_week = mean(pH_range, na.rm=TRUE))
 # add year_month to weekly data
-tmp <- ungroup(mean0m) %>%
-  mutate(year_week=paste0(year,"-", week(sampling_date))) %>%
-  select(sampling_date, mean_Chla, year_week)
+tmp <- dplyr::ungroup(mean0m) %>%
+  dplyr::mutate(year_week=paste0(year,"-", week(sampling_date))) %>%
+  dplyr::select(sampling_date, mean_Chla, year_week)
 # add chla in range_month
 range_year_week <- inner_join(range_year_week, tmp, by="year_week")
 plot_range_pH_Chla_week <-  ggplot(data =  range_year_week) +
@@ -2524,35 +2522,39 @@ kable(broom::tidy(summary(reg_Chla)), digits = c(5,5,5,3,3), caption="Regression
 
 ## CO2
 ```{r CO2, include=FALSE}
-typ <- c("cccccccdddddddddddddddddddd") # column type
+#typ <- c("cccccccdddddddddddddddddddd") # column type
 CO2_pr <- tbl_df(
-  read_csv(file=paste0(path,"/data/CO2_data_PlateauRosa_daily_1993-2018_R.txt"), comment="#", col_types = typ)
+  read_csv(file=paste0(path,"/data/CO2_data_PlateauRosa_daily_1993-2018_R.txt"), comment="#")
+#, col_types = typ)
 #read_csv(file=paste0(path,"/data/CO2_data_PlateauRosa_daily_1993-2015_R.csv"), col_names=TRUE, col_types = typ, skip=7)
 ) %>%
-#tidyr::unite(col="datetime", year, month, day, sep = "-" )%>%
-dplyr::rename(dt=date) %>%
-  dplyr::mutate(year=year(dt)) %>%
-  dplyr::filter(dt >= "2007-01-01")
-NAs_by_year <- summarise(group_by(CO2_pr, year), NAs=sum(is.na(atm_CO2))) # N NAs per year
+unite(col="dt", year, month, day, sep = "-" , remove = FALSE)%>%
+dplyr::rename(atm_CO2= value) %>%
+dplyr::mutate(dt= ymd(dt),
+              atm_CO2 = case_when(atm_CO2 <= -999 ~ NA_real_ ,TRUE ~ atm_CO2)) %>%
+# dplyr::mutate(year=year(dt)) %>%
+dplyr::filter(dt >= "2007-01-01")
+
+NAs_by_year <- dplyr::summarise(group_by(CO2_pr, year), NAs=sum(is.na(atm_CO2))) # N NAs per year
 duration <- CO2_pr$dt[length(CO2_pr$dt)] - CO2_pr$dt[1]
 CO2_pr_zoo <- zooreg(CO2_pr$atm_CO2, order.by=CO2_pr$dt) # create zoo time series
 CO2_pr_zoo_i <- na.approx(CO2_pr_zoo) # interpolate NAs
 CO2_pr_i <- tbl_df(fortify.zoo(CO2_pr_zoo_i)) %>% # change to df
-  rename(dt=Index, atm_CO2=CO2_pr_zoo_i) %>%
-  mutate(year=year(dt), monthd = month(dt), month = month(dt, label = TRUE, abbr = FALSE))
+  dplyr::rename(dt=Index, atm_CO2=CO2_pr_zoo_i) %>%
+  dplyr::mutate(year=year(dt), monthd = month(dt), month = month(dt, label = TRUE, abbr = FALSE))
 # add seawater pCO2
 tmp <- ungroup(mean0m) %>%
-  select(sampling_date, mean_pCO2)
+  dplyr::select(sampling_date, mean_pCO2)
 tmp$dt <- as.Date(tmp$sampling_date)
 CO2_pr_i <- left_join(CO2_pr_i, tmp)
 # Calculate monthly means
 tmp <- CO2_pr_i %>%
-  group_by(monthd) %>%
-  summarise(atm_CO2__month = mean(atm_CO2, na.rm = TRUE))
+  dplyr::group_by(monthd) %>%
+  dplyr::summarise(atm_CO2__month = mean(atm_CO2, na.rm = TRUE))
 
 # Calculate anomalies
 ano_atm_CO2 <- left_join(ungroup(CO2_pr_i), tmp, by = "monthd") %>%
-  mutate(atm_CO2_ano = atm_CO2 - atm_CO2__month)
+  dplyr::mutate(atm_CO2_ano = atm_CO2 - atm_CO2__month)
 
 #regression atmospheric CO2
 lms <- summary(lm(data = CO2_pr_i, atm_CO2 ~ decimal_date(dt)))
@@ -2583,7 +2585,7 @@ reg_atm_CO2 <- cbind(reg_atm_CO2, reg_atm_CO2_ano)
 #   select(dt, atm_CO2, mean_pCO2) %>%
 #   melt(id.var = "dt")
 CO2_pr_i_melt <- CO2_pr_i %>%
-  select(dt, atm_CO2, mean_pCO2) %>%
+  dplyr::select(dt, atm_CO2, mean_pCO2) %>%
   gather(key = variable, value=value, -dt, na.rm = TRUE)
 
 fig_CO2_time_series <- ggplot(data=CO2_pr_i_melt) +
@@ -2615,7 +2617,7 @@ g <- arrangeGrob(fig_CO2_time_series, fig_CO2_ano, ncol=1)
 ggsave("figures/fig_atm_CO2.png", g)
 ```
 
-Atmospheric concentration of CO2 measured at Plateau Rosa from 1993 to 2018 were downloaded from
+Atmospheric concentration of CO2 measured at Plateau Rosa from 1993 to 2019 were downloaded from
 <https://gaw.kishou.go.jp/search/file/0064-6039-1001-01-01-9999>
 <!-- <http://ds.data.jma.go.jp/gmd/wdcgg/cgi-bin/wdcgg/download.cgi?index=PRS645N00-RSE&param=200612120114&select=inventory>.  -->
 Note that contributors should be contacted for proper acknowledgement for use of the data or offer of co-authorship
@@ -2642,11 +2644,23 @@ The rate of increase of seawater pCO2 (`r round(reg_var_1m[7,1], digit=2)` uatm 
 # the discrete_continuous file is already read in chunk "Daily and seasonal changes"
 
 #round time into nearest hour
-continuous_discrete$datetime_round <-round_date(continuous_discrete$datetime,unit = "hour" )
-```
-## point B
-```{r point b, echo=FALSE, warning = FALSE, message = FALSE, out.width='100%'}
-y <- read.table("../../pCloud Sync/exp153_carbonates_point_B/data/Data_DIC.csv", header=T, sep=",", dec=".", as.is=T)
+continuous_discrete$datetime <-round_date(continuous_discrete$datetime,unit = "hour" )
+
+## PLOT
+sf_xts <- dplyr::select(continuous_discrete, datetime, pHT_sfint, T_seaF, pHspec_Tptb, pHcalc_ptB)
+sf_xts <- as.xts(sf_xts, order.by=sf_xts$datetime)
+
+dygraph(sf_xts, ylab = "") %>%
+  dySeries("pHT_sfint", drawPoints = TRUE, pointSize=2, label = "pH corrected")%>%
+  dySeries("pHspec_Tptb", drawPoints = TRUE, pointSize=3, color = "red", label = "pH spectro (T ptB)") %>%
+  dySeries("pHcalc_ptB", drawPoints = TRUE, pointSize=2, label = "pH calc (T ptB)") %>%
+ dySeries(axis = "y2","T_seaF", drawPoints = TRUE, pointSize=2, label = "T_seaF") %>%
+ # dyLegend(show = "always", width = 600)%>%
+dyOptions(
+    drawGrid = TRUE,
+    drawPoints = TRUE,
+    useDataTimezone = TRUE)%>%
+  dyRangeSelector(height = 30)
 ```
 
 ## SAMI pH
@@ -2717,18 +2731,21 @@ urls <- str_c(url, files)
 eol <- purrr::map_dfr(urls, read_csv, comment="#", col_types=cols(Date="c", Heure="c"))
 eol <- dplyr::mutate(eol, datetime=str_c(Date, " ", Heure) %>% parse_datetime(format="%Y%m%d %H%M%S"))
 
-# replace outliers O2 data by NA
-eol <- dplyr::mutate(eol, O2 = case_when(O2 >= 999 ~ NA_real_ ,
-                                       TRUE ~ O2))
+# replace outliers O2 data by NA + remove O2 > 6 units
+eol <- dplyr::mutate(eol, O2 = case_when(O2 > 6 ~ NA_real_,
+                                         O2 >= 999 ~ NA_real_ ,
+                                       TRUE ~ O2
+                                        ))
 
-#round time to nearest hour
-eol$datetime_round <-round_date(eol$datetime,unit = "hour" )
+#round time to nearest hour and take it in considetation as datetime.
+eol$datetime <-round_date(eol$datetime,unit = "hour" )
+
 
 ## PLOT 1 = all eol data S T
 eol_xts <- dplyr::select(eol, datetime, S, T, O2)
 eol_xts <- as.xts(eol_xts, order.by=eol_xts$datetime)
 
-dygraph(eol_xts, main = "EOL S T data: all depths, raw time", ylab = "") %>%
+dygraph(eol_xts, main = "EOL S T data: all depths", ylab = "") %>%
   dySeries("T", drawPoints = TRUE, pointSize=2, label = "Temp")%>%
   dySeries("O2", drawPoints = TRUE, pointSize=2, label = "oxy")%>%
   dySeries(axis = "y2","S", drawPoints = TRUE, pointSize=2, label = "Sal") %>%
@@ -2742,20 +2759,19 @@ dyOptions(
 
 #make the mean with same date and rounded time + filter only surface data 1 to 3 m.
 mean_eol <- eol %>%
-  group_by( P, datetime_round) %>%
+  group_by( P, datetime) %>%
   dplyr::summarise(
             mean_sal_eol = mean(S, na.rm=TRUE),
             mean_temp_eol = mean(T, na.rm=TRUE),
             mean_oxy_eol = mean(O2, na.rm=TRUE)) %>%
-  dplyr::rename(datetime = datetime_round) %>%
   dplyr::filter(P >=1 & P <= 3)
 
 
 ## PLOT 2 = 0 to 2 m + rounded time to hour
-eol_xts <- dplyr::select(mean_eol, datetime_round, mean_sal_eol, mean_temp_eol, mean_oxy_eol)
-eol_xts <- as.xts(eol_xts, order.by=eol_xts$datetime_round)
+eol_xts <- dplyr::select(mean_eol, datetime, mean_sal_eol, mean_temp_eol, mean_oxy_eol)
+eol_xts <- as.xts(eol_xts, order.by=eol_xts$datetime)
 
-dygraph(eol_xts,  main = "EOL data: 0 to 3 m depth , rounded time to nearest hour", ylab = "") %>%
+dygraph(eol_xts,  main = "EOL data: 1 to 3 m depth , rounded time to nearest hour", ylab = "") %>%
   dySeries("mean_temp_eol", drawPoints = TRUE, pointSize=2, label = "Temp")%>%
   dySeries(axis = "y2","mean_sal_eol", drawPoints = TRUE, pointSize=2, label = "Sal") %>%
     dySeries("mean_oxy_eol", drawPoints = TRUE, pointSize=2, label = "oxy")%>%
@@ -2848,10 +2864,10 @@ rh_B_Bplus_mean$datetime <- with_tz(rh_B_Bplus_mean$datetime, "UTC")
 
 ```
 
-### Time series plots
+### Time series plots (for Point B / B+)
 
 ```{r plot ctd_hydro, echo=FALSE, warning = FALSE, message = FALSE, out.width='100%'}
-# Temp
+## Temp
 rh_temp_xts <- dplyr::select(rh_B_Bplus_mean, date, mean_temp_rhBplus, mean_temp_rhB)
 rh_temp_xts <- as.xts(rh_temp_xts, order.by=rh_temp_xts$date)
 
@@ -2866,7 +2882,15 @@ dyOptions(
     useDataTimezone = TRUE)%>%
   dyRangeSelector(height = 30)
 
-# Sal
+# Property plot
+titre <- "Temperature Rade Hydro: B vs B+"
+fit <- lmodel2(data = rh_B_Bplus_mean, mean_temp_rhBplus ~ mean_temp_rhB, nperm = 99)
+p_rh_temp <-  ggreg2(fit, "mean_temp_rhB", "mean_temp_rhBplus") +
+  geom_abline(aes(intercept = 0, slope = 1), linetype = 2) +
+  mytheme+labs(x="Temp Point B", y="Temp Point B+")
+print(p_rh_temp)
+
+## Sal
 rh_sal_xts <- dplyr::select(rh_B_Bplus_mean, date, mean_sal_rhBplus, mean_sal_rhB)
 rh_sal_xts <- as.xts(rh_sal_xts, order.by=rh_sal_xts$date)
 
@@ -2881,7 +2905,15 @@ dyOptions(
     useDataTimezone = TRUE)%>%
   dyRangeSelector(height = 30)
 
-# Oxy ml/l
+# Property plot
+titre <- "Salinity Rade Hydro: B vs B+"
+fit <- lmodel2(data = rh_B_Bplus_mean, mean_sal_rhBplus ~ mean_sal_rhB, nperm = 99)
+p_rh_sal <-  ggreg2(fit, "mean_sal_rhB", "mean_sal_rhBplus") +
+  geom_abline(aes(intercept = 0, slope = 1), linetype = 2) +
+  mytheme+labs(x="Sal Point B", y="Sal Point B+")
+print(p_rh_sal)
+
+## Oxy ml/l
 rh_oxymll_xts <- dplyr::select(rh_B_Bplus_mean, date, mean_oxy_mll_rhBplus, mean_oxy_mll_rhB)
 rh_oxymll_xts <- as.xts(rh_oxymll_xts, order.by=rh_oxymll_xts$date)
 
@@ -2895,8 +2927,16 @@ dyOptions(
     drawPoints = TRUE,
     useDataTimezone = TRUE)%>%
   dyRangeSelector(height = 30)
-  
-# Oxy umolkg
+
+# Property plot
+titre <- "Oxygen (ml/l) Rade Hydro: B vs B+"
+fit <- lmodel2(data = rh_B_Bplus_mean, mean_oxy_mll_rhBplus ~ mean_oxy_mll_rhB, nperm = 99)
+p_rh_oxy_mll <-  ggreg2(fit, "mean_oxy_mll_rhB", "mean_oxy_mll_rhBplus") +
+  geom_abline(aes(intercept = 0, slope = 1), linetype = 2) +
+  mytheme+labs(x="Oxy_mll Point B", y="Oxy_mll Point B+")
+print(p_rh_oxy_mll)
+
+## Oxy umolkg
 rh_oxyumolkg_xts <- dplyr::select(rh_B_Bplus_mean, date, mean_oxy_umolkg_rhBplus, mean_oxy_umolkg_rhB)
 rh_oxyumolkg_xts <- as.xts(rh_oxyumolkg_xts, order.by=rh_oxyumolkg_xts$date)
 
@@ -2910,36 +2950,8 @@ dyOptions(
     drawPoints = TRUE,
     useDataTimezone = TRUE)%>%
   dyRangeSelector(height = 30)
-```
 
-### Property-property plots
-
-```{r property plot ctd_hydro, echo=FALSE, warning = FALSE, message = FALSE, out.width='100%'}
-# temp
-titre <- "Temperature Rade Hydro: B vs B+"
-fit <- lmodel2(data = rh_B_Bplus_mean, mean_temp_rhBplus ~ mean_temp_rhB, nperm = 99)
-p_rh_temp <-  ggreg2(fit, "mean_temp_rhB", "mean_temp_rhBplus") +
-  geom_abline(aes(intercept = 0, slope = 1), linetype = 2) +
-  mytheme+labs(x="Temp Point B", y="Temp Point B+")
-print(p_rh_temp)
-
-# sal
-titre <- "Salinity Rade Hydro: B vs B+"
-fit <- lmodel2(data = rh_B_Bplus_mean, mean_sal_rhBplus ~ mean_sal_rhB, nperm = 99)
-p_rh_sal <-  ggreg2(fit, "mean_sal_rhB", "mean_sal_rhBplus") +
-  geom_abline(aes(intercept = 0, slope = 1), linetype = 2) +
-  mytheme+labs(x="Sal Point B", y="Sal Point B+")
-print(p_rh_sal)
-
-# Oxy mll
-titre <- "Oxygen (ml/l) Rade Hydro: B vs B+"
-fit <- lmodel2(data = rh_B_Bplus_mean, mean_oxy_mll_rhBplus ~ mean_oxy_mll_rhB, nperm = 99)
-p_rh_oxy_mll <-  ggreg2(fit, "mean_oxy_mll_rhB", "mean_oxy_mll_rhBplus") +
-  geom_abline(aes(intercept = 0, slope = 1), linetype = 2) +
-  mytheme+labs(x="Oxy_mll Point B", y="Oxy_mll Point B+")
-print(p_rh_oxy_mll)
-
-# Oxy umolkg
+# Property plot
 titre <- "Oxygen (umol/kg) Rade Hydro: B vs B+"
 fit <- lmodel2(data = rh_B_Bplus_mean, mean_oxy_umolkg_rhBplus ~ mean_oxy_umolkg_rhB, nperm = 99)
 p_rh_oxy_umolkg <-  ggreg2(fit, "mean_oxy_umolkg_rhB", "mean_oxy_umolkg_rhBplus") +
@@ -2947,6 +2959,7 @@ p_rh_oxy_umolkg <-  ggreg2(fit, "mean_oxy_umolkg_rhB", "mean_oxy_umolkg_rhBplus"
   mytheme+labs(x="Oxy_umolkg Point B", y="Oxy_umolkg Point B+")
 print(p_rh_oxy_umolkg)
 ```
+
 
 ## Comparaison EOL - SOMLIT (Point B) 
 
@@ -2958,45 +2971,46 @@ In this section, T, S and Oxy are compaired between EOL and SOMLIT data.
 
 ### Temperature
 
-#### 1st approach (same Point B data during 6 days)
+<!-- #### 1st approach (same Point B data during 6 days) 
 
-Here, SOMLIT data from Rade hydro were not used. Instead, we took Point B data from Data_dic.csv.  The same S/T value was kept for 3 days before and 3 days after.
+Here, SOMLIT data from Rade hydro were not used. Instead, we took Point B data from Data_dic.csv.  The same S/T value was kept for 3 days before and 3 days after. 
 
 ```{r eol pointb comp Temp 1st, echo=FALSE, warning = FALSE, message = FALSE, out.width='100%'}
 
-### 1st approach with pointB data from "continuous_discret" 
-### 
-# join PTB data from continuous_discrete to EOL data to compare
-eol_ptb <- left_join(mean_eol, continuous_discrete, by="datetime_round")
-
-temperature <- left_join(mean_eol%>%select(datetime_round, mean_temp_eol), continuous_discrete%>%select(datetime_round, T_ptb), by="datetime_round")
-
-temperature_xts <- dplyr::select(temperature, datetime_round, T_ptb, mean_temp_eol)
-temperature_xts <- as.xts(temperature_xts, order.by=temperature_xts$datetime_round)
-
-dygraph(temperature_xts,  main = "Temperature comparaison: EOL - PTB", ylab = "") %>%
-  dySeries("mean_temp_eol", drawPoints = TRUE, pointSize=2, label = "Temp EOL")%>%
-  dySeries("T_ptb", drawPoints = TRUE, pointSize=2, label = "Temp PTB") %>%
- # dyLegend(show = "always", width = 600)%>%
-  #dyAxis("y",valueRange = c(-0.1, 0.11))%>%
-dyOptions(
-    drawGrid = TRUE,
-    drawPoints = TRUE,
-    useDataTimezone = TRUE)%>%
-  dyRangeSelector(height = 30)
-
-###
-titre <- "Temperature: EOL vs Point B"
-fit <- lmodel2(data = temperature, T_ptb ~ mean_temp_eol, nperm = 99)
-p_Tptb_Teol <-  ggreg2(fit, "mean_temp_eol", "T_ptb") +
-  geom_line(aes(x = mean_temp_eol, y = mean_temp_eol), linetype = 2) +
-  mytheme+labs(x="T EOL", y="T Point B")
-
-print(p_Tptb_Teol)
+# ### 1st approach with pointB data from "continuous_discret" 
+# ### 
+# # join PTB data from continuous_discrete to EOL data to compare
+# eol_ptb <- left_join(mean_eol, continuous_discrete, by="datetime")
+# 
+# temperature <- left_join(mean_eol%>%dplyr::select(datetime, mean_temp_eol), continuous_discrete%>%dplyr::select(datetime, T_ptb), by="datetime")
+# 
+# temperature_xts <- dplyr::select(temperature, datetime, T_ptb, mean_temp_eol)
+# temperature_xts <- as.xts(temperature_xts, order.by=temperature_xts$datetime)
+# 
+# dygraph(temperature_xts,  main = "Temperature comparaison: EOL - PTB", ylab = "") %>%
+#   dySeries("mean_temp_eol", drawPoints = TRUE, pointSize=2, label = "Temp EOL")%>%
+#   dySeries("T_ptb", drawPoints = TRUE, pointSize=2, label = "Temp PTB") %>%
+#  # dyLegend(show = "always", width = 600)%>%
+#   #dyAxis("y",valueRange = c(-0.1, 0.11))%>%
+# dyOptions(
+#     drawGrid = TRUE,
+#     drawPoints = TRUE,
+#     useDataTimezone = TRUE)%>%
+#   dyRangeSelector(height = 30)
+# 
+# ###
+# titre <- "Temperature: EOL vs Point B"
+# fit <- lmodel2(data = temperature, T_ptb ~ mean_temp_eol, nperm = 99)
+# p_Tptb_Teol <-  ggreg2(fit, "mean_temp_eol", "T_ptb") +
+#   geom_line(aes(x = mean_temp_eol, y = mean_temp_eol), linetype = 2) +
+#   mytheme+labs(x="T EOL", y="T Point B")
+# 
+# print(p_Tptb_Teol)
 ```
-#### 2nd approach
 
-Here, SOmlit data were used and binded with EOL data by datetime in order to compare.
+#### 2nd approach -->
+
+Here, SOMLIT data were used and binded with EOL data by datetime in order to compare.
 
 ```{r eol pointb comp Temp 2nd, echo=FALSE, warning = FALSE, message = FALSE, out.width='100%'}
 ### 2nd approach with pointB data from "rade hydro" 
@@ -3010,10 +3024,10 @@ eol_ptb_temp_xts <- dplyr::select(eol_ptb, datetime, mean_temp_rhB, mean_temp_eo
 eol_ptb_temp_xts <- as.xts(eol_ptb_temp_xts, order.by=eol_ptb$datetime)
 
 dygraph(eol_ptb_temp_xts,  main = "Temperature comparaison: EOL - PTB", ylab = "") %>%
-    dySeries("mean_temp_rhB", drawPoints = TRUE, pointSize=4, label = "Temp PTB", color ="blue") %>%
+dySeries("mean_temp_rhB", drawPoints = TRUE, pointSize=4, label = "Temp PTB", color ="blue") %>%
 dySeries("mean_temp_eol", drawPoints = TRUE, pointSize=2, label = "Temp EOL", color ="red")%>%
  # dyLegend(show = "always", width = 600)%>%
-  #dyAxis("y",valueRange = c(-0.1, 0.11))%>%
+ #dyAxis("y",valueRange = c(-0.1, 0.11))%>%
 dyOptions(
     drawGrid = TRUE,
     drawPoints = TRUE,
@@ -3063,7 +3077,7 @@ eol_ptb_oxy_xts <- as.xts(eol_ptb_oxy_xts, order.by=eol_ptb_oxy_xts$datetime)
 
 dygraph(eol_ptb_oxy_xts,  main = "Oxygen (ml/l) comparaison: EOL - PTB", ylab = "") %>%
 dySeries("mean_oxy_mll_rhB", drawPoints = TRUE, pointSize=4, label = "Oxy PTB", color ="blue") %>%
-dySeries("mean_O2_eol", drawPoints = TRUE, pointSize=2, label = "Oxy EOL", color ="red")%>%
+dySeries("mean_oxy_eol", drawPoints = TRUE, pointSize=2, label = "Oxy EOL", color ="red")%>%
  # dyLegend(show = "always", width = 600)%>%
   #dyAxis("y",valueRange = c(-0.1, 0.11))%>%
 dyOptions(
@@ -3074,8 +3088,8 @@ dyOptions(
 
 ###
 titre <- "Salinity: EOL vs Point B"
-fit <- lmodel2(data = eol_ptb, mean_oxy_mll_rhB ~ mean_O2_eol, nperm = 99)
-p_Oxyptb_Oxyeol <-  ggreg2(fit, "mean_O2_eol", "mean_oxy_mll_rhB") +
+fit <- lmodel2(data = eol_ptb, mean_oxy_mll_rhB ~ mean_oxy_eol, nperm = 99)
+p_Oxyptb_Oxyeol <-  ggreg2(fit, "mean_oxy_eol", "mean_oxy_mll_rhB") +
   geom_abline(aes(slope= 1, intercept =0), linetype = 2) +
   mytheme+labs(x="Sal EOL", y="Sal Point B")
 
@@ -3099,4 +3113,4 @@ p_spec_cal <- ggreg2(fit, "pHspec_Tptb", "pHcalc_ptB") +
   ggsave(file = "figures/fig_comparison_pH.png", p_spec_cal,  width = 15, height = 15, units = "cm")
 
 print(p_spec_cal)
-```
+ ```
