@@ -2737,9 +2737,12 @@ eol <- dplyr::mutate(eol, O2 = case_when(O2 > 6 ~ NA_real_,
                                        TRUE ~ O2
                                         ))
 <<<<<<< HEAD
+<<<<<<< HEAD
 
 #round time to nearest hour and take it in considetation as datetime.
 eol$datetime <-round_date(eol$datetime,unit = "hour" )
+=======
+>>>>>>> work1
 =======
 >>>>>>> work1
 
@@ -2768,6 +2771,10 @@ mean_eol <- eol %>%
             mean_temp_eol = mean(T, na.rm=TRUE),
             mean_oxy_eol = mean(O2, na.rm=TRUE)) %>%
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+  #dplyr::rename(datetime = datetime_round) %>%
+>>>>>>> work1
 =======
   #dplyr::rename(datetime = datetime_round) %>%
 >>>>>>> work1
