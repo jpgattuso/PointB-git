@@ -2736,9 +2736,12 @@ eol <- dplyr::mutate(eol, O2 = case_when(O2 > 6 ~ NA_real_,
                                          O2 >= 999 ~ NA_real_ ,
                                        TRUE ~ O2
                                         ))
+<<<<<<< HEAD
 
 #round time to nearest hour and take it in considetation as datetime.
 eol$datetime <-round_date(eol$datetime,unit = "hour" )
+=======
+>>>>>>> work1
 
 
 ## PLOT 1 = all eol data S T
@@ -2764,6 +2767,10 @@ mean_eol <- eol %>%
             mean_sal_eol = mean(S, na.rm=TRUE),
             mean_temp_eol = mean(T, na.rm=TRUE),
             mean_oxy_eol = mean(O2, na.rm=TRUE)) %>%
+<<<<<<< HEAD
+=======
+  #dplyr::rename(datetime = datetime_round) %>%
+>>>>>>> work1
   dplyr::filter(P >=1 & P <= 3)
 
 
@@ -2977,6 +2984,7 @@ Here, SOMLIT data from Rade hydro were not used. Instead, we took Point B data f
 
 ```{r eol pointb comp Temp 1st, echo=FALSE, warning = FALSE, message = FALSE, out.width='100%'}
 
+<<<<<<< HEAD
 # ### 1st approach with pointB data from "continuous_discret" 
 # ### 
 # # join PTB data from continuous_discrete to EOL data to compare
@@ -3006,6 +3014,37 @@ Here, SOMLIT data from Rade hydro were not used. Instead, we took Point B data f
 #   mytheme+labs(x="T EOL", y="T Point B")
 # 
 # print(p_Tptb_Teol)
+=======
+### 1st approach with pointB data from "continuous_discret" 
+### 
+# join PTB data from continuous_discrete to EOL data to compare
+eol_ptb <- left_join(mean_eol, continuous_discrete, by="datetime")
+
+temperature <- left_join(mean_eol%>%select(datetime_round, mean_temp_eol), continuous_discrete%>%select(datetime_round, T_ptb), by="datetime_round")
+
+temperature_xts <- dplyr::select(temperature, datetime_round, T_ptb, mean_temp_eol)
+temperature_xts <- as.xts(temperature_xts, order.by=temperature_xts$datetime_round)
+
+dygraph(temperature_xts,  main = "Temperature comparaison: EOL - PTB", ylab = "") %>%
+  dySeries("mean_temp_eol", drawPoints = TRUE, pointSize=2, label = "Temp EOL")%>%
+  dySeries("T_ptb", drawPoints = TRUE, pointSize=2, label = "Temp PTB") %>%
+ # dyLegend(show = "always", width = 600)%>%
+  #dyAxis("y",valueRange = c(-0.1, 0.11))%>%
+dyOptions(
+    drawGrid = TRUE,
+    drawPoints = TRUE,
+    useDataTimezone = TRUE)%>%
+  dyRangeSelector(height = 30)
+
+###
+titre <- "Temperature: EOL vs Point B"
+fit <- lmodel2(data = temperature, T_ptb ~ mean_temp_eol, nperm = 99)
+p_Tptb_Teol <-  ggreg2(fit, "mean_temp_eol", "T_ptb") +
+  geom_line(aes(x = mean_temp_eol, y = mean_temp_eol), linetype = 2) +
+  mytheme+labs(x="T EOL", y="T Point B")
+
+print(p_Tptb_Teol)
+>>>>>>> work1
 ```
 
 #### 2nd approach -->
