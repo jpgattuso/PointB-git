@@ -3081,25 +3081,44 @@ winkler<- tbl_df(
 delim = "\t", 
 col_names = TRUE, col_types = typ,
 na = c("NA", "999999.00")) %>%
-dplyr::rename(datetime = DATE, 
+dplyr::rename(date = DATE, 
               ptb_oxy_wink_dup= "O (Oxygène)")) 
-winkler$datetime <- as.Date(winkler$datetime)
+winkler$date <- as.POSIXct(winkler$date)
 winkler$ptb_oxy_wink_dup <- as.numeric(as.character(winkler$ptb_oxy_wink_dup))
-
-
 
 # Average ptb_oxy_wink_dup data that are in duplicate (raw data)
 wink <- winkler %>%
-  dplyr::group_by(datetime) %>%
-  dplyr::select(datetime,ptb_oxy_wink_dup,qO )%>%
+  dplyr::group_by(date) %>%
+  dplyr::select(date,ptb_oxy_wink_dup,qO )%>%
   dplyr::filter(qO == 2  |qO ==6)%>%
   dplyr::summarise(ptb_oxy_wink = mean(ptb_oxy_wink_dup, na.rm = T)) 
 
-# PLOT
-eol_ptb_oxy_xts <- dplyr::select(eol_ptb, datetime, mean_oxy_mll_rhB, mean_oxy_eol)
+# Adding the Winkler PointB data perweek to eol_ptb.
+
+eol_ptb <- left_join(eol_ptb, wink , by="date")
+
+
+# PLOT all oxyegen data as time series
+eol_ptb_oxy_xts <- dplyr::select(eol_ptb, datetime, mean_oxy_mll_rhB, mean_oxy_eol, ptb_oxy_wink)
 eol_ptb_oxy_xts <- as.xts(eol_ptb_oxy_xts, order.by=eol_ptb_oxy_xts$datetime)
 
 dygraph(eol_ptb_oxy_xts,  main = "Oxygen (ml/l) comparaison: EOL - PTB", ylab = "") %>%
+dySeries("mean_oxy_mll_rhB", drawPoints = TRUE, pointSize=4, label = "Oxy PTB", color ="blue") %>%
+dySeries("mean_oxy_eol", drawPoints = TRUE, pointSize=2, label = "Oxy EOL", color ="red")%>%
+dySeries("ptb_oxy_wink", drawPoints = TRUE, pointSize=2, label = "Oxy winkler PTB", color ="green")%>%
+ # dyLegend(show = "always", width = 600)%>%
+  #dyAxis("y",valueRange = c(-0.1, 0.11))%>%
+dyOptions(
+    drawGrid = TRUE,
+    drawPoints = TRUE,
+    useDataTimezone = TRUE)%>%
+  dyRangeSelector(height = 30)
+
+# PLOT by parameters
+eol_ptb_oxy_xts <- dplyr::select(eol_ptb, datetime, mean_oxy_mll_rhB, mean_oxy_eol)
+eol_ptb_oxy_xts <- as.xts(eol_ptb_oxy_xts, order.by=eol_ptb_oxy_xts$datetime)
+
+dygraph(eol_ptb_oxy_xts,  main = "Oxygen (ml/l) comparaison: EOL - PTB (CTD + Winkler)", ylab = "") %>%
 dySeries("mean_oxy_mll_rhB", drawPoints = TRUE, pointSize=4, label = "Oxy PTB", color ="blue") %>%
 dySeries("mean_oxy_eol", drawPoints = TRUE, pointSize=2, label = "Oxy EOL", color ="red")%>%
  # dyLegend(show = "always", width = 600)%>%
