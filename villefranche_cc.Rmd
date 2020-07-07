@@ -2520,7 +2520,7 @@ kable(broom::tidy(summary(reg_Temperature)), digits = c(5,5,5,3,3), caption="Reg
 kable(broom::tidy(summary(reg_Chla)), digits = c(5,5,5,3,3), caption="Regressions on values monthly means of pH range as a function of Chla")
 ```
 
-## CO2
+## Atmospheric vs. Seawater pCO2
 ```{r CO2, include=FALSE}
 #typ <- c("cccccccdddddddddddddddddddd") # column type
 CO2_pr <- tbl_df(
@@ -2906,6 +2906,46 @@ rh_B_Bplus_50m_mean$datetime <- with_tz(rh_B_Bplus_50m_mean$datetime, "UTC")
 
 ```
 
+```{r ctd_hydro 5m, echo=FALSE, warning = FALSE, message = FALSE, out.width='100%'}
+# select deep 5 m for B or B+ data
+# B
+rh_B_5m <- dat %>%
+  dplyr::select(station, date , depth, salinity, temperature, oxygen_mll, oxygen_umolkg) %>%
+  dplyr::filter( (depth == 5))%>%
+  dplyr::filter( station == "B")
+
+rh_B_5m_mean <- rh_B_5m %>%
+  dplyr::group_by(date) %>%
+  dplyr::summarise(mean_sal_rhB = mean(salinity, na.rm=TRUE),
+                   mean_temp_rhB = mean(temperature, na.rm=TRUE),
+                   mean_oxy_mll_rhB = mean(oxygen_mll, na.rm=TRUE),
+                   mean_oxy_umolkg_rhB = mean(oxygen_umolkg, na.rm=TRUE))
+# B+
+rh_Bplus_5m <- dat %>%
+  dplyr::select(station, date , depth, salinity, temperature, oxygen_mll, oxygen_umolkg) %>%
+  dplyr::filter( (depth == 5))%>%
+  dplyr::filter( station == "B+")
+
+rh_Bplus_5m_mean <- rh_Bplus_5m %>%
+  dplyr::group_by(date) %>%
+  dplyr::summarise(mean_sal_rhBplus = mean(salinity, na.rm=TRUE),
+                   mean_temp_rhBplus = mean(temperature, na.rm=TRUE),
+                   mean_oxy_mll_rhBplus = mean(oxygen_mll, na.rm=TRUE),
+                   mean_oxy_umolkg_rhBplus = mean(oxygen_umolkg, na.rm=TRUE))
+# bind the 2 df (B and B+)
+rh_B_Bplus_5m_mean <- full_join(rh_B_5m_mean, rh_Bplus_5m_mean, by=NULL)
+rh_B_Bplus_5m_mean$date <- as.POSIXct(rh_B_Bplus_5m_mean$date)
+
+# put 09:00:00 as time (local time)
+rh_B_Bplus_5m_mean <- rh_B_Bplus_5m_mean %>%
+  dplyr::mutate(time = " 09:00:00") %>%
+  dplyr::mutate(datetime = paste0(date, time)) 
+rh_B_Bplus_5m_mean$datetime <- ymd_hms(rh_B_Bplus_5m_mean$datetime, tz="Europe/Paris")
+
+# convert local time to UTC time
+rh_B_Bplus_5m_mean$datetime <- with_tz(rh_B_Bplus_5m_mean$datetime, "UTC")
+```
+
 ### Time series Point B / B+ (1 m)
 
 ```{r plot ctd_hydro 1m, echo=FALSE, warning = FALSE, message = FALSE, out.width='100%'}
@@ -3067,7 +3107,7 @@ dyOptions(
 
 # Property plot
 titre <- "Oxygen (ml/l) 50m Rade Hydro: B vs B+"
-fit <- lmodel2(data = rh_B_Bplus_1m_mean, mean_oxy_mll_rhBplus ~ mean_oxy_mll_rhB, nperm = 99)
+fit <- lmodel2(data = rh_B_Bplus_50m_mean, mean_oxy_mll_rhBplus ~ mean_oxy_mll_rhB, nperm = 99)
 p_rh_oxy_mll <-  ggreg2(fit, "mean_oxy_mll_rhB", "mean_oxy_mll_rhBplus") +
   geom_abline(aes(intercept = 0, slope = 1), linetype = 2) +
   mytheme+labs(x="Oxy_mll Point B", y="Oxy_mll Point B+")
@@ -3091,6 +3131,101 @@ dyOptions(
 # Property plot
 titre <- "Oxygen (umol/kg) 50m Rade Hydro: B vs B+"
 fit <- lmodel2(data = rh_B_Bplus_50m_mean, mean_oxy_umolkg_rhBplus ~ mean_oxy_umolkg_rhB, nperm = 99)
+p_rh_oxy_umolkg <-  ggreg2(fit, "mean_oxy_umolkg_rhB", "mean_oxy_umolkg_rhBplus") +
+  geom_abline(aes(intercept = 0, slope = 1), linetype = 2) +
+  mytheme+labs(x="Oxy_umolkg Point B", y="Oxy_umolkg Point B+")
+print(p_rh_oxy_umolkg)
+```
+
+### Time series Point B / B+ (5 m)
+
+```{r plot ctd_hydro 5m, echo=FALSE, warning = FALSE, message = FALSE, out.width='100%'}
+## Temp
+rh_temp_xts <- dplyr::select(rh_B_Bplus_5m_mean, date, mean_temp_rhBplus, mean_temp_rhB)
+rh_temp_xts <- as.xts(rh_temp_xts, order.by=rh_temp_xts$date)
+
+dygraph(rh_temp_xts,  main = "Temperature 5m Rade Hydro: B / B+", ylab = "") %>%
+    dySeries("mean_temp_rhB", drawPoints = TRUE, pointSize=4, label = "Temp B", color ="blue") %>%
+   dySeries("mean_temp_rhBplus", drawPoints = TRUE, pointSize=2, label = "Temp B+", color="red")%>%
+ # dyLegend(show = "always", width = 600)%>%
+  #dyAxis("y",valueRange = c(-0.1, 0.11))%>%
+dyOptions(
+    drawGrid = TRUE,
+    drawPoints = TRUE,
+    useDataTimezone = TRUE)%>%
+  dyRangeSelector(height = 30)
+# Property plot
+titre <- "Temperature 5m Rade Hydro: B vs B+"
+fit <- lmodel2(data = rh_B_Bplus_5m_mean, mean_temp_rhBplus ~ mean_temp_rhB, nperm = 99)
+p_rh_temp <-  ggreg2(fit, "mean_temp_rhB", "mean_temp_rhBplus") +
+  geom_abline(aes(intercept = 0, slope = 1), linetype = 2) +
+  mytheme+labs(x="Temp Point B", y="Temp Point B+")
+print(p_rh_temp)
+
+## Sal
+rh_sal_xts <- dplyr::select(rh_B_Bplus_5m_mean, date, mean_sal_rhBplus, mean_sal_rhB)
+rh_sal_xts <- as.xts(rh_sal_xts, order.by=rh_sal_xts$date)
+
+dygraph(rh_sal_xts,  main = "Salinity 5m Rade Hydro: B / B+", ylab = "") %>%
+    dySeries("mean_sal_rhB", drawPoints = TRUE, pointSize=4, label = "Sal B", color ="blue") %>%
+   dySeries("mean_sal_rhBplus", drawPoints = TRUE, pointSize=2, label = "Sal B+", color="red")%>%
+ # dyLegend(show = "always", width = 600)%>%
+  #dyAxis("y",valueRange = c(-0.1, 0.11))%>%
+dyOptions(
+    drawGrid = TRUE,
+    drawPoints = TRUE,
+    useDataTimezone = TRUE)%>%
+  dyRangeSelector(height = 30)
+
+# Property plot
+titre <- "Salinity 5m Rade Hydro: B vs B+"
+fit <- lmodel2(data = rh_B_Bplus_5m_mean, mean_sal_rhBplus ~ mean_sal_rhB, nperm = 99)
+p_rh_sal <-  ggreg2(fit, "mean_sal_rhB", "mean_sal_rhBplus") +
+  geom_abline(aes(intercept = 0, slope = 1), linetype = 2) +
+  mytheme+labs(x="Sal Point B", y="Sal Point B+")
+print(p_rh_sal)
+
+## Oxy ml/l
+rh_oxymll_xts <- dplyr::select(rh_B_Bplus_5m_mean, date, mean_oxy_mll_rhBplus, mean_oxy_mll_rhB)
+rh_oxymll_xts <- as.xts(rh_oxymll_xts, order.by=rh_oxymll_xts$date)
+
+dygraph(rh_oxymll_xts,  main = "Oxygen (ml/l) 5m Rade Hydro: B / B+", ylab = "") %>%
+    dySeries("mean_oxy_mll_rhB", drawPoints = TRUE, pointSize=4, label = "Oxy_mll B", color ="blue") %>%
+   dySeries("mean_oxy_mll_rhBplus", drawPoints = TRUE, pointSize=2, label = "Oxy_mll B+", color="red")%>%
+ # dyLegend(show = "always", width = 600)%>%
+  #dyAxis("y",valueRange = c(-0.1, 0.11))%>%
+dyOptions(
+    drawGrid = TRUE,
+    drawPoints = TRUE,
+    useDataTimezone = TRUE)%>%
+  dyRangeSelector(height = 30)
+
+# Property plot
+titre <- "Oxygen (ml/l) 5m Rade Hydro: B vs B+"
+fit <- lmodel2(data = rh_B_Bplus_5m_mean, mean_oxy_mll_rhBplus ~ mean_oxy_mll_rhB, nperm = 99)
+p_rh_oxy_mll <-  ggreg2(fit, "mean_oxy_mll_rhB", "mean_oxy_mll_rhBplus") +
+  geom_abline(aes(intercept = 0, slope = 1), linetype = 2) +
+  mytheme+labs(x="Oxy_mll Point B", y="Oxy_mll Point B+")
+print(p_rh_oxy_mll)
+
+## Oxy umolkg
+rh_oxyumolkg_xts <- dplyr::select(rh_B_Bplus_5m_mean, date, mean_oxy_umolkg_rhBplus, mean_oxy_umolkg_rhB)
+rh_oxyumolkg_xts <- as.xts(rh_oxyumolkg_xts, order.by=rh_oxyumolkg_xts$date)
+
+dygraph(rh_oxyumolkg_xts,  main = "Oxygen (umol/kg) 5m Rade Hydro: B / B+", ylab = "") %>%
+    dySeries("mean_oxy_umolkg_rhB", drawPoints = TRUE, pointSize=4, label = "Oxy_umolkg B", color ="blue") %>%
+   dySeries("mean_oxy_umolkg_rhBplus", drawPoints = TRUE, pointSize=2, label = "Oxy_umolkg B+", color="red")%>%
+ # dyLegend(show = "always", width = 600)%>%
+  #dyAxis("y",valueRange = c(-0.1, 0.11))%>%
+dyOptions(
+    drawGrid = TRUE,
+    drawPoints = TRUE,
+    useDataTimezone = TRUE)%>%
+  dyRangeSelector(height = 30)
+
+# Property plot
+titre <- "Oxygen (umol/kg) 5m Rade Hydro: B vs B+"
+fit <- lmodel2(data = rh_B_Bplus_5m_mean, mean_oxy_umolkg_rhBplus ~ mean_oxy_umolkg_rhB, nperm = 99)
 p_rh_oxy_umolkg <-  ggreg2(fit, "mean_oxy_umolkg_rhB", "mean_oxy_umolkg_rhBplus") +
   geom_abline(aes(intercept = 0, slope = 1), linetype = 2) +
   mytheme+labs(x="Oxy_umolkg Point B", y="Oxy_umolkg Point B+")
@@ -3311,7 +3446,14 @@ print(p_Oxyptbwink_Oxyptb)
 ## pH comparaison
 
 ### **continuous pH time series**
-Includes SAMI and seafet
+Here SAMI and seafet data are shown.
+
+```{r plots pH sami seafet, echo=FALSE, warning = FALSE, message = FALSE, out.width='70%'}
+
+ptb_wink_ctd_50m <- left_join(rh_B_Bplus_50m_mean, wink_50m , by="date")
+
+```
+
 
 ### **spectro vs calculated pH (T insitu)**
 <br>
