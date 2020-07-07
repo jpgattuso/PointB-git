@@ -2740,14 +2740,19 @@ eol <- dplyr::mutate(eol, O2 = case_when(O2 > 6 ~ NA_real_,
 #round time to nearest hour and take it in considetation as datetime.
 eol$datetime <-round_date(eol$datetime,unit = "hour" )
 
+eol <- eol%>%
+  dplyr::rename(temp_eol = T,
+                sal_eol = S,
+                oxy_eol = O2)
+
 ## PLOT 1 = all eol data S T
-eol_xts <- dplyr::select(eol, datetime, S, T, O2)
+eol_xts <- dplyr::select(eol, datetime, temp_eol, sal_eol, oxy_eol)
 eol_xts <- as.xts(eol_xts, order.by=eol_xts$datetime)
 
 dygraph(eol_xts, main = "EOL S T data: all depths", ylab = "") %>%
-  dySeries("T", drawPoints = TRUE, pointSize=2, label = "Temp")%>%
-  dySeries("O2", drawPoints = TRUE, pointSize=2, label = "oxy")%>%
-  dySeries(axis = "y2","S", drawPoints = TRUE, pointSize=2, label = "Sal") %>%
+  dySeries("temp_eol", drawPoints = TRUE, pointSize=2, label = "Temp")%>%
+  dySeries("oxy_eol", drawPoints = TRUE, pointSize=2, label = "oxy")%>%
+  dySeries(axis = "y2","sal_eol", drawPoints = TRUE, pointSize=2, label = "Sal") %>%
  # dyLegend(show = "always", width = 600)%>%
   #dyAxis("y",valueRange = c(-0.1, 0.11))%>%
 dyOptions(
@@ -2756,32 +2761,6 @@ dyOptions(
     useDataTimezone = TRUE)%>%
   dyRangeSelector(height = 30)
 
-#make the mean with same date and rounded time + filter only surface data 1 to 3 m.
-mean_eol <- eol %>%
-  group_by( P, datetime) %>%
-  dplyr::summarise(
-            mean_sal_eol = mean(S, na.rm=TRUE),
-            mean_temp_eol = mean(T, na.rm=TRUE),
-            mean_oxy_eol = mean(O2, na.rm=TRUE)) %>%
-  #dplyr::rename(datetime = datetime_round) %>%
-  dplyr::filter(P >=1 & P <= 3)
-
-
-## PLOT 2 = 0 to 2 m + rounded time to hour
-eol_xts <- dplyr::select(mean_eol, datetime, mean_sal_eol, mean_temp_eol, mean_oxy_eol)
-eol_xts <- as.xts(eol_xts, order.by=eol_xts$datetime)
-
-dygraph(eol_xts,  main = "EOL data: 1 to 3 m depth , mean by day", ylab = "") %>%
-  dySeries("mean_temp_eol", drawPoints = TRUE, pointSize=2, label = "Temp")%>%
-  dySeries(axis = "y2","mean_sal_eol", drawPoints = TRUE, pointSize=2, label = "Sal") %>%
-    dySeries("mean_oxy_eol", drawPoints = TRUE, pointSize=2, label = "oxy")%>%
- # dyLegend(show = "always", width = 600)%>%
-  #dyAxis("y",valueRange = c(-0.1, 0.11))%>%
-dyOptions(
-    drawGrid = TRUE,
-    drawPoints = TRUE,
-    useDataTimezone = TRUE)%>%
-  dyRangeSelector(height = 30)
 ### SAVE
 saveRDS(eol, file = paste0(path, "data/eol/eol_data.rds"))
 
