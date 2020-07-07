@@ -2653,7 +2653,7 @@ sf_xts <- as.xts(sf_xts, order.by=sf_xts$datetime)
 dygraph(sf_xts, ylab = "") %>%
   dySeries("pHT_sfint", drawPoints = TRUE, pointSize=2, label = "pH corrected")%>%
   dySeries("pHspec_Tptb", drawPoints = TRUE, pointSize=3, color = "red", label = "pH spectro (T ptB)") %>%
-  dySeries("pHcalc_ptB", drawPoints = TRUE, pointSize=2, label = "pH calc (T ptB)") %>%
+  dySeries("pHcalc_ptB", drawPoints = TRUE, pointSize=3, label = "pH calc (T ptB)") %>%
  dySeries(axis = "y2","T_seaF", drawPoints = TRUE, pointSize=2, label = "T_seaF") %>%
  # dyLegend(show = "always", width = 600)%>%
 dyOptions(
