@@ -2664,6 +2664,9 @@ dyOptions(
 ```
 
 ## SAMI pH
+
+### Deployment
+
 ```{r sami pH, echo=FALSE, warning = FALSE, message = FALSE, out.width='100%'}
 # read deployment file
 file_list <- list.files(path  = path_sami, pattern = "Raw_SAMI.*.txt")
@@ -2696,8 +2699,10 @@ sami$datetime <- mdy_hms(sami$datetime, tz="UTC")
 sami <- sami %>% 
   dplyr::filter(flag_sami == 0 & ph_sami >= 7.95 & ph_sami <= 8.2) 
 
-save(sami, file = paste0(path, "data/sami/sami_all_ptb.csv"))
+save(sami, file = paste0(path, "data/sami/sami_all_eol.csv"))
 
+## Events
+sami_events <- c("2019-12-16 00:00:00", "2020-02-25 16:00:00","2019-07-17 14:00:00")
 ## PLOT
 sami_xts <- dplyr::select(sami, datetime, ph_sami, temp_int_sami, temp_ext_sami)
 sami_xts <- as.xts(sami_xts, order.by=sami_xts$datetime)
@@ -2706,6 +2711,11 @@ dygraph(sami_xts, ylab = "") %>%
   dySeries("ph_sami", drawPoints = TRUE, pointSize=2, label = "ph_sami")%>%
   dySeries(axis = "y2","temp_int_sami", drawPoints = TRUE, pointSize=2, label = "temp_int_sami") %>%
   dySeries(axis = "y2", "temp_ext_sami", drawPoints = TRUE, pointSize=2, label = "temp_ext_sami") %>%
+   dyEvent(as.POSIXct("2020-07-16 12:00:00", tz="GMT"), "reagent bag changed", labelLoc = "bottom", color="red") %>%
+   dyEvent(as.POSIXct("2020-07-16 11:30:00", tz="GMT"), "end of TRIS calib", labelLoc = "bottom", color="red") %>%
+   dyEvent(as.POSIXct("2019-12-05 11:00:00", tz="GMT"), "end of TRIS calib", labelLoc = "bottom", color="red") %>%
+  dyShading(from = sami_events[1], to = sami_events[2], color = "#CCCCCC") %>%
+  dyShading(from = sami_events[2], to = sami_events[3], color = "#E0E0E0") %>%
  # dyLegend(show = "always", width = 600)%>%
   #dyAxis("y",valueRange = c(-0.1, 0.11))%>%
 dyOptions(
@@ -2714,6 +2724,8 @@ dyOptions(
     useDataTimezone = TRUE)%>%
   dyRangeSelector(height = 30)
 ```
+### Tris 
+
 
 ## EOL
 Here we read data from the EOL ctd and calculate total alkalinity using the relationship with salinity. We also compare salinity and temperature with the SOMLIT data.
