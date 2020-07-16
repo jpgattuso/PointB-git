@@ -45,11 +45,11 @@ library(dplyr)
 #define who is the user and define path
 if (Sys.getenv("LOGNAME") == "gattuso") {
   path = "../../pCloud\ Sync/Documents/experiments/exp153_carbonates_point_B/"
-  path_sami = "../../pCloud\ Sync/Documents/experiments/exp176_sami/sami_data/sami_processed/Data_deployment/PointB/"
+  path_sami = "../../pCloud\ Sync/Documents/experiments/exp176_sami/sami_data/sami_raw_export/Data_deployment/EOL/"
 }
 if (Sys.getenv("LOGNAME") == "samir") {
   path = "../../pCloud Sync/exp153_carbonates_point_B/"
-  path_sami = "../../pCloud\ Sync/exp176_sami/sami_data/sami_processed/Data_deployment/PointB/"
+  path_sami = "../../pCloud\ Sync/exp176_sami/sami_data/sami_raw_export/Data_deployment/EOL/"
 }
 
 Sys.setenv(TZ='UTC')
