@@ -2702,7 +2702,7 @@ sami <- sami %>%
 save(sami, file = paste0(path, "data/sami/sami_all_eol.csv"))
 
 ## Events
-sami_events <- c("2019-12-16 00:00:00", "2020-02-25 16:00:00","2019-07-17 14:00:00")
+sami_events <- c("2019-12-16 11:00:00", "2020-02-25 16:00:00","2020-06-17 08:00:00","2020-06-19 10:00:00","2020-07-15 10:00:00","2020-07-17 18:00:00")
 ## PLOT
 sami_xts <- dplyr::select(sami, datetime, ph_sami, temp_int_sami, temp_ext_sami)
 sami_xts <- as.xts(sami_xts, order.by=sami_xts$datetime)
@@ -2716,6 +2716,8 @@ dygraph(sami_xts, ylab = "") %>%
    dyEvent(as.POSIXct("2019-12-05 11:00:00", tz="GMT"), "end of TRIS calib", labelLoc = "bottom", color="red") %>%
   dyShading(from = sami_events[1], to = sami_events[2], color = "#CCCCCC") %>%
   dyShading(from = sami_events[2], to = sami_events[3], color = "#E0E0E0") %>%
+  dyShading(from = sami_events[3], to = sami_events[4], color = "white") %>%
+   dyShading(from = sami_events[4], to = sami_events[5], color = "#CCCCCC") %>%
  # dyLegend(show = "always", width = 600)%>%
   #dyAxis("y",valueRange = c(-0.1, 0.11))%>%
 dyOptions(
@@ -2724,8 +2726,38 @@ dyOptions(
     useDataTimezone = TRUE)%>%
   dyRangeSelector(height = 30)
 ```
+
 ### Tris 
 
+## SAMI - Sunburst Infos
+
+Here are gathered important emails from Sunburst concerning SAMI handling (reggie@sunburstsensors.com):
+
+ - 29/10/2019 à 18:53
+ 
+> Samir,
+
+>By all accounts, this instrument appears to be functioning correctly.  The blank signals are stable, indicating no air bubbles in the lines. Absorbances show a good curve in the expected range, indicating that the pump and valve are working properly.
+
+>I want to be clear on some of the procedures though.
+
+>pH measurements are extremely temperature sensitive.  In order to get best results, the following procedures must be followed:
+
+>-the PiSAMI must be completely submersed in the sample and equilibrated to the sample temperature
+>-if the sample is in a bottle, the bottle must be submersed in the same water as the PiSAMI
+>-when comparing discrete pH to PiSAMI pH, the measurements must be either made at the EXACT same temperature, or corrected to the same temperature (generally seawater pH changes by -0.015 per degree C)
+>-Theoretical Tris pH must be calculated at the PiSAMI Internal Temperature, as this is the temperature at which the PiSAMI measured pH
+>-when processing Tris data with QC_PH, choose "Tris validation."  This actually calculates pH a bit differently (taking an average of several measurements; whereas seawater pH is calculated by extrapolating several pH measurements vs indicator concentration). 
+
+>I suspect that some of the offsets you are seeing between theoretical pH or discrete pH and PiSAMI pH have to do with temperature.  For example, see the 161019 file.  If you measured discrete pH at 25C, it would differ from the SAMI pH by ~0.04-0.05 pH.  The Tris file that you sent me only has 2 samples in it, so I cannot see all of your data.  However, these two samples come out to  a difference between theoretical pH (at SAMI internal temperature) and measured pH of 0.0046 and 0.0056 (see the Diff column).  However, the pH does differ substantially from the pH of Tris at 22.118C.
+
+>I believe that the apparently poor precision you are seeing in some of the seawater analysis also is due to temperature,  If you have a flow-through system, the temperature of the water seems to not be stable.  The instability in pH mimics the changes in water temperature, indicating that the pH of the water is also changing (see the 181019 file).
+
+>I have attached seawater and Tris tests on this unit before we shipped it.
+
+>I think this instrument is working fine, and you should try deploying it.  Also, go back into your data and make sure you are handling temperature correctly to see if that improves accuracy.
+
+>Reggie
 
 ## EOL
 Here we read data from the EOL ctd and calculate total alkalinity using the relationship with salinity. We also compare salinity and temperature with the SOMLIT data.
