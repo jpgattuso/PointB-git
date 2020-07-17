@@ -2753,13 +2753,14 @@ I believe that the apparently poor precision you are seeing in some of the seawa
 ### **pH measurement method (Tris and seawater) 16/12/2019 à 20:40**
  
  - **When Tris pH is calculated, the software takes an average of several measurements, whereas when seawater pH is calculated the software will extrapolate to a pH without indicator.**  We do this because seawater pH is perturbed by the indicator, whereas Tris pH is not.  
- >With the PiSAMI there is a thermistor inside the instrument and one on the outside.  pH is calculated at the internal temperature.  
+
+With the PiSAMI there is a thermistor inside the instrument and one on the outside.  pH is calculated at the internal temperature.  
 - **For seawater, the pH is then corrected to the external temperature. ** 
 - **For Tris the internal temperature is used to calculate the measured and theoretical pH and the difference.**  You can see that when Tris pH is calculated from the QC program, the standard deviation is much smaller, although it seems that the average error is not much different (0.0091 +/-0.0019).  I also did a rough correction of Tris pH to the external pH, and the offset does not change.
 
 **<span style="color:red"> You could consider applying this offset to your field data, given that it is the same, or similar, both pre- and post-deployment. </span>**
 
-### 17/01/2020 à 22:36
+### **17/01/2020 à 22:36**
 
 Samir: 
 
