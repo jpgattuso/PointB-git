@@ -2516,8 +2516,8 @@ The changes in the daily pH range do not seem to be driven by the concentration 
 
 
 ```{r kable pH range vs temperature and Chla}
-kable(broom::tidy(summary(reg_Temperature)), digits = c(5,5,5,3,3), caption="Regressions on values monthly means of pH range as a function of temperature")
-kable(broom::tidy(summary(reg_Chla)), digits = c(5,5,5,3,3), caption="Regressions on values monthly means of pH range as a function of Chla")
+kable(broom::tidy(reg_Temperature), digits = c(5,5,5,3,3), caption="Regressions on values monthly means of pH range as a function of temperature")
+kable(broom::tidy(reg_Chla), digits = c(5,5,5,3,3), caption="Regressions on values monthly means of pH range as a function of Chla")
 ```
 
 ## **Atmospheric vs. Seawater pCO2**
@@ -3507,4 +3507,4 @@ p_spec_cal <- ggreg2(fit, "pHspec_Tptb", "pHcalc_ptB") +
   ggsave(file = "figures/fig_comparison_pH.png", p_spec_cal,  width = 15, height = 15, units = "cm")
 
 print(p_spec_cal)
- ```
+```
