@@ -572,8 +572,8 @@ z$qflag_pH_s_ptb <- as.factor(z$qflag_pH_s_ptb)
 # Average TA/DIC data that are in duplicate (raw data)
 z <- z %>%
   dplyr::group_by(sampling_date, depth) %>%
-  dplyr::mutate(ta = mean(ta_dup, na.rm = T),
-                dic =mean(dic_dup, na.rm =T)) 
+  dplyr::mutate(ta = mean(ta_dup, na.rm = TRUE),
+                dic =mean(dic_dup, na.rm = TRUE)) 
 
 # Exclude data for 2020 and later
 z <- filter(z, sampling_date < "2020-01-01")
@@ -787,7 +787,6 @@ means_depth <- dat %>%
     week = week(sampling_date)
     ) %>%
     dplyr::arrange(depth)
-
 # The above generates NaNs which are replaced by NAs
 is.na(means_depth) <- is.na(means_depth)
 write.table(means_depth, paste0(path,"/output/output_somlit.csv"), sep= ",", dec=".", row.names = FALSE)
