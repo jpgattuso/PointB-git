@@ -848,9 +848,9 @@ tmp <- ungroup(mean0m) %>%
   )
 tmp$month <- factor(tmp$month)
 
-means_month0m <- ungroup(mean0m) %>%
-  group_by(monthd) %>%
-  summarise(
+means_month0m <- dplyr::ungroup(mean0m) %>%
+  dplyr::group_by(monthd) %>%
+  dplyr::summarise(
   Salinity = mean(mean_salinity, na.rm = TRUE),
   Salinity_sd = sd(mean_salinity, na.rm = TRUE),
   Salinity_n = sum(!is.na(mean_salinity)),
@@ -2645,7 +2645,7 @@ continuous_discrete$datetime_round <-round_date(continuous_discrete$datetime,uni
 ```
 ## point B
 ```{r point b, echo=FALSE, warning = FALSE, message = FALSE, out.width='100%'}
-y <- read.table("../../pCloud Sync/exp153_carbonates_point_B/data/Data_DIC.csv", header=T, sep=",", dec=".", as.is=T)
+y <- read.table("../../pCloud Sync/exp153_carbonates_point_B/data/Data_DIC.csv", header=TRUE, sep=",", dec=".", as.is=TRUE)
 ```
 
 ## SAMI pH
@@ -2657,7 +2657,7 @@ if (length(file_list) == 0) {stop()} # script does not run if there is no data f
 ii <- 0
 for (file in file_list){ 
   ii <- ii + 1
-  tmp <- read.table(paste(path_sami, file, sep = ""), header = F, dec = ".", as.is = T, sep = "\t", skip = 4, fill = TRUE)
+  tmp <- read.table(paste(path_sami, file, sep = ""), header = F, dec = ".", as.is = TRUE, sep = "\t", skip = 4, fill = TRUE)
   if (ii == 1) {sami <- tmp} else {sami <- rbind(sami, tmp)}
 }
 
