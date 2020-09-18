@@ -2639,7 +2639,7 @@ The rate of increase of seawater pCO2 (`r round(reg_var_1m[7,1], digit=2)` uatm 
 
 ## **seafet pH**
 ```{r seafet pH, echo=FALSE, warning = FALSE, message = FALSE, out.width='100%'}
-# the discrete_continuous file is already read in chunk "Daily and seasonal changes"
+# the continuous_discrete file is already read in chunk "Daily and seasonal changes"
 
 #round time into nearest hour
 continuous_discrete$datetime_round <-round_date(continuous_discrete$datetime,unit = "hour" )
@@ -2730,7 +2730,6 @@ dyOptions(
   dyRangeSelector(height = 30)
 ```
 
-### **Tris** 
 
 ## **SAMI - Sunburst Infos**
 
