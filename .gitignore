@@ -41,3 +41,10 @@ rsconnect/
 *.html
 *.png
 *.pdf
+figures/*.png
+figures/*.pdf
+*.rds
+*.csv
+*.Rdata
+old/
+figures/
