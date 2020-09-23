@@ -365,11 +365,20 @@ ave_yr <- bind_cols(ave_yr, tibble(date = z))
 ```
 
 ```{r plot min-max, fig.width=10, fig.height=4, echo=FALSE, message= FALSE}
+<<<<<<< HEAD
+#plot_min-max <- 
+  
+  temp_yr %>%
+  ggplot() +
+  geom_line(aes(x = year, y = temp)) +
+  facet_grid(rows = vars(range))
+=======
 # plot_min-max <- temp_yr %>%
 #   #dplyr::filter(temp_yr, is.nan == FALSE) %>%
 #   ggplot(aes(x = year, y = temp)) +
 #   geom_linerange(aes(ymin = max(temp, na.rm = TRUE), 
 #                  ymax = min(temp, na.rm = TRUE)))
+>>>>>>> d71fc7160da1ec73c265c5155d2b35200d2f322c
 
 ```
 
