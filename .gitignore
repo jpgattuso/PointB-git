@@ -48,3 +48,5 @@ figures/*.pdf
 *.Rdata
 old/
 figures/
+figures_jp
+output/
