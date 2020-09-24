@@ -47,6 +47,8 @@ if (!require("pander")) install.packages("pander")
 library(pander)
 if (!require("tidyverse")) install.packages("tidyverse")
 library(tidyverse)
+if (!require("todor")) install.packages("todor")
+library(todor)
 
 Sys.setenv(TZ='UTC')
 dc1 <- "#482173FF" #discrete color 1
@@ -471,11 +473,11 @@ dyf$AT[dyf$QF_AT==3 | dyf$QF_AT==4] <- NA
 dyf$CT[dyf$QF_CT==3 | dyf$QF_AT==4] <- NA 
 dyf <- filter(dyf, date!="2005-03-29") # very high salinities that seem wrong that day
 
-# remove ouliers
+# remove outliers
 #tmp <- dyf[which(dyf$AT>2625),]
 fig_dyf_date_AT <- ggplot(data = dyf, aes(x=date, y=AT)) +
   geom_point(na.rm=TRUE)
-png(file = "figures_jp/fig_dyf_date_AT.png", 
+png(file = "output_jp/figures/fig_dyf_date_AT.png", 
     width = 15, height = 10, units = "cm", res = 300)
 print(fig_dyf_date_AT)
 dev.off()
@@ -485,7 +487,7 @@ dyf$AT[dyf$date=="2005-07-02" & (dyf$pressure>=300 & dyf$pressure<=700)] <- NA #
 # replot without outliers
 fig_dyf_date_AT <- ggplot(data = dyf, aes(x=date, y=AT)) +
   geom_point(na.rm=TRUE)
-png(file = "figures_jp/fig_dyf_date_AT.png", 
+png(file = "output_jp/figures/fig_dyf_date_AT.png", 
     width = 15, height = 10, units = "cm", res = 300)
 print(fig_dyf_date_AT)
 dev.off()
@@ -495,7 +497,7 @@ lms <- summary(lm(data = dyf, AT ~ salinity)) #all data
 fig_dyf_AT_salinity <- ggplot() +  geom_point(data = dyf, aes(x=salinity, y=AT)) +
   labs(y = "", x="Salinity", title="DYFAMED all depths") +
   stat_smooth(method = lm, na.rm=TRUE)
-png(file = "figures_jp/fig_dyf_AT_salinity.png", 
+png(file = "output_jp/figures/fig_dyf_AT_salinity.png", 
     width = 15, height = 10, units = "cm", res = 300)
 print(fig_dyf_AT_salinity)
 dev.off()
@@ -564,7 +566,7 @@ fig_dyf_surf_date_AT <- ggplot(data = dyf_surf, aes(x=date, y=AT)) +
   geom_point(na.rm=TRUE) + 
   labs(y = "",x="Time", title=expression(paste(italic(A)[T] ," ","at <= 12 m"))) +
   stat_smooth(method = lm, na.rm=TRUE)
-png(file = "figures_jp/fig_dyf_surf_date_AT.png", 
+png(file = "output_jp/figures/fig_dyf_surf_date_AT.png", 
     width = 15, height = 10, units = "cm", res = 300)
 print(fig_dyf_surf_date_AT)
 dev.off()
@@ -619,7 +621,7 @@ p1 <- ggplot(data=dyf_surf) +
         plot.title = element_text(face="bold", size=16)
   )
 
-ggsave(file = "figures_jp/fig_ta_vs_salinity_0m.png", p1,
+ggsave(file = "output_jp/figures/fig_ta_vs_salinity_0m.png", p1,
     width = 20, height = 13, units = "cm")
 
 
@@ -627,7 +629,7 @@ dyf_surf_salinity_AT <- ggplot(data = dyf_surf, aes(x=salinity, y=AT), na.rm=TRU
   geom_point(aes(colour=factor(year)), na.rm=TRUE) + 
   labs(y = "",x="Salinity", title=expression(paste(italic(A)[T] ," ","at <= 12 m"))) +
   stat_smooth(method = lm, na.rm=TRUE)
-ggsave(file = "figures_jp/dyf_surf_salinity_AT.png", dyf_surf_salinity_AT,
+ggsave(file = "output_jp/figures/dyf_surf_salinity_AT.png", dyf_surf_salinity_AT,
     width = 15, height = 10, units = "cm")
 
 # AT as a function of salinity for every year
@@ -676,7 +678,7 @@ dyf_surf_salinity_AT_year <- ggplot(data=dyf_surf) +
         plot.title = element_text(face="bold", size=16)
   )
 
-ggsave(file = "figures_jp/dyf_surf_salinity_AT_year.png", dyf_surf_salinity_AT_year,
+ggsave(file = "output_jp/figures/dyf_surf_salinity_AT_year.png", dyf_surf_salinity_AT_year,
     width = 20, height = 20, units = "cm")
 ```
 
@@ -695,7 +697,7 @@ kable(tab_fig_dyf_surf_date_salinity)
 ## AT vs time and salinity at DYFAMED
 These are for surface (< 12 m) values, with outliers removed. The slope of salinity vs time is significant for all years but not post-2007 (P = 0.08), which is the relevant period of interest.
 
-![figures/dyf_surf_salinity_AT_year.png](figures_jp/dyf_surf_salinity_AT_year.png)
+![figures/dyf_surf_salinity_AT_year.png](output_jp/figures/dyf_surf_salinity_AT_year.png)
 
 The relationship with salinity is highly significant: 
 <!-- cat(sprintf("%.3f + salinity x %.3f (P = %.3f)", int_dyf, slo_dyf, tab_dyf_surf_salinity_AT[8,3])) -->
@@ -719,39 +721,47 @@ z <-  read_delim(
   col_types = "ccccdddddddddddcddddddddddddddd",
   na = c("NA", "999999")
   )
-H <- NULL
-z$sampling_date <- as.POSIXct(z$sampling_date, format = "%d/%m/%Y")
-z$measure_date <- as.POSIXct(z$measure_date, format = "%d/%m/%Y")
-z$year <- year(z$sampling_date)
-z$monthd <- month(z$sampling_date)
-z$quarter <- quarter(z$sampling_date)
-z$month <- month(z$sampling_date, label = TRUE, abbr = FALSE)
-#render all variables as.numeric instead of character
-z$salinity_field <- as.numeric(z$salinity_field)
-# convert from umol/l to umol/kg
-z$PO4 <- as.numeric(z$PO4 / (rho(S= z$salinity_field,T = z$temp_field , P= 0) / 1000))
-z$SIOH4 <- as.numeric(z$SIOH4 / (1000 * rho(S= z$salinity_field,T = z$temp_field , P= 0) / 1000))
-z$temp_lab_eol <- as.numeric(z$temp_lab_eol)
-z$pH_s_eol_temp_lab <- as.numeric(z$pH_s_eol_temp_lab)
-z$temp_lab_ptb <- as.numeric(z$temp_lab_ptb)
-z$pH_s_ptb_temp_lab <- as.numeric(z$pH_s_ptb_temp_lab)
+#H <- NULL
+z <- z %>%
+  dplyr::mutate(
+    sampling_date = as.POSIXct(sampling_date, format = "%d/%m/%Y"),
+    measure_date = as.POSIXct(measure_date, format = "%d/%m/%Y"),
+    year = year(sampling_date),
+    monthd = month(sampling_date),
+    quarter = quarter(sampling_date),
+    month = month(sampling_date, label = TRUE, abbr = FALSE),
+    #render all variables as.numeric instead of character
+    salinity_field = as.numeric(salinity_field),
+    # convert from umol/l to umol/kg
+    PO4 = as.numeric(PO4 / (
+      rho(S = salinity_field, T = temp_field , P = 0) / 1000
+    )),
+    SIOH4 = as.numeric(SIOH4 / (
+      1000 * rho(S = salinity_field, T = temp_field , P = 0) / 1000
+    )),
+    temp_lab_eol = as.numeric(temp_lab_eol),
+    pH_s_eol_temp_lab = as.numeric(pH_s_eol_temp_lab),
+    temp_lab_ptb = as.numeric(temp_lab_ptb),
+    pH_s_ptb_temp_lab = as.numeric(pH_s_ptb_temp_lab)
+  )
 
 # all flags changed into factors
-z$qflag_taking <- as.factor(z$qflag_taking)     
-z$qflag_sample <- as.factor(z$qflag_sample)     
-z$qflag_ta <- as.factor(z$qflag_ta)
-z$qflag_dic <- as.factor(z$qflag_dic)
-z$qflag_final <- as.factor(z$qflag_final)
-z$qflag_pH_s_eol <- as.factor(z$qflag_pH_s_eol)
-z$qflag_pH_s_ptb <- as.factor(z$qflag_pH_s_ptb)
-
-
+z <- z %>%
+  dplyr::mutate(
+    qflag_taking = as.factor(qflag_taking),
+    qflag_sample = as.factor(qflag_sample),
+    qflag_ta = as.factor(qflag_ta),
+    qflag_dic = as.factor(qflag_dic),
+    qflag_final = as.factor(qflag_final),
+    qflag_pH_s_eol = as.factor(qflag_pH_s_eol),
+    qflag_pH_s_ptb = as.factor(qflag_pH_s_ptb),
+  )
 
 # Exclude data for 2019 and later
 #z <- filter(z, sampling_date < "2021-01-01")
 
 # read POC and PON data
-pom <- read_csv(file = "../data/POC-PON/POC-2007-2015_PtB_1m.csv", comment="#")
+pom <- read_csv(file = paste0(path, "data/POC-PON/POC-2007-2015_PtB_1m.csv"), comment="#")
 pom$date <- as.POSIXct(pom$date)
 ```
 
@@ -845,349 +855,174 @@ CCT50 <- ggplot(dplyr::filter(z, depth == 50 & qflag_dic != 3),
        color = "flag")
 
 #combine graphs on one page
-png(file = "figures_jp/fig_outliers.png",
+png(file = "output_jp/figures/fig_outliers.png",
     width = 17, height = 25, units = "cm", res = 300)
 grid.arrange(CAT1, CCT1, CAT50, CCT50, ncol=1)
-```{r calculate derived parameters and save data, include=FALSE}
-# Calculate means of duplicate samples and remove duplicates
-# one removes the ta and dic values flagged as 3
-z <- z %>%
-  dplyr::group_by(sampling_date, depth) %>%
-  dplyr::mutate(ta = ifelse(qflag_ta != 3, mean(ta_dup, na.rm = TRUE), NA),
-                dic = ifelse(qflag_dic != 3, mean(dic_dup, na.rm = TRUE), NA)) %>% 
-  dplyr::select(-c(ta_dup, dic_dup, pH_ta)) %>% #pH_ta not useful and causes problems with distinct
-  dplyr::distinct()
-
-# calculate in situ spec pH at eol
-tmp <- dplyr::filter(z, !is.na(ta), !is.na(dic),
-                     !is.na(salinity_field), !is.na(temp_field), 
-                     !is.na(pH_s_eol_temp_lab), !is.na(temp_lab_eol))
-pH_s_eol_temp_insi <- pHinsi(pH=tmp$pH_s_eol_temp_lab, ALK=tmp$ta,
-                             Tinsi=tmp$temp_field, 
-                             Tlab=tmp$temp_lab_eol,
-                             Pinsi=0, S=tmp$salinity_field, 
-                             Pt=1e-6*tmp$PO4, Sit=1e-6*tmp$SIOH4, 
-                             k1k2 = "l", kf = "pf", ks="d", 
-                             pHscale = "T", b="l10")
-
-#select tmp variables
-tmp <- tmp %>%
-  ungroup() %>%                                       # added to solve 2 problems: " Adding missing grouping variables: `depth`" and 
-  mutate(pH_s_eol_temp_insi = pH_s_eol_temp_insi) %>%  #"Error in mutate_impl(.data, dots) : "Column `pH_s_ptb_temp_insi` must be length 30 (the group size) or one, not 2557"
-  select(sampling_date, pH_s_eol_temp_insi, depth, pH_s_eol_temp_lab) #add depth , pH_s_ lab to discriminate pH and avoid duplicates in the result of left_join
-
-z <- left_join(z, tmp, by=c("pH_s_eol_temp_lab", "sampling_date", "depth"))
-
-# calculate in situ spec pH at Point B
-tmp <- dplyr::filter(z, !is.na(ta), !is.na(dic),
-                     !is.na(salinity_field), !is.na(temp_field), 
-                     !is.na(pH_s_ptb_temp_lab), !is.na(temp_lab_ptb))
-pH_s_ptb_temp_insi <- pHinsi(pH=tmp$pH_s_ptb_temp_lab, ALK=tmp$ta,
-                             Tinsi=tmp$temp_field, 
-                             Tlab=tmp$temp_lab_ptb,
-                             Pinsi=0, S=tmp$salinity_field, 
-                             Pt=1e-6*tmp$PO4, Sit=1e-6*tmp$SIOH4, 
-                             k1k2 = "l", kf = "pf", ks="d", 
-                             pHscale = "T", b="l10")
-tmp <- tmp %>%
-  ungroup() %>% # added to solve the problem " Adding missing grouping variables: `depth`"
-  mutate(pH_s_ptb_temp_insi = pH_s_ptb_temp_insi) %>%
-  select(sampling_date, pH_s_ptb_temp_insi, depth, pH_s_ptb_temp_lab)  #add depth , pH_s_ lab to discriminate pH and avoid duplicates in the result of left_join
-z <- left_join(z, tmp, by = c("sampling_date","depth", "pH_s_ptb_temp_lab"))
-# to avoid duplicate in rows
-z <- unique(z)
-
-#select all rows containing NA for one of the 4 key variables
-NArows <-  z%>%
-  ungroup() %>% 
-  filter(is.na(salinity_field & dic & ta & temp_field)) # rows with NAs
-
-#select all rows containing data because the carb function does not work with NAs
-
-# add calculated pH and Omega calcite (to dat)
-dat <- dplyr::filter(z, ta != "NA" & dic != "NA" & salinity_field != "NA" & temp_field != "NA")
-carb <- carb(flag=15, var1=dat$ta*1e-6, var2=dat$dic*1e-6,
-             S=dat$salinity_field, T=dat$temp_field, P=dat$depth/10,
-             Pt=1e-6*dat$PO4, Sit=1e-6*dat$SIOH4, 
-             k1k2 = "l", kf = "pf", pHscale = "T", b="l10")
-dat$pH <- carb$pH
-dat$CO2 <- carb$CO2
-dat <- dat%>%
-      ungroup() %>% 
-      dplyr::mutate(
-              CSC_flag = carb$flag,
-              HCO3 = carb$HCO3,
-              CO3 = carb$CO3,
-              OmegaCalcite = as.numeric(carb$OmegaCalcite),
-              OmegaAragonite = as.numeric(carb$OmegaAragonite),
-              pH25 = pHinsi(pH=dat$pH,ALK=dat$ta*1e-6,Tinsi=25,
-                            Tlab=dat$temp_field,S=dat$salinity_field,
-                            Pt=1e-6*dat$PO4, Sit=1e-6*dat$SIOH4, 
-                            k1k2 = "l", 
-                            kf = "pf", pHscale = "T"),
-              pCO2 = carb$pCO2,
-              fCO2 = carb$fCO2,
-              Nta = 1e6 * carb$ALK * 38 / dat$salinity_field,
-              Ndic = 1e6 * carb$DIC * 38 / dat$salinity_field
-              )
-
-#merge back all NArows (they were temporarily eliminated for the data processing above)
-#first add missing columns
-f <- as.data.frame(matrix(as.numeric(NA), nrow = nrow(NArows), ncol = 12))
-
-#name the columns (same column names as dat)
-colnames(f)=c("pH", "CO2", "CSC_flag", "HCO3", "CO3", "OmegaCalcite", "OmegaAragonite", 
-              "pH25", "pCO2" ,"fCO2",	"Nta",	"Ndic")
-
-#bind to dat
-NArows <- cbind(NArows,f)
-
-#bind dates
-dat <- rbind(dat, NArows)
-
-#arrange by dates
-dat <- arrange(dat, sampling_date)
-
-#Prepare data to upload to Pangaea 
-pangaea <- select(dat, sampling_date, depth, CSC_flag, salinity_field,
-                  temp_field, HCO3, CO3,
-                  pH, ta, dic, OmegaCalcite,
-                  OmegaAragonite, pCO2, fCO2) %>%
-  dplyr::mutate(depth = replace(depth, depth == 0, 1))
-  
-#save data
-write_csv(dat, path="output/output.csv")
-write_csv(pangaea, path="output/output_pangaea.csv")
-write_rds(dat, "output/output.rds")
-```
-
-```{r calculate derived parameters and save data, include=FALSE}
-# Calculate means of duplicate samples and remove duplicates
-# one removes the ta and dic values flagged as 3
-z <- z %>%
-  dplyr::group_by(sampling_date, depth) %>%
-  dplyr::mutate(ta = ifelse(qflag_ta != 3, mean(ta_dup, na.rm = TRUE), NA),
-                dic = ifelse(qflag_dic != 3, mean(dic_dup, na.rm = TRUE), NA)) %>% 
-  dplyr::select(-c(ta_dup, dic_dup, pH_ta)) %>% #pH_ta not useful and causes problems with distinct
-  dplyr::distinct()
-
-# calculate in situ spec pH at eol
-tmp <- dplyr::filter(z, !is.na(ta), !is.na(dic),
-                     !is.na(salinity_field), !is.na(temp_field), 
-                     !is.na(pH_s_eol_temp_lab), !is.na(temp_lab_eol))
-pH_s_eol_temp_insi <- pHinsi(pH=tmp$pH_s_eol_temp_lab, ALK=tmp$ta,
-                             Tinsi=tmp$temp_field, 
-                             Tlab=tmp$temp_lab_eol,
-                             Pinsi=0, S=tmp$salinity_field, 
-                             Pt=1e-6*tmp$PO4, Sit=1e-6*tmp$SIOH4, 
-                             k1k2 = "l", kf = "pf", ks="d", 
-                             pHscale = "T", b="l10")
-
-#select tmp variables
-tmp <- tmp %>%
-  ungroup() %>%                                       # added to solve 2 problems: " Adding missing grouping variables: `depth`" and 
-  mutate(pH_s_eol_temp_insi = pH_s_eol_temp_insi) %>%  #"Error in mutate_impl(.data, dots) : "Column `pH_s_ptb_temp_insi` must be length 30 (the group size) or one, not 2557"
-  select(sampling_date, pH_s_eol_temp_insi, depth, pH_s_eol_temp_lab) #add depth , pH_s_ lab to discriminate pH and avoid duplicates in the result of left_join
-
-z <- left_join(z, tmp, by=c("pH_s_eol_temp_lab", "sampling_date", "depth"))
-
-# calculate in situ spec pH at Point B
-tmp <- dplyr::filter(z, !is.na(ta), !is.na(dic),
-                     !is.na(salinity_field), !is.na(temp_field), 
-                     !is.na(pH_s_ptb_temp_lab), !is.na(temp_lab_ptb))
-pH_s_ptb_temp_insi <- pHinsi(pH=tmp$pH_s_ptb_temp_lab, ALK=tmp$ta,
-                             Tinsi=tmp$temp_field, 
-                             Tlab=tmp$temp_lab_ptb,
-                             Pinsi=0, S=tmp$salinity_field, 
-                             Pt=1e-6*tmp$PO4, Sit=1e-6*tmp$SIOH4, 
-                             k1k2 = "l", kf = "pf", ks="d", 
-                             pHscale = "T", b="l10")
-tmp <- tmp %>%
-  ungroup() %>% # added to solve the problem " Adding missing grouping variables: `depth`"
-  mutate(pH_s_ptb_temp_insi = pH_s_ptb_temp_insi) %>%
-  select(sampling_date, pH_s_ptb_temp_insi, depth, pH_s_ptb_temp_lab)  #add depth , pH_s_ lab to discriminate pH and avoid duplicates in the result of left_join
-z <- left_join(z, tmp, by = c("sampling_date","depth", "pH_s_ptb_temp_lab"))
-# to avoid duplicate in rows
-z <- unique(z)
-
-#select all rows containing NA for one of the 4 key variables
-NArows <-  z%>%
-  ungroup() %>% 
-  filter(is.na(salinity_field & dic & ta & temp_field)) # rows with NAs
-
-#select all rows containing data because the carb function does not work with NAs
-
-# add calculated pH and Omega calcite (to dat)
-dat <- dplyr::filter(z, ta != "NA" & dic != "NA" & salinity_field != "NA" & temp_field != "NA")
-carb <- carb(flag=15, var1=dat$ta*1e-6, var2=dat$dic*1e-6,
-             S=dat$salinity_field, T=dat$temp_field, P=dat$depth/10,
-             Pt=1e-6*dat$PO4, Sit=1e-6*dat$SIOH4, 
-             k1k2 = "l", kf = "pf", pHscale = "T", b="l10")
-dat$pH <- carb$pH
-dat$CO2 <- carb$CO2
-dat <- dat%>%
-      ungroup() %>% 
-      dplyr::mutate(
-              CSC_flag = carb$flag,
-              HCO3 = carb$HCO3,
-              CO3 = carb$CO3,
-              OmegaCalcite = as.numeric(carb$OmegaCalcite),
-              OmegaAragonite = as.numeric(carb$OmegaAragonite),
-              pH25 = pHinsi(pH=dat$pH,ALK=dat$ta*1e-6,Tinsi=25,
-                            Tlab=dat$temp_field,S=dat$salinity_field,
-                            Pt=1e-6*dat$PO4, Sit=1e-6*dat$SIOH4, 
-                            k1k2 = "l", 
-                            kf = "pf", pHscale = "T"),
-              pCO2 = carb$pCO2,
-              fCO2 = carb$fCO2,
-              Nta = 1e6 * carb$ALK * 38 / dat$salinity_field,
-              Ndic = 1e6 * carb$DIC * 38 / dat$salinity_field
-              )
-
-#merge back all NArows (they were temporarily eliminated for the data processing above)
-#first add missing columns
-f <- as.data.frame(matrix(as.numeric(NA), nrow = nrow(NArows), ncol = 12))
-
-#name the columns (same column names as dat)
-colnames(f)=c("pH", "CO2", "CSC_flag", "HCO3", "CO3", "OmegaCalcite", "OmegaAragonite", 
-              "pH25", "pCO2" ,"fCO2",	"Nta",	"Ndic")
-
-#bind to dat
-NArows <- cbind(NArows,f)
-
-#bind dates
-dat <- rbind(dat, NArows)
-
-#arrange by dates
-dat <- arrange(dat, sampling_date)
-
-#Prepare data to upload to Pangaea 
-pangaea <- select(dat, sampling_date, depth, CSC_flag, salinity_field,
-                  temp_field, HCO3, CO3,
-                  pH, ta, dic, OmegaCalcite,
-                  OmegaAragonite, pCO2, fCO2) %>%
-  dplyr::mutate(depth = replace(depth, depth == 0, 1))
-  
-#save data
-write_csv(dat, path="../output/output.csv")
-write_csv(pangaea, path="../output/output_pangaea.csv")
-write_rds(dat, "../output/output.rds")
-```
-```{r calculate derived parameters and save data, include=FALSE}
-# Calculate means of duplicate samples and remove duplicates
-# one removes the ta and dic values flagged as 3
-z <- z %>%
-  dplyr::group_by(sampling_date, depth) %>%
-  dplyr::mutate(ta = ifelse(qflag_ta != 3, mean(ta_dup, na.rm = TRUE), NA),
-                dic = ifelse(qflag_dic != 3, mean(dic_dup, na.rm = TRUE), NA)) %>% 
-  dplyr::select(-c(ta_dup, dic_dup, pH_ta)) %>% #pH_ta not useful and causes problems with distinct
-  dplyr::distinct()
-
-# calculate in situ spec pH at eol
-tmp <- dplyr::filter(z, !is.na(ta), !is.na(dic),
-                     !is.na(salinity_field), !is.na(temp_field), 
-                     !is.na(pH_s_eol_temp_lab), !is.na(temp_lab_eol))
-pH_s_eol_temp_insi <- pHinsi(pH=tmp$pH_s_eol_temp_lab, ALK=tmp$ta,
-                             Tinsi=tmp$temp_field, 
-                             Tlab=tmp$temp_lab_eol,
-                             Pinsi=0, S=tmp$salinity_field, 
-                             Pt=1e-6*tmp$PO4, Sit=1e-6*tmp$SIOH4, 
-                             k1k2 = "l", kf = "pf", ks="d", 
-                             pHscale = "T", b="l10")
-
-#select tmp variables
-tmp <- tmp %>%
-  ungroup() %>%                                       # added to solve 2 problems: " Adding missing grouping variables: `depth`" and 
-  mutate(pH_s_eol_temp_insi = pH_s_eol_temp_insi) %>%  #"Error in mutate_impl(.data, dots) : "Column `pH_s_ptb_temp_insi` must be length 30 (the group size) or one, not 2557"
-  select(sampling_date, pH_s_eol_temp_insi, depth, pH_s_eol_temp_lab) #add depth , pH_s_ lab to discriminate pH and avoid duplicates in the result of left_join
-
-z <- left_join(z, tmp, by=c("pH_s_eol_temp_lab", "sampling_date", "depth"))
-
-# calculate in situ spec pH at Point B
-tmp <- dplyr::filter(z, !is.na(ta), !is.na(dic),
-                     !is.na(salinity_field), !is.na(temp_field), 
-                     !is.na(pH_s_ptb_temp_lab), !is.na(temp_lab_ptb))
-pH_s_ptb_temp_insi <- pHinsi(pH=tmp$pH_s_ptb_temp_lab, ALK=tmp$ta,
-                             Tinsi=tmp$temp_field, 
-                             Tlab=tmp$temp_lab_ptb,
-                             Pinsi=0, S=tmp$salinity_field, 
-                             Pt=1e-6*tmp$PO4, Sit=1e-6*tmp$SIOH4, 
-                             k1k2 = "l", kf = "pf", ks="d", 
-                             pHscale = "T", b="l10")
-tmp <- tmp %>%
-  ungroup() %>% # added to solve the problem " Adding missing grouping variables: `depth`"
-  mutate(pH_s_ptb_temp_insi = pH_s_ptb_temp_insi) %>%
-  select(sampling_date, pH_s_ptb_temp_insi, depth, pH_s_ptb_temp_lab)  #add depth , pH_s_ lab to discriminate pH and avoid duplicates in the result of left_join
-z <- left_join(z, tmp, by = c("sampling_date","depth", "pH_s_ptb_temp_lab"))
-# to avoid duplicate in rows
-z <- unique(z)
-
-#select all rows containing NA for one of the 4 key variables
-NArows <-  z%>%
-  ungroup() %>% 
-  filter(is.na(salinity_field & dic & ta & temp_field)) # rows with NAs
-
-#select all rows containing data because the carb function does not work with NAs
-
-# add calculated pH and Omega calcite (to dat)
-dat <- dplyr::filter(z, ta != "NA" & dic != "NA" & salinity_field != "NA" & temp_field != "NA")
-carb <- carb(flag=15, var1=dat$ta*1e-6, var2=dat$dic*1e-6,
-             S=dat$salinity_field, T=dat$temp_field, P=dat$depth/10,
-             Pt=1e-6*dat$PO4, Sit=1e-6*dat$SIOH4, 
-             k1k2 = "l", kf = "pf", pHscale = "T", b="l10")
-dat$pH <- carb$pH
-dat$CO2 <- carb$CO2
-dat <- dat%>%
-      ungroup() %>% 
-      dplyr::mutate(
-              CSC_flag = carb$flag,
-              HCO3 = carb$HCO3,
-              CO3 = carb$CO3,
-              OmegaCalcite = as.numeric(carb$OmegaCalcite),
-              OmegaAragonite = as.numeric(carb$OmegaAragonite),
-              pH25 = pHinsi(pH=dat$pH,ALK=dat$ta*1e-6,Tinsi=25,
-                            Tlab=dat$temp_field,S=dat$salinity_field,
-                            Pt=1e-6*dat$PO4, Sit=1e-6*dat$SIOH4, 
-                            k1k2 = "l", 
-                            kf = "pf", pHscale = "T"),
-              pCO2 = carb$pCO2,
-              fCO2 = carb$fCO2,
-              Nta = 1e6 * carb$ALK * 38 / dat$salinity_field,
-              Ndic = 1e6 * carb$DIC * 38 / dat$salinity_field
-              )
-
-#merge back all NArows (they were temporarily eliminated for the data processing above)
-#first add missing columns
-f <- as.data.frame(matrix(as.numeric(NA), nrow = nrow(NArows), ncol = 12))
-
-#name the columns (same column names as dat)
-colnames(f)=c("pH", "CO2", "CSC_flag", "HCO3", "CO3", "OmegaCalcite", "OmegaAragonite", 
-              "pH25", "pCO2" ,"fCO2",	"Nta",	"Ndic")
-
-#bind to dat
-NArows <- cbind(NArows,f)
-
-#bind dates
-dat <- rbind(dat, NArows)
-
-#arrange by dates
-dat <- arrange(dat, sampling_date)
-
-#Prepare data to upload to Pangaea 
-pangaea <- select(dat, sampling_date, depth, CSC_flag, salinity_field,
-                  temp_field, HCO3, CO3,
-                  pH, ta, dic, OmegaCalcite,
-                  OmegaAragonite, pCO2, fCO2) %>%
-  dplyr::mutate(depth = replace(depth, depth == 0, 1))
-  
-#save data
-write_csv(dat, path="../output/output.csv")
-write_csv(pangaea, path="../output/output_pangaea.csv")
-write_rds(dat, "../output/output.rds")
-```
 dev.off()
 ```
 
+```{r Calculate mean AT and DIC, include=FALSE}
+# Calculate means of duplicate samples and remove duplicates
+# one removes  values flagged as 3
+z <- z %>%
+  dplyr::group_by(sampling_date, depth) %>%
+  dplyr::mutate(ta = ifelse(qflag_ta != 3, mean(ta_dup, na.rm = TRUE), NA),
+                dic = ifelse(qflag_dic != 3, mean(dic_dup, na.rm = TRUE), NA)) %>% 
+  dplyr::select(-c(sample, ta_dup, dic_dup, pH_ta)) %>% #pH_ta not useful and causes problems with distinct
+  dplyr::ungroup() %>% 
+  dplyr::distinct() %>% 
+  dplyr::relocate(depth, .before = salinity_field)
+```
+
+```{r Calculate and compare spec pH, include=FALSE}
+# calculate in situ spec pH at eol
+eol <- z %>%
+  dplyr::select(sampling_date, depth, ta, dic, salinity_field, temp_field, 
+                pH_s_eol_temp_lab, qflag_pH_s_eol, temp_lab_eol, PO4, SIOH4) %>%
+  tidyr::drop_na() %>%
+  dplyr::filter(qflag_pH_s_eol != 3) %>% 
+  dplyr::mutate(pH_s_eol_temp_insi = pHinsi(pH=pH_s_eol_temp_lab, ALK=ta,
+                             Tinsi=temp_field,
+                             Tlab=temp_lab_eol,
+                             Pinsi=depth/10, S=salinity_field,
+                             Pt=1e-6*PO4, Sit=1e-6*SIOH4,
+                             k1k2 = "l", kf = "pf", ks="d",
+                             pHscale = "T", b="l10")) %>% 
+  dplyr::group_by(sampling_date, depth) %>%
+  dplyr::mutate(pH_s_eol_temp_insi = mean(pH_s_eol_temp_insi, na.rm = TRUE)) %>% 
+  dplyr::select(-c(pH_s_eol_temp_lab, qflag_pH_s_eol, temp_lab_eol)) %>% # no 
+  # longer needed and prevents efficient unique()
+  dplyr::ungroup() %>% 
+  dplyr::distinct()
+
+# calculate in situ spec pH at Point B
+ptb <- z %>%
+  dplyr::select(sampling_date, depth, ta, dic, salinity_field, temp_field, 
+                pH_s_ptb_temp_lab, qflag_pH_s_ptb, temp_lab_ptb, PO4, SIOH4) %>%
+  tidyr::drop_na() %>%
+  dplyr::filter(qflag_pH_s_ptb != 3) %>% 
+  dplyr::mutate(pH_s_ptb_temp_insi = pHinsi(pH=pH_s_ptb_temp_lab, ALK=ta,
+                             Tinsi=temp_field,
+                             Tlab=temp_lab_ptb,
+                             Pinsi=depth/10, S=salinity_field,
+                             Pt=1e-6*PO4, Sit=1e-6*SIOH4,
+                             k1k2 = "l", kf = "pf", ks="d",
+                             pHscale = "T", b="l10")) %>% 
+  dplyr::group_by(sampling_date, depth) %>%
+  dplyr::mutate(pH_s_ptb_temp_insi = mean(pH_s_ptb_temp_insi, na.rm = TRUE)) %>% 
+  dplyr::select(-c(pH_s_ptb_temp_lab, qflag_pH_s_ptb, temp_lab_ptb)) %>% # no 
+  # longer needed and prevents efficient unique()
+  dplyr::ungroup() %>% 
+  dplyr::distinct()
+# join pH eol and pointB
+eol_ptb <- full_join(eol, ptb, by = c("sampling_date", "depth")) %>% 
+  dplyr::select(sampling_date, depth, pH_s_eol_temp_insi, pH_s_ptb_temp_insi)
+# check outliers
+eol_ptb_long <- eol_ptb %>% 
+  tidyr::pivot_longer(!c(depth, sampling_date), names_to = "location", values_to = "pH")
+CPHa <- ggplot(eol_ptb_long, aes(x = sampling_date, y = pH, colour = location)) +
+  scale_x_datetime(breaks = date_breaks("2 year"), labels = date_format("%Y")) +
+  geom_point(na.rm=TRUE) +
+  theme_bw() + 
+  #scale_colour_manual(values = cols) +
+  labs(y = "pH (unit)",x="",
+       title="",
+       color = "") +
+  facet_grid(depth ~ .)
+CPHa
+# Remove outliers and replot
+eol_ptb <- eol_ptb %>% 
+  dplyr::mutate(qflag_ph_insi = ifelse(depth == 0 & pH_s_ptb_temp_insi < 7.97, 3, 2),
+                qflag_ph_insi = ifelse(depth == 50 & (pH_s_ptb_temp_insi < 8.05 |
+                                                      pH_s_ptb_temp_insi > 8.15), 3, 2)) %>% 
+  dplyr::filter(qflag_ph_insi != 3)
+eol_ptb_long <- eol_ptb %>% 
+  tidyr::pivot_longer(!c(depth, sampling_date, qflag_ph_insi), names_to = "location", values_to = "pH")
+CPHb <- ggplot(eol_ptb_long, aes(x = sampling_date, y = pH, colour = location)) +
+  scale_x_datetime(breaks = date_breaks("2 year"), labels = date_format("%Y")) +
+  geom_point(na.rm=TRUE) +
+  theme_bw() + 
+  #scale_colour_manual(values = cols) +
+  labs(y = "pH (unit)",x="",
+       title="",
+       color = "") +
+  facet_grid(depth ~ .)
+CPHb
+# calculate mean pH when data are available both at eol and point B
+eol_ptb <- eol_ptb %>% 
+  rowwise() %>%
+  dplyr::mutate(ph_insi = mean(c(pH_s_eol_temp_insi, pH_s_ptb_temp_insi), na.rm = TRUE))
+# add pH variables to data
+eol_ptb <- left_join(z, eol_ptb, by = c("sampling_date", "depth"))
+```
+
+```{r Calculate final derived variable and save, include=FALSE}
+#select all rows containing NA for one of the 4 key variables
+NArows <-  z%>%
+  dplyr::ungroup() %>% 
+  dplyr::filter(is.na(salinity_field & dic & ta & temp_field)) # rows with NAs
+
+#select all rows containing data because the carb function does not work with NAs
+
+# add calculated pH and Omega calcite (to dat)
+dat <- dplyr::filter(z, ta != "NA" & dic != "NA" & salinity_field != "NA" & temp_field != "NA")
+carb <- carb(flag=15, var1=dat$ta*1e-6, var2=dat$dic*1e-6,
+             S=dat$salinity_field, T=dat$temp_field, P=dat$depth/10,
+             Pt=1e-6*dat$PO4, Sit=1e-6*dat$SIOH4, 
+             k1k2 = "l", kf = "pf", pHscale = "T", b="l10")
+dat$pH <- carb$pH
+dat$CO2 <- carb$CO2
+dat <- dat%>%
+      dplyr::ungroup() %>% 
+      dplyr::mutate(
+              CSC_flag = carb$flag,
+              HCO3 = carb$HCO3,
+              CO3 = carb$CO3,
+              OmegaCalcite = as.numeric(carb$OmegaCalcite),
+              OmegaAragonite = as.numeric(carb$OmegaAragonite),
+              pH25 = pHinsi(pH=dat$pH,ALK=dat$ta*1e-6,Tinsi=25,
+                            Tlab=dat$temp_field,S=dat$salinity_field,
+                            Pt=1e-6*dat$PO4, Sit=1e-6*dat$SIOH4, 
+                            k1k2 = "l", 
+                            kf = "pf", pHscale = "T"),
+              pCO2 = carb$pCO2,
+              fCO2 = carb$fCO2,
+              Nta = 1e6 * carb$ALK * 38 / dat$salinity_field,
+              Ndic = 1e6 * carb$DIC * 38 / dat$salinity_field
+              )
+
+#merge back all NArows (they were temporarily eliminated for the data processing above)
+#first add missing columns
+f <- as.data.frame(matrix(as.numeric(NA), nrow = nrow(NArows), ncol = 12))
+
+#name the columns (same column names as dat)
+colnames(f)=c("pH", "CO2", "CSC_flag", "HCO3", "CO3", "OmegaCalcite", "OmegaAragonite", 
+              "pH25", "pCO2" ,"fCO2",	"Nta",	"Ndic")
+
+#bind to dat
+NArows <- cbind(NArows,f)
+
+#bind dates
+dat <- rbind(dat, NArows)
+
+#arrange by dates
+dat2 <- dat %>% 
+  arrange(sampling_date) %>% 
+  dplyr::select(-tidyr::contains(c("eol", "ptb")) %>% 
+  dplyr::distinct()
+
+#Prepare data to upload to Pangaea 
+pangaea <- select(dat, sampling_date, depth, CSC_flag, salinity_field,
+                  temp_field, HCO3, CO3,
+                  pH, ta, dic, OmegaCalcite,
+                  OmegaAragonite, pCO2, fCO2) %>%
+  dplyr::mutate(depth = replace(depth, depth == 0, 1))
+  
+#save data
+write_csv(dat, path="output_jp/data/output.csv")
+write_csv(pangaea, path="output_jp/data/output_pangaea.csv")
+write_rds(dat, "output_jp/data/output.rds")
+```
 
 ```{r Calculate mean values, include=FALSE}
 means_depth <- dat %>%
@@ -1224,7 +1059,7 @@ means_depth <- dat %>%
 
 # The above generates NaNs which are replaced by NAs
 is.na(means_depth) <- is.na(means_depth)
-write.table(means_depth, paste0("../output/output_somlit.csv"), sep= ",", dec=".", row.names = FALSE)
+write.table(means_depth, paste0("output_jp/data/output_somlit.csv"), sep= ",", dec=".", row.names = FALSE)
 
 #separate each means_depth and handle last incomplete year
 mean0m <- dplyr::filter(means_depth, depth==0)
@@ -1477,9 +1312,9 @@ g <- plot_grid(T1vp, S1vp, AT1vp, CT1vp, pH1vp, pCO21vp, Oa1vp, ncol=1,
                align="v")
 #g <- arrangeGrob(T1vp, S1vp, AT1vp, CT1vp, pH1vp, pCO21vp, Oa1vp, ncol=1)
 #cowplot::
-ggsave(file="figures_jp/fig4.pdf", g,  width = 8, height = 28, units = "cm")
+ggsave(file="output_jp/figures/fig4.pdf", g,  width = 8, height = 28, units = "cm")
 g <- plot_grid(T1vp, S1vp, AT1vp, CT1vp, pH1vp, pCO21vp, Oa1vp, ncol=2)
-ggsave(file="figures_jp/fig_paper_monthly_means_1m.png", g, width = 18, height = 14, units = "cm")
+ggsave(file="output_jp/figures/fig_paper_monthly_means_1m.png", g, width = 18, height = 14, units = "cm")
 
 # prepare data 50m
 tmp <- ungroup(mean50m) %>%
@@ -1587,7 +1422,7 @@ colnames(means_month50m) <-
 ```
 
 ## Monthly means at the surface
-![fig_paper_monthly_means_1m.png](figures_jp/fig_paper_monthly_means_1m.png)
+![fig_paper_monthly_means_1m.png](output_jp/figures/fig_paper_monthly_means_1m.png)
 
 ```{r table monthly means}
 kable(means_month0m, digits = 3, caption="Monthly means at the surface")
@@ -1682,7 +1517,7 @@ ATvsCT1p <- ggplot(mean0m, aes(x = sampling_date, y = mean_ta/mean_dic), na.rm=T
            label = lm_eqn(lm(mean_ta/mean_dic ~sampling_date, data=mean0m)), parse = TRUE) +
   coord_fixed() +
   Mytheme(size_labs = 8)
-ggsave(filename = "figures_jp/ATvsCT1p.png", plot = ATvsCT1p)
+ggsave(filename = "output_jp/figures/ATvsCT1p.png", plot = ATvsCT1p)
 
 # Calculate anomalies
 # At 1 m
@@ -1950,8 +1785,8 @@ anOa1p <- ggplot(data = ano_month0m, aes(x = sampling_date, y = OmegaAragonite_a
   annotation_custom(grob_N_bl)
 
 g <- plot_grid(T1p, anT1p, S1p, anS1p, AT1p, anAT1p, CT1p, anCT1p, pH1p, anpH1p, anpHeol1p, anpHptb1p, pCO21p, anpCO21p, Oa1p, anOa1p, align='vh', ncol=2)
-ggsave(file="figures_jp/fig_paper_interannual_1m.png", g, width=15, height = 17, units = "cm")
-ggsave(file="figures_jp/fig2.pdf", g, width = 18, height = 21, units = "cm")
+ggsave(file="output_jp/figures/fig_paper_interannual_1m.png", g, width=15, height = 17, units = "cm")
+ggsave(file="output_jp/figures/fig2.pdf", g, width = 18, height = 21, units = "cm")
 
 # AT as a function of salinity for every year
 j <- 0
@@ -1988,7 +1823,7 @@ fig_poc_pon <- ggplot(data = filter(pom_l, depth==1), aes(x = date, y = value), 
   scale_x_datetime(breaks = date_breaks("2 year"), labels = date_format("%Y")) +
   labs(title="Point B at 1 m",x="",y="Particulate organic matter") +
   Mytheme()
-ggsave(file="figures_jp/fig_poc_pon.png", fig_poc_pon, width = 18, height = 20, units = "cm")
+ggsave(file="output_jp/figures/fig_poc_pon.png", fig_poc_pon, width = 18, height = 20, units = "cm")
 ```
 
 
@@ -2056,9 +1891,9 @@ row.names(reg_ta_no_change) <- var_list
 * The change in pH is `r 1000*round(reg_var_1m[7,1], digits=4)` ± `r 1000*round(reg_var_1m[7,2], digits=4)` mpH units per year. If the observed total alkalinity data are corrected from their rate of change (i.e. assuming that they have not increased during the period of measurement, but kept their subannual variability), the rate of change is `r 1000*round(reg_ta_no_change[1,1], digits=4)` ± `r 1000*round(reg_ta_no_change[1,2], digits=4)` mpH units per year.
 
 ## Interannual changes at 1 m
-![fig_paper_interannual_1m.png](figures_jp/fig_paper_interannual_1m.png)
-![fig_poc_pon.png](figures_jp/fig_poc_pon.png)
-![fig_ta_vs_salinity_month_pointB_0m.png](figures_jp/fig_ta_vs_salinity_month_pointB_0m.png)
+![fig_paper_interannual_1m.png](output_jp/figures/fig_paper_interannual_1m.png)
+![fig_poc_pon.png](output_jp/figures/fig_poc_pon.png)
+![fig_ta_vs_salinity_month_pointB_0m.png](output_jp/figures/fig_ta_vs_salinity_month_pointB_0m.png)
 
 
 
@@ -2154,7 +1989,7 @@ ATvsCT50p <- ggplot(mean50m, aes(x = sampling_date, y = mean_ta/mean_dic), na.rm
   labs(title=NULL,x="",y=expression(paste(A[T]:C[T]))) +
   coord_fixed() +
   Mytheme(size_labs = 8)
-ggsave(filename = "figures_jp/ATvsCT50p.png", plot = ATvsCT50p)
+ggsave(filename = "output_jp/figures/ATvsCT50p.png", plot = ATvsCT50p)
 
 # Calculate monthly means
 tmp <- ungroup(mean50m) %>%
@@ -2406,11 +2241,11 @@ anOa50p <- ggplot(data = ano_month50m, aes(x = sampling_date, y = OmegaAragonite
   annotation_custom(grob_N)
 
 g <- plot_grid(T50p, anT50p, S50p, anS50p, AT50p, anAT50p, CT50p, anCT50p, pH50p, anpH50p, anpHptb50p, pCO250p, anpCO250p, Oa50p, anOa50p, align='vh', ncol=2)
-ggsave(file="figures_jp/fig_paper_interannual_50m.png", g, width=15, height = 17, units = "cm")
-ggsave(file="figures_jp/fig3.pdf", g, width = 18, height = 21, units = "cm")
+ggsave(file="output_jp/figures/fig_paper_interannual_50m.png", g, width=15, height = 17, units = "cm")
+ggsave(file="output_jp/figures/fig3.pdf", g, width = 18, height = 21, units = "cm")
 ```
 ## Interannual changes at 50 m
-![fig_paper_interannual_50m.png](figures_jp/fig_paper_interannual_50m.png)
+![fig_paper_interannual_50m.png](output_jp/figures/fig_paper_interannual_50m.png)
 
 ```{r kable regressions 50 m}
 kable(reg_var_50m, digits = c(4,4,3,3,3,2,3), caption="Regressions on values at 50 m depth.")
@@ -2441,8 +2276,8 @@ ATnoC50p <- ggplot(mean50m, aes(x = sampling_date, y = mean_ta_nocarb), na.rm=TR
   theme(axis.text.x=element_blank()) +
   annotation_custom(grob_B_bl)
 g <- plot_grid(ATnoC1p, ATnoC50p, align='vh', ncol=1)
-ggsave(file="figures_jp/fig_paper_at_nocarb.png", g, width=15, height = 17, units = "cm")
-#cowplot::ggsave(file="figures_jp/at_nocarb.pdf", g, width = 18, height = 21, units = "cm")
+ggsave(file="output_jp/figures/fig_paper_at_nocarb.png", g, width=15, height = 17, units = "cm")
+#cowplot::ggsave(file="output_jp/figures/at_nocarb.pdf", g, width = 18, height = 21, units = "cm")
 ```
 
 ## Annual, monthly and quarterly ranges of T, AT and pCO2 at 1m
@@ -2463,7 +2298,7 @@ fig_temp_month <- ggplot(data=mean0m_month, aes(x=year, y=Temperature)) +
   scale_color_viridis(name="Month", discrete=TRUE, option="plasma") + 
   theme(legend.position="top") +
   guides(col = guide_legend(ncol = 12, byrow = TRUE))
-ggsave(file="figures_jp/fig_temp_month.png", fig_temp_month, width = 15, height = 10, units = "cm")
+ggsave(file="output_jp/figures/fig_temp_month.png", fig_temp_month, width = 15, height = 10, units = "cm")
 fig_at_month <- ggplot(data=mean0m_month, aes(x=year, y=at)) + 
   geom_line(aes(color=as.factor(monthd)), size=1) +
   guides(guide_legend(title = "Month")) +
@@ -2472,7 +2307,7 @@ fig_at_month <- ggplot(data=mean0m_month, aes(x=year, y=at)) +
   scale_color_viridis(name="Month", discrete=TRUE, option="plasma") + 
   theme(legend.position="top") +
   guides(col = guide_legend(ncol = 12, byrow = TRUE))
-ggsave(file="figures_jp/fig_at_month.png", fig_at_month, width = 15, height = 10, units = "cm")
+ggsave(file="output_jp/figures/fig_at_month.png", fig_at_month, width = 15, height = 10, units = "cm")
 fig_pCO2_month <- ggplot(data=mean0m_month, aes(x=year, y=pCO2)) + 
   geom_line(aes(color=as.factor(monthd)), size=1) +
   xlab("Time") + ylab("pCO2") +
@@ -2480,7 +2315,7 @@ fig_pCO2_month <- ggplot(data=mean0m_month, aes(x=year, y=pCO2)) +
   scale_color_viridis(name="Month", discrete=TRUE, option="plasma") + 
   theme(legend.position="top") +
   guides(col = guide_legend(ncol = 12, byrow = TRUE))
-ggsave(file="figures_jp/fig_pCO2_month.png", fig_pCO2_month, width = 15, height = 10, units = "cm")
+ggsave(file="output_jp/figures/fig_pCO2_month.png", fig_pCO2_month, width = 15, height = 10, units = "cm")
 fig_ct_month <- ggplot(data=mean0m_month, aes(x=year, y=ct)) + 
   geom_line(aes(color=as.factor(monthd)), size=1) +
   xlab("Time") + ylab("Dissolved inorganic carbon") +
@@ -2488,7 +2323,7 @@ fig_ct_month <- ggplot(data=mean0m_month, aes(x=year, y=ct)) +
   scale_color_viridis(name="Month", discrete=TRUE, option="plasma") + 
   theme(legend.position="top") +
   guides(col = guide_legend(ncol = 12, byrow = TRUE))
-ggsave(file="figures_jp/fig_ct_month.png", fig_ct_month, width = 15, height = 10, units = "cm")
+ggsave(file="output_jp/figures/fig_ct_month.png", fig_ct_month, width = 15, height = 10, units = "cm")
 
 # Regressions annual monthly temperature
 j <- 0
@@ -2602,8 +2437,8 @@ fig_paper_monthly_rate_AT_CT <-
         legend.key = element_rect(colour = 'white', fill = 'white', size = 0),
         legend.background = element_rect(fill=alpha('white', alpha=0))
         )
-ggsave(file="figures_jp/fig_paper_monthly_rate_AT_CT.png", fig_paper_monthly_rate_AT_CT, width = 8, height = 8*2/3, units = "cm")
-ggsave(file="figures_jp/fig5.pdf", fig_paper_monthly_rate_AT_CT, width = 16, height= 10, units = "cm")
+ggsave(file="output_jp/figures/fig_paper_monthly_rate_AT_CT.png", fig_paper_monthly_rate_AT_CT, width = 8, height = 8*2/3, units = "cm")
+ggsave(file="output_jp/figures/fig5.pdf", fig_paper_monthly_rate_AT_CT, width = 16, height= 10, units = "cm")
 
 # Quarterly
 mean0m_quart <- mean0m %>%
@@ -2617,7 +2452,7 @@ fig_temp_quarter <- ggplot(data=mean0m_quart, aes(x=year, y=Temperature)) +
   scale_color_viridis(name="Quarter", discrete=TRUE, option="plasma") + 
   theme(legend.position="top") +
   guides(col = guide_legend(ncol = 12, byrow = TRUE))
-ggsave(file="figures_jp/fig_temp_quarter.png", fig_temp_quarter, width = 15, height = 10, units = "cm")
+ggsave(file="output_jp/figures/fig_temp_quarter.png", fig_temp_quarter, width = 15, height = 10, units = "cm")
 
 fig_at_quarter <- ggplot(data=mean0m_quart, aes(x=year, y=at)) + 
   geom_line(aes(color=as.factor(quarter)), size=1) +
@@ -2626,7 +2461,7 @@ fig_at_quarter <- ggplot(data=mean0m_quart, aes(x=year, y=at)) +
   scale_color_viridis(name="Quarter", discrete=TRUE, option="plasma") + 
   theme(legend.position="top") +
   guides(col = guide_legend(ncol = 12, byrow = TRUE))
-ggsave(file="figures_jp/fig_at_quarter.png", fig_at_quarter, width = 15, height = 10, units = "cm")
+ggsave(file="output_jp/figures/fig_at_quarter.png", fig_at_quarter, width = 15, height = 10, units = "cm")
 ```
 
 ```{r}
@@ -2636,11 +2471,11 @@ kable(tab_pCO2_month, digits = c(4,4,3,3,3,2,3), caption="Regressions on annual 
 kable(tab_ct_month, digits = c(4,4,3,3,3,2,3), caption="Regressions on annual monthly values of CT at 1 m depth.")
 ```
 
-![fig_temp_month.png](figures_jp/fig_temp_month.png)
-![fig_at_month.png](figures_jp/fig_at_month.png)
-![fig_pCO2_month.png](figures_jp/fig_pCO2_month.png)
-![fig_temp_quarter.png](figures_jp/fig_temp_quarter.png)
-![fig_at_quarter.png](figures_jp/fig_at_quarter.png)
+![fig_temp_month.png](output_jp/figures/fig_temp_month.png)
+![fig_at_month.png](output_jp/figures/fig_at_month.png)
+![fig_pCO2_month.png](output_jp/figures/fig_pCO2_month.png)
+![fig_temp_quarter.png](output_jp/figures/fig_temp_quarter.png)
+![fig_at_quarter.png](output_jp/figures/fig_at_quarter.png)
 ## Annual, monthly and quarterly ranges of T, AT and pCO2 at 50 m
 
 ```{r monthly and quarterly temperature and AT at 50 m, include=FALSE}
@@ -2659,7 +2494,7 @@ mean50m_month <- mean50m %>%
 #   scale_color_viridis(name="Month", discrete=TRUE, option="plasma") + 
 #   theme(legend.position="top") +
 #   guides(col = guide_legend(ncol = 12, byrow = TRUE))
-# ggsave(file="figures_jp/fig_temp_month.png", fig_temp_month, width = 15, height = 10, units = "cm")
+# ggsave(file="output_jp/figures/fig_temp_month.png", fig_temp_month, width = 15, height = 10, units = "cm")
 # fig_at_month <- ggplot(data=mean0m_month, aes(x=year, y=at)) + 
 #   geom_line(aes(color=as.factor(monthd)), size=1) +
 #   guides(guide_legend(title = "Month")) +
@@ -2668,7 +2503,7 @@ mean50m_month <- mean50m %>%
 #   scale_color_viridis(name="Month", discrete=TRUE, option="plasma") + 
 #   theme(legend.position="top") +
 #   guides(col = guide_legend(ncol = 12, byrow = TRUE))
-# ggsave(file="figures_jp/fig_at_month.png", fig_at_month, width = 15, height = 10, units = "cm")
+# ggsave(file="output_jp/figures/fig_at_month.png", fig_at_month, width = 15, height = 10, units = "cm")
 # fig_pCO2_month <- ggplot(data=mean0m_month, aes(x=year, y=pCO2)) + 
 #   geom_line(aes(color=as.factor(monthd)), size=1) +
 #   xlab("Time") + ylab("pCO2") +
@@ -2676,7 +2511,7 @@ mean50m_month <- mean50m %>%
 #   scale_color_viridis(name="Month", discrete=TRUE, option="plasma") + 
 #   theme(legend.position="top") +
 #   guides(col = guide_legend(ncol = 12, byrow = TRUE))
-# ggsave(file="figures_jp/fig_pCO2_month.png", fig_pCO2_month, width = 15, height = 10, units = "cm")
+# ggsave(file="output_jp/figures/fig_pCO2_month.png", fig_pCO2_month, width = 15, height = 10, units = "cm")
 # fig_ct_month <- ggplot(data=mean0m_month, aes(x=year, y=ct)) + 
 #   geom_line(aes(color=as.factor(monthd)), size=1) +
 #   xlab("Time") + ylab("Dissolved inorganic carbon") +
@@ -2684,7 +2519,7 @@ mean50m_month <- mean50m %>%
 #   scale_color_viridis(name="Month", discrete=TRUE, option="plasma") + 
 #   theme(legend.position="top") +
 #   guides(col = guide_legend(ncol = 12, byrow = TRUE))
-# ggsave(file="figures_jp/fig_ct_month.png", fig_ct_month, width = 15, height = 10, units = "cm")
+# ggsave(file="output_jp/figures/fig_ct_month.png", fig_ct_month, width = 15, height = 10, units = "cm")
 
 
 # Regressions annual monthly temperature
@@ -2798,8 +2633,8 @@ fig_paper_monthly_rate_AT_CT_50m <-
         legend.title = element_blank(),
         legend.key = element_rect(colour = 'white', fill = 'white', size = 0),
         legend.background = element_rect(fill="white", size=0.15, colour="black"))
-ggsave(file="figures_jp/fig_paper_monthly_rate_AT_CT_50m.png", fig_paper_monthly_rate_AT_CT_50m, width = 8, height = 8*2/3, units = "cm")
-ggsave(file="figures_jp/fig4b.pdf", fig_paper_monthly_rate_AT_CT_50m, width = 16, height= 10, units = "cm")
+ggsave(file="output_jp/figures/fig_paper_monthly_rate_AT_CT_50m.png", fig_paper_monthly_rate_AT_CT_50m, width = 8, height = 8*2/3, units = "cm")
+ggsave(file="output_jp/figures/fig4b.pdf", fig_paper_monthly_rate_AT_CT_50m, width = 16, height= 10, units = "cm")
 ```
 
 ## Deconvolution of pH changes at 1 m with my approach
@@ -2978,7 +2813,7 @@ fig_deconv_pH_1m <- ggplot(deconv_pH_1m_melt) + geom_point(aes(x=date, y=value, 
   xlab("Time") + ylab("pH (total scale)")+
   Mytheme() +
   scale_colour_discrete(guide="none")
-ggsave(file="figures_jp/fig_deconv_pH_1m.png", fig_deconv_pH_1m, width = 18, height = 20, units = "cm")
+ggsave(file="output_jp/figures/fig_deconv_pH_1m.png", fig_deconv_pH_1m, width = 18, height = 20, units = "cm")
 
 # Plot with anomalies
 ano_deconv_pH_1m_melt <-  gather(data = select(ano_deconv_pH_1m, -monthd), key = variable, value=value, -date)
@@ -2987,19 +2822,19 @@ fig_deconv_pH_1m_ano <- ggplot(ano_deconv_pH_1m_melt) + geom_point(aes(x=date, y
   xlab("Time") + ylab("pH (total scale)")+
   Mytheme() +
   scale_colour_discrete(guide="none")
-ggsave(file="figures_jp/fig_deconv_pH_1m_ano.png", fig_deconv_pH_1m_ano, width = 18, height = 20, units = "cm")
+ggsave(file="output_jp/figures/fig_deconv_pH_1m_ano.png", fig_deconv_pH_1m_ano, width = 18, height = 20, units = "cm")
 ```
 García-Ibáñez et al. (2016) provide a method to partition the changes in pH due to changes in salinity, temperature, total alkalinity and dissolved inorganic carbon.
-![garcia-ibanez.png](../various/garcia-ibanez.png)
+![garcia-ibanez.png](output_jp/various/garcia-ibanez.png)
 
 García-Ibáñez M. I., Zunino P., Fröb F., Carracedo L. I., Ríos A. F., Mercier H., Olsen A. \& Pérez F. F., 2016. Ocean acidification in the North Atlantic: controlling mechanisms. \textit{Biogeosciences Discussions} 1-26.
 
 Below is the deconvolution performed on values. Here, dvar is the monthly mean value of T, S and CT for the entire time-series.
 
-![fig_deconv_pH_1m.png](figures_jp/fig_deconv_pH_1m.png)
+![fig_deconv_pH_1m.png](output_jp/figures/fig_deconv_pH_1m.png)
 Below is the deconvolution performed on anomalies Here, dvar is the monthly mean value of the anomalies of T, S and CT for the entire time-series.
 
-![fig_deconv_pH_1m_ano.png](figures_jp/fig_deconv_pH_1m_ano.png)
+![fig_deconv_pH_1m_ano.png](output_jp/figures/fig_deconv_pH_1m_ano.png)
 
 
 ```{r kable regressions deconvolution pH 1 m}
@@ -3097,14 +2932,14 @@ fit <- lm(data = d, pH_T_y ~ T)
 fig_dpH_T_dT_y_1m <- ggreg(fit) +
   labs(x="Temperature (yearly mean)", y="pH") +
   Mytheme(size_labs = 10)
-ggsave(file="figures_jp/fig_dpH_T_y_dT_1m.png", fig_dpH_T_dT_y_1m, width = 18, height = 12, units = "cm")
+ggsave(file="output_jp/figures/fig_dpH_T_y_dT_1m.png", fig_dpH_T_dT_y_1m, width = 18, height = 12, units = "cm")
 
 title <- ""
 fit <- lm(data = deconv_garcia_dat_pH_1m, T ~ sampling_date)
 fig_dT_dt <- ggreg(fit) +
   labs(x="Year", y="Temperature") +
   Mytheme(size_labs = 10)
-ggsave(file="figures_jp/fig_dT_dt_1m.png", fig_dT_dt, width = 18, height = 12, units = "cm")
+ggsave(file="output_jp/figures/fig_dT_dt_1m.png", fig_dT_dt, width = 18, height = 12, units = "cm")
 
 ### delta pH due to salinity using yearly means for not changing variables
 d <- filter(deconv_garcia_dat_pH_1m, !is.na(yAT), !is.na(yCT), !is.na(S), 
@@ -3135,14 +2970,14 @@ fit <- lm(data = d, pH_S_y ~ S)
 fig_dpH_S_dS_y_1m <- ggreg(fit) +
   labs(x="Salinity (yearly mean)", y="pH") +
   Mytheme(size_labs = 10)
-ggsave(file="figures_jp/fig_dpH_S_dS_y_1m.png", fig_dpH_S_dS_y_1m, width = 18, height = 12, units = "cm")
+ggsave(file="output_jp/figures/fig_dpH_S_dS_y_1m.png", fig_dpH_S_dS_y_1m, width = 18, height = 12, units = "cm")
 
 title <- ""
 fit <- lm(data = deconv_garcia_dat_pH_1m, S ~ sampling_date)
 fig_dS_dt_1m <- ggreg(fit) +
   labs(x="Year", y="Salinity") +
   Mytheme(size_labs = 10)
-ggsave(file="figures_jp/fig_dS_dt_1m.png", fig_dS_dt_1m, width = 18, height = 12, units = "cm")
+ggsave(file="output_jp/figures/fig_dS_dt_1m.png", fig_dS_dt_1m, width = 18, height = 12, units = "cm")
 
 ### delta pH due to AT using yearly means for not changing variables
 d <- filter(deconv_garcia_dat_pH_1m, !is.na(AT), !is.na(yCT), !is.na(yS), 
@@ -3173,14 +3008,14 @@ fit <- lm(data = d, pH_AT_y ~ AT)
 fig_dpH_AT_dAT_y_1m <- ggreg(fit) +
   labs(x="AT (yearly mean)", y="pH") +
   Mytheme(size_labs = 10)
-ggsave(file="figures_jp/fig_dpH_AT_dT_y_1m.png", fig_dpH_AT_dAT_y_1m, width = 18, height = 12, units = "cm")
+ggsave(file="output_jp/figures/fig_dpH_AT_dT_y_1m.png", fig_dpH_AT_dAT_y_1m, width = 18, height = 12, units = "cm")
 
 title <- ""
 fit <- lm(data = deconv_garcia_dat_pH_1m, AT ~ sampling_date)
 fig_dAT_dt_1m <- ggreg(fit) +
   labs(x="Year", y="AT") +
   Mytheme(size_labs = 10)
-ggsave(file="figures_jp/fig_dAT_dt_1m.png", fig_dAT_dt_1m, width = 18, height = 12, units = "cm")
+ggsave(file="output_jp/figures/fig_dAT_dt_1m.png", fig_dAT_dt_1m, width = 18, height = 12, units = "cm")
 
 ### delta pH due to CT using yearly means for not changing variables
 d <- filter(deconv_garcia_dat_pH_1m, !is.na(yAT), !is.na(CT), !is.na(yS), 
@@ -3210,14 +3045,14 @@ fit <- lm(data = d, pH_CT_y ~ CT)
 fig_dpH_CT_dCT_y_1m <- ggreg(fit) +
   labs(x="CT (yearly mean)", y="pH") +
   Mytheme(size_labs = 10)
-ggsave(file="figures_jp/fig_dpH_CT_y_dT_1m.png", fig_dpH_CT_dCT_y_1m, width = 18, height = 12, units = "cm")
+ggsave(file="output_jp/figures/fig_dpH_CT_y_dT_1m.png", fig_dpH_CT_dCT_y_1m, width = 18, height = 12, units = "cm")
 
 title <- ""
 fit <- lm(data = deconv_garcia_dat_pH_1m, CT ~ sampling_date)
 fig_dCT_dt_1m <- ggreg(fit) +
   labs(x="Year", y="CT") +
   Mytheme(size_labs = 10)
-ggsave(file="figures_jp/fig_dCT_dt_1m.png", fig_dCT_dt_1m, width = 18, height = 12, units = "cm")
+ggsave(file="output_jp/figures/fig_dCT_dt_1m.png", fig_dCT_dt_1m, width = 18, height = 12, units = "cm")
 
 deconv_garcia_year <- tibble(
   means = c("year", "year", "year", "year", "year"),
@@ -3236,19 +3071,19 @@ deconv_garcia_year <- tibble(
 ```
 
 
-![fig_dpH_CT_dCT_y_1m.png](figures_jp/fig_dpH_T_y_dT_1m.png)
-![fig_dT_dt_1m.png](figures_jp/fig_dT_dt_1m.png)
-![fig_dpH_S_dS_y_1m.png](figures_jp/fig_dpH_S_dS_y_1m.png)
-![fig_dS_dt_1m.png](figures_jp/fig_dS_dt_1m.png)
-![fig_dpH_AT_dT_y_1m.png](figures_jp/fig_dpH_AT_dT_y_1m.png)
+![fig_dpH_CT_dCT_y_1m.png](output_jp/figures/fig_dpH_T_y_dT_1m.png)
+![fig_dT_dt_1m.png](output_jp/figures/fig_dT_dt_1m.png)
+![fig_dpH_S_dS_y_1m.png](output_jp/figures/fig_dpH_S_dS_y_1m.png)
+![fig_dS_dt_1m.png](output_jp/figures/fig_dS_dt_1m.png)
+![fig_dpH_AT_dT_y_1m.png](output_jp/figures/fig_dpH_AT_dT_y_1m.png)
 
-![fig_dAT_dt_1m.png](figures_jp/fig_dAT_dt_1m.png)
-
-
+![fig_dAT_dt_1m.png](output_jp/figures/fig_dAT_dt_1m.png)
 
 
-![fig_dpH_CT_y_dT_1m.png](figures_jp/fig_dpH_CT_y_dT_1m.png)
-![fig_dCT_dt_1m.png](figures_jp/fig_dCT_dt_1m.png)
+
+
+![fig_dpH_CT_y_dT_1m.png](output_jp/figures/fig_dpH_CT_y_dT_1m.png)
+![fig_dCT_dt_1m.png](output_jp/figures/fig_dCT_dt_1m.png)
 
 ### Deconvolution of pH changes at 1 m using year/month means for not changing variables
 
@@ -3279,14 +3114,14 @@ fit <- lm(data = d, pH_T_ym ~ T)
 fig_dpH_T_dT_ym_1m <- ggreg(fit) +
   labs(x="Temperature (year/month mean)", y="pH") +
   Mytheme(size_labs = 10)
-ggsave(file="figures_jp/fig_dpH_T_ym_dT_1m.png", fig_dpH_T_dT_ym_1m, width = 18, height = 12, units = "cm")
+ggsave(file="output_jp/figures/fig_dpH_T_ym_dT_1m.png", fig_dpH_T_dT_ym_1m, width = 18, height = 12, units = "cm")
 
 title <- ""
 fit <- lm(data = deconv_garcia_dat_pH_1m, T ~ sampling_date)
 fig_dT_dt_1m <- ggreg(fit) +
   labs(x="Year", y="Temperature") +
   Mytheme(size_labs = 10)
-ggsave(file="figures_jp/fig_dT_dt_1m.png", fig_dT_dt_1m, width = 18, height = 12, units = "cm")
+ggsave(file="output_jp/figures/fig_dT_dt_1m.png", fig_dT_dt_1m, width = 18, height = 12, units = "cm")
 
 ### delta pH due to salinity using year/month means for not changing variables
 d <- filter(deconv_garcia_dat_pH_1m, !is.na(ymAT), !is.na(ymCT), !is.na(S), 
@@ -3314,14 +3149,14 @@ fit <- lm(data = d, pH_S_ym ~ S)
 fig_dpH_S_dS_ym_1m <- ggreg(fit) +
   labs(x="Salinity (year/month mean)", y="pH") +
   Mytheme(size_labs = 10)
-ggsave(file="figures_jp/fig_dpH_S_dS_ym_1m.png", fig_dpH_S_dS_ym_1m, width = 18, height = 12, units = "cm")
+ggsave(file="output_jp/figures/fig_dpH_S_dS_ym_1m.png", fig_dpH_S_dS_ym_1m, width = 18, height = 12, units = "cm")
 
 title <- ""
 fit <- lm(data = deconv_garcia_dat_pH_1m, S ~ sampling_date)
 fig_dS_dt_1m <- ggreg(fit) +
   labs(x="Year", y="Salinity") +
   Mytheme(size_labs = 10)
-ggsave(file="figures_jp/fig_dS_dt_1m.png", fig_dS_dt_1m, width = 18, height = 12, units = "cm")
+ggsave(file="output_jp/figures/fig_dS_dt_1m.png", fig_dS_dt_1m, width = 18, height = 12, units = "cm")
 
 ### delta pH due to AT using year/month means for not changing variables
 d <- filter(deconv_garcia_dat_pH_1m, !is.na(AT), !is.na(ymCT), !is.na(ymS), 
@@ -3349,14 +3184,14 @@ fit <- lm(data = d, pH_AT_ym ~ AT)
 fig_dpH_AT_dAT_ym_1m <- ggreg(fit) +
   labs(x="AT (year/month mean)", y="pH") +
   Mytheme(size_labs = 10)
-ggsave(file="figures_jp/fig_dpH_AT_dT_ym_1m.png", fig_dpH_AT_dAT_ym_1m, width = 18, height = 12, units = "cm")
+ggsave(file="output_jp/figures/fig_dpH_AT_dT_ym_1m.png", fig_dpH_AT_dAT_ym_1m, width = 18, height = 12, units = "cm")
 
 title <- ""
 fit <- lm(data = deconv_garcia_dat_pH_1m, AT ~ sampling_date)
 fig_dAT_dt_1m <- ggreg(fit) +
   labs(x="Year", y="AT") +
   Mytheme(size_labs = 10)
-ggsave(file="figures_jp/fig_dAT_dt_1m.png", fig_dAT_dt_1m, width = 18, height = 12, units = "cm")
+ggsave(file="output_jp/figures/fig_dAT_dt_1m.png", fig_dAT_dt_1m, width = 18, height = 12, units = "cm")
 
 ### delta pH due to CT using year/month means for not changing variables
 d <- filter(deconv_garcia_dat_pH_1m, !is.na(ymAT), !is.na(CT), !is.na(ymS), 
@@ -3384,14 +3219,14 @@ fit <- lm(data = d, pH_CT_ym ~ CT)
 fig_dpH_CT_dCT_ym_1m <- ggreg(fit) +
   labs(x="CT (year/month mean)", y="pH") +
   Mytheme(size_labs = 10)
-ggsave(file="figures_jp/fig_dpH_CT_ym_dT_1m.png", fig_dpH_CT_dCT_ym_1m, width = 18, height = 12, units = "cm")
+ggsave(file="output_jp/figures/fig_dpH_CT_ym_dT_1m.png", fig_dpH_CT_dCT_ym_1m, width = 18, height = 12, units = "cm")
 
 title <- ""
 fit <- lm(data = deconv_garcia_dat_pH_1m, CT ~ sampling_date)
 fig_dCT_dt_1m <- ggreg(fit) +
   labs(x="Year", y="CT") +
   Mytheme(size_labs = 10)
-ggsave(file="figures_jp/fig_dCT_dt_1m.png", fig_dCT_dt_1m, width = 18, height = 12, units = "cm")
+ggsave(file="output_jp/figures/fig_dCT_dt_1m.png", fig_dCT_dt_1m, width = 18, height = 12, units = "cm")
 
 deconv_garcia_year_month <- tibble(
   means = c("year/month", "year/month", "year/month", "year/month", "year/month"),
@@ -3409,14 +3244,14 @@ deconv_garcia_year_month <- tibble(
 )
 ```
 
-![fig_dpH_T_dT_ym_1m.png](figures_jp/fig_dpH_T_ym_dT_1m.png)
-![fig_dT_dt_1m.png](figures_jp/fig_dT_dt_1m.png)
-![fig_dpH_S_dS_ym_1m.png](figures_jp/fig_dpH_S_dS_ym_1m.png)
-![fig_dS_dt_1m.png](figures_jp/fig_dS_dt_1m.png)
-![fig_dpH_AT_dT_ym_1m.png](figures_jp/fig_dpH_AT_dT_ym_1m.png)
-![fig_dAT_dt_1m.png](figures_jp/fig_dAT_dt_1m.png)
-![fig_dpH_CT_ym_dT_1m.png](figures_jp/fig_dpH_CT_ym_dT_1m.png)
-![fig_dCT_dt_1m.png](figures_jp/fig_dCT_dt_1m.png)
+![fig_dpH_T_dT_ym_1m.png](output_jp/figures/fig_dpH_T_ym_dT_1m.png)
+![fig_dT_dt_1m.png](output_jp/figures/fig_dT_dt_1m.png)
+![fig_dpH_S_dS_ym_1m.png](output_jp/figures/fig_dpH_S_dS_ym_1m.png)
+![fig_dS_dt_1m.png](output_jp/figures/fig_dS_dt_1m.png)
+![fig_dpH_AT_dT_ym_1m.png](output_jp/figures/fig_dpH_AT_dT_ym_1m.png)
+![fig_dAT_dt_1m.png](output_jp/figures/fig_dAT_dt_1m.png)
+![fig_dpH_CT_ym_dT_1m.png](output_jp/figures/fig_dpH_CT_ym_dT_1m.png)
+![fig_dCT_dt_1m.png](output_jp/figures/fig_dCT_dt_1m.png)
 
 ### Deconvolution of pH changes at 1 m using total means for not changing variables
 
@@ -3451,13 +3286,13 @@ fit <- lm(data = d, pH_T_t ~ T)
 fig_dpH_T_dT_t_1m <- ggreg(fit) +
   labs(x="Temperature (total mean)", y="pH") +
   Mytheme(size_labs = 10)
-ggsave(file="figures_jp/fig_dpH_T_t_dT_1m.png", fig_dpH_T_dT_t_1m, width = 18, height = 12, units = "cm")
+ggsave(file="output_jp/figures/fig_dpH_T_t_dT_1m.png", fig_dpH_T_dT_t_1m, width = 18, height = 12, units = "cm")
 
 fit <- lm(data = deconv_garcia_dat_pH_1m, T ~ sampling_date)
 fig_dT_dt_1m <- ggreg(fit) +
   labs(x="Year", y="Temperature") +
   Mytheme(size_labs = 10)
-ggsave(file="figures_jp/fig_dT_dt_1m.png", fig_dT_dt_1m, width = 18, height = 12, units = "cm")
+ggsave(file="output_jp/figures/fig_dT_dt_1m.png", fig_dT_dt_1m, width = 18, height = 12, units = "cm")
 
 title <- ""
 d <- filter(deconv_garcia_dat_pH_1m, !is.na(tAT), !is.na(tCT), !is.na(S), 
@@ -3488,13 +3323,13 @@ fit <- lm(data = d, pH_S_t ~ S)
 fig_dpH_S_dS_t_1m <- ggreg(fit) +
   labs(x="Salinity (total mean)", y="pH") +
   Mytheme(size_labs = 10)
-ggsave(file="figures_jp/fig_dpH_S_dS_t_1m.png", fig_dpH_S_dS_t_1m, width = 18, height = 12, units = "cm")
+ggsave(file="output_jp/figures/fig_dpH_S_dS_t_1m.png", fig_dpH_S_dS_t_1m, width = 18, height = 12, units = "cm")
 
 fit <- lm(data = deconv_garcia_dat_pH_1m, S ~ sampling_date)
 fig_dS_dt_1m <- ggreg(fit) +
   labs(x="Year", y="Salinity") +
   Mytheme(size_labs = 10)
-ggsave(file="figures_jp/fig_dS_dt_1m.png", fig_dS_dt_1m, width = 18, height = 12, units = "cm")
+ggsave(file="output_jp/figures/fig_dS_dt_1m.png", fig_dS_dt_1m, width = 18, height = 12, units = "cm")
 
 title <- ""
 d <- filter(deconv_garcia_dat_pH_1m, !is.na(AT), !is.na(tCT), !is.na(tS), 
@@ -3526,14 +3361,14 @@ fit <- lm(data = d, pH_AT_t ~ AT)
 fig_dpH_AT_dAT_t_1m <- ggreg(fit) +
   labs(x="AT (total mean)", y="pH") +
   Mytheme(size_labs = 10)
-ggsave(file="figures_jp/fig_dpH_AT_dT_t_1m.png", fig_dpH_AT_dAT_t_1m, width = 18, height = 12, units = "cm")
+ggsave(file="output_jp/figures/fig_dpH_AT_dT_t_1m.png", fig_dpH_AT_dAT_t_1m, width = 18, height = 12, units = "cm")
 
 title <- ""
 fit <- lm(data = deconv_garcia_dat_pH_1m, AT ~ sampling_date)
 fig_dAT_dt_1m <- ggreg(fit) +
   labs(x="Year", y="AT") +
   Mytheme(size_labs = 10)
-ggsave(file="figures_jp/fig_dAT_dt_1m.png", fig_dAT_dt_1m, width = 18, height = 12, units = "cm")
+ggsave(file="output_jp/figures/fig_dAT_dt_1m.png", fig_dAT_dt_1m, width = 18, height = 12, units = "cm")
 
 ### delta pH due to CT using total means for not changing variables
 d <- filter(deconv_garcia_dat_pH_1m, !is.na(tAT), !is.na(CT), !is.na(tS), 
@@ -3565,14 +3400,14 @@ fit <- lm(data = d, pH_CT_t ~ CT)
 fig_dpH_CT_dCT_t_1m <- ggreg(fit) +
   labs(x="CT (total mean)", y="pH") +
   Mytheme(size_labs = 10)
-ggsave(file="figures_jp/fig_dpH_CT_t_dT_1m.png", fig_dpH_CT_dCT_t_1m, width = 18, height = 12, units = "cm")
+ggsave(file="output_jp/figures/fig_dpH_CT_t_dT_1m.png", fig_dpH_CT_dCT_t_1m, width = 18, height = 12, units = "cm")
 
 title <- ""
 fit <- lm(data = deconv_garcia_dat_pH_1m, CT ~ sampling_date)
 fig_dCT_dt_1m <- ggreg(fit) +
   labs(x="Year", y="CT") +
   Mytheme(size_labs = 10)
-ggsave(file="figures_jp/fig_dCT_dt_1m.png", fig_dCT_dt_1m, width = 18, height = 12, units = "cm")
+ggsave(file="output_jp/figures/fig_dCT_dt_1m.png", fig_dCT_dt_1m, width = 18, height = 12, units = "cm")
 
 deconv_garcia_total <- tibble(
   means = c("total", "total", "total", "total", "total"),
@@ -3593,14 +3428,14 @@ deconv_garcia_total <- tibble(
 )
 ```
 
-![fig_dpH_T_t_dT_1m.png](figures_jp/fig_dpH_T_t_dT_1m.png)
-![fig_dT_dt_1m.png](figures_jp/fig_dT_dt_1m.png)
-![fig_dpH_S_dS_t_1m.png](figures_jp/fig_dpH_S_dS_t_1m.png)
-![fig_dS_dt_1m.png](figures_jp/fig_dS_dt_1m.png)
-![fig_dpH_AT_dT_t_1m.png](figures_jp/fig_dpH_AT_dT_t_1m.png)
-![fig_dAT_dt_1m.png](figures_jp/fig_dAT_dt_1m.png)
-![fig_dpH_CT_t_dT_1m.png](figures_jp/fig_dpH_CT_t_dT_1m.png)
-![fig_dCT_dt_1m.png](figures_jp/fig_dCT_dt_1m.png)
+![fig_dpH_T_t_dT_1m.png](output_jp/figures/fig_dpH_T_t_dT_1m.png)
+![fig_dT_dt_1m.png](output_jp/figures/fig_dT_dt_1m.png)
+![fig_dpH_S_dS_t_1m.png](output_jp/figures/fig_dpH_S_dS_t_1m.png)
+![fig_dS_dt_1m.png](output_jp/figures/fig_dS_dt_1m.png)
+![fig_dpH_AT_dT_t_1m.png](output_jp/figures/fig_dpH_AT_dT_t_1m.png)
+![fig_dAT_dt_1m.png](output_jp/figures/fig_dAT_dt_1m.png)
+![fig_dpH_CT_t_dT_1m.png](output_jp/figures/fig_dpH_CT_t_dT_1m.png)
+![fig_dCT_dt_1m.png](output_jp/figures/fig_dCT_dt_1m.png)
 
 ###Summary Garcia-Ibanez compared with my approach
 
@@ -3905,7 +3740,7 @@ fig_deconv_pCO2_1m <- ggplot(deconv_pCO2_1m_melt) + geom_point(aes(x=date, y=val
   xlab("Time") + ylab("pCO2 (uatm)")+
   Mytheme() +
   scale_colour_discrete(guide="none")
-ggsave(file="figures_jp/fig_deconv_pCO2_1m.png", fig_deconv_pCO2_1m, width = 18, height = 20, units = "cm")
+ggsave(file="output_jp/figures/fig_deconv_pCO2_1m.png", fig_deconv_pCO2_1m, width = 18, height = 20, units = "cm")
 
 # Plot with anomalies
 ano_deconv_pCO2_1m_melt <-  gather(data = select(ano_deconv_pCO2_1m, -monthd), key = variable, value=value, -date)
@@ -3914,14 +3749,14 @@ fig_deconv_pCO2_1m_ano <- ggplot(ano_deconv_pCO2_1m_melt) + geom_point(aes(x=dat
   xlab("Time") + ylab("pCO2 (uatm)")+
   Mytheme() +
   scale_colour_discrete(guide="none")
-ggsave(file="figures_jp/fig_deconv_pCO2_1m_ano.png", fig_deconv_pCO2_1m_ano, width = 18, height = 20, units = "cm")
+ggsave(file="output_jp/figures/fig_deconv_pCO2_1m_ano.png", fig_deconv_pCO2_1m_ano, width = 18, height = 20, units = "cm")
 ```
 Below is the deconvolution performed on values. Here, dvar is the monthly mean value of T, S and CT for the entire time-series.
 
-![fig_deconv_pCO2_1m.png](figures_jp/fig_deconv_pCO2_1m.png)
+![fig_deconv_pCO2_1m.png](output_jp/figures/fig_deconv_pCO2_1m.png)
 Below is the deconvolution performed on anomalies Here, dvar is the monthly mean value of the anomalies of T, S and CT for the entire time-series.
 
-![fig_deconv_pCO2_1m_ano.png](figures_jp/fig_deconv_pCO2_1m_ano.png)
+![fig_deconv_pCO2_1m_ano.png](output_jp/figures/fig_deconv_pCO2_1m_ano.png)
 
 ```{r kable regressions deconvolution pCO2 1 m}
 kable(reg_deconv_pCO2_1m, digits = c(4,4,11,3,3,2,3), caption="Regressions on values at 1 m depth.")
@@ -3991,13 +3826,13 @@ fit <- lm(data = d, pCO2_T_t ~ T)
 fig_dpCO2_T_dT_t_1m <- ggreg(fit) +
   labs(x="Temperature (total mean)", y="pCO2") +
   Mytheme(size_labs = 10)
-ggsave(file="figures_jp/fig_dpCO2_T_t_dT_1m.png", fig_dpCO2_T_dT_t_1m, width = 18, height = 12, units = "cm")
+ggsave(file="output_jp/figures/fig_dpCO2_T_t_dT_1m.png", fig_dpCO2_T_dT_t_1m, width = 18, height = 12, units = "cm")
 
 fit <- lm(data = deconv_garcia_dat_pCO2_1m, T ~ sampling_date)
 fig_dT_dt_1m <- ggreg(fit) +
   labs(x="Year", y="Temperature") +
   Mytheme(size_labs = 10)
-ggsave(file="figures_jp/fig_dT_dt_1m.png", fig_dT_dt_1m, width = 18, height = 12, units = "cm")
+ggsave(file="output_jp/figures/fig_dT_dt_1m.png", fig_dT_dt_1m, width = 18, height = 12, units = "cm")
 
 title <- ""
 d <- filter(deconv_garcia_dat_pCO2_1m, !is.na(tAT), !is.na(tCT), !is.na(S), 
@@ -4029,13 +3864,13 @@ fit <- lm(data = d, pCO2_S_t ~ S)
 fig_dpCO2_S_dS_t_1m <- ggreg(fit) +
   labs(x="Salinity (total mean)", y="pCO2") +
   Mytheme(size_labs = 10)
-ggsave(file="figures_jp/fig_dpCO2_S_dS_t_1m.png", fig_dpCO2_S_dS_t_1m, width = 18, height = 12, units = "cm")
+ggsave(file="output_jp/figures/fig_dpCO2_S_dS_t_1m.png", fig_dpCO2_S_dS_t_1m, width = 18, height = 12, units = "cm")
 
 fit <- lm(data = deconv_garcia_dat_pCO2_1m, S ~ sampling_date)
 fig_dS_dt_1m <- ggreg(fit) +
   labs(x="Year", y="Salinity") +
   Mytheme(size_labs = 10)
-ggsave(file="figures_jp/fig_dS_dt_1m.png", fig_dS_dt_1m, width = 18, height = 12, units = "cm")
+ggsave(file="output_jp/figures/fig_dS_dt_1m.png", fig_dS_dt_1m, width = 18, height = 12, units = "cm")
 
 title <- ""
 d <- filter(deconv_garcia_dat_pCO2_1m, !is.na(AT), !is.na(tCT), !is.na(tS), 
@@ -4067,14 +3902,14 @@ fit <- lm(data = d, pCO2_AT_t ~ AT)
 fig_dpCO2_AT_dAT_t_1m <- ggreg(fit) +
   labs(x="AT (total mean)", y="pCO2") +
   Mytheme(size_labs = 10)
-ggsave(file="figures_jp/fig_dpCO2_AT_dT_t_1m.png", fig_dpCO2_AT_dAT_t_1m, width = 18, height = 12, units = "cm")
+ggsave(file="output_jp/figures/fig_dpCO2_AT_dT_t_1m.png", fig_dpCO2_AT_dAT_t_1m, width = 18, height = 12, units = "cm")
 
 title <- ""
 fit <- lm(data = deconv_garcia_dat_pCO2_1m, AT ~ sampling_date)
 fig_dAT_dt_1m <- ggreg(fit) +
   labs(x="Year", y="AT") +
   Mytheme(size_labs = 10)
-ggsave(file="figures_jp/fig_dAT_dt_1m.png", fig_dAT_dt_1m, width = 18, height = 12, units = "cm")
+ggsave(file="output_jp/figures/fig_dAT_dt_1m.png", fig_dAT_dt_1m, width = 18, height = 12, units = "cm")
 
 ### delta pCO2 due to CT using total means for not changing variables
 d <- filter(deconv_garcia_dat_pCO2_1m, !is.na(tAT), !is.na(CT), !is.na(tS), 
@@ -4106,14 +3941,14 @@ fit <- lm(data = d, pCO2_CT_t ~ CT)
 fig_dpCO2_CT_dCT_t_1m <- ggreg(fit) +
   labs(x="CT (total mean)", y="pCO2") +
   Mytheme(size_labs = 10)
-ggsave(file="figures_jp/fig_dpCO2_CT_t_dT_1m.png", fig_dpCO2_CT_dCT_t_1m, width = 18, height = 12, units = "cm")
+ggsave(file="output_jp/figures/fig_dpCO2_CT_t_dT_1m.png", fig_dpCO2_CT_dCT_t_1m, width = 18, height = 12, units = "cm")
 
 title <- ""
 fit <- lm(data = deconv_garcia_dat_pCO2_1m, CT ~ sampling_date)
 fig_dCT_dt_1m <- ggreg(fit) +
   labs(x="Year", y="CT") +
   Mytheme(size_labs = 10)
-ggsave(file="figures_jp/fig_dCT_dt_1m.png", fig_dCT_dt_1m, width = 18, height = 12, units = "cm")
+ggsave(file="output_jp/figures/fig_dCT_dt_1m.png", fig_dCT_dt_1m, width = 18, height = 12, units = "cm")
 
 deconv_garcia_total_pCO2 <- tibble(
   means = c("total", "total", "total", "total", "total"),
@@ -4355,7 +4190,7 @@ fig_deconv_pH_50m <- ggplot(deconv_pH_50m_melt) + geom_point(aes(x=date, y=value
   xlab("Time") + ylab("pH (total scale)")+
   Mytheme() +
   scale_colour_discrete(guide="none")
-ggsave(file="figures_jp/fig_deconv_pH_50m.png", fig_deconv_pH_50m, width = 18, height = 20, units = "cm")
+ggsave(file="output_jp/figures/fig_deconv_pH_50m.png", fig_deconv_pH_50m, width = 18, height = 20, units = "cm")
 
 # Plot with anomalies
 ano_deconv_pH_50m_melt <-  gather(data = select(ano_deconv_pH_50m, -monthd), key = variable, value=value, -date)
@@ -4364,15 +4199,15 @@ fig_deconv_pH_ano_50m <- ggplot(ano_deconv_pH_50m_melt) + geom_point(aes(x=date,
   xlab("Time") + ylab("pH (total scale)")+
   Mytheme() +
   scale_colour_discrete(guide="none")
-ggsave(file="figures_jp/fig_deconv_pH_ano_50m.png", fig_deconv_pH_ano_50m, width = 18, height = 20, units = "cm")
+ggsave(file="output_jp/figures/fig_deconv_pH_ano_50m.png", fig_deconv_pH_ano_50m, width = 18, height = 20, units = "cm")
 ```
 
 Below is the deconvolution performed on values at 50 m. Here, dvar is the monthly mean value of T, S and CT for the entire time-series.
 
-![fig_deconv_pH_50m.png](figures_jp/fig_deconv_pH_50m.png)
+![fig_deconv_pH_50m.png](output_jp/figures/fig_deconv_pH_50m.png)
 Below is the deconvolution performed on anomalies at 50 m. Here, dvar is the monthly mean value of the anomalies of T, S and CT for the entire time-series.
 
-![fig_deconv_pH_ano_50m.png](figures_jp/fig_deconv_pH_ano_50m.png)
+![fig_deconv_pH_ano_50m.png](output_jp/figures/fig_deconv_pH_ano_50m.png)
 
 ```{r kable regressions deconvolution pH 50 m}
 kable(reg_deconv_pH_50m, digits = c(4,4,11,3,3,2,3), caption="Regressions on values at 50 m depth.")
@@ -4548,7 +4383,7 @@ fig_deconv_pCO2_50m <- ggplot(deconv_pCO2_50m_melt) + geom_point(aes(x=date, y=v
   xlab("Time") + ylab("pCO2 (uatm)")+
   Mytheme() +
   scale_colour_discrete(guide="none")
-ggsave(file="figures_jp/fig_deconv_pCO2_50m.png", fig_deconv_pCO2_50m, width = 18, height = 20, units = "cm")
+ggsave(file="output_jp/figures/fig_deconv_pCO2_50m.png", fig_deconv_pCO2_50m, width = 18, height = 20, units = "cm")
 
 # Plot with anomalies
 ano_deconv_pCO2_50m_melt <-  gather(data = select(ano_deconv_pCO2_50m, -monthd), key = variable, value=value, -date)
@@ -4557,14 +4392,14 @@ fig_deconv_pCO2_50m_ano <- ggplot(ano_deconv_pCO2_50m_melt) + geom_point(aes(x=d
   xlab("Time") + ylab("pCO2 (uatm)")+
   Mytheme() +
   scale_colour_discrete(guide="none")
-ggsave(file="figures_jp/fig_deconv_pCO2_50m_ano.png", fig_deconv_pCO2_50m_ano, width = 18, height = 20, units = "cm")
+ggsave(file="output_jp/figures/fig_deconv_pCO2_50m_ano.png", fig_deconv_pCO2_50m_ano, width = 18, height = 20, units = "cm")
 ```
 Below is the deconvolution performed on values. Here, dvar is the monthly mean value of T, S and CT for the entire time-series.
 
-![fig_deconv_pCO2_50m.png](figures_jp/fig_deconv_pCO2_50m.png)
+![fig_deconv_pCO2_50m.png](output_jp/figures/fig_deconv_pCO2_50m.png)
 Below is the deconvolution performed on anomalies Here, dvar is the monthly mean value of the anomalies of T, S and CT for the entire time-series.
 
-![fig_deconv_pCO2_50m_ano.png](figures_jp/fig_deconv_pCO2_50m_ano.png)
+![fig_deconv_pCO2_50m_ano.png](output_jp/figures/fig_deconv_pCO2_50m_ano.png)
 
 ```{r kable regressions deconvolution pCO2 50 m}
 kable(reg_deconv_pCO2_50m, digits = c(4,4,11,3,3,2,3), caption="Regressions on values at 50 m depth.")
@@ -4637,13 +4472,13 @@ fit <- lm(data = d, pH_T_t ~ T)
 fig_dpH_T_dT_t_50m <- ggreg(fit) +
   labs(x="Temperature (total mean)", y="pH") +
   Mytheme(size_labs = 10)
-ggsave(file="figures_jp/fig_dpH_T_t_dT_50m.png", fig_dpH_T_dT_t_50m, width = 18, height = 12, units = "cm")
+ggsave(file="output_jp/figures/fig_dpH_T_t_dT_50m.png", fig_dpH_T_dT_t_50m, width = 18, height = 12, units = "cm")
 
 fit <- lm(data = deconv_garcia_dat_pH_50m, T ~ sampling_date)
 fig_dT_dt_50m <- ggreg(fit) +
   labs(x="Year", y="Temperature") +
   Mytheme(size_labs = 10)
-ggsave(file="figures_jp/fig_dT_dt_50m.png", fig_dT_dt_50m, width = 18, height = 12, units = "cm")
+ggsave(file="output_jp/figures/fig_dT_dt_50m.png", fig_dT_dt_50m, width = 18, height = 12, units = "cm")
 
 title <- ""
 d <- filter(deconv_garcia_dat_pH_50m, !is.na(tAT), !is.na(tCT), !is.na(S), 
@@ -4674,13 +4509,13 @@ fit <- lm(data = d, pH_S_t ~ S)
 fig_dpH_S_dS_t_50m <- ggreg(fit) +
   labs(x="Salinity (total mean)", y="pH") +
   Mytheme(size_labs = 10)
-ggsave(file="figures_jp/fig_dpH_S_dS_t_50m.png", fig_dpH_S_dS_t_50m, width = 18, height = 12, units = "cm")
+ggsave(file="output_jp/figures/fig_dpH_S_dS_t_50m.png", fig_dpH_S_dS_t_50m, width = 18, height = 12, units = "cm")
 
 fit <- lm(data = deconv_garcia_dat_pH_50m, S ~ sampling_date)
 fig_dS_dt_50m <- ggreg(fit) +
   labs(x="Year", y="Salinity") +
   Mytheme(size_labs = 10)
-ggsave(file="figures_jp/fig_dS_dt_50m.png", fig_dS_dt_50m, width = 18, height = 12, units = "cm")
+ggsave(file="output_jp/figures/fig_dS_dt_50m.png", fig_dS_dt_50m, width = 18, height = 12, units = "cm")
 
 title <- ""
 d <- filter(deconv_garcia_dat_pH_50m, !is.na(AT), !is.na(tCT), !is.na(tS), 
@@ -4712,14 +4547,14 @@ fit <- lm(data = d, pH_AT_t ~ AT)
 fig_dpH_AT_dAT_t_50m <- ggreg(fit) +
   labs(x="AT (total mean)", y="pH") +
   Mytheme(size_labs = 10)
-ggsave(file="figures_jp/fig_dpH_AT_dT_t_50m.png", fig_dpH_AT_dAT_t_50m, width = 18, height = 12, units = "cm")
+ggsave(file="output_jp/figures/fig_dpH_AT_dT_t_50m.png", fig_dpH_AT_dAT_t_50m, width = 18, height = 12, units = "cm")
 
 title <- ""
 fit <- lm(data = deconv_garcia_dat_pH_50m, AT ~ sampling_date)
 fig_dAT_dt_50m <- ggreg(fit) +
   labs(x="Year", y="AT") +
   Mytheme(size_labs = 10)
-ggsave(file="figures_jp/fig_dAT_dt_50m.png", fig_dAT_dt_50m, width = 18, height = 12, units = "cm")
+ggsave(file="output_jp/figures/fig_dAT_dt_50m.png", fig_dAT_dt_50m, width = 18, height = 12, units = "cm")
 
 ### delta pH due to CT using total means for not changing variables
 d <- filter(deconv_garcia_dat_pH_50m, !is.na(tAT), !is.na(CT), !is.na(tS), 
@@ -4751,14 +4586,14 @@ fit <- lm(data = d, pH_CT_t ~ CT)
 fig_dpH_CT_dCT_t_50m <- ggreg(fit) +
   labs(x="CT (total mean)", y="pH") +
   Mytheme(size_labs = 10)
-ggsave(file="figures_jp/fig_dpH_CT_t_dT_50m.png", fig_dpH_CT_dCT_t_50m, width = 18, height = 12, units = "cm")
+ggsave(file="output_jp/figures/fig_dpH_CT_t_dT_50m.png", fig_dpH_CT_dCT_t_50m, width = 18, height = 12, units = "cm")
 
 title <- ""
 fit <- lm(data = deconv_garcia_dat_pH_50m, CT ~ sampling_date)
 fig_dCT_dt_50m <- ggreg(fit) +
   labs(x="Year", y="CT") +
   Mytheme(size_labs = 10)
-ggsave(file="figures_jp/fig_dCT_dt_50m.png", fig_dCT_dt_50m, width = 18, height = 12, units = "cm")
+ggsave(file="output_jp/figures/fig_dCT_dt_50m.png", fig_dCT_dt_50m, width = 18, height = 12, units = "cm")
 
 deconv_garcia_total_50m <- tibble(
   means = c("total", "total", "total", "total", "total"),
@@ -4779,14 +4614,14 @@ deconv_garcia_total_50m <- tibble(
 )
 ```
 
-![fig_dpH_T_t_dT_50m.png](figures_jp/fig_dpH_T_t_dT_50m.png)
-![fig_dT_dt_50m.png](figures_jp/fig_dT_dt_50m.png)
-![fig_dpH_S_dS_t_50m.png](figures_jp/fig_dpH_S_dS_t_50m.png)
-![fig_dS_dt_50m.png](figures_jp/fig_dS_dt_50m.png)
-![fig_dpH_AT_dT_t_50m.png](figures_jp/fig_dpH_AT_dT_t_50m.png)
-![fig_dAT_dt_50m.png](figures_jp/fig_dAT_dt_50m.png)
-![fig_dpH_CT_t_dT_50m.png](figures_jp/fig_dpH_CT_t_dT_50m.png)
-![fig_dCT_dt_50m.png](figures_jp/fig_dCT_dt_50m.png)
+![fig_dpH_T_t_dT_50m.png](output_jp/figures/fig_dpH_T_t_dT_50m.png)
+![fig_dT_dt_50m.png](output_jp/figures/fig_dT_dt_50m.png)
+![fig_dpH_S_dS_t_50m.png](output_jp/figures/fig_dpH_S_dS_t_50m.png)
+![fig_dS_dt_50m.png](output_jp/figures/fig_dS_dt_50m.png)
+![fig_dpH_AT_dT_t_50m.png](output_jp/figures/fig_dpH_AT_dT_t_50m.png)
+![fig_dAT_dt_50m.png](output_jp/figures/fig_dAT_dt_50m.png)
+![fig_dpH_CT_t_dT_50m.png](output_jp/figures/fig_dpH_CT_t_dT_50m.png)
+![fig_dCT_dt_50m.png](output_jp/figures/fig_dCT_dt_50m.png)
 
 ```{r kable Garcia-Ibanez pH 50 m}
 kable(deconv_garcia_total_50m, digits = c(1,4,4,7,4,4,4,4), caption="Contributions of 4 variables to pH change at 50 m")
@@ -4907,13 +4742,13 @@ fit <- lm(data = d, pCO2_T_t ~ T)
 fig_dpCO2_T_dT_t_50m <- ggreg(fit) +
   labs(x="Temperature (total mean)", y="pCO2") +
   Mytheme(size_labs = 10)
-ggsave(file="figures_jp/fig_dpCO2_T_t_dT_50m.png", fig_dpCO2_T_dT_t_50m, width = 18, height = 12, units = "cm")
+ggsave(file="output_jp/figures/fig_dpCO2_T_t_dT_50m.png", fig_dpCO2_T_dT_t_50m, width = 18, height = 12, units = "cm")
 
 fit <- lm(data = deconv_garcia_dat_pCO2_50m, T ~ sampling_date)
 fig_dT_dt_50m <- ggreg(fit) +
   labs(x="Year", y="Temperature") +
   Mytheme(size_labs = 10)
-ggsave(file="figures_jp/fig_dT_dt_50m.png", fig_dT_dt_50m, width = 18, height = 12, units = "cm")
+ggsave(file="output_jp/figures/fig_dT_dt_50m.png", fig_dT_dt_50m, width = 18, height = 12, units = "cm")
 
 title <- ""
 d <- filter(deconv_garcia_dat_pCO2_50m, !is.na(tAT), !is.na(tCT), !is.na(S), 
@@ -4945,13 +4780,13 @@ fit <- lm(data = d, pCO2_S_t ~ S)
 fig_dpCO2_S_dS_t_50m <- ggreg(fit) +
   labs(x="Salinity (total mean)", y="pCO2") +
   Mytheme(size_labs = 10)
-ggsave(file="figures_jp/fig_dpCO2_S_dS_t_50m.png", fig_dpCO2_S_dS_t_50m, width = 18, height = 12, units = "cm")
+ggsave(file="output_jp/figures/fig_dpCO2_S_dS_t_50m.png", fig_dpCO2_S_dS_t_50m, width = 18, height = 12, units = "cm")
 
 fit <- lm(data = deconv_garcia_dat_pCO2_50m, S ~ sampling_date)
 fig_dS_dt_50m <- ggreg(fit) +
   labs(x="Year", y="Salinity") +
   Mytheme(size_labs = 10)
-ggsave(file="figures_jp/fig_dS_dt_50m.png", fig_dS_dt_50m, width = 18, height = 12, units = "cm")
+ggsave(file="output_jp/figures/fig_dS_dt_50m.png", fig_dS_dt_50m, width = 18, height = 12, units = "cm")
 
 title <- ""
 d <- filter(deconv_garcia_dat_pCO2_50m, !is.na(AT), !is.na(tCT), !is.na(tS), 
@@ -4983,14 +4818,14 @@ fit <- lm(data = d, pCO2_AT_t ~ AT)
 fig_dpCO2_AT_dAT_t_50m <- ggreg(fit) +
   labs(x="AT (total mean)", y="pCO2") +
   Mytheme(size_labs = 10)
-ggsave(file="figures_jp/fig_dpCO2_AT_dT_t_50m.png", fig_dpCO2_AT_dAT_t_50m, width = 18, height = 12, units = "cm")
+ggsave(file="output_jp/figures/fig_dpCO2_AT_dT_t_50m.png", fig_dpCO2_AT_dAT_t_50m, width = 18, height = 12, units = "cm")
 
 title <- ""
 fit <- lm(data = deconv_garcia_dat_pCO2_50m, AT ~ sampling_date)
 fig_dAT_dt_50m <- ggreg(fit) +
   labs(x="Year", y="AT") +
   Mytheme(size_labs = 10)
-ggsave(file="figures_jp/fig_dAT_dt_50m.png", fig_dAT_dt_50m, width = 18, height = 12, units = "cm")
+ggsave(file="output_jp/figures/fig_dAT_dt_50m.png", fig_dAT_dt_50m, width = 18, height = 12, units = "cm")
 
 ### delta pCO2 due to CT using total means for not changing variables
 d <- filter(deconv_garcia_dat_pCO2_50m, !is.na(tAT), !is.na(CT), !is.na(tS), 
@@ -5022,14 +4857,14 @@ fit <- lm(data = d, pCO2_CT_t ~ CT)
 fig_dpCO2_CT_dCT_t_50m <- ggreg(fit) +
   labs(x="CT (total mean)", y="pCO2") +
   Mytheme(size_labs = 10)
-ggsave(file="figures_jp/fig_dpCO2_CT_t_dT_50m.png", fig_dpCO2_CT_dCT_t_50m, width = 18, height = 12, units = "cm")
+ggsave(file="output_jp/figures/fig_dpCO2_CT_t_dT_50m.png", fig_dpCO2_CT_dCT_t_50m, width = 18, height = 12, units = "cm")
 
 title <- ""
 fit <- lm(data = deconv_garcia_dat_pCO2_50m, CT ~ sampling_date)
 fig_dCT_dt_50m <- ggreg(fit) +
   labs(x="Year", y="CT") +
   Mytheme(size_labs = 10)
-ggsave(file="figures_jp/fig_dCT_dt_50m.png", fig_dCT_dt_50m, width = 18, height = 12, units = "cm")
+ggsave(file="output_jp/figures/fig_dCT_dt_50m.png", fig_dCT_dt_50m, width = 18, height = 12, units = "cm")
 
 deconv_garcia_total_pCO2_50m <- tibble(
   means = c("total", "total", "total", "total", "total"),
@@ -5120,7 +4955,7 @@ p1 <- ggplot(data=dplyr::filter(means_depth, depth== 0)) +
   scale_y_continuous(limits = c(2490, 2600), expand = c(0,0)) +
   labs(title = "Point B (1 m, with month of sampling)", x = "Salinity", y = expression(paste("Total alkalinity (",mu, "mol ", kg^-1,")"))) +
   Mytheme()
-png(file = "figures_jp/fig_ta_vs_salinity_month_pointB_0m.png", 
+png(file = "output_jp/figures/fig_ta_vs_salinity_month_pointB_0m.png", 
     width = 20, height = 13, units = "cm", res = 300)
 print(p1)
 dev.off()
@@ -5135,7 +4970,7 @@ p1 <- ggplot(data=dplyr::filter(means_depth, depth== 0)) +
   scale_y_continuous(limits = c(2490, 2600), expand = c(0,0)) +
   labs(title = NULL, x = "Salinity", y = expression(paste("Total alkalinity (",mu, "mol ", kg^-1,")"))) +
 Mytheme_facet()
-ggsave(p1, file = "figures_jp/fig_ta_vs_salinity_year_pointB_0m.png", 
+ggsave(p1, file = "output_jp/figures/fig_ta_vs_salinity_year_pointB_0m.png", 
     width = 6, height = 6)
 
 # AT versus salinity at the surface per year with loop
@@ -5184,7 +5019,7 @@ g1 <- plot_grid(p[[1]], p[[2]], p[[3]], p[[4]], p[[5]], p[[6]], p[[7]], p[[8]],
 grobs <- ggplotGrob(p[[1]] + theme(legend.position="top"))$grobs
 legend_top <- grobs[[which(sapply(grobs, function(x) x$name) == "guide-box")]]
 g <- plot_grid(legend_top, g1, ncol = 1, rel_heights = c(0.15, 1))
-ggsave(file="figures_jp/fig6.pdf", g, width = 16, height = 15, units = "cm")
+ggsave(file="output_jp/figures/fig6.pdf", g, width = 16, height = 15, units = "cm")
 
 
 # AT=f(S) with all data
@@ -5204,7 +5039,7 @@ p1 <- ggplot(data=mean0m) +
   stat_smooth(method=lm, na.rm=TRUE, show.legend=FALSE, se=FALSE, colour="black", size=0.5) +
   labs(title = "With monthly means", x = "Salinity", y = expression(paste("Total alkalinity (",mu, "mol ", kg^-1,")"))) +
   Mytheme()
-ggsave(p1, filename = "figures_jp/fig_ta_vs_salinity_all_pointB_0m.png", width = 20, height = 13, units = "cm")
+ggsave(p1, filename = "output_jp/figures/fig_ta_vs_salinity_all_pointB_0m.png", width = 20, height = 13, units = "cm")
 
 # AT=f(S) with monthly means
 lms <- summary(lm(data = means_month0m, AT ~ Salinity))
@@ -5224,14 +5059,14 @@ p1 <- ggplot(data=means_month0m) +
   labs(title = "With all data", x = "Salinity", 
        y = expression(paste("Total alkalinity (",mu, "mol ", kg^-1,")"))) +
   Mytheme()
-png(file = "figures_jp/fig_ta_vs_salinity_monthly_means_pointB_0m.png", 
+png(file = "output_jp/figures/fig_ta_vs_salinity_monthly_means_pointB_0m.png", 
     width = 20, height = 13, units = "cm", res = 300)
 print(p1)
 dev.off()
 
 
 # Alkalinity as a function of precipitation
-w <- tbl_df(read.table("../data/meteo_nice_airport/Meteo_2007_2015.csv", header=T, sep=",", dec=".", as.is=T, na.strings = c("NA", "-999", "999999")))
+w <- tibble::as_tibble(read.table(paste0(path, "data/meteo_nice_airport/Meteo_2007_2015.csv"), header=T, sep=",", dec=".", as.is=T, na.strings = c("NA", "-999", "999999")))
 w$sampling_date <- ymd(w$sampling_date)
 w$days <- wday(w$sampling_date, label = TRUE, abbr = FALSE)
 w$group <- format(w$sampling_date - 1, "%Y%W") # Group the weeks tuesday to monday
@@ -5287,15 +5122,15 @@ precip_S <- ggplot(w_AT_precip, aes(x = rr_cumsum, y = mean_salinity)) +
 annotation_custom(grob_C_bl)
 
 g <- plot_grid(precip_cumsum, precip_ta, precip_S, ncol=1, align="h")
-ggsave("figures_jp/precip.png",g, width = 18, height = 14, units = "cm")
-ggsave("figures_jp/figS2.pdf",g, width = 8, height = 14, units = "cm")
+ggsave("output_jp/figures/precip.png",g, width = 18, height = 14, units = "cm")
+ggsave("output_jp/figures/figS2.pdf",g, width = 8, height = 14, units = "cm")
 ```
 
 The relationship between AT and salinity using all data is shown below.
-![fig_ta_vs_salinity_all_pointB_0m.png](figures_jp/fig_ta_vs_salinity_all_pointB_0m.png)
+![fig_ta_vs_salinity_all_pointB_0m.png](output_jp/figures/fig_ta_vs_salinity_all_pointB_0m.png)
 
 The relationship between AT and salinity using monthly means is shown below.
-![fig_ta_vs_salinity_monthly_means_pointB_0m.png](figures_jp/fig_ta_vs_salinity_monthly_means_pointB_0m.png)
+![fig_ta_vs_salinity_monthly_means_pointB_0m.png](output_jp/figures/fig_ta_vs_salinity_monthly_means_pointB_0m.png)
 
 ```{r reg_AT_S_monthly}
   kable(reg_AT_S_monthly, digits = c(3), padding = 0, caption="Regression parameters of the AT=f(S) relationship derived using monthly means.")
@@ -5304,13 +5139,13 @@ The relationship between AT and salinity using monthly means is shown below.
 
 
 Salinity and total alkalinity data were compared with the weekly, from Tuesday to Monday, sum of precipitation data (Nice airport). Note that the analysis is incomplete as the 2015 data are currenly missing.
-![precip.png](figures_jp/precip.png)
+![precip.png](output_jp/figures/precip.png)
 
 
 ## Daily and monthly changes in pH and T
 ```{r Daily and seasonal changes, include=FALSE}
 # Long series
-continuous_discrete <- read_csv(file = "../data/continuous_discrete.csv", 
+continuous_discrete <- read_csv(file = paste0(path, "data/continuous_discrete.csv"), 
                                 col_names = TRUE,
                                 col_types = "cdddddddddddddddddddd") %>% 
   dplyr::mutate(date = as.POSIXct(date))
@@ -5409,7 +5244,7 @@ plot_range_pH_Chla_month <-  ggplot(data = range_month) +
   geom_text(aes(x = Chla, y = pH_range_month, label = Month)) +
   labs(x = "Chl-a concentration", y = "pH range", title = NULL) +
   theme_bw()
-ggsave("figures_jp/plot_range_pH_Chla_month.png", plot_range_pH_Chla_month)
+ggsave("output_jp/figures/plot_range_pH_Chla_month.png", plot_range_pH_Chla_month)
 
 plot_range_pH_Temperature <-  ggplot(data = range_month) +
   geom_text(aes(x = Temperature, y = pH_range_month, label = Month), na.rm=TRUE) +
@@ -5422,7 +5257,7 @@ plot_range_pH_Temperature <-  ggplot(data = range_month) +
   theme(aspect.ratio=1/2,
         axis.title.x = element_text(margin=margin(t=0.25, r=0, b=0.25, l=0, unit = "cm"))) +
   annotation_custom(grob_A)
-ggsave("figures_jp/plot_range_pH_Temperature.png", plot_range_pH_Temperature)
+ggsave("output_jp/figures/plot_range_pH_Temperature.png", plot_range_pH_Temperature)
 
 size_point <- 0.4 # size of data points
 plot_range <-  
@@ -5435,8 +5270,8 @@ plot_range <-
   annotation_custom(grob_D)
 
 g <- plot_grid(plot_continuous_discrete_pH, plot_continuous_discrete_T, plot_offset, plot_range, plot_zoom, align='vh', ncol=1)
-ggsave("figures_jp/fig_paper_time_series.png", g, width = 18, height = 14, units = "cm")
-ggsave(file="figures_jp/fig7.pdf", g, width = 8, height = 16, units = "cm")
+ggsave("output_jp/figures/fig_paper_time_series.png", g, width = 18, height = 14, units = "cm")
+ggsave(file="output_jp/figures/fig7.pdf", g, width = 8, height = 16, units = "cm")
 
 # Per year and week
 range$year_week <- paste0(range$year,"-", week(range$date))
@@ -5459,17 +5294,17 @@ plot_range_pH_Chla_week <-  ggplot(data =  range_year_week) +
   theme(aspect.ratio=1/2,
         axis.title.x = element_text(margin=margin(t=0.25, r=0, b=0.25, l=0, unit = "cm"))) +
   annotation_custom(grob_B)
-ggsave("figures_jp/plot_range_pH_Chla_week.png", plot_range_pH_Chla_week)
+ggsave("output_jp/figures/plot_range_pH_Chla_week.png", plot_range_pH_Chla_week)
 
 plot_range_pH_Chla_temp <- plot_grid(plot_range_pH_Temperature,
                                      plot_range_pH_Chla_week, ncol = 1, align = "h")
-ggsave("figures_jp/plot_range_pH_Chla_temp.png", plot_range_pH_Chla_temp, width = 8)
-ggsave("figures_jp/figS1.pdf", plot_range_pH_Chla_temp, width = 8, height = 8)
+ggsave("output_jp/figures/plot_range_pH_Chla_temp.png", plot_range_pH_Chla_temp, width = 8)
+ggsave("output_jp/figures/figS1.pdf", plot_range_pH_Chla_temp, width = 8, height = 8)
 
 ```
 
 The average error in pH due to spatiotemporal mismatch between sensor and discrete sample is `r average_offset`.
-![fig_paper_time_series.png](figures_jp/fig_paper_time_series.png)
+![fig_paper_time_series.png](output_jp/figures/fig_paper_time_series.png)
 
 The quantiles of interest for the daily pH range of the total scale are `r quant ` (respectively 2.5% and 97.5%).
 
@@ -5482,14 +5317,14 @@ pander(summary(reg_Chla), digits = c(5,5,5,3,3), caption="Regressions on values 
 ```
 
 
-![plot_range_pH_Chla_month.png](figures_jp/plot_range_pH_Chla_month.png)
-![plot_range_pH_Chla_temp.png](figures_jp/plot_range_pH_Chla_temp.png)
+![plot_range_pH_Chla_month.png](output_jp/figures/plot_range_pH_Chla_month.png)
+![plot_range_pH_Chla_temp.png](output_jp/figures/plot_range_pH_Chla_temp.png)
 
 
 ## CO2
 ```{r CO2, include=FALSE}
 CO2_pr <- tbl_df(
-  read_csv(file="../data/CO2_data_PlateauRosa_daily_1993-2015_R.csv", col_names=TRUE, skip=7)
+  read_csv(file=paste0(path, "data/CO2_data_PlateauRosa_daily_1993-2015_R.csv"), col_names=TRUE, skip=7)
 ) %>%
   rename(dt=date) %>%
   mutate(year=year(dt)) %>%
@@ -5573,7 +5408,7 @@ fig_delta_CO2 <- ggplot(data = CO2_pr_i, aes(x = as.POSIXct(dt), y = mean_pCO2 -
   geom_hline(yintercept = 0)
   
 g <- arrangeGrob(fig_CO2_time_series, fig_CO2_ano, ncol=1)
-ggsave("figures_jp/fig_atm_CO2.png", g)
+ggsave("output_jp/figures/fig_atm_CO2.png", g)
 ```
 
 Atmospheric concentration of CO2 measured at Plateau Rosa from 1993 to 2015 were downloaded from <http://ds.data.jma.go.jp/gmd/wdcgg/cgi-bin/wdcgg/download.cgi?index=PRS645N00-RSE&param=200612120114&select=inventory>. Note that contributors should be contacted for proper acknowledgement for use of the data or offer of co-authorship
@@ -5589,7 +5424,7 @@ Missing values were filled by linear interpolation between nearest values in ord
 
 The rate of increase of seawater pCO2 (`r round(reg_var_1m[7,1], digit=2)` uatm per year) is much larger than that of atmospheric CO2 (`r round(reg_atm_CO2[1,1], digit=2)` ppm per year).
 
-![fig_atm_CO2.png](figures_jp/fig_atm_CO2.png)
+![fig_atm_CO2.png](output_jp/figures/fig_atm_CO2.png)
 
 ```{r Table reg atm CO2}
   kable(reg_atm_CO2, digits = c(2,2), caption="Regressions of atmospheric CO2 (time series and anomalies).")
@@ -5637,7 +5472,7 @@ deff_monthly <- ggplot() +
        y=expression(paste(italic(A)[T]," ","(",mu, mol.kg^-1,")"))) +
   scale_color_viridis(name = "Month", discrete = TRUE, option = "plasma")
   #direct.label(deff_monthly, "top.pieces")
-  ggsave(file = "figures_jp/fig_deffayes_monthly.png", deff_monthly,
+  ggsave(file = "output_jp/figures/fig_deffayes_monthly.png", deff_monthly,
   width = 15, height = 15, units = "cm")
   
 # Yearly Deffayes plot
@@ -5658,7 +5493,7 @@ deff_yearly <- ggplot() +
        x=expression(paste(italic(C)[T]," ","(",mu, mol.kg^-1,")")),
        y=expression(paste(italic(A)[T]," ","(",mu, mol.kg^-1,")"))) +
   scale_color_viridis(name = "Month", discrete = TRUE, option = "plasma")
-  #ggsave(file = "figures_jp/fig_deffayes_monthly.png", deff_monthly, width = 15, height = 15, units = "cm")
+  #ggsave(file = "output_jp/figures/fig_deffayes_monthly.png", deff_monthly, width = 15, height = 15, units = "cm")
 
 # Quarterly Deffayes plot
 tmp <- ungroup(mean0m) %>%
@@ -5685,6 +5520,6 @@ deff_quarterly <- ggplot() +
 ```
 
 Test of a Deffayes plot.
-![fig_deffayes_monthly.png](figures_jp/fig_deffayes_monthly.png)
+![fig_deffayes_monthly.png](output_jp/figures/fig_deffayes_monthly.png)
 
 
