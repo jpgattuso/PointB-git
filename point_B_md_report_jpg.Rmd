@@ -24,7 +24,7 @@ if (Sys.getenv("LOGNAME") == "samir") {
   path = "../../pCloud Sync/exp153_carbonates_point_B/"
   path_sami = "../../pCloud\ Sync/exp176_sami/sami_data/sami_raw_export/Data_deployment/EOL"
 }
-cutoff_date <- "2021-01-01" #to limit regresions on complete years
+cutoff_date <- "2020-01-01" #to limit regresions on complete years
 require(readxl)
 require(seacarb)
 library(cowplot)
@@ -89,291 +89,291 @@ Mytheme_facet <- function(size_labs = 6, face_font="plain") {
         plot.margin = margin(t = 0, r = 1, b = 0, l = 0, unit = "lines")
   )
 }
-# to add panel numbers at top left 
-size_grob <- 8
-grob_A <- grobTree(rectGrob(x=0.04, y=0.90, width=0.04, height=0.12,
-                            default.units="npc",
-                            just=c("centre", "centre"),
-                            gp=gpar(col="white", fill="white"),
-                            vp=NULL),
-                   textGrob("(a)",x=0.04, y=0.90, 
-                            just=c("centre", "centre"),
-                            gp=gpar(col="black",
-                                    fontsize=size_grob,
-                                    fontface="bold")))
-grob_B <- grobTree(rectGrob(x=0.04, y=0.90, width=0.04, height=0.12,
-                            default.units="npc",
-                            just=c("centre", "centre"),
-                            gp=gpar(col="white", fill="white"),
-                            vp=NULL),
-                   textGrob("(b)",x=0.04, y=0.90, 
-                            just=c("centre", "centre"),
-                            gp=gpar(col="black",
-                                    fontsize=size_grob,
-                                    fontface="bold")))
-grob_C <- grobTree(rectGrob(x=0.04, y=0.90, width=0.04, height=0.12,
-                            default.units="npc",
-                            just=c("centre", "centre"),
-                            gp=gpar(col="white", fill="white"),
-                            vp=NULL),
-                   textGrob("(c)",x=0.04, y=0.90, 
-                            just=c("centre", "centre"),
-                            gp=gpar(col="black",
-                                    fontsize=size_grob,
-                                    fontface="bold")))
-grob_D <- grobTree(rectGrob(x=0.04, y=0.90, width=0.04, height=0.12,
-                            default.units="npc",
-                            just=c("centre", "centre"),
-                            gp=gpar(col="white", fill="white"),
-                            vp=NULL),
-                   textGrob("(d)",x=0.04, y=0.90, 
-                            just=c("centre", "centre"),
-                            gp=gpar(col="black",
-                                    fontsize=size_grob,
-                                    fontface="bold")))
-grob_E <- grobTree(rectGrob(x=0.04, y=0.90, width=0.04, height=0.12,
-                            default.units="npc",
-                            just=c("centre", "centre"),
-                            gp=gpar(col="white", fill="white"),
-                            vp=NULL),
-                   textGrob("(e)",x=0.04, y=0.90, 
-                            just=c("centre", "centre"),
-                            gp=gpar(col="black",
-                                    fontsize=size_grob,
-                                    fontface="bold")))
-grob_F <- grobTree(rectGrob(x=0.04, y=0.90, width=0.04, height=0.12,
-                            default.units="npc",
-                            just=c("centre", "centre"),
-                            gp=gpar(col="white", fill="white"),
-                            vp=NULL),
-                   textGrob("(f)",x=0.04, y=0.90, 
-                            just=c("centre", "centre"),
-                            gp=gpar(col="black",
-                                    fontsize=size_grob,
-                                    fontface="bold")))
-grob_G <- grobTree(rectGrob(x=0.04, y=0.90, width=0.04, height=0.12,
-                            default.units="npc",
-                            just=c("centre", "centre"),
-                            gp=gpar(col="white", fill="white"),
-                            vp=NULL),
-                   textGrob("(g)",x=0.04, y=0.90, 
-                            just=c("centre", "centre"),
-                            gp=gpar(col="black",
-                                    fontsize=size_grob,
-                                    fontface="bold")))
-grob_H <- grobTree(rectGrob(x=0.04, y=0.90, width=0.04, height=0.12,
-                            default.units="npc",
-                            just=c("centre", "centre"),
-                            gp=gpar(col="white", fill="white"),
-                            vp=NULL),
-                   textGrob("(h)",x=0.04, y=0.90, 
-                            just=c("centre", "centre"),
-                            gp=gpar(col="black",
-                                    fontsize=size_grob,
-                                    fontface="bold")))
-grob_I <- grobTree(rectGrob(x=0.04, y=0.90, width=0.04, height=0.12,
-                            default.units="npc",
-                            just=c("centre", "centre"),
-                            gp=gpar(col="white", fill="white"),
-                            vp=NULL),
-                   textGrob("(i)",x=0.04, y=0.90, 
-                            just=c("centre", "centre"),
-                            gp=gpar(col="black",
-                                    fontsize=size_grob,
-                                    fontface="bold")))
-grob_J <- grobTree(rectGrob(x=0.04, y=0.90, width=0.04, height=0.12,
-                            default.units="npc",
-                            just=c("centre", "centre"),
-                            gp=gpar(col="white", fill="white"),
-                            vp=NULL),
-                   textGrob("(j)",x=0.04, y=0.90, 
-                            just=c("centre", "centre"),
-                            gp=gpar(col="black",
-                                    fontsize=size_grob,
-                                    fontface="bold")))
-grob_K <- grobTree(rectGrob(x=0.04, y=0.90, width=0.04, height=0.12,
-                            default.units="npc",
-                            just=c("centre", "centre"),
-                            gp=gpar(col="white", fill="white"),
-                            vp=NULL),
-                   textGrob("(k)",x=0.04, y=0.90, 
-                            just=c("centre", "centre"),
-                            gp=gpar(col="black",
-                                    fontsize=size_grob,
-                                    fontface="bold")))
-grob_L <- grobTree(rectGrob(x=0.04, y=0.90, width=0.04, height=0.12,
-                            default.units="npc",
-                            just=c("centre", "centre"),
-                            gp=gpar(col="white", fill="white"),
-                            vp=NULL),
-                   textGrob("(l)",x=0.04, y=0.90, 
-                            just=c("centre", "centre"),
-                            gp=gpar(col="black",
-                                    fontsize=size_grob,
-                                    fontface="bold")))
-grob_M <- grobTree(rectGrob(x=0.04, y=0.90, width=0.04, height=0.12,
-                            default.units="npc",
-                            just=c("centre", "centre"),
-                            gp=gpar(col="white", fill="white"),
-                            vp=NULL),
-                   textGrob("(m)",x=0.04, y=0.90, 
-                            just=c("centre", "centre"),
-                            gp=gpar(col="black",
-                                    fontsize=size_grob,
-                                    fontface="bold")))
-grob_N <- grobTree(rectGrob(x=0.04, y=0.90, width=0.04, height=0.12,
-                            default.units="npc",
-                            just=c("centre", "centre"),
-                            gp=gpar(col="white", fill="white"),
-                            vp=NULL),
-                   textGrob("(n)",x=0.04, y=0.90, 
-                            just=c("centre", "centre"),
-                            gp=gpar(col="black",
-                                    fontsize=size_grob,
-                                    fontface="bold")))
-
-# to add panel numbers at bottom left 
-size_grob <- 9
-grob_A_bl <- grobTree(rectGrob(x=0.04, y=0.1, width=0.04, height=0.12,
-                            default.units="npc",
-                            just=c("centre", "centre"),
-                            gp=gpar(col="white", fill="white"),
-                            vp=NULL),
-                   textGrob("(a)",x=0.04, y=0.1, 
-                            just=c("centre", "centre"),
-                            gp=gpar(col="black",
-                                    fontsize=size_grob,
-                                    fontface="bold")))
-grob_B_bl <- grobTree(rectGrob(x=0.04, y=0.1, width=0.04, height=0.12,
-                            default.units="npc",
-                            just=c("centre", "centre"),
-                            gp=gpar(col="white", fill="white"),
-                            vp=NULL),
-                   textGrob("(b)",x=0.04, y=0.1, 
-                            just=c("centre", "centre"),
-                            gp=gpar(col="black",
-                                    fontsize=size_grob,
-                                    fontface="bold")))
-grob_C_bl <- grobTree(rectGrob(x=0.04, y=0.1, width=0.04, height=0.12,
-                            default.units="npc",
-                            just=c("centre", "centre"),
-                            gp=gpar(col="white", fill="white"),
-                            vp=NULL),
-                   textGrob("(c)",x=0.04, y=0.1, 
-                            just=c("centre", "centre"),
-                            gp=gpar(col="black",
-                                    fontsize=size_grob,
-                                    fontface="bold")))
-grob_D_bl <- grobTree(rectGrob(x=0.04, y=0.1, width=0.04, height=0.12,
-                            default.units="npc",
-                            just=c("centre", "centre"),
-                            gp=gpar(col="white", fill="white"),
-                            vp=NULL),
-                   textGrob("(d)",x=0.04, y=0.1, 
-                            just=c("centre", "centre"),
-                            gp=gpar(col="black",
-                                    fontsize=size_grob,
-                                    fontface="bold")))
-grob_E_bl <- grobTree(rectGrob(x=0.04, y=0.1, width=0.04, height=0.12,
-                            default.units="npc",
-                            just=c("centre", "centre"),
-                            gp=gpar(col="white", fill="white"),
-                            vp=NULL),
-                   textGrob("(e)",x=0.04, y=0.1, 
-                            just=c("centre", "centre"),
-                            gp=gpar(col="black",
-                                    fontsize=size_grob,
-                                    fontface="bold")))
-grob_F_bl <- grobTree(rectGrob(x=0.04, y=0.1, width=0.04, height=0.12,
-                            default.units="npc",
-                            just=c("centre", "centre"),
-                            gp=gpar(col="white", fill="white"),
-                            vp=NULL),
-                   textGrob("(f)",x=0.04, y=0.1, 
-                            just=c("centre", "centre"),
-                            gp=gpar(col="black",
-                                    fontsize=size_grob,
-                                    fontface="bold")))
-grob_G_bl <- grobTree(rectGrob(x=0.04, y=0.1, width=0.04, height=0.12,
-                            default.units="npc",
-                            just=c("centre", "centre"),
-                            gp=gpar(col="white", fill="white"),
-                            vp=NULL),
-                   textGrob("(g)",x=0.04, y=0.1, 
-                            just=c("centre", "centre"),
-                            gp=gpar(col="black",
-                                    fontsize=size_grob,
-                                    fontface="bold")))
-grob_H_bl <- grobTree(rectGrob(x=0.04, y=0.1, width=0.04, height=0.12,
-                            default.units="npc",
-                            just=c("centre", "centre"),
-                            gp=gpar(col="white", fill="white"),
-                            vp=NULL),
-                   textGrob("(h)",x=0.04, y=0.1, 
-                            just=c("centre", "centre"),
-                            gp=gpar(col="black",
-                                    fontsize=size_grob,
-                                    fontface="bold")))
-grob_I_bl <- grobTree(rectGrob(x=0.04, y=0.1, width=0.04, height=0.12,
-                            default.units="npc",
-                            just=c("centre", "centre"),
-                            gp=gpar(col="white", fill="white"),
-                            vp=NULL),
-                   textGrob("(i)",x=0.04, y=0.1, 
-                            just=c("centre", "centre"),
-                            gp=gpar(col="black",
-                                    fontsize=size_grob,
-                                    fontface="bold")))
-grob_J_bl <-grobTree(rectGrob(x=0.04, y=0.1, width=0.04, height=0.12,
-                            default.units="npc",
-                            just=c("centre", "centre"),
-                            gp=gpar(col="white", fill="white"),
-                            vp=NULL),
-                   textGrob("(j)",x=0.04, y=0.1, 
-                            just=c("centre", "centre"),
-                            gp=gpar(col="black",
-                                    fontsize=size_grob,
-                                    fontface="bold")))
-grob_K_bl <- grobTree(rectGrob(x=0.04, y=0.1, width=0.04, height=0.12,
-                            default.units="npc",
-                            just=c("centre", "centre"),
-                            gp=gpar(col="white", fill="white"),
-                            vp=NULL),
-                   textGrob("(k)",x=0.04, y=0.1, 
-                            just=c("centre", "centre"),
-                            gp=gpar(col="black",
-                                    fontsize=size_grob,
-                                    fontface="bold")))
-grob_L_bl <- grobTree(rectGrob(x=0.04, y=0.1, width=0.04, height=0.12,
-                            default.units="npc",
-                            just=c("centre", "centre"),
-                            gp=gpar(col="white", fill="white"),
-                            vp=NULL),
-                   textGrob("(l)",x=0.04, y=0.1, 
-                            just=c("centre", "centre"),
-                            gp=gpar(col="black",
-                                    fontsize=size_grob,
-                                    fontface="bold")))
-grob_M_bl <- grobTree(rectGrob(x=0.04, y=0.1, width=0.04, height=0.12,
-                            default.units="npc",
-                            just=c("centre", "centre"),
-                            gp=gpar(col="white", fill="white"),
-                            vp=NULL),
-                   textGrob("(m)",x=0.04, y=0.1, 
-                            just=c("centre", "centre"),
-                            gp=gpar(col="black",
-                                    fontsize=size_grob,
-                                    fontface="bold")))
-grob_N_bl <- grobTree(rectGrob(x=0.04, y=0.1, width=0.04, height=0.12,
-                            default.units="npc",
-                            just=c("centre", "centre"),
-                            gp=gpar(col="white", fill="white"),
-                            vp=NULL),
-                   textGrob("(n)",x=0.04, y=0.1, 
-                            just=c("centre", "centre"),
-                            gp=gpar(col="black",
-                                    fontsize=size_grob,
-                                    fontface="bold")))
+# # to add panel numbers at top left 
+# size_grob <- 8
+# grob_A <- grobTree(rectGrob(x=0.04, y=0.90, width=0.04, height=0.12,
+#                             default.units="npc",
+#                             just=c("centre", "centre"),
+#                             gp=gpar(col="white", fill="white"),
+#                             vp=NULL),
+#                    textGrob("(a)",x=0.04, y=0.90, 
+#                             just=c("centre", "centre"),
+#                             gp=gpar(col="black",
+#                                     fontsize=size_grob,
+#                                     fontface="bold")))
+# grob_B <- grobTree(rectGrob(x=0.04, y=0.90, width=0.04, height=0.12,
+#                             default.units="npc",
+#                             just=c("centre", "centre"),
+#                             gp=gpar(col="white", fill="white"),
+#                             vp=NULL),
+#                    textGrob("(b)",x=0.04, y=0.90, 
+#                             just=c("centre", "centre"),
+#                             gp=gpar(col="black",
+#                                     fontsize=size_grob,
+#                                     fontface="bold")))
+# grob_C <- grobTree(rectGrob(x=0.04, y=0.90, width=0.04, height=0.12,
+#                             default.units="npc",
+#                             just=c("centre", "centre"),
+#                             gp=gpar(col="white", fill="white"),
+#                             vp=NULL),
+#                    textGrob("(c)",x=0.04, y=0.90, 
+#                             just=c("centre", "centre"),
+#                             gp=gpar(col="black",
+#                                     fontsize=size_grob,
+#                                     fontface="bold")))
+# grob_D <- grobTree(rectGrob(x=0.04, y=0.90, width=0.04, height=0.12,
+#                             default.units="npc",
+#                             just=c("centre", "centre"),
+#                             gp=gpar(col="white", fill="white"),
+#                             vp=NULL),
+#                    textGrob("(d)",x=0.04, y=0.90, 
+#                             just=c("centre", "centre"),
+#                             gp=gpar(col="black",
+#                                     fontsize=size_grob,
+#                                     fontface="bold")))
+# grob_E <- grobTree(rectGrob(x=0.04, y=0.90, width=0.04, height=0.12,
+#                             default.units="npc",
+#                             just=c("centre", "centre"),
+#                             gp=gpar(col="white", fill="white"),
+#                             vp=NULL),
+#                    textGrob("(e)",x=0.04, y=0.90, 
+#                             just=c("centre", "centre"),
+#                             gp=gpar(col="black",
+#                                     fontsize=size_grob,
+#                                     fontface="bold")))
+# grob_F <- grobTree(rectGrob(x=0.04, y=0.90, width=0.04, height=0.12,
+#                             default.units="npc",
+#                             just=c("centre", "centre"),
+#                             gp=gpar(col="white", fill="white"),
+#                             vp=NULL),
+#                    textGrob("(f)",x=0.04, y=0.90, 
+#                             just=c("centre", "centre"),
+#                             gp=gpar(col="black",
+#                                     fontsize=size_grob,
+#                                     fontface="bold")))
+# grob_G <- grobTree(rectGrob(x=0.04, y=0.90, width=0.04, height=0.12,
+#                             default.units="npc",
+#                             just=c("centre", "centre"),
+#                             gp=gpar(col="white", fill="white"),
+#                             vp=NULL),
+#                    textGrob("(g)",x=0.04, y=0.90, 
+#                             just=c("centre", "centre"),
+#                             gp=gpar(col="black",
+#                                     fontsize=size_grob,
+#                                     fontface="bold")))
+# grob_H <- grobTree(rectGrob(x=0.04, y=0.90, width=0.04, height=0.12,
+#                             default.units="npc",
+#                             just=c("centre", "centre"),
+#                             gp=gpar(col="white", fill="white"),
+#                             vp=NULL),
+#                    textGrob("(h)",x=0.04, y=0.90, 
+#                             just=c("centre", "centre"),
+#                             gp=gpar(col="black",
+#                                     fontsize=size_grob,
+#                                     fontface="bold")))
+# grob_I <- grobTree(rectGrob(x=0.04, y=0.90, width=0.04, height=0.12,
+#                             default.units="npc",
+#                             just=c("centre", "centre"),
+#                             gp=gpar(col="white", fill="white"),
+#                             vp=NULL),
+#                    textGrob("(i)",x=0.04, y=0.90, 
+#                             just=c("centre", "centre"),
+#                             gp=gpar(col="black",
+#                                     fontsize=size_grob,
+#                                     fontface="bold")))
+# grob_J <- grobTree(rectGrob(x=0.04, y=0.90, width=0.04, height=0.12,
+#                             default.units="npc",
+#                             just=c("centre", "centre"),
+#                             gp=gpar(col="white", fill="white"),
+#                             vp=NULL),
+#                    textGrob("(j)",x=0.04, y=0.90, 
+#                             just=c("centre", "centre"),
+#                             gp=gpar(col="black",
+#                                     fontsize=size_grob,
+#                                     fontface="bold")))
+# grob_K <- grobTree(rectGrob(x=0.04, y=0.90, width=0.04, height=0.12,
+#                             default.units="npc",
+#                             just=c("centre", "centre"),
+#                             gp=gpar(col="white", fill="white"),
+#                             vp=NULL),
+#                    textGrob("(k)",x=0.04, y=0.90, 
+#                             just=c("centre", "centre"),
+#                             gp=gpar(col="black",
+#                                     fontsize=size_grob,
+#                                     fontface="bold")))
+# grob_L <- grobTree(rectGrob(x=0.04, y=0.90, width=0.04, height=0.12,
+#                             default.units="npc",
+#                             just=c("centre", "centre"),
+#                             gp=gpar(col="white", fill="white"),
+#                             vp=NULL),
+#                    textGrob("(l)",x=0.04, y=0.90, 
+#                             just=c("centre", "centre"),
+#                             gp=gpar(col="black",
+#                                     fontsize=size_grob,
+#                                     fontface="bold")))
+# grob_M <- grobTree(rectGrob(x=0.04, y=0.90, width=0.04, height=0.12,
+#                             default.units="npc",
+#                             just=c("centre", "centre"),
+#                             gp=gpar(col="white", fill="white"),
+#                             vp=NULL),
+#                    textGrob("(m)",x=0.04, y=0.90, 
+#                             just=c("centre", "centre"),
+#                             gp=gpar(col="black",
+#                                     fontsize=size_grob,
+#                                     fontface="bold")))
+# grob_N <- grobTree(rectGrob(x=0.04, y=0.90, width=0.04, height=0.12,
+#                             default.units="npc",
+#                             just=c("centre", "centre"),
+#                             gp=gpar(col="white", fill="white"),
+#                             vp=NULL),
+#                    textGrob("(n)",x=0.04, y=0.90, 
+#                             just=c("centre", "centre"),
+#                             gp=gpar(col="black",
+#                                     fontsize=size_grob,
+#                                     fontface="bold")))
+# 
+# # to add panel numbers at bottom left 
+# size_grob <- 9
+# grob_A_bl <- grobTree(rectGrob(x=0.04, y=0.1, width=0.04, height=0.12,
+#                             default.units="npc",
+#                             just=c("centre", "centre"),
+#                             gp=gpar(col="white", fill="white"),
+#                             vp=NULL),
+#                    textGrob("(a)",x=0.04, y=0.1, 
+#                             just=c("centre", "centre"),
+#                             gp=gpar(col="black",
+#                                     fontsize=size_grob,
+#                                     fontface="bold")))
+# grob_B_bl <- grobTree(rectGrob(x=0.04, y=0.1, width=0.04, height=0.12,
+#                             default.units="npc",
+#                             just=c("centre", "centre"),
+#                             gp=gpar(col="white", fill="white"),
+#                             vp=NULL),
+#                    textGrob("(b)",x=0.04, y=0.1, 
+#                             just=c("centre", "centre"),
+#                             gp=gpar(col="black",
+#                                     fontsize=size_grob,
+#                                     fontface="bold")))
+# grob_C_bl <- grobTree(rectGrob(x=0.04, y=0.1, width=0.04, height=0.12,
+#                             default.units="npc",
+#                             just=c("centre", "centre"),
+#                             gp=gpar(col="white", fill="white"),
+#                             vp=NULL),
+#                    textGrob("(c)",x=0.04, y=0.1, 
+#                             just=c("centre", "centre"),
+#                             gp=gpar(col="black",
+#                                     fontsize=size_grob,
+#                                     fontface="bold")))
+# grob_D_bl <- grobTree(rectGrob(x=0.04, y=0.1, width=0.04, height=0.12,
+#                             default.units="npc",
+#                             just=c("centre", "centre"),
+#                             gp=gpar(col="white", fill="white"),
+#                             vp=NULL),
+#                    textGrob("(d)",x=0.04, y=0.1, 
+#                             just=c("centre", "centre"),
+#                             gp=gpar(col="black",
+#                                     fontsize=size_grob,
+#                                     fontface="bold")))
+# grob_E_bl <- grobTree(rectGrob(x=0.04, y=0.1, width=0.04, height=0.12,
+#                             default.units="npc",
+#                             just=c("centre", "centre"),
+#                             gp=gpar(col="white", fill="white"),
+#                             vp=NULL),
+#                    textGrob("(e)",x=0.04, y=0.1, 
+#                             just=c("centre", "centre"),
+#                             gp=gpar(col="black",
+#                                     fontsize=size_grob,
+#                                     fontface="bold")))
+# grob_F_bl <- grobTree(rectGrob(x=0.04, y=0.1, width=0.04, height=0.12,
+#                             default.units="npc",
+#                             just=c("centre", "centre"),
+#                             gp=gpar(col="white", fill="white"),
+#                             vp=NULL),
+#                    textGrob("(f)",x=0.04, y=0.1, 
+#                             just=c("centre", "centre"),
+#                             gp=gpar(col="black",
+#                                     fontsize=size_grob,
+#                                     fontface="bold")))
+# grob_G_bl <- grobTree(rectGrob(x=0.04, y=0.1, width=0.04, height=0.12,
+#                             default.units="npc",
+#                             just=c("centre", "centre"),
+#                             gp=gpar(col="white", fill="white"),
+#                             vp=NULL),
+#                    textGrob("(g)",x=0.04, y=0.1, 
+#                             just=c("centre", "centre"),
+#                             gp=gpar(col="black",
+#                                     fontsize=size_grob,
+#                                     fontface="bold")))
+# grob_H_bl <- grobTree(rectGrob(x=0.04, y=0.1, width=0.04, height=0.12,
+#                             default.units="npc",
+#                             just=c("centre", "centre"),
+#                             gp=gpar(col="white", fill="white"),
+#                             vp=NULL),
+#                    textGrob("(h)",x=0.04, y=0.1, 
+#                             just=c("centre", "centre"),
+#                             gp=gpar(col="black",
+#                                     fontsize=size_grob,
+#                                     fontface="bold")))
+# grob_I_bl <- grobTree(rectGrob(x=0.04, y=0.1, width=0.04, height=0.12,
+#                             default.units="npc",
+#                             just=c("centre", "centre"),
+#                             gp=gpar(col="white", fill="white"),
+#                             vp=NULL),
+#                    textGrob("(i)",x=0.04, y=0.1, 
+#                             just=c("centre", "centre"),
+#                             gp=gpar(col="black",
+#                                     fontsize=size_grob,
+#                                     fontface="bold")))
+# grob_J_bl <-grobTree(rectGrob(x=0.04, y=0.1, width=0.04, height=0.12,
+#                             default.units="npc",
+#                             just=c("centre", "centre"),
+#                             gp=gpar(col="white", fill="white"),
+#                             vp=NULL),
+#                    textGrob("(j)",x=0.04, y=0.1, 
+#                             just=c("centre", "centre"),
+#                             gp=gpar(col="black",
+#                                     fontsize=size_grob,
+#                                     fontface="bold")))
+# grob_K_bl <- grobTree(rectGrob(x=0.04, y=0.1, width=0.04, height=0.12,
+#                             default.units="npc",
+#                             just=c("centre", "centre"),
+#                             gp=gpar(col="white", fill="white"),
+#                             vp=NULL),
+#                    textGrob("(k)",x=0.04, y=0.1, 
+#                             just=c("centre", "centre"),
+#                             gp=gpar(col="black",
+#                                     fontsize=size_grob,
+#                                     fontface="bold")))
+# grob_L_bl <- grobTree(rectGrob(x=0.04, y=0.1, width=0.04, height=0.12,
+#                             default.units="npc",
+#                             just=c("centre", "centre"),
+#                             gp=gpar(col="white", fill="white"),
+#                             vp=NULL),
+#                    textGrob("(l)",x=0.04, y=0.1, 
+#                             just=c("centre", "centre"),
+#                             gp=gpar(col="black",
+#                                     fontsize=size_grob,
+#                                     fontface="bold")))
+# grob_M_bl <- grobTree(rectGrob(x=0.04, y=0.1, width=0.04, height=0.12,
+#                             default.units="npc",
+#                             just=c("centre", "centre"),
+#                             gp=gpar(col="white", fill="white"),
+#                             vp=NULL),
+#                    textGrob("(m)",x=0.04, y=0.1, 
+#                             just=c("centre", "centre"),
+#                             gp=gpar(col="black",
+#                                     fontsize=size_grob,
+#                                     fontface="bold")))
+# grob_N_bl <- grobTree(rectGrob(x=0.04, y=0.1, width=0.04, height=0.12,
+#                             default.units="npc",
+#                             just=c("centre", "centre"),
+#                             gp=gpar(col="white", fill="white"),
+#                             vp=NULL),
+#                    textGrob("(n)",x=0.04, y=0.1, 
+#                             just=c("centre", "centre"),
+#                             gp=gpar(col="black",
+#                                     fontsize=size_grob,
+#                                     fontface="bold")))
 ######## To add regression line on ggplots
 # use as annotate(aes(x = 25, y = 300, label = lm_eqn(lm(y ~ x, df))), parse = TRUE)
 # http://stackoverflow.com/questions/7549694/ggplot2-adding-regression-line-equation-and-r2-on-graph
@@ -868,8 +868,8 @@ z <- z %>%
   dplyr::group_by(sampling_date, depth) %>%
   dplyr::mutate(ta = ifelse(qflag_ta != 3, mean(ta_dup, na.rm = TRUE), NA),
                 dic = ifelse(qflag_dic != 3, mean(dic_dup, na.rm = TRUE), NA)) %>% 
-  dplyr::select(-c(sample, ta_dup, dic_dup, pH_ta)) %>% #pH_ta not useful and causes problems with distinct
   dplyr::ungroup() %>% 
+  dplyr::select(-c(sample, sampling_hour, measure_date, ta_dup, dic_dup, pH_ta)) %>% #remove vars not useful and causing problems with distinct
   dplyr::distinct() %>% 
   dplyr::relocate(depth, .before = salinity_field)
 ```
@@ -916,7 +916,8 @@ ptb <- z %>%
   dplyr::distinct()
 # join pH eol and pointB
 eol_ptb <- full_join(eol, ptb, by = c("sampling_date", "depth")) %>% 
-  dplyr::select(sampling_date, depth, pH_s_eol_temp_insi, pH_s_ptb_temp_insi)
+  dplyr::select(sampling_date, depth, pH_s_eol_temp_insi, pH_s_ptb_temp_insi) %>% 
+  dplyr::distinct()
 # check outliers
 eol_ptb_long <- eol_ptb %>% 
   tidyr::pivot_longer(!c(depth, sampling_date), names_to = "location", values_to = "pH")
@@ -948,17 +949,37 @@ CPHb <- ggplot(eol_ptb_long, aes(x = sampling_date, y = pH, colour = location)) 
        color = "") +
   facet_grid(depth ~ .)
 CPHb
-# calculate mean pH when data are available both at eol and point B
+# Difference between pH eol and ptb
+eol_ptb <- eol_ptb %>% 
+  dplyr::mutate(diff_pH = pH_s_eol_temp_insi - pH_s_ptb_temp_insi)
+diff_pH <- ggplot(data = eol_ptb, aes(diff_pH)) +
+  geom_histogram(na.rm = TRUE) +
+  geom_vline(xintercept = -0.015) +
+  geom_vline(xintercept = 0.015)
+print(diff_pH)
+
+# calculate mean pH when data are available both at eol and point B and abs(difference) < 0.01
+# if not one uses the Point B pH
 eol_ptb <- eol_ptb %>% 
   rowwise() %>%
-  dplyr::mutate(ph_insi = mean(c(pH_s_eol_temp_insi, pH_s_ptb_temp_insi), na.rm = TRUE))
+  dplyr::mutate(mean_pH = mean(c(pH_s_eol_temp_insi, pH_s_ptb_temp_insi), na.rm = TRUE)) %>%
+  ungroup() %>% 
+  dplyr::mutate(pH_insi = dplyr::case_when(
+    !is.na(pH_s_eol_temp_insi) & is.na(pH_s_ptb_temp_insi) ~ pH_s_eol_temp_insi,
+    is.na(pH_s_eol_temp_insi) & !is.na(pH_s_ptb_temp_insi)  ~ pH_s_ptb_temp_insi,
+    !is.na(pH_s_eol_temp_insi) & !is.na(pH_s_ptb_temp_insi) & abs(eol_ptb$diff_pH) <= 0.015 ~ mean_pH,
+    TRUE ~ pH_s_ptb_temp_insi)) %>% 
+  dplyr::select(-mean_pH)
+
 # add pH variables to data
-eol_ptb <- left_join(z, eol_ptb, by = c("sampling_date", "depth"))
+z2 <- dplyr::left_join(z, eol_ptb, by = c("sampling_date", "depth")) %>% 
+  dplyr::select(-dplyr::contains(c("eol", "ptb", "qflag", "qNO3", "qNO2", "qPO4", "qSIOH4"))) %>% 
+    distinct()
 ```
 
 ```{r Calculate final derived variable and save, include=FALSE}
 #select all rows containing NA for one of the 4 key variables
-NArows <-  z%>%
+NArows <-  z %>%
   dplyr::ungroup() %>% 
   dplyr::filter(is.na(salinity_field & dic & ta & temp_field)) # rows with NAs
 
@@ -970,9 +991,10 @@ carb <- carb(flag=15, var1=dat$ta*1e-6, var2=dat$dic*1e-6,
              S=dat$salinity_field, T=dat$temp_field, P=dat$depth/10,
              Pt=1e-6*dat$PO4, Sit=1e-6*dat$SIOH4, 
              k1k2 = "l", kf = "pf", pHscale = "T", b="l10")
-dat$pH <- carb$pH
+dat$pH_calc <- carb$pH
 dat$CO2 <- carb$CO2
-dat <- dat%>%
+zz <- left_join(z, dat, by = c("sampling_date", "depth"))
+dat2 <- dat%>%
       dplyr::ungroup() %>% 
       dplyr::mutate(
               CSC_flag = carb$flag,
@@ -980,7 +1002,7 @@ dat <- dat%>%
               CO3 = carb$CO3,
               OmegaCalcite = as.numeric(carb$OmegaCalcite),
               OmegaAragonite = as.numeric(carb$OmegaAragonite),
-              pH25 = pHinsi(pH=dat$pH,ALK=dat$ta*1e-6,Tinsi=25,
+              pH25 = pHinsi(pH=dat$pH_insi,ALK=dat$ta*1e-6,Tinsi=25,
                             Tlab=dat$temp_field,S=dat$salinity_field,
                             Pt=1e-6*dat$PO4, Sit=1e-6*dat$SIOH4, 
                             k1k2 = "l", 
@@ -1005,16 +1027,16 @@ NArows <- cbind(NArows,f)
 #bind dates
 dat <- rbind(dat, NArows)
 
-#arrange by dates
-dat2 <- dat %>% 
-  arrange(sampling_date) %>% 
-  dplyr::select(-tidyr::contains(c("eol", "ptb")) %>% 
-  dplyr::distinct()
+# #arrange by dates
+# dat2 <- dat %>% 
+#   arrange(sampling_date) %>% 
+#   dplyr::select(-tidyr::contains(c("eol", "ptb"))) %>% 
+#   dplyr::distinct()
 
 #Prepare data to upload to Pangaea 
 pangaea <- select(dat, sampling_date, depth, CSC_flag, salinity_field,
                   temp_field, HCO3, CO3,
-                  pH, ta, dic, OmegaCalcite,
+                  pH_insi, ta, dic, OmegaCalcite,
                   OmegaAragonite, pCO2, fCO2) %>%
   dplyr::mutate(depth = replace(depth, depth == 0, 1))
   
@@ -1025,29 +1047,30 @@ write_rds(dat, "output_jp/data/output.rds")
 ```
 
 ```{r Calculate mean values, include=FALSE}
+# means_depth <- dat %>%
+#   group_by(depth, sampling_date) %>%
+#   dplyr::summarise(
+#             mean_salinity=mean(salinity_field, na.rm=TRUE),
+#             temp_field=mean(temp_field, na.rm=TRUE),
+#             Chla=mean(Chla, na.rm=TRUE),
+#             dic=mean(dic, na.rm=TRUE),
+#             ta=mean(ta, na.rm=TRUE),
+#             ta_nocarb=mean(ta - HCO3*1e6 - 2*CO3*1e6, na.rm=TRUE),
+#             Nta=mean(Nta,na.rm=TRUE),
+#             dic=mean(Ndic,na.rm=TRUE),
+#             mean_pH_s_eol_temp_insi=mean(pH_s_eol_temp_insi,na.rm=TRUE),
+#             mean_pH_s_ptb_temp_insi=mean(pH_s_ptb_temp_insi,na.rm=TRUE),
+#             mean_pH=mean(pH, na.rm=TRUE),
+#             mean_pH25=mean(pH25, na.rm=TRUE),
+#             mean_pCO2=mean(pCO2, na.rm=TRUE),
+#             mean_OmegaCalcite=mean(OmegaCalcite, na.rm=TRUE),
+#             mean_OmegaAragonite=mean(OmegaAragonite, na.rm=TRUE),
+#             Chla=mean(Chla, na.rm=TRUE),
+#             mean_P=mean(depth/10, na.rm=TRUE),
+#             mean_Pt=mean(1e-6*PO4, na.rm=TRUE),
+#             mean_Sit=mean(1e-6*SIOH4, na.rm=TRUE)
+#             ) %>%
 means_depth <- dat %>%
-  group_by(depth, sampling_date) %>%
-  dplyr::summarise(
-            mean_salinity=mean(salinity_field, na.rm=TRUE),
-            mean_temperature=mean(temp_field, na.rm=TRUE),
-            mean_Chla=mean(Chla, na.rm=TRUE),
-            mean_dic=mean(dic, na.rm=TRUE),
-            mean_ta=mean(ta, na.rm=TRUE),
-            mean_ta_nocarb=mean(ta - HCO3*1e6 - 2*CO3*1e6, na.rm=TRUE),
-            mean_Nta=mean(Nta,na.rm=TRUE),
-            mean_Ndic=mean(Ndic,na.rm=TRUE),
-            mean_pH_s_eol_temp_insi=mean(pH_s_eol_temp_insi,na.rm=TRUE), 
-            mean_pH_s_ptb_temp_insi=mean(pH_s_ptb_temp_insi,na.rm=TRUE),
-            mean_pH=mean(pH, na.rm=TRUE),
-            mean_pH25=mean(pH25, na.rm=TRUE),
-            mean_pCO2=mean(pCO2, na.rm=TRUE),
-            mean_OmegaCalcite=mean(OmegaCalcite, na.rm=TRUE),
-            mean_OmegaAragonite=mean(OmegaAragonite, na.rm=TRUE),
-            mean_Chla=mean(Chla, na.rm=TRUE),
-            mean_P=mean(depth/10, na.rm=TRUE),
-            mean_Pt=mean(1e-6*PO4, na.rm=TRUE),
-            mean_Sit=mean(1e-6*SIOH4, na.rm=TRUE)
-            ) %>%
   dplyr::mutate(
     year = year(sampling_date),
     quarter = quarter(sampling_date),
@@ -1064,12 +1087,12 @@ write.table(means_depth, paste0("output_jp/data/output_somlit.csv"), sep= ",", d
 #separate each means_depth and handle last incomplete year
 mean0m <- dplyr::filter(means_depth, depth==0)
 mean50m <- dplyr::filter(means_depth, depth==50)
-mean0m_full <- dplyr::filter(means_depth, depth==0, year(sampling_date) < 2016)
-mean50m_full <- dplyr::filter(means_depth, depth==50, year(sampling_date) < 2016)
+mean0m_full <- dplyr::filter(means_depth, depth==0, year(sampling_date) < cutoff_date)
+mean50m_full <- dplyr::filter(means_depth, depth==50, year(sampling_date) < cutoff_date)
 ```
 
 ```{r Uncertainties, include=FALSE, echo=FALSE}
-means_depth_no_NA <- filter(means_depth, !is.na(mean_ta) & !is.na(mean_dic) & !is.na(mean_salinity)  & !is.na(mean_temperature))
+means_depth_no_NA <- filter(means_depth, !is.na(ta) & !is.na(dic) & !is.na(salinity)  & !is.na(temperature))
   evar1 <-
   mean(c(3.6, 3.5, 1.2, 1.99, 2.4, 3.0, 3.9, 2.6, 0.5, 2.6, 3.2))*1e-6 #AT, extracted from SNAPO-CO2 reports
 evar2 <-
@@ -1077,8 +1100,8 @@ evar2 <-
 
 epKstd  <- c(0.002, 0.01,  0.02, 0.01,  0.01, 0.01, 0.01)
 
-tmp <- errors(flag = 15, var1 = means_depth_no_NA$mean_ta*1e-6, var2 = means_depth_no_NA$mean_dic*1e-6, 
-  S = means_depth_no_NA$mean_salinity, T = means_depth_no_NA$mean_temperature, P = means_depth_no_NA$depth/10, Pt = 1e-6*means_depth_no_NA$mean_Pt, Sit = 1e-6*means_depth_no_NA$mean_Sit,
+tmp <- errors(flag = 15, var1 = means_depth_no_NA$ta*1e-6, var2 = means_depth_no_NA$dic*1e-6, 
+  S = means_depth_no_NA$mean_salinity, T = means_depth_no_NA$temp_field, P = means_depth_no_NA$depth/10, Pt = 1e-6*means_depth_no_NA$mean_Pt, Sit = 1e-6*means_depth_no_NA$mean_Sit,
   evar1 = evar1, evar2 = evar1, eS = 0.01, eT = 0.1, ePt = 0, eSit = 0,
   epK = epKstd, 
   #method = "ga", r = 0.0, runs = 10000, 
@@ -1105,11 +1128,11 @@ tmp <- ungroup(mean0m) %>%
   mutate(month = month(sampling_date, label = TRUE, abb = TRUE)) %>%
   select(
   month,
-  mean_temperature,
+  temp_field,
   mean_salinity,
-  mean_Chla,
-  mean_ta,
-  mean_dic,
+  Chla,
+  ta,
+  dic,
   mean_pCO2,
   mean_pH_s_eol_temp_insi,
   mean_pH_s_ptb_temp_insi,
@@ -1124,18 +1147,18 @@ means_month0m <- ungroup(mean0m) %>%
   Salinity = mean(mean_salinity, na.rm = TRUE),
   Salinity_sd = sd(mean_salinity, na.rm = TRUE),
   Salinity_n = sum(!is.na(mean_salinity)),
-  Temperature = mean(mean_temperature, na.rm = TRUE),
-  Temperature_sd = sd(mean_temperature, na.rm = TRUE),
-  Temperature_n = sum(!is.na(mean_temperature)),
-  Chla = mean(mean_Chla, na.rm = TRUE),
-  Chla_sd = sd(mean_Chla, na.rm=TRUE),
-  Chla_n = sum(!is.na(mean_Chla)),
-  dic = mean(mean_dic, na.rm = TRUE),
-  dic_sd = sd(mean_dic, na.rm = TRUE),
-  dic_n = sum(!is.na(mean_dic)),
-  ta = mean(mean_ta, na.rm = TRUE),
-  ta_sd = sd(mean_ta, na.rm = TRUE),
-  ta_n = sum(!is.na(mean_ta)),
+  Temperature = mean(temp_field, na.rm = TRUE),
+  Temperature_sd = sd(temp_field, na.rm = TRUE),
+  Temperature_n = sum(!is.na(temp_field)),
+  Chla = mean(Chla, na.rm = TRUE),
+  Chla_sd = sd(Chla, na.rm=TRUE),
+  Chla_n = sum(!is.na(Chla)),
+  dic = mean(dic, na.rm = TRUE),
+  dic_sd = sd(dic, na.rm = TRUE),
+  dic_n = sum(!is.na(dic)),
+  ta = mean(ta, na.rm = TRUE),
+  ta_sd = sd(ta, na.rm = TRUE),
+  ta_n = sum(!is.na(ta)),
   pH_s_eol_temp_insi = mean(mean_pH_s_eol_temp_insi, na.rm = TRUE),
   pH_s_eol_temp_insi_sd = sd(mean_pH_s_eol_temp_insi, na.rm = TRUE),
   pH_s_eol_temp_insi_n = sum(!is.na(mean_pH_s_eol_temp_insi)),
@@ -1203,30 +1226,11 @@ colnames(means_month0m) <-
   "Oa_n"
   )
 
-# tmp_long <-
-# tbl_df(
-# melt(
-#   tmp,
-#   id.vars = c("month"),
-#   measure.vars = c(
-#   "mean_temperature",
-#   "mean_salinity",
-#   "mean_Chla",
-#   "mean_ta",
-#   "mean_dic",
-#   "mean_pCO2",
-#   "mean_pH",
-#   "mean_OmegaAragonite"
-#   ),
-#   na.rm = TRUE
-#   )
-# )
-
 tmp_long <- tmp %>%
   gather(key = variable, value=value, -month, na.rm = TRUE)
   
 size_point <- 0.1 # size of data points
-T1vp <- ggplot(filter(tmp_long, variable=="mean_temperature"), aes(x = month, y = value, group=month)) +
+T1vp <- ggplot(filter(tmp_long, variable=="temp_field"), aes(x = month, y = value, group=month)) +
   #geom_violin(fill='lightblue', alpha=0.5, size=0.2, trim = TRUE) +
   geom_violin(fill='lightblue', alpha=0.5, size=0.2, trim = TRUE, draw_quantiles = c(0.25, 0.5, 0.75)) +
   #geom_boxplot(notch=TRUE, size=0.2, fill="grey50", outlier.color = "blue", outlier.size = 0.3) +
@@ -1240,7 +1244,7 @@ T1vp <- ggplot(filter(tmp_long, variable=="mean_temperature"), aes(x = month, y 
   theme(aspect.ratio = 1/2,
         plot.margin = margin(t = -0.5, r = 0.2, b = -0.5, l = 0, unit = "cm"),
         axis.text.x=element_blank()) +
-  annotation_custom(grob_A)
+  #annotation_custom(grob_A)
 S1vp <- ggplot(filter(tmp_long, variable=="mean_salinity"), aes(x = month, y = value, group=month)) +
   geom_violin(fill='lightblue', alpha=0.5, size=0.2, trim = TRUE) +
   geom_boxplot(notch=TRUE, size=0.2, fill="grey50", outlier.color = "blue", outlier.size = 0.3) +
@@ -1252,8 +1256,8 @@ S1vp <- ggplot(filter(tmp_long, variable=="mean_salinity"), aes(x = month, y = v
   theme(aspect.ratio = 1/2,
         plot.margin = margin(t = -0.5, r = 0.2, b = -0.2, l = 0, unit = "cm"),
         axis.text.x=element_blank()) +
-  annotation_custom(grob_B)
-AT1vp <- ggplot(filter(tmp_long, variable=="mean_ta"), aes(x = month, y = value, group=month)) +
+  #annotation_custom(grob_B)
+AT1vp <- ggplot(filter(tmp_long, variable=="ta"), aes(x = month, y = value, group=month)) +
   geom_violin(fill='lightblue', alpha=0.5, size=0.2, trim = TRUE) +
   geom_boxplot(notch=TRUE, size=0.2, fill="grey50", outlier.color = "blue", outlier.size = 0.3) +
   scale_x_discrete(breaks=c("Jan", "", "Mar", "", "May", "", "Jul", "", "Sep", "", "Nov", "")) +
@@ -1263,8 +1267,8 @@ AT1vp <- ggplot(filter(tmp_long, variable=="mean_ta"), aes(x = month, y = value,
   theme(aspect.ratio = 1/2,
         plot.margin = margin(t = -0.5, r = 0.2, b = -0.2, l = 0, unit = "cm"),
         axis.text.x=element_blank()) +
-  annotation_custom(grob_C)
-CT1vp <- ggplot(filter(tmp_long, variable=="mean_dic"), aes(x = month, y = value, group=month)) +
+  #annotation_custom(grob_C)
+CT1vp <- ggplot(filter(tmp_long, variable=="dic"), aes(x = month, y = value, group=month)) +
   geom_violin(fill='lightblue', alpha=0.5, size=0.2, trim = TRUE) +
   geom_boxplot(notch=TRUE, size=0.2, fill="grey50", outlier.color = "blue", outlier.size = 0.3) +
   scale_x_discrete(breaks=c("Jan", "", "Mar", "", "May", "", "Jul", "", "Sep", "", "Nov", "")) +
@@ -1274,7 +1278,7 @@ CT1vp <- ggplot(filter(tmp_long, variable=="mean_dic"), aes(x = month, y = value
   theme(aspect.ratio = 1/2,
         plot.margin = margin(t = -0.5, r = 0.2, b = -0.2, l = 0, unit = "cm"),
         axis.text.x=element_blank()) +
-  annotation_custom(grob_D_bl)
+  #annotation_custom(grob_D_bl)
 pH1vp <- ggplot(filter(tmp_long, variable=="mean_pH"), aes(x = month, y = value, group=month)) +
   geom_violin(fill='lightblue', alpha=0.5, size=0.2, trim = TRUE) +
   geom_boxplot(notch=TRUE, size=0.2, fill="grey50", outlier.color = "blue", outlier.size = 0.3) +
@@ -1285,7 +1289,7 @@ pH1vp <- ggplot(filter(tmp_long, variable=="mean_pH"), aes(x = month, y = value,
   theme(aspect.ratio = 1/2,
         plot.margin = margin(t = -0.5, r = 0.2, b = -0.2, l = 0, unit = "cm"),
         axis.text.x=element_blank()) +
-  annotation_custom(grob_E_bl)
+  #annotation_custom(grob_E_bl)
 pCO21vp <- ggplot(filter(tmp_long, variable=="mean_pCO2"), aes(x = month, y = value, group=month)) +
   geom_violin(fill='lightblue', alpha=0.5, size=0.2, trim = TRUE) +
   geom_boxplot(notch=TRUE, size=0.2, fill="grey50", outlier.color = "blue", outlier.size = 0.3) +
@@ -1296,7 +1300,7 @@ pCO21vp <- ggplot(filter(tmp_long, variable=="mean_pCO2"), aes(x = month, y = va
   theme(aspect.ratio = 1/2,
         plot.margin = margin(t = -0.5, r = 0.2, b = -0.5, l = 0, unit = "cm"),
         axis.text.x=element_blank()) +
-  annotation_custom(grob_F)
+  #annotation_custom(grob_F)
 Oa1vp <- ggplot(filter(tmp_long, variable=="mean_OmegaAragonite"), aes(x = month, y = value, group=month)) +
   geom_violin(fill='lightblue', alpha=0.5, size=0.2, trim = TRUE) +
   geom_boxplot(notch=TRUE, size=0.2, fill="grey50", outlier.color = "blue", outlier.size = 0.3) +
@@ -1306,7 +1310,7 @@ Oa1vp <- ggplot(filter(tmp_long, variable=="mean_OmegaAragonite"), aes(x = month
   Mytheme(size_labs = 9) +
   theme(aspect.ratio = 1/2,
         plot.margin = margin(t = 0, r = 0.2, b = 0.3, l = 0, unit = "cm")) +
-  annotation_custom(grob_G)
+  #annotation_custom(grob_G)
 
 g <- plot_grid(T1vp, S1vp, AT1vp, CT1vp, pH1vp, pCO21vp, Oa1vp, ncol=1,
                align="v")
@@ -1321,11 +1325,11 @@ tmp <- ungroup(mean50m) %>%
   mutate(month = month(sampling_date, label = TRUE, abb = TRUE)) %>%
   select(
   month,
-  mean_temperature,
+  temp_field,
   mean_salinity,
-  mean_Chla,
-  mean_ta,
-  mean_dic,
+  Chla,
+  ta,
+  dic,
   mean_pCO2,
   mean_pH_s_eol_temp_insi,
   mean_pH_s_ptb_temp_insi,
@@ -1340,18 +1344,18 @@ means_month50m <- ungroup(mean50m) %>%
   Salinity = mean(mean_salinity, na.rm = TRUE),
   Salinity_sd = sd(mean_salinity, na.rm = TRUE),
   Salinity_n = sum(!is.na(mean_salinity)),
-  Temperature = mean(mean_temperature, na.rm = TRUE),
-  Temperature_sd = sd(mean_temperature, na.rm = TRUE),
-  Temperature_n = sum(!is.na(mean_temperature)),
-  Chla = mean(mean_Chla, na.rm = TRUE),
-  Chla_sd = sd(mean_Chla, na.rm=TRUE),
-  Chla_n = sum(!is.na(mean_Chla)),
-  dic = mean(mean_dic, na.rm = TRUE),
-  dic_sd = sd(mean_dic, na.rm = TRUE),
-  dic_n = sum(!is.na(mean_dic)),
-  ta = mean(mean_ta, na.rm = TRUE),
-  ta_sd = sd(mean_ta, na.rm = TRUE),
-  ta_n = sum(!is.na(mean_ta)),
+  Temperature = mean(temp_field, na.rm = TRUE),
+  Temperature_sd = sd(temp_field, na.rm = TRUE),
+  Temperature_n = sum(!is.na(temp_field)),
+  Chla = mean(Chla, na.rm = TRUE),
+  Chla_sd = sd(Chla, na.rm=TRUE),
+  Chla_n = sum(!is.na(Chla)),
+  dic = mean(dic, na.rm = TRUE),
+  dic_sd = sd(dic, na.rm = TRUE),
+  dic_n = sum(!is.na(dic)),
+  ta = mean(ta, na.rm = TRUE),
+  ta_sd = sd(ta, na.rm = TRUE),
+  ta_n = sum(!is.na(ta)),
   pH_s_eol_temp_insi = mean(mean_pH_s_eol_temp_insi, na.rm = TRUE),
   pH_s_eol_temp_insi_sd = sd(mean_pH_s_eol_temp_insi, na.rm = TRUE),
   pH_s_eol_temp_insi_n = sum(!is.na(mean_pH_s_eol_temp_insi)),
@@ -1434,7 +1438,7 @@ kable(means_month50m, digits = 3, caption="Monthly means at 50 m")
 size_point <- 0.4 # size of data points
 
 # Plot interannual changes
-T1p <- ggplot(mean0m, aes(x = sampling_date, y = mean_temperature), na.rm=TRUE) +
+T1p <- ggplot(mean0m, aes(x = sampling_date, y = temp_field), na.rm=TRUE) +
   scale_x_datetime(date_breaks="4 year", date_minor_breaks="1 years", labels = date_format("%Y")) +
   geom_point(colour="black", na.rm=TRUE, size=size_point) + 
   #geom_smooth(method=lm, colour="black", fill="grey", size=0.6, na.rm=TRUE) +
@@ -1442,7 +1446,7 @@ T1p <- ggplot(mean0m, aes(x = sampling_date, y = mean_temperature), na.rm=TRUE) 
   coord_fixed() +
   Mytheme(size_labs = 8) +
   theme(axis.text.x=element_blank()) +
-  annotation_custom(grob_A_bl)
+  #annotation_custom(grob_A_bl)
 S1p <- ggplot(mean0m, aes(x = sampling_date, y = mean_salinity), na.rm=TRUE) +
   scale_x_datetime(date_breaks="4 year", date_minor_breaks="1 years", labels = date_format("%Y")) +
     scale_y_continuous(limits=c(35.5, 39), breaks=c(36,37,38)) +
@@ -1452,29 +1456,29 @@ S1p <- ggplot(mean0m, aes(x = sampling_date, y = mean_salinity), na.rm=TRUE) +
   coord_fixed() +
   Mytheme(size_labs = 8) +
   theme(axis.text.x=element_blank()) +
-  annotation_custom(grob_B_bl)
-CT1p <- ggplot(mean0m, aes(x = sampling_date, y = mean_dic), na.rm=TRUE) +
+  #annotation_custom(grob_B_bl)
+CT1p <- ggplot(mean0m, aes(x = sampling_date, y = dic), na.rm=TRUE) +
   scale_x_datetime(date_breaks="4 year", date_minor_breaks="1 years", labels = date_format("%Y")) +
   geom_point(colour="black", na.rm=TRUE, size=size_point) + 
   #geom_smooth(method=lm, colour="black", fill="grey", size=0.6, na.rm=TRUE) +
   labs(title=NULL,x="",y=expression(paste(italic(C)[T], " (",mu, "mol ", kg^-1,")"))) +
-  #annotate("text", x =as.POSIXct("2016-01-01"), y= min(mean0m$mean_dic, na.rm=TRUE), 
+  #annotate("text", x =as.POSIXct("2016-01-01"), y= min(mean0m$dic, na.rm=TRUE), 
   #         label="*", colour="blue", size=10, fontface="plain") +
   coord_fixed() +
   Mytheme(size_labs = 8) +
   theme(axis.text.x=element_blank()) +
-  annotation_custom(grob_D_bl)
-AT1p <- ggplot(mean0m, aes(x = sampling_date, y = mean_ta), na.rm=TRUE) +
+  #annotation_custom(grob_D_bl)
+AT1p <- ggplot(mean0m, aes(x = sampling_date, y = ta), na.rm=TRUE) +
   scale_x_datetime(date_breaks="4 year", date_minor_breaks="1 years", labels = date_format("%Y")) +
   geom_point(colour="black", na.rm=TRUE, size=size_point) + 
   #geom_smooth(method=lm, colour="black", fill="grey", size=0.6, na.rm=TRUE) +
   labs(title=NULL,x="",y=expression(paste(italic(A)[T], " (",mu, "mol ", kg^-1,")"))) +
-  #annotate("text", x =as.POSIXct("2016-01-01"), y= min(mean0m$mean_ta, na.rm=TRUE), 
+  #annotate("text", x =as.POSIXct("2016-01-01"), y= min(mean0m$ta, na.rm=TRUE), 
   #         label="*", colour="blue", size=9, fontface="plain") +
   coord_fixed() +
   Mytheme(size_labs = 8) +
   theme(axis.text.x=element_blank()) +
-  annotation_custom(grob_C_bl)
+  #annotation_custom(grob_C_bl)
 pH1p <- ggplot(mean0m, aes(x = sampling_date, y = mean_pH), na.rm=TRUE) +
   scale_x_datetime(date_breaks="4 year", date_minor_breaks="1 years", labels = date_format("%Y")) +
   geom_point(colour="black", na.rm=TRUE, size=size_point) + 
@@ -1487,7 +1491,7 @@ pH1p <- ggplot(mean0m, aes(x = sampling_date, y = mean_pH), na.rm=TRUE) +
   #annotate("text", x =as.POSIXct("2016-01-01"), y= min(mean0m$mean_pH, na.rm=TRUE), 
   #         label="*", colour="blue", size=9, fontface="plain") +
   theme(axis.text.x=element_blank()) +
-  annotation_custom(grob_E_bl)
+  #annotation_custom(grob_E_bl)
 pCO21p <- ggplot(mean0m, aes(x = sampling_date, y = mean_pCO2), na.rm=TRUE) +
   scale_x_datetime(date_breaks="4 year", date_minor_breaks="1 years", labels = date_format("%Y")) +
   geom_point(colour="black", na.rm=TRUE, size=size_point) + 
@@ -1498,7 +1502,7 @@ pCO21p <- ggplot(mean0m, aes(x = sampling_date, y = mean_pCO2), na.rm=TRUE) +
   coord_fixed() +
   Mytheme(size_labs = 8) +
   theme(axis.text.x=element_blank()) +
-  annotation_custom(grob_F_bl)
+  #annotation_custom(grob_F_bl)
 Oa1p <- ggplot(mean0m, aes(x = sampling_date, y = mean_OmegaAragonite), na.rm=TRUE) +
   scale_x_datetime(date_breaks="4 year", date_minor_breaks="1 years", labels = date_format("%Y")) +
   geom_point(colour="black", na.rm=TRUE, size=size_point) + 
@@ -1506,15 +1510,15 @@ Oa1p <- ggplot(mean0m, aes(x = sampling_date, y = mean_OmegaAragonite), na.rm=TR
   labs(title=NULL,x="",y=expression(paste(Omega[a]))) +
   coord_fixed() +
   Mytheme(size_labs = 8) +
-  annotation_custom(grob_G_bl)
-ATvsCT1p <- ggplot(mean0m, aes(x = sampling_date, y = mean_ta/mean_dic), na.rm=TRUE) +
+  #annotation_custom(grob_G_bl)
+ATvsCT1p <- ggplot(mean0m, aes(x = sampling_date, y = ta/dic), na.rm=TRUE) +
   scale_x_datetime(date_breaks="4 year", date_minor_breaks="1 years", labels = date_format("%Y")) +
   geom_point(colour="#482173FF", na.rm=TRUE, size=size_point) +
   geom_smooth(method=lm, colour="black", fill="grey", size=0.6, na.rm=TRUE) +
   labs(title=NULL,x="",y=expression(paste(A[T]:C[T]))) +
   annotate("text", x = as.POSIXct("2008-01-01"), 
-           y = max(mean0m$mean_ta/mean0m$mean_dic, na.rm=TRUE), 
-           label = lm_eqn(lm(mean_ta/mean_dic ~sampling_date, data=mean0m)), parse = TRUE) +
+           y = max(mean0m$ta/mean0m$dic, na.rm=TRUE), 
+           label = lm_eqn(lm(ta/dic ~sampling_date, data=mean0m)), parse = TRUE) +
   coord_fixed() +
   Mytheme(size_labs = 8)
 ggsave(filename = "output_jp/figures/ATvsCT1p.png", plot = ATvsCT1p)
@@ -1526,9 +1530,9 @@ tmp <- ungroup(mean0m) %>%
   group_by(monthd) %>%
   summarise(
   Salinity_month = mean(mean_salinity, na.rm = TRUE),
-  Temperature_month = mean(mean_temperature, na.rm = TRUE),
-  dic_month = mean(mean_dic, na.rm = TRUE),
-  ta_month = mean(mean_ta, na.rm = TRUE),
+  Temperature_month = mean(temp_field, na.rm = TRUE),
+  dic_month = mean(dic, na.rm = TRUE),
+  ta_month = mean(ta, na.rm = TRUE),
   pH_s_eol_temp_insi_month = mean(mean_pH_s_eol_temp_insi, na.rm = TRUE),
   pH_s_ptb_temp_insi_month = mean(mean_pH_s_ptb_temp_insi, na.rm = TRUE),
   pH_month = mean(mean_pH, na.rm = TRUE),
@@ -1536,16 +1540,16 @@ tmp <- ungroup(mean0m) %>%
   pCO2_month = mean(mean_pCO2, na.rm = TRUE),
   OmegaCalcite_month = mean(mean_OmegaCalcite, na.rm = TRUE),
   OmegaAragonite_month = mean(mean_OmegaAragonite, na.rm = TRUE),
-  Nta_month = mean(mean_Nta, na.rm = TRUE),
-  Ndic_month = mean(mean_Ndic, na.rm = TRUE)
+  Nta_month = mean(Nta, na.rm = TRUE),
+  Ndic_month = mean(dic, na.rm = TRUE)
   )
 # Calculate anomalies
 ano_month0m <- left_join(ungroup(mean0m), tmp, by = "monthd") %>%
   mutate(
   Salinity_ano = mean_salinity - Salinity_month,
-  Temperature_ano = mean_temperature - Temperature_month,
-  dic_ano = mean_dic - dic_month,
-  ta_ano = mean_ta - ta_month,
+  Temperature_ano = temp_field - Temperature_month,
+  dic_ano = dic - dic_month,
+  ta_ano = ta - ta_month,
   pH_s_eol_temp_insi_ano = mean_pH_s_eol_temp_insi - pH_s_eol_temp_insi_month,
   pH_s_ptb_temp_insi_ano = mean_pH_s_ptb_temp_insi - pH_s_ptb_temp_insi_month,
   pH_ano = mean_pH - pH_month,
@@ -1553,17 +1557,17 @@ ano_month0m <- left_join(ungroup(mean0m), tmp, by = "monthd") %>%
   pCO2_ano = mean_pCO2 - pCO2_month,
   OmegaCalcite_ano = mean_OmegaCalcite - OmegaCalcite_month,
   OmegaAragonite_ano = mean_OmegaAragonite - OmegaAragonite_month,
-  Nta_ano = mean_Nta - Nta_month,
-  Ndic_ano = mean_Ndic - Ndic_month
+  Nta_ano = Nta - Nta_month,
+  Ndic_ano = dic - Ndic_month
   )
 
 # Regressions and tables of key parameters
 var_list <-
   c(
   "mean_salinity",
-  "mean_temperature",
-  "mean_dic",
-  "mean_ta",
+  "temp_field",
+  "dic",
+  "ta",
   "mean_pH_s_eol_temp_insi",
   "mean_pH_s_ptb_temp_insi",
   "mean_pH",
@@ -1571,8 +1575,8 @@ var_list <-
   "mean_pCO2",
   "mean_OmegaCalcite",
   "mean_OmegaAragonite",
-  "mean_Nta",
-  "mean_Ndic"
+  "Nta",
+  "dic"
   )
 lms <- lapply(var_list, function(x) {
   summary(lm(substitute(i ~ decimal_date(sampling_date), list(i = as.name(x))), 
@@ -1693,7 +1697,7 @@ anT1p <- ggplot(data = ano_month0m, aes(x = sampling_date, y = Temperature_ano),
   coord_fixed() +
   Mytheme(size_labs = 8) +
   theme(axis.text.x=element_blank()) +
-  annotation_custom(grob_H_bl)
+  #annotation_custom(grob_H_bl)
 anS1p <- ggplot(data = ano_month0m, aes(x = sampling_date, y = Salinity_ano), na.rm=TRUE) +
   scale_x_datetime(date_breaks="4 year", date_minor_breaks="1 years", labels = date_format("%Y")) +
   scale_y_continuous(breaks=c(-2,-1,0,0.5)) +
@@ -1703,7 +1707,7 @@ anS1p <- ggplot(data = ano_month0m, aes(x = sampling_date, y = Salinity_ano), na
   coord_fixed() +
   Mytheme(size_labs = 8) +
   theme(axis.text.x=element_blank()) +
-  annotation_custom(grob_I_bl)
+  #annotation_custom(grob_I_bl)
 anCT1p <- ggplot(data = ano_month0m, aes(x = sampling_date, y = dic_ano), na.rm=TRUE) +
   scale_x_datetime(date_breaks="4 year", date_minor_breaks="1 years", labels = date_format("%Y")) +
   geom_point(colour="blue", na.rm=TRUE, size=size_point) + 
@@ -1714,7 +1718,7 @@ anCT1p <- ggplot(data = ano_month0m, aes(x = sampling_date, y = dic_ano), na.rm=
   coord_fixed() +
   Mytheme(size_labs = 8) +
   theme(axis.text.x=element_blank()) +
-  annotation_custom(grob_K_bl)
+  #annotation_custom(grob_K_bl)
 anAT1p <- ggplot(data = ano_month0m, aes(x = sampling_date, y = ta_ano), na.rm=TRUE) +
   scale_x_datetime(date_breaks="4 year", date_minor_breaks="1 years", labels = date_format("%Y")) +
   geom_point(colour="blue", na.rm=TRUE, size=size_point) + 
@@ -1726,7 +1730,7 @@ anAT1p <- ggplot(data = ano_month0m, aes(x = sampling_date, y = ta_ano), na.rm=T
   coord_fixed() +
   Mytheme(size_labs = 8) +
   theme(axis.text.x=element_blank()) +
-  annotation_custom(grob_J_bl)
+  #annotation_custom(grob_J_bl)
 anpHeol1p <- ggplot(data = ano_month0m, aes(x = sampling_date, y = pH_s_eol_temp_insi_ano), na.rm=TRUE) +
   scale_x_datetime(date_breaks="4 year", date_minor_breaks="1 years", labels = date_format("%Y")) +
   geom_point(colour="blue", na.rm=TRUE, size=size_point) + 
@@ -1737,7 +1741,7 @@ anpHeol1p <- ggplot(data = ano_month0m, aes(x = sampling_date, y = pH_s_eol_temp
   coord_fixed() +
   Mytheme(size_labs = 8) +
   theme(axis.text.x=element_blank()) +
-  annotation_custom(grob_L_bl)
+  #annotation_custom(grob_L_bl)
 
 anpHptb1p <- ggplot(data = ano_month0m, aes(x = sampling_date, y = pH_s_ptb_temp_insi_ano), na.rm=TRUE) +
   scale_x_datetime(date_breaks="4 year", date_minor_breaks="1 years", labels = date_format("%Y")) +
@@ -1749,7 +1753,7 @@ anpHptb1p <- ggplot(data = ano_month0m, aes(x = sampling_date, y = pH_s_ptb_temp
   coord_fixed() +
   Mytheme(size_labs = 8) +
   theme(axis.text.x=element_blank()) +
-  annotation_custom(grob_L_bl)
+  #annotation_custom(grob_L_bl)
 anpH1p <- ggplot(data = ano_month0m, aes(x = sampling_date, y = pH_ano), na.rm=TRUE) +
   scale_x_datetime(date_breaks="4 year", date_minor_breaks="1 years", labels = date_format("%Y")) +
   geom_point(colour="blue", na.rm=TRUE, size=size_point) + 
@@ -1760,7 +1764,7 @@ anpH1p <- ggplot(data = ano_month0m, aes(x = sampling_date, y = pH_ano), na.rm=T
   coord_fixed() +
   Mytheme(size_labs = 8) +
   theme(axis.text.x=element_blank()) +
-  annotation_custom(grob_L_bl)
+  #annotation_custom(grob_L_bl)
 anpCO21p <- ggplot(data = ano_month0m, aes(x = sampling_date, y = pCO2_ano), na.rm=TRUE) +
   scale_x_datetime(date_breaks="4 year", date_minor_breaks="1 years", labels = date_format("%Y")) +
    geom_point(colour="blue", na.rm=TRUE, size=size_point) + 
@@ -1771,7 +1775,7 @@ anpCO21p <- ggplot(data = ano_month0m, aes(x = sampling_date, y = pCO2_ano), na.
   coord_fixed() +
   Mytheme(size_labs = 8) +
   theme(axis.text.x=element_blank()) +
-  annotation_custom(grob_M_bl)
+  #annotation_custom(grob_M_bl)
 anOa1p <- ggplot(data = ano_month0m, aes(x = sampling_date, y = OmegaAragonite_ano), na.rm=TRUE) +
   scale_x_datetime(date_breaks="4 year", date_minor_breaks="1 years", labels = date_format("%Y")) +
   scale_y_continuous(breaks=c(-0.2,0,0.2)) +
@@ -1782,7 +1786,7 @@ anOa1p <- ggplot(data = ano_month0m, aes(x = sampling_date, y = OmegaAragonite_a
            label="", colour="black", size=9, fontface="plain") +
   coord_fixed() +
   Mytheme(size_labs = 8) +
-  annotation_custom(grob_N_bl)
+  #annotation_custom(grob_N_bl)
 
 g <- plot_grid(T1p, anT1p, S1p, anS1p, AT1p, anAT1p, CT1p, anCT1p, pH1p, anpH1p, anpHeol1p, anpHptb1p, pCO21p, anpCO21p, Oa1p, anOa1p, align='vh', ncol=2)
 ggsave(file="output_jp/figures/fig_paper_interannual_1m.png", g, width=15, height = 17, units = "cm")
@@ -1797,7 +1801,7 @@ for (i in 1:(length(unique(mean0m$year))-1)) { #one loops through all years exce
   d_reg <- filter(mean0m, year==yr)
 #  fm <- as.formula(paste0(i, " ~ sampling_date"))
   #fit[[i]] <- lm(fm, data = mean0m)
-  lms <- summary(lm(data=d_reg, mean_ta ~ mean_salinity))
+  lms <- summary(lm(data=d_reg, ta ~ mean_salinity))
   # calculate probability of fstatistic because it cannot be extracted from lms above
   # see http://stats.stackexchange.com/questions/92824/extracting-the-model-p-value-for-a-multiple-regression-in-r
   # slope returned by lm is per second
@@ -1907,18 +1911,18 @@ kable(tab_surf_salinity_AT_year, digits = c(2,2), caption="Regressions on values
 size_point <- 0.4 # size of data points
 
 # Plot interannual changes
-T50p <- ggplot(mean50m, aes(x = sampling_date, y = mean_temperature), na.rm=TRUE) +
+T50p <- ggplot(mean50m, aes(x = sampling_date, y = temp_field), na.rm=TRUE) +
   scale_x_datetime(breaks = date_breaks("2 year"), labels = date_format("%Y")) +
   scale_y_continuous(limits = c(12.5, 22.6)) +
   geom_point(colour="black", na.rm=TRUE, size=size_point) + 
   #geom_smooth(method=lm, colour="black", fill="grey", size=0.6, na.rm=TRUE) +
   labs(title=NULL,x="", y="Temp. (°C)") +
-  # annotate("text", x =as.POSIXct("2016-01-01"), y= min(mean50m$mean_temperature, na.rm=TRUE), 
+  # annotate("text", x =as.POSIXct("2016-01-01"), y= min(mean50m$temp_field, na.rm=TRUE), 
   #          label="*", colour="blue", size=10, fontface="plain") +
   coord_fixed() +
   Mytheme(size_labs = 8) +
   theme(axis.text.x=element_blank()) +
-  annotation_custom(grob_A)
+  #annotation_custom(grob_A)
 S50p <- ggplot(mean50m, aes(x = sampling_date, y = mean_salinity), na.rm=TRUE) +
   scale_x_datetime(breaks = date_breaks("2 year"), labels = date_format("%Y")) +
 #    scale_y_continuous(limits=c(37, 39), breaks=c(37,38,39)) +
@@ -1930,8 +1934,8 @@ S50p <- ggplot(mean50m, aes(x = sampling_date, y = mean_salinity), na.rm=TRUE) +
   coord_fixed() +
   Mytheme(size_labs = 8) +
   theme(axis.text.x=element_blank()) +
-  annotation_custom(grob_B)
-CT50p <- ggplot(mean50m, aes(x = sampling_date, y = mean_dic), na.rm=TRUE) +
+  #annotation_custom(grob_B)
+CT50p <- ggplot(mean50m, aes(x = sampling_date, y = dic), na.rm=TRUE) +
   scale_x_datetime(breaks = date_breaks("2 year"), labels = date_format("%Y")) +
   geom_point(colour="black", na.rm=TRUE, size=size_point) + 
   #geom_smooth(method=lm, colour="black", fill="grey", size=0.6, na.rm=TRUE) +
@@ -1939,8 +1943,8 @@ CT50p <- ggplot(mean50m, aes(x = sampling_date, y = mean_dic), na.rm=TRUE) +
   coord_fixed() +
   Mytheme(size_labs = 8) +
   theme(axis.text.x=element_blank()) +
-  annotation_custom(grob_D)
-AT50p <- ggplot(mean50m, aes(x = sampling_date, y = mean_ta), na.rm=TRUE) +
+  #annotation_custom(grob_D)
+AT50p <- ggplot(mean50m, aes(x = sampling_date, y = ta), na.rm=TRUE) +
   scale_x_datetime(breaks = date_breaks("2 year"), labels = date_format("%Y")) +
   scale_y_continuous(breaks=c(2530, 2550, 2570)) +
   geom_point(colour="black", na.rm=TRUE, size=size_point) + 
@@ -1950,7 +1954,7 @@ AT50p <- ggplot(mean50m, aes(x = sampling_date, y = mean_ta), na.rm=TRUE) +
   coord_fixed() +
   Mytheme(size_labs = 8) +
   theme(axis.text.x=element_blank()) +
-  annotation_custom(grob_C)
+  #annotation_custom(grob_C)
 pH50p <- ggplot(mean50m, aes(x = sampling_date, y = mean_pH), na.rm=TRUE) +
   scale_x_datetime(breaks = date_breaks("2 year"), labels = date_format("%Y")) +
   geom_point(colour="black", na.rm=TRUE, size=size_point) + 
@@ -1962,7 +1966,7 @@ pH50p <- ggplot(mean50m, aes(x = sampling_date, y = mean_pH), na.rm=TRUE) +
   coord_fixed() +
   Mytheme(size_labs = 8) +
   theme(axis.text.x=element_blank()) +
-  annotation_custom(grob_E)
+  #annotation_custom(grob_E)
 pCO250p <- ggplot(mean50m, aes(x = sampling_date, y = mean_pCO2), na.rm=TRUE) +
   scale_x_datetime(breaks = date_breaks("2 year"), labels = date_format("%Y")) +
   geom_point(colour="black", na.rm=TRUE, size=size_point) + 
@@ -1971,7 +1975,7 @@ pCO250p <- ggplot(mean50m, aes(x = sampling_date, y = mean_pCO2), na.rm=TRUE) +
   coord_fixed() +
   Mytheme(size_labs = 8) +
   theme(axis.text.x=element_blank()) +
-  annotation_custom(grob_F)
+  #annotation_custom(grob_F)
 Oa50p <- ggplot(mean50m, aes(x = sampling_date, y = mean_OmegaAragonite), na.rm=TRUE) +
   scale_x_datetime(breaks = date_breaks("2 year"), labels = date_format("%Y")) +
   geom_point(colour="black", na.rm=TRUE, size=size_point) + 
@@ -1981,8 +1985,8 @@ Oa50p <- ggplot(mean50m, aes(x = sampling_date, y = mean_OmegaAragonite), na.rm=
   #          label="*", colour="blue", size=10, fontface="plain") +  
   coord_fixed() +
   Mytheme(size_labs = 8) +
-  annotation_custom(grob_G)
-ATvsCT50p <- ggplot(mean50m, aes(x = sampling_date, y = mean_ta/mean_dic), na.rm=TRUE) +
+  #annotation_custom(grob_G)
+ATvsCT50p <- ggplot(mean50m, aes(x = sampling_date, y = ta/dic), na.rm=TRUE) +
   scale_x_datetime(breaks = date_breaks("2 year"), labels = date_format("%Y")) +
   geom_point(colour="black", na.rm=TRUE, size=size_point) +
   geom_smooth(method=lm, colour="black", fill="grey", size=0.6, na.rm=TRUE) +
@@ -1996,51 +2000,51 @@ tmp <- ungroup(mean50m) %>%
   group_by(monthd) %>%
   summarise(
   Salinity_month = mean(mean_salinity, na.rm = TRUE),
-  Temperature_month = mean(mean_temperature, na.rm = TRUE),
-  dic_month = mean(mean_dic, na.rm = TRUE),
-  ta_month = mean(mean_ta, na.rm = TRUE),
+  Temperature_month = mean(temp_field, na.rm = TRUE),
+  dic_month = mean(dic, na.rm = TRUE),
+  ta_month = mean(ta, na.rm = TRUE),
   pH_s_ptb_temp_insi_month = mean(mean_pH_s_ptb_temp_insi, na.rm = TRUE),
   pH_month = mean(mean_pH, na.rm = TRUE),
   pH25_month = mean(mean_pH25, na.rm = TRUE),
   pCO2_month = mean(mean_pCO2, na.rm = TRUE),
   OmegaCalcite_month = mean(mean_OmegaCalcite, na.rm = TRUE),
   OmegaAragonite_month = mean(mean_OmegaAragonite, na.rm = TRUE),
-  Nta_month = mean(mean_Nta, na.rm = TRUE),
-  Ndic_month = mean(mean_Ndic, na.rm = TRUE)
+  Nta_month = mean(Nta, na.rm = TRUE),
+  Ndic_month = mean(dic, na.rm = TRUE)
   )
 
 # Calculate anomalies
 ano_month50m <- left_join(ungroup(mean50m), tmp, by = "monthd") %>%
   mutate(
   Salinity_ano = mean_salinity - Salinity_month,
-  Temperature_ano = mean_temperature - Temperature_month,
-  dic_ano = mean_dic - dic_month,
-  ta_ano = mean_ta - ta_month,
+  Temperature_ano = temp_field - Temperature_month,
+  dic_ano = dic - dic_month,
+  ta_ano = ta - ta_month,
   pH_s_ptb_temp_insi_ano = mean_pH_s_ptb_temp_insi - pH_s_ptb_temp_insi_month,
   pH_ano = mean_pH - pH_month,
   pH25_ano = mean_pH25 - pH25_month,
   pCO2_ano = mean_pCO2 - pCO2_month,
   OmegaCalcite_ano = mean_OmegaCalcite - OmegaCalcite_month,
   OmegaAragonite_ano = mean_OmegaAragonite - OmegaAragonite_month,
-  Nta_ano = mean_Nta - Nta_month,
-  Ndic_ano = mean_Ndic - Ndic_month
+  Nta_ano = Nta - Nta_month,
+  Ndic_ano = dic - Ndic_month
   )
 
 # Regressions and tables of key parameters
 var_list <-
   c(
   "mean_salinity",
-  "mean_temperature",
-  "mean_dic",
-  "mean_ta",
+  "temp_field",
+  "dic",
+  "ta",
   "mean_pH_s_ptb_temp_insi",
   "mean_pH",
   "mean_pH25",
   "mean_pCO2",
   "mean_OmegaCalcite",
   "mean_OmegaAragonite",
-  "mean_Nta",
-  "mean_Ndic"
+  "Nta",
+  "dic"
   )
 lms <- lapply(var_list, function(x) {
   summary(lm(substitute(i ~ decimal_date(sampling_date), list(i = as.name(x))), data = ano_month50m))
@@ -2159,7 +2163,7 @@ anT50p <- ggplot(data = ano_month50m, aes(x = sampling_date, y = Temperature_ano
   coord_fixed() +
   Mytheme(size_labs = 8) +
   theme(axis.text.x=element_blank()) +
-  annotation_custom(grob_H)
+  #annotation_custom(grob_H)
 anS50p <- ggplot(data = ano_month50m, aes(x = sampling_date, y = Salinity_ano), na.rm=TRUE) +
   scale_x_datetime(breaks = date_breaks("2 year"), labels = date_format("%Y")) +
   #scale_y_continuous(breaks=c(-2,-1,0,0.5)) +
@@ -2170,7 +2174,7 @@ anS50p <- ggplot(data = ano_month50m, aes(x = sampling_date, y = Salinity_ano), 
   coord_fixed() +
   Mytheme(size_labs = 8) +
   theme(axis.text.x=element_blank()) +
-  annotation_custom(grob_I)
+  #annotation_custom(grob_I)
 anCT50p <- ggplot(data = ano_month50m, aes(x = sampling_date, y = dic_ano), na.rm=TRUE) +
   scale_x_datetime(breaks = date_breaks("2 year"), labels = date_format("%Y")) +
   geom_point(colour="blue", na.rm=TRUE, size=size_point) + 
@@ -2181,7 +2185,7 @@ anCT50p <- ggplot(data = ano_month50m, aes(x = sampling_date, y = dic_ano), na.r
   coord_fixed() +
   Mytheme(size_labs = 8) +
   theme(axis.text.x=element_blank()) +
-  annotation_custom(grob_K)
+  #annotation_custom(grob_K)
 anAT50p <- ggplot(data = ano_month50m, aes(x = sampling_date, y = ta_ano), na.rm=TRUE) +
   scale_x_datetime(breaks = date_breaks("2 year"), labels = date_format("%Y")) +
   scale_y_continuous(breaks=c(-20, 0, 20)) +
@@ -2194,7 +2198,7 @@ anAT50p <- ggplot(data = ano_month50m, aes(x = sampling_date, y = ta_ano), na.rm
   coord_fixed() +
   Mytheme(size_labs = 8) +
   theme(axis.text.x=element_blank()) +
-  annotation_custom(grob_J)
+  #annotation_custom(grob_J)
 anpHptb50p <- ggplot(data = ano_month50m, aes(x = sampling_date, y = pH_s_ptb_temp_insi_ano), na.rm=TRUE) +
   scale_x_datetime(breaks = date_breaks("2 year"), labels = date_format("%Y")) +
   geom_point(colour="red", na.rm=TRUE, size=size_point) + 
@@ -2205,7 +2209,7 @@ anpHptb50p <- ggplot(data = ano_month50m, aes(x = sampling_date, y = pH_s_ptb_te
   coord_fixed() +
   Mytheme(size_labs = 8) +
   theme(axis.text.x=element_blank()) +
-  annotation_custom(grob_L)
+  #annotation_custom(grob_L)
 anpH50p <- ggplot(data = ano_month50m, aes(x = sampling_date, y = pH_ano), na.rm=TRUE) +
   scale_x_datetime(breaks = date_breaks("2 year"), labels = date_format("%Y")) +
   geom_point(colour="blue", na.rm=TRUE, size=size_point) + 
@@ -2216,7 +2220,7 @@ anpH50p <- ggplot(data = ano_month50m, aes(x = sampling_date, y = pH_ano), na.rm
   coord_fixed() +
   Mytheme(size_labs = 8) +
   theme(axis.text.x=element_blank()) +
-  annotation_custom(grob_L)
+  #annotation_custom(grob_L)
 anpCO250p <- ggplot(data = ano_month50m, aes(x = sampling_date, y = pCO2_ano), na.rm=TRUE) +
   scale_x_datetime(breaks = date_breaks("2 year"), labels = date_format("%Y")) +
   geom_point(colour="blue", na.rm=TRUE, size=size_point) + 
@@ -2227,7 +2231,7 @@ anpCO250p <- ggplot(data = ano_month50m, aes(x = sampling_date, y = pCO2_ano), n
   coord_fixed() +
   Mytheme(size_labs = 8) +
   theme(axis.text.x=element_blank()) +
-  annotation_custom(grob_M)
+  #annotation_custom(grob_M)
 anOa50p <- ggplot(data = ano_month50m, aes(x = sampling_date, y = OmegaAragonite_ano), na.rm=TRUE) +
   scale_x_datetime(breaks = date_breaks("2 year"), labels = date_format("%Y")) +
   scale_y_continuous(breaks=c(-0.2,0,0.2)) +
@@ -2238,7 +2242,7 @@ anOa50p <- ggplot(data = ano_month50m, aes(x = sampling_date, y = OmegaAragonite
            label="*", colour="black", size=10, fontface="plain") +
   coord_fixed() +
   Mytheme(size_labs = 8) +
-  annotation_custom(grob_N)
+  #annotation_custom(grob_N)
 
 g <- plot_grid(T50p, anT50p, S50p, anS50p, AT50p, anAT50p, CT50p, anCT50p, pH50p, anpH50p, anpHptb50p, pCO250p, anpCO250p, Oa50p, anOa50p, align='vh', ncol=2)
 ggsave(file="output_jp/figures/fig_paper_interannual_50m.png", g, width=15, height = 17, units = "cm")
@@ -2253,28 +2257,28 @@ kable(reg_ano_50m, digits = c(4,4,3,3,3,2,3), caption="Regressions on anomalies 
 ```
 
 ```{r Changes in AT_nocarb, include=FALSE}
-ATnoC1p <- ggplot(mean0m, aes(x = sampling_date, y = mean_ta_nocarb), na.rm=TRUE) +
+ATnoC1p <- ggplot(mean0m, aes(x = sampling_date, y = ta_nocarb), na.rm=TRUE) +
   scale_x_datetime(breaks = date_breaks("2 year"), labels = date_format("%Y")) +
   geom_point(colour="black", na.rm=TRUE, size=size_point) + 
   #geom_smooth(method=lm, colour="black", fill="grey", size=0.6, na.rm=TRUE) +
   labs(title="1 m",x="",y=expression(paste(italic(A)[T], " non carbonate (",mu, "mol ", kg^-1,")"))) +
-  #annotate("text", x =as.POSIXct("2016-01-01"), y= min(mean0m$mean_ta, na.rm=TRUE), 
+  #annotate("text", x =as.POSIXct("2016-01-01"), y= min(mean0m$ta, na.rm=TRUE), 
   #         label="*", colour="blue", size=9, fontface="plain") +
   coord_fixed() +
   Mytheme(size_labs = 8) +
   theme(axis.text.x=element_blank()) +
-  annotation_custom(grob_A_bl)
-ATnoC50p <- ggplot(mean50m, aes(x = sampling_date, y = mean_ta_nocarb), na.rm=TRUE) +
+  #annotation_custom(grob_A_bl)
+ATnoC50p <- ggplot(mean50m, aes(x = sampling_date, y = ta_nocarb), na.rm=TRUE) +
   scale_x_datetime(breaks = date_breaks("2 year"), labels = date_format("%Y")) +
   geom_point(colour="black", na.rm=TRUE, size=size_point) + 
   #geom_smooth(method=lm, colour="black", fill="grey", size=0.6, na.rm=TRUE) +
   labs(title="50 m",x="",y=expression(paste(italic(A)[T], " non carbonate (",mu, "mol ", kg^-1,")"))) +
-  #annotate("text", x =as.POSIXct("2016-01-01"), y= min(mean0m$mean_ta, na.rm=TRUE), 
+  #annotate("text", x =as.POSIXct("2016-01-01"), y= min(mean0m$ta, na.rm=TRUE), 
   #         label="*", colour="blue", size=9, fontface="plain") +
   coord_fixed() +
   Mytheme(size_labs = 8) +
   theme(axis.text.x=element_blank()) +
-  annotation_custom(grob_B_bl)
+  #annotation_custom(grob_B_bl)
 g <- plot_grid(ATnoC1p, ATnoC50p, align='vh', ncol=1)
 ggsave(file="output_jp/figures/fig_paper_at_nocarb.png", g, width=15, height = 17, units = "cm")
 #cowplot::ggsave(file="output_jp/figures/at_nocarb.pdf", g, width = 18, height = 21, units = "cm")
@@ -2285,10 +2289,10 @@ ggsave(file="output_jp/figures/fig_paper_at_nocarb.png", g, width=15, height = 1
 ```{r monthly and quarterly temperature and AT at 1 m, include=FALSE}
 mean0m_month <- mean0m %>%
   group_by(year, monthd) %>%
-  summarise(Temperature = mean(mean_temperature, na.rm=TRUE),
-            at = mean(mean_ta, na.rm=TRUE),
+  summarise(Temperature = mean(temp_field, na.rm=TRUE),
+            at = mean(ta, na.rm=TRUE),
             pCO2 = mean(mean_pCO2, na.rm=TRUE),
-            ct = mean(mean_dic, na.rm=TRUE)) %>%
+            ct = mean(dic, na.rm=TRUE)) %>%
   mutate(date = ymd(paste(year,monthd,"01")))
 
 fig_temp_month <- ggplot(data=mean0m_month, aes(x=year, y=Temperature)) + 
@@ -2443,8 +2447,8 @@ ggsave(file="output_jp/figures/fig5.pdf", fig_paper_monthly_rate_AT_CT, width = 
 # Quarterly
 mean0m_quart <- mean0m %>%
   group_by(year, quarter) %>%
-  summarise(Temperature = mean(mean_temperature, na.rm=TRUE),
-            at = mean(mean_ta, na.rm=TRUE))
+  summarise(Temperature = mean(temp_field, na.rm=TRUE),
+            at = mean(ta, na.rm=TRUE))
 fig_temp_quarter <- ggplot(data=mean0m_quart, aes(x=year, y=Temperature)) + 
   geom_line(aes(color=as.factor(quarter)), size=1) +
   xlab("Time") + ylab("Temperature") +
@@ -2481,10 +2485,10 @@ kable(tab_ct_month, digits = c(4,4,3,3,3,2,3), caption="Regressions on annual mo
 ```{r monthly and quarterly temperature and AT at 50 m, include=FALSE}
 mean50m_month <- mean50m %>%
   group_by(year, monthd) %>%
-  summarise(Temperature = mean(mean_temperature, na.rm=TRUE),
-            at = mean(mean_ta, na.rm=TRUE),
+  summarise(Temperature = mean(temp_field, na.rm=TRUE),
+            at = mean(ta, na.rm=TRUE),
             pCO2 = mean(mean_pCO2, na.rm=TRUE),
-            ct = mean(mean_dic, na.rm=TRUE)) %>%
+            ct = mean(dic, na.rm=TRUE)) %>%
   mutate(date = ymd(paste(year,monthd,"01")))
 
 # fig_temp_month <- ggplot(data=mean0m_month, aes(x=year, y=Temperature)) + 
@@ -2640,7 +2644,7 @@ ggsave(file="output_jp/figures/fig4b.pdf", fig_paper_monthly_rate_AT_CT_50m, wid
 ## Deconvolution of pH changes at 1 m with my approach
 ```{r Deconvolution of pH changes at 1 m my appproach, include=FALSE}
 #We construct a dataframe with monthly means for the entire series (mXX) as well as real data (without prefix m)
-deconv_dat_pH_1m <- tibble(date=as.POSIXct(mean0m$sampling_date), mAT=means_month0m$AT[mean0m$monthd]*1e-6, mCT=means_month0m$CT[mean0m$monthd]*1e-6, mS=means_month0m$Salinity[mean0m$monthd], mT=means_month0m$Temperature[mean0m$monthd], P=mean0m$mean_P, Pt=mean0m$mean_Pt, Sit=mean0m$mean_Sit, AT=mean0m$mean_ta*1e-6, CT=mean0m$mean_dic*1e-6, S=mean0m$mean_salinity, T=mean0m$mean_temperature)
+deconv_dat_pH_1m <- tibble(date=as.POSIXct(mean0m$sampling_date), mAT=means_month0m$AT[mean0m$monthd]*1e-6, mCT=means_month0m$CT[mean0m$monthd]*1e-6, mS=means_month0m$Salinity[mean0m$monthd], mT=means_month0m$Temperature[mean0m$monthd], P=mean0m$mean_P, Pt=mean0m$mean_Pt, Sit=mean0m$mean_Sit, AT=mean0m$ta*1e-6, CT=mean0m$dic*1e-6, S=mean0m$mean_salinity, T=mean0m$temp_field)
 
 #d <- NULL; deconv <- NULL # d is for the data to use in carb, deconv is to store the results
 deconv_pH_1m <- tibble(date = as.POSIXct(mean0m$sampling_date))
@@ -2854,9 +2858,9 @@ mean0m <- ungroup(mean0m)
 y <- mean0m %>%
   group_by(year) %>% # First, yearly means
   summarise(yS = mean(mean_salinity, na.rm = TRUE), 
-            yT = mean(mean_temperature, na.rm = TRUE),
-            yCT = mean(mean_dic, na.rm = TRUE),
-            yAT = mean(mean_ta, na.rm = TRUE),
+            yT = mean(temp_field, na.rm = TRUE),
+            yCT = mean(dic, na.rm = TRUE),
+            yAT = mean(ta, na.rm = TRUE),
             yP = mean(mean_P, na.rm = TRUE),
             yPt = mean(mean_Pt, na.rm = TRUE),
             ySit = mean(mean_Sit, na.rm = TRUE)
@@ -2867,9 +2871,9 @@ mean0m$year_month <- format(mean0m$sampling_date, '%Y-%m')
 ym <- mean0m %>%
   group_by(year_month) %>% # First, monthly means
   summarise(ymS = mean(mean_salinity, na.rm = TRUE), 
-            ymT = mean(mean_temperature, na.rm = TRUE),
-            ymCT = mean(mean_dic, na.rm = TRUE),
-            ymAT = mean(mean_ta, na.rm = TRUE),
+            ymT = mean(temp_field, na.rm = TRUE),
+            ymCT = mean(dic, na.rm = TRUE),
+            ymAT = mean(ta, na.rm = TRUE),
             ymP = mean(mean_P, na.rm = TRUE),
             ymPt = mean(mean_Pt, na.rm = TRUE),
             ymSit = mean(mean_Sit, na.rm = TRUE)
@@ -2878,17 +2882,17 @@ ym <- mean0m %>%
 # Third, total means (no grouping)
 t <- mean0m %>%
   summarise(tS = mean(mean_salinity, na.rm = TRUE),
-         tT = mean(mean_temperature, na.rm = TRUE),
-         tAT = mean(mean_ta, na.rm = TRUE),
-         tCT = mean(mean_dic, na.rm = TRUE),
+         tT = mean(temp_field, na.rm = TRUE),
+         tAT = mean(ta, na.rm = TRUE),
+         tCT = mean(dic, na.rm = TRUE),
          tP = mean(mean_P, na.rm = TRUE),
          tPt = mean(mean_Pt, na.rm = TRUE),
          tSit = mean(mean_Sit, na.rm = TRUE)
          )
 # bring all variables together
 deconv_garcia_dat_pH_1m <- mean0m %>%
-  select(sampling_date, year, monthd, year_month, CT = mean_dic, AT = mean_ta,
-         S = mean_salinity, T = mean_temperature) %>%
+  select(sampling_date, year, monthd, year_month, CT = dic, AT = ta,
+         S = mean_salinity, T = temp_field) %>%
   left_join(y) %>%
   left_join(ym) %>%
   mutate(tS = t$tS,
@@ -3527,9 +3531,9 @@ kable(deconv_garcia_total_pH_ano, digits = c(1,4,4,7,4,4,4,4,0), caption="Contri
 # y <- mean0m %>%
 #   group_by(year) %>% # First, yearly means
 #   summarise(yS = mean(mean_salinity, na.rm = TRUE), 
-#             yT = mean(mean_temperature, na.rm = TRUE),
-#             yCT = mean(mean_dic, na.rm = TRUE),
-#             yAT = mean(mean_ta, na.rm = TRUE),
+#             yT = mean(temp_field, na.rm = TRUE),
+#             yCT = mean(dic, na.rm = TRUE),
+#             yAT = mean(ta, na.rm = TRUE),
 #             yP = mean(mean_P, na.rm = TRUE),
 #             yPt = mean(mean_Pt, na.rm = TRUE),
 #             ySit = mean(mean_Sit, na.rm = TRUE)
@@ -3540,9 +3544,9 @@ kable(deconv_garcia_total_pH_ano, digits = c(1,4,4,7,4,4,4,4,0), caption="Contri
 # ym <- mean0m %>%
 #   group_by(year_month) %>% # First, monthly means
 #   summarise(ymS = mean(mean_salinity, na.rm = TRUE), 
-#             ymT = mean(mean_temperature, na.rm = TRUE),
-#             ymCT = mean(mean_dic, na.rm = TRUE),
-#             ymAT = mean(mean_ta, na.rm = TRUE),
+#             ymT = mean(temp_field, na.rm = TRUE),
+#             ymCT = mean(dic, na.rm = TRUE),
+#             ymAT = mean(ta, na.rm = TRUE),
 #             ymP = mean(mean_P, na.rm = TRUE),
 #             ymPt = mean(mean_Pt, na.rm = TRUE),
 #             ymSit = mean(mean_Sit, na.rm = TRUE)
@@ -3551,17 +3555,17 @@ kable(deconv_garcia_total_pH_ano, digits = c(1,4,4,7,4,4,4,4,0), caption="Contri
 # # Third, total means (no grouping)
 # t <- mean0m %>%
 #   summarise(tS = mean(mean_salinity, na.rm = TRUE),
-#          tT = mean(mean_temperature, na.rm = TRUE),
-#          tAT = mean(mean_ta, na.rm = TRUE),
-#          tCT = mean(mean_dic, na.rm = TRUE),
+#          tT = mean(temp_field, na.rm = TRUE),
+#          tAT = mean(ta, na.rm = TRUE),
+#          tCT = mean(dic, na.rm = TRUE),
 #          tP = mean(mean_P, na.rm = TRUE),
 #          tPt = mean(mean_Pt, na.rm = TRUE),
 #          tSit = mean(mean_Sit, na.rm = TRUE)
 #          )
 # # bring all variables together
 # deconv_garcia_dat_pH_1m <- mean0m %>%
-#   select(sampling_date, year, monthd, year_month, CT = mean_dic, AT = mean_ta,
-#          S = mean_salinity, T = mean_temperature) %>%
+#   select(sampling_date, year, monthd, year_month, CT = dic, AT = ta,
+#          S = mean_salinity, T = temp_field) %>%
 #   left_join(y) %>%
 #   left_join(ym) %>%
 #   mutate(tS = t$tS,
@@ -3578,7 +3582,7 @@ kable(deconv_garcia_total_pH_ano, digits = c(1,4,4,7,4,4,4,4,0), caption="Contri
 # We follow the method of Garcia-Ibanez described above.
 # construct a dataframe with monthly means for the entire series (mXX) as well as real data (without mrefix m)
 deconv_dat_pCO2_1m <- tbl_df(
-  data.frame(date=as.POSIXct(mean0m$sampling_date), mAT=means_month0m$AT[mean0m$monthd]*1e-6, mCT=means_month0m$CT[mean0m$monthd]*1e-6, mS=means_month0m$Salinity[mean0m$monthd], mT=means_month0m$Temperature[mean0m$monthd], P=mean0m$mean_P, Pt=mean0m$mean_Pt, Sit=mean0m$mean_Sit, AT=mean0m$mean_ta*1e-6, CT=mean0m$mean_dic*1e-6, S=mean0m$mean_salinity, T=mean0m$mean_temperature)
+  data.frame(date=as.POSIXct(mean0m$sampling_date), mAT=means_month0m$AT[mean0m$monthd]*1e-6, mCT=means_month0m$CT[mean0m$monthd]*1e-6, mS=means_month0m$Salinity[mean0m$monthd], mT=means_month0m$Temperature[mean0m$monthd], P=mean0m$mean_P, Pt=mean0m$mean_Pt, Sit=mean0m$mean_Sit, AT=mean0m$ta*1e-6, CT=mean0m$dic*1e-6, S=mean0m$mean_salinity, T=mean0m$temp_field)
 )
 
 #d <- NULL; deconv <- NULL # d is for the data to use in carb, deconv is to store the results
@@ -3775,17 +3779,17 @@ deconv_garcia_dat_pCO2_1m <- NULL
 # total means (no grouping)
 t <- mean0m %>%
   summarise(tS = mean(mean_salinity, na.rm = TRUE),
-         tT = mean(mean_temperature, na.rm = TRUE),
-         tAT = mean(mean_ta, na.rm = TRUE),
-         tCT = mean(mean_dic, na.rm = TRUE),
+         tT = mean(temp_field, na.rm = TRUE),
+         tAT = mean(ta, na.rm = TRUE),
+         tCT = mean(dic, na.rm = TRUE),
          tP = mean(mean_P, na.rm = TRUE),
          tPt = mean(mean_Pt, na.rm = TRUE),
          tSit = mean(mean_Sit, na.rm = TRUE)
          )
 # bring all variables together
 deconv_garcia_dat_pCO2_1m <- mean0m %>%
-  select(sampling_date, year, monthd, year_month, CT = mean_dic, AT = mean_ta,
-         S = mean_salinity, T = mean_temperature) %>%
+  select(sampling_date, year, monthd, year_month, CT = dic, AT = ta,
+         S = mean_salinity, T = temp_field) %>%
   mutate(tS = t$tS,
          tT = t$tT,
          tAT = t$tAT,
@@ -4030,7 +4034,7 @@ kable(deconv_garcia_total_pCO2_ano, digits = c(1,4,4,7,4,4,4,4,0), caption="Cont
 ```{r Deconvolution of pH changes at 50 m, include=FALSE}
 #We construct a dataframe with monthly means for the entire series (mXX) as well as real data (without mrefix m)
 deconv_dat_50m <- tbl_df(
-  data.frame(date=as.POSIXct(mean50m$sampling_date), mAT=means_month50m$AT[mean50m$monthd]*1e-6, mCT=means_month0m$CT[mean50m$monthd]*1e-6, mS=means_month50m$Salinity[mean50m$monthd], mT=means_month0m$Temperature[mean50m$monthd], P=mean50m$mean_P, Pt=mean50m$mean_Pt, Sit=mean50m$mean_Sit, AT=mean50m$mean_ta*1e-6, CT=mean50m$mean_dic*1e-6, S=mean50m$mean_salinity, T=mean50m$mean_temperature)
+  data.frame(date=as.POSIXct(mean50m$sampling_date), mAT=means_month50m$AT[mean50m$monthd]*1e-6, mCT=means_month0m$CT[mean50m$monthd]*1e-6, mS=means_month50m$Salinity[mean50m$monthd], mT=means_month0m$Temperature[mean50m$monthd], P=mean50m$mean_P, Pt=mean50m$mean_Pt, Sit=mean50m$mean_Sit, AT=mean50m$ta*1e-6, CT=mean50m$dic*1e-6, S=mean50m$mean_salinity, T=mean50m$temp_field)
 )
 
 #d <- NULL; deconv_50m <- NULL # d is for the data to use in carb, deconv is to store the results
@@ -4223,7 +4227,7 @@ Using the anomalies rather than the real values, the sum of the slopes is much c
 # We follow the method of Garcia-Ibanez described above.
 # construct a dataframe with monthly means for the entire series (mXX) as well as real data (without mrefix m)
 deconv_dat_50m <- tbl_df(
-  data.frame(date=as.POSIXct(mean50m$sampling_date), mAT=means_month0m$AT[mean50m$monthd]*1e-6, mCT=means_month0m$CT[mean50m$monthd]*1e-6, mS=means_month0m$Salinity[mean50m$monthd], mT=means_month0m$Temperature[mean50m$monthd], P=mean50m$mean_P, Pt=mean50m$mean_Pt, Sit=mean50m$mean_Sit, AT=mean50m$mean_ta*1e-6, CT=mean50m$mean_dic*1e-6, S=mean50m$mean_salinity, T=mean50m$mean_temperature)
+  data.frame(date=as.POSIXct(mean50m$sampling_date), mAT=means_month0m$AT[mean50m$monthd]*1e-6, mCT=means_month0m$CT[mean50m$monthd]*1e-6, mS=means_month0m$Salinity[mean50m$monthd], mT=means_month0m$Temperature[mean50m$monthd], P=mean50m$mean_P, Pt=mean50m$mean_Pt, Sit=mean50m$mean_Sit, AT=mean50m$ta*1e-6, CT=mean50m$dic*1e-6, S=mean50m$mean_salinity, T=mean50m$temp_field)
 )
 
 #d <- NULL; deconv_50m <- NULL # d is for the data to use in carb, deconv is to store the results
@@ -4419,17 +4423,17 @@ deconv_garcia_dat_pH_50m <- NULL
 mean50m <- ungroup(mean50m)
 t <- mean50m %>%
   summarise(tS = mean(mean_salinity, na.rm = TRUE),
-         tT = mean(mean_temperature, na.rm = TRUE),
-         tAT = mean(mean_ta, na.rm = TRUE),
-         tCT = mean(mean_dic, na.rm = TRUE),
+         tT = mean(temp_field, na.rm = TRUE),
+         tAT = mean(ta, na.rm = TRUE),
+         tCT = mean(dic, na.rm = TRUE),
          tP = mean(mean_P, na.rm = TRUE),
          tPt = mean(mean_Pt, na.rm = TRUE),
          tSit = mean(mean_Sit, na.rm = TRUE)
          )
 # bring all variables together
 deconv_garcia_dat_pH_50m <- mean50m %>%
-  select(sampling_date, year, monthd, CT = mean_dic, AT = mean_ta,
-         S = mean_salinity, T = mean_temperature) %>%
+  select(sampling_date, year, monthd, CT = dic, AT = ta,
+         S = mean_salinity, T = temp_field) %>%
   mutate(tS = t$tS,
          tT = t$tT,
          tAT = t$tAT,
@@ -4691,17 +4695,17 @@ deconv_garcia_dat_pCO2_50m <- NULL
 # total means (no grouping)
 t <- mean50m %>%
   summarise(tS = mean(mean_salinity, na.rm = TRUE),
-         tT = mean(mean_temperature, na.rm = TRUE),
-         tAT = mean(mean_ta, na.rm = TRUE),
-         tCT = mean(mean_dic, na.rm = TRUE),
+         tT = mean(temp_field, na.rm = TRUE),
+         tAT = mean(ta, na.rm = TRUE),
+         tCT = mean(dic, na.rm = TRUE),
          tP = mean(mean_P, na.rm = TRUE),
          tPt = mean(mean_Pt, na.rm = TRUE),
          tSit = mean(mean_Sit, na.rm = TRUE)
          )
 # bring all variables together
 deconv_garcia_dat_pCO2_50m <- mean50m %>%
-  select(sampling_date, year, monthd, CT = mean_dic, AT = mean_ta,
-         S = mean_salinity, T = mean_temperature) %>%
+  select(sampling_date, year, monthd, CT = dic, AT = ta,
+         S = mean_salinity, T = temp_field) %>%
   mutate(tS = t$tS,
          tT = t$tT,
          tAT = t$tAT,
@@ -4947,7 +4951,7 @@ kable(deconv_garcia_total_pCO2_50m_ano, digits = c(1,4,4,7,4,4,4,4,0), caption="
 
 # AT versus salinity at the surface per month with facet
 p1 <- ggplot(data=dplyr::filter(means_depth, depth== 0)) +
-  aes(mean_salinity, mean_ta) +
+  aes(mean_salinity, ta) +
   geom_point(na.rm=TRUE, size=size_point) +
   stat_smooth(method=lm, na.rm=TRUE, show.legend=FALSE, se=FALSE, colour="black", size=0.5) +
   facet_wrap(~ month) +
@@ -4962,7 +4966,7 @@ dev.off()
 
 # AT versus salinity at the surface per year with facet
 p1 <- ggplot(data=dplyr::filter(means_depth, depth== 0)) +
-  aes(mean_salinity, mean_ta) +
+  aes(mean_salinity, ta) +
   geom_point(na.rm=TRUE, size=size_point) +
   stat_smooth(method=lm, na.rm=TRUE, show.legend=FALSE, se=FALSE, colour="black", size=0.5) +
   facet_wrap(~ year) +
@@ -4981,7 +4985,7 @@ for (i in unique(tmp$year)[-length(unique(tmp$year))]) {
   #i <- 13
   j <- j+1
   print(j)
-  p[[j]] <- ggplot(data=filter(tmp, tmp$year==i), aes(x=mean_salinity, y=mean_ta, colour=month)) +
+  p[[j]] <- ggplot(data=filter(tmp, tmp$year==i), aes(x=mean_salinity, y=ta, colour=month)) +
     geom_point(na.rm=TRUE, size=2) +
     stat_smooth(method=lm, na.rm=TRUE, show.legend=FALSE, se=FALSE, colour="black", size=0.5) +
     scale_x_continuous(limits = c(36.8, 38.5), breaks=c(37, 37.5, 38, 38.5), expand = c(0,0)) +
@@ -5023,7 +5027,7 @@ ggsave(file="output_jp/figures/fig6.pdf", g, width = 16, height = 15, units = "c
 
 
 # AT=f(S) with all data
-lms <- summary(lm(data = mean0m, mean_ta ~ mean_salinity))
+lms <- summary(lm(data = mean0m, ta ~ mean_salinity))
 prob <- pf(lms$fstatistic[1],lms$fstatistic[2],lms$fstatistic[3],lower.tail=FALSE)
 reg_AT_S_all <- cbind(as.numeric(c(lms$coefficients[2,1], lms$coefficients[2,2], 
                                        lms$coefficients[2,4], lms$coefficients[1,1],
@@ -5034,7 +5038,7 @@ row.names(reg_AT_S_all) <- c("Slope", "SE Slope", "P Slope","Intercept","SE int.
                     "R2","P value")
 
 p1 <- ggplot(data=mean0m) +
-  aes(x= mean_salinity, y=mean_ta) +
+  aes(x= mean_salinity, y=ta) +
   geom_point(na.rm=TRUE, size=size_point) +
   stat_smooth(method=lm, na.rm=TRUE, show.legend=FALSE, se=FALSE, colour="black", size=0.5) +
   labs(title = "With monthly means", x = "Salinity", y = expression(paste("Total alkalinity (",mu, "mol ", kg^-1,")"))) +
@@ -5097,9 +5101,9 @@ precip_cumsum <-
   theme(aspect.ratio = 1/2,
         plot.margin = margin(t=0.25, r=0.5, b=0, l=0, unit = "cm"),
         axis.title.x = element_text(margin=margin(t=0.15, r=0, b=0.25, l=0, unit = "cm"))) +
-  annotation_custom(grob_A)
+  #annotation_custom(grob_A)
   
-precip_ta <- ggplot(w_AT_precip, aes(x = rr_cumsum, y = mean_ta)) +
+precip_ta <- ggplot(w_AT_precip, aes(x = rr_cumsum, y = ta)) +
   geom_point(colour = "blue", na.rm=TRUE) +
   labs(title = NULL,
        x = "Weekly precipitation (mm)", 
@@ -5108,7 +5112,7 @@ precip_ta <- ggplot(w_AT_precip, aes(x = rr_cumsum, y = mean_ta)) +
   theme(aspect.ratio = 1/2,
         plot.margin = margin(t=0.25, r=0.5, b=0, l=0, unit = "cm"),
         axis.title.x = element_text(margin=margin(t=0.15, r=0, b=0.25, l=0, unit = "cm"))) +
-  annotation_custom(grob_B_bl)
+  #annotation_custom(grob_B_bl)
 
 precip_S <- ggplot(w_AT_precip, aes(x = rr_cumsum, y = mean_salinity)) +
   geom_point(colour = "blue", na.rm=TRUE) +
@@ -5119,7 +5123,7 @@ precip_S <- ggplot(w_AT_precip, aes(x = rr_cumsum, y = mean_salinity)) +
     theme(aspect.ratio = 1/2,
         plot.margin = margin(t=0.25, r=0.5, b=0, l=0, unit = "cm"),
         axis.title.x = element_text(margin=margin(t=0.15, r=0, b=0.25, l=0, unit = "cm"))) +
-annotation_custom(grob_C_bl)
+#annotation_custom(grob_C_bl)
 
 g <- plot_grid(precip_cumsum, precip_ta, precip_S, ncol=1, align="h")
 ggsave("output_jp/figures/precip.png",g, width = 18, height = 14, units = "cm")
@@ -5179,7 +5183,7 @@ plot_continuous_discrete_pH  <- ggplot(data = filter(continuous_discrete,!is.na(
                date_minor_breaks="1 month", labels=date_format("%b %Y")) +
   Mytheme() +
   theme(panel.grid.major.x = element_blank()) +
-  annotation_custom(grob_A)
+  #annotation_custom(grob_A)
 
   # Plot Seafet temperature
 plot_continuous_discrete_T  <- ggplot(data = filter(continuous_discrete,!is.na(T_seaF))) +
@@ -5190,7 +5194,7 @@ plot_continuous_discrete_T  <- ggplot(data = filter(continuous_discrete,!is.na(T
                date_minor_breaks="1 month", labels=date_format("%b %Y")) +
   Mytheme() +
   theme(panel.grid.major.x = element_blank()) +
-  annotation_custom(grob_B)
+  #annotation_custom(grob_B)
 
 # Zoom on a few days
 date_min <- as.numeric(as.POSIXct("2015-05-01"))
@@ -5202,7 +5206,7 @@ plot_zoom <- ggplot(data =dat) +
   scale_x_datetime(breaks = date_breaks("1 days"), labels = date_format("%d %b")) +
   Mytheme() +
   theme(panel.grid.major.x = element_blank()) +
-  annotation_custom(grob_E)
+  #annotation_custom(grob_E)
 
 # Offset between seafet pH and spec pH (Fig. 2 Kapsenberg et al.)
 dat <- mutate(continuous_discrete, diff_pH = pHspec_Tptb - pHT_sfint)
@@ -5216,7 +5220,7 @@ plot_offset <- ggplot(data = filter(dat, !is.na(diff_pH))) +
                date_minor_breaks="1 month", labels=date_format("%b %Y")) +
   Mytheme() +
   theme(panel.grid.major.x = element_blank()) +
-  annotation_custom(grob_C)
+  #annotation_custom(grob_C)
 
 # Range of daily pH changes
 range <- tbl_df(
@@ -5256,7 +5260,7 @@ plot_range_pH_Temperature <-  ggplot(data = range_month) +
   Mytheme(size_labs = 9) +
   theme(aspect.ratio=1/2,
         axis.title.x = element_text(margin=margin(t=0.25, r=0, b=0.25, l=0, unit = "cm"))) +
-  annotation_custom(grob_A)
+  #annotation_custom(grob_A)
 ggsave("output_jp/figures/plot_range_pH_Temperature.png", plot_range_pH_Temperature)
 
 size_point <- 0.4 # size of data points
@@ -5267,7 +5271,7 @@ plot_range <-
   labs(y =expression(paste(pH[T], " range")), x=NULL, title=NULL) +
   Mytheme() +
   theme(panel.grid.major.x = element_blank()) +
-  annotation_custom(grob_D)
+  #annotation_custom(grob_D)
 
 g <- plot_grid(plot_continuous_discrete_pH, plot_continuous_discrete_T, plot_offset, plot_range, plot_zoom, align='vh', ncol=1)
 ggsave("output_jp/figures/fig_paper_time_series.png", g, width = 18, height = 14, units = "cm")
@@ -5282,18 +5286,18 @@ range_year_week <-
 # add year_month to weekly data
 tmp <- ungroup(mean0m) %>%
   mutate(year_week=paste0(year,"-", week(sampling_date))) %>%
-  select(sampling_date, mean_Chla, year_week)
+  select(sampling_date, Chla, year_week)
 # add chla in range_month
 range_year_week <- inner_join(range_year_week, tmp, by="year_week")
 plot_range_pH_Chla_week <-  ggplot(data =  range_year_week) +
-  geom_point(aes(x = mean_Chla, y = pH_range_year_week), na.rm=TRUE) +
+  geom_point(aes(x = Chla, y = pH_range_year_week), na.rm=TRUE) +
   labs(title = NULL,
        x = expression(paste("Chl-a concentration (mg ", m^-3,")")),
        y = "pH range") +
   Mytheme(size_labs = 9) +
   theme(aspect.ratio=1/2,
         axis.title.x = element_text(margin=margin(t=0.25, r=0, b=0.25, l=0, unit = "cm"))) +
-  annotation_custom(grob_B)
+  #annotation_custom(grob_B)
 ggsave("output_jp/figures/plot_range_pH_Chla_week.png", plot_range_pH_Chla_week)
 
 plot_range_pH_Chla_temp <- plot_grid(plot_range_pH_Temperature,
@@ -5389,7 +5393,7 @@ fig_CO2_time_series <- ggplot(data=CO2_pr_i_melt) +
   Mytheme() +
   theme(legend.position="top") +
   guides(col = guide_legend(ncol = 2, byrow = TRUE)) +
-  annotation_custom(grob_A)
+  #annotation_custom(grob_A)
 
 fig_CO2_ano <- ggplot(data = ano_atm_CO2, aes(x = as.POSIXct(dt), y = atm_CO2_ano)) +
   scale_x_datetime(breaks = date_breaks("2 year"), labels = date_format("%Y")) +
@@ -5397,7 +5401,7 @@ fig_CO2_ano <- ggplot(data = ano_atm_CO2, aes(x = as.POSIXct(dt), y = atm_CO2_an
   geom_smooth(method=lm, colour="black", fill="grey", size=0.6) +
   labs(title=NULL, x="Time", y=expression(paste("Atmospheric ", CO[2]))) +
   Mytheme() +
-  annotation_custom(grob_B)
+  #annotation_custom(grob_B)
 
 fig_delta_CO2 <- ggplot(data = CO2_pr_i, aes(x = as.POSIXct(dt), y = mean_pCO2 - atm_CO2), na.rm=TRUE) +
   scale_x_datetime(breaks = date_breaks("2 year"), labels = date_format("%Y")) +
@@ -5443,7 +5447,7 @@ zz$pH <- zz2$pH
 deff <- ggplot() + 
   geom_contour(data=zz, aes(x=ct*1e6, y=at*1e6, z=pH), stat = "contour", binwidth = 0.1, na.rm=TRUE) +
 stat_contour(aes(colour=..level..), breaks=c(8, 8.1, 8.2)) +
-  geom_point(data=mean0m, aes(x = mean_dic, y=mean_ta, col=as.factor(year)), na.rm=TRUE) + 
+  geom_point(data=mean0m, aes(x = dic, y=ta, col=as.factor(year)), na.rm=TRUE) + 
   scale_color_viridis(name="Year", discrete=TRUE, option="plasma")
 
 deff_monthly <- ggplot() + 
@@ -5497,8 +5501,8 @@ deff_yearly <- ggplot() +
 
 # Quarterly Deffayes plot
 tmp <- ungroup(mean0m) %>%
-  select(mean_dic, mean_ta, year, quarter) %>%
-  rename(ct=mean_dic, at=mean_ta) %>%
+  select(dic, ta, year, quarter) %>%
+  rename(ct=dic, at=ta) %>%
   group_by(year, quarter) %>%
   summarize_all(mean,na.rm=TRUE)
 deff_quarterly <- ggplot() +
