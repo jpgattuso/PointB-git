@@ -861,33 +861,80 @@ grid.arrange(CAT1, CCT1, CAT50, CCT50, ncol=1)
 dev.off()
 ```
 
-```{r Calculate mean AT and DIC, include=FALSE}
-# Calculate means of duplicate samples and remove duplicates
-# one removes  values flagged as 3
-z <- z %>%
+```{r Calculate means except pH, include=FALSE}
+# AT and CT, one removes  values flagged as 3
+mean_at_dic <- z %>%
+  dplyr::select(sampling_date, depth, ta_dup, qflag_ta, dic_dup, qflag_dic) %>% 
   dplyr::group_by(sampling_date, depth) %>%
-  dplyr::mutate(ta = ifelse(qflag_ta != 3, mean(ta_dup, na.rm = TRUE), NA),
-                dic = ifelse(qflag_dic != 3, mean(dic_dup, na.rm = TRUE), NA)) %>% 
+  dplyr::mutate(ta_dup = ifelse(qflag_ta != 3, ta_dup, NA),
+                dic_dup = ifelse(qflag_dic != 3, dic_dup, NA),
+                ta = mean(ta_dup, na.rm = TRUE),
+                dic = mean(dic_dup, na.rm = TRUE)) %>% 
   dplyr::ungroup() %>% 
-  dplyr::select(-c(sample, sampling_hour, measure_date, ta_dup, dic_dup, pH_ta)) %>% #remove vars not useful and causing problems with distinct
-  dplyr::distinct() %>% 
-  dplyr::relocate(depth, .before = salinity_field)
+  dplyr::select(sampling_date, depth, ta, dic) %>% 
+  dplyr::distinct()
+# salinity and temperature field
+mean_sal_temp <- z %>%
+  dplyr::select(sampling_date, depth, salinity_field, temp_field) %>% 
+  dplyr::group_by(sampling_date, depth) %>%
+  dplyr::mutate(salinity = mean(salinity_field, na.rm = TRUE),
+                temperature = mean(temp_field, na.rm = TRUE)) %>% 
+  dplyr::ungroup() %>% 
+  dplyr::select(sampling_date, depth, salinity, temperature) %>% 
+  dplyr::distinct()
+# Chl-a
+mean_Chla <- z %>%
+  dplyr::select(sampling_date, depth, Chla) %>% 
+  dplyr::group_by(sampling_date, depth) %>%
+  dplyr::mutate(Chla = mean(Chla, na.rm = TRUE)) %>% 
+  dplyr::ungroup() %>% 
+  dplyr::select(sampling_date, depth, Chla) %>% 
+  dplyr::distinct()
+# NO2, NO3, PO4, SIHO4
+mean_nuts <- z %>%
+  dplyr::select(sampling_date, depth, NO2, qNO2, NO3, qNO3, PO4, qPO4, SIOH4, qSIOH4) %>% 
+  dplyr::group_by(sampling_date, depth) %>%
+  dplyr::mutate(NO2 = ifelse(qNO2 == 2, NO2, NA),
+                NO3 = ifelse(qNO3 == 2, NO3, NA),
+                PO4 = ifelse(qPO4 == 2, PO4, NA),
+                SIOH4 = ifelse(qSIOH4 == 2, SIOH4, NA)) %>% 
+  dplyr::mutate(NO2 = mean(NO2, na.rm = TRUE),
+                NO3 = mean(NO3, na.rm = TRUE),
+                PO4 = mean(PO4, na.rm = TRUE),
+                SIOH4 = mean(SIOH4, na.rm = TRUE)
+                ) %>% 
+  dplyr::ungroup() %>% 
+  dplyr::select(sampling_date, depth, NO2, NO3, PO4, SIOH4) %>% 
+  dplyr::distinct()
+dat1 <- dplyr::full_join(mean_sal_temp, mean_at_dic)  %>% 
+  dplyr::full_join(mean_nuts) %>% 
+  dplyr::full_join(mean_Chla) %>% 
+  dplyr::distinct()
+# Check that there is only one row per date and depth
+zzz <- dat1 %>% filter(depth==50) %>% select(sampling_date, depth) %>% group_by(sampling_date) %>% mutate(n=n()) %>% ungroup() %>% filter(n!=1)
+zzz
 ```
 
 ```{r Calculate and compare spec pH, include=FALSE}
+
+#First, create df with pH variables plus mean ta
+tmp <- z %>% 
+  dplyr::select(sampling_date, depth, contains("eol"), contains("ptb")) %>% 
+  dplyr::left_join(dat1)
+
 # calculate in situ spec pH at eol
 eol <- z %>%
   dplyr::select(sampling_date, depth, ta, dic, salinity_field, temp_field, 
                 pH_s_eol_temp_lab, qflag_pH_s_eol, temp_lab_eol, PO4, SIOH4) %>%
   tidyr::drop_na() %>%
   dplyr::filter(qflag_pH_s_eol != 3) %>% 
-  dplyr::mutate(pH_s_eol_temp_insi = pHinsi(pH=pH_s_eol_temp_lab, ALK=ta,
-                             Tinsi=temp_field,
-                             Tlab=temp_lab_eol,
-                             Pinsi=depth/10, S=salinity_field,
-                             Pt=1e-6*PO4, Sit=1e-6*SIOH4,
-                             k1k2 = "l", kf = "pf", ks="d",
-                             pHscale = "T", b="l10")) %>% 
+  dplyr::mutate(pH_s_eol_temp_insi = pHinsi(pH = pH_s_eol_temp_lab, ALK=ta,
+                             Tinsi = temp_field,
+                             Tlab =temp_lab_eol,
+                             Pinsi = depth/10, S = salinity_field,
+                             Pt = 1e-6*PO4, Sit = 1e-6*SIOH4,
+                             k1k2 = "l", kf = "pf", ks = "d",
+                             pHscale = "T", b = "l10")) %>% 
   dplyr::group_by(sampling_date, depth) %>%
   dplyr::mutate(pH_s_eol_temp_insi = mean(pH_s_eol_temp_insi, na.rm = TRUE)) %>% 
   dplyr::select(-c(pH_s_eol_temp_lab, qflag_pH_s_eol, temp_lab_eol)) %>% # no 
@@ -972,9 +1019,68 @@ eol_ptb <- eol_ptb %>%
   dplyr::select(-mean_pH)
 
 # add pH variables to data
-z2 <- dplyr::left_join(z, eol_ptb, by = c("sampling_date", "depth")) %>% 
+# z <- dplyr::left_join(z, eol_ptb, by = c("sampling_date", "depth")) %>% 
+#   dplyr::select(-dplyr::contains(c("eol", "ptb", "qflag", "qNO3", "qNO2", "qPO4", "qSIOH4"))) %>% 
+#     distinct()
+```
+
+```{r Calculate means other than ta,dic, pH, include=FALSE}
+# means_depth <- dat %>%
+#   group_by(depth, sampling_date) %>%
+#   dplyr::summarise(
+#             mean_salinity=mean(salinity_field, na.rm=TRUE),
+#             temp_field=mean(temp_field, na.rm=TRUE),
+#             Chla=mean(Chla, na.rm=TRUE),
+#             dic=mean(dic, na.rm=TRUE),
+#             ta=mean(ta, na.rm=TRUE),
+#             Nta=mean(Nta,na.rm=TRUE),
+#             dic=mean(Ndic,na.rm=TRUE),
+#             mean_pH_s_eol_temp_insi=mean(pH_s_eol_temp_insi,na.rm=TRUE),
+#             mean_pH_s_ptb_temp_insi=mean(pH_s_ptb_temp_insi,na.rm=TRUE),
+#             mean_pH=mean(pH, na.rm=TRUE),
+#             mean_pH25=mean(pH25, na.rm=TRUE),
+#             mean_pCO2=mean(pCO2, na.rm=TRUE),
+#             mean_OmegaCalcite=mean(OmegaCalcite, na.rm=TRUE),
+#             mean_OmegaAragonite=mean(OmegaAragonite, na.rm=TRUE),
+#             Chla=mean(Chla, na.rm=TRUE),
+#             mean_P=mean(depth/10, na.rm=TRUE),
+#             mean_Pt=mean(1e-6*PO4, na.rm=TRUE),
+#             mean_Sit=mean(1e-6*SIOH4, na.rm=TRUE)
+#             ) %>%
+
+dat <- dplyr::full_join(dat1, eol_ptb, by = c("sampling_date", "depth")) %>% 
   dplyr::select(-dplyr::contains(c("eol", "ptb", "qflag", "qNO3", "qNO2", "qPO4", "qSIOH4"))) %>% 
     distinct()
+# also add P and time variables, and rename nuts
+means_depth <- dat %>%
+  group_by(depth, sampling_date) %>%
+  dplyr::summarise(
+            P = mean(depth/10, na.rm=TRUE),
+            Pt = mean(1e-6*PO4, na.rm=TRUE),
+            Sit = mean(1e-6*SIOH4, na.rm=TRUE)
+            ) %>%
+  dplyr::ungroup() %>% 
+  dplyr::mutate(
+    year = year(sampling_date),
+    quarter = quarter(sampling_date),
+    monthd = month(sampling_date),
+    month = month(sampling_date, label = TRUE, abbr = FALSE),
+    week = week(sampling_date)
+    ) %>%
+    dplyr::arrange(sampling_date) %>% 
+  distinct()
+
+# The above generates NaNs which are replaced by NAs
+is.na(means_depth) <- is.na(means_depth)
+somlit <- means_depth %>% 
+  dplyr::select(sampling_date, depth, salinity, temperature, dic, ta, pH_insi, Pt, Sit)
+write_csv(somlit, path = "output_jp/data/output_somlit.csv")
+
+#separate each means_depth and handle last incomplete year
+mean0m <- dplyr::filter(means_depth, depth==0)
+mean50m <- dplyr::filter(means_depth, depth==50)
+mean0m_full <- dplyr::filter(means_depth, depth==0, year(sampling_date) < cutoff_date)
+mean50m_full <- dplyr::filter(means_depth, depth==50, year(sampling_date) < cutoff_date)
 ```
 
 ```{r Calculate final derived variable and save, include=FALSE}
@@ -1044,51 +1150,6 @@ pangaea <- select(dat, sampling_date, depth, CSC_flag, salinity_field,
 write_csv(dat, path="output_jp/data/output.csv")
 write_csv(pangaea, path="output_jp/data/output_pangaea.csv")
 write_rds(dat, "output_jp/data/output.rds")
-```
-
-```{r Calculate mean values, include=FALSE}
-# means_depth <- dat %>%
-#   group_by(depth, sampling_date) %>%
-#   dplyr::summarise(
-#             mean_salinity=mean(salinity_field, na.rm=TRUE),
-#             temp_field=mean(temp_field, na.rm=TRUE),
-#             Chla=mean(Chla, na.rm=TRUE),
-#             dic=mean(dic, na.rm=TRUE),
-#             ta=mean(ta, na.rm=TRUE),
-#             ta_nocarb=mean(ta - HCO3*1e6 - 2*CO3*1e6, na.rm=TRUE),
-#             Nta=mean(Nta,na.rm=TRUE),
-#             dic=mean(Ndic,na.rm=TRUE),
-#             mean_pH_s_eol_temp_insi=mean(pH_s_eol_temp_insi,na.rm=TRUE),
-#             mean_pH_s_ptb_temp_insi=mean(pH_s_ptb_temp_insi,na.rm=TRUE),
-#             mean_pH=mean(pH, na.rm=TRUE),
-#             mean_pH25=mean(pH25, na.rm=TRUE),
-#             mean_pCO2=mean(pCO2, na.rm=TRUE),
-#             mean_OmegaCalcite=mean(OmegaCalcite, na.rm=TRUE),
-#             mean_OmegaAragonite=mean(OmegaAragonite, na.rm=TRUE),
-#             Chla=mean(Chla, na.rm=TRUE),
-#             mean_P=mean(depth/10, na.rm=TRUE),
-#             mean_Pt=mean(1e-6*PO4, na.rm=TRUE),
-#             mean_Sit=mean(1e-6*SIOH4, na.rm=TRUE)
-#             ) %>%
-means_depth <- dat %>%
-  dplyr::mutate(
-    year = year(sampling_date),
-    quarter = quarter(sampling_date),
-    monthd = month(sampling_date),
-    month = month(sampling_date, label = TRUE, abbr = FALSE),
-    week = week(sampling_date)
-    ) %>%
-    dplyr::arrange(depth)
-
-# The above generates NaNs which are replaced by NAs
-is.na(means_depth) <- is.na(means_depth)
-write.table(means_depth, paste0("output_jp/data/output_somlit.csv"), sep= ",", dec=".", row.names = FALSE)
-
-#separate each means_depth and handle last incomplete year
-mean0m <- dplyr::filter(means_depth, depth==0)
-mean50m <- dplyr::filter(means_depth, depth==50)
-mean0m_full <- dplyr::filter(means_depth, depth==0, year(sampling_date) < cutoff_date)
-mean50m_full <- dplyr::filter(means_depth, depth==50, year(sampling_date) < cutoff_date)
 ```
 
 ```{r Uncertainties, include=FALSE, echo=FALSE}
@@ -2254,34 +2315,6 @@ ggsave(file="output_jp/figures/fig3.pdf", g, width = 18, height = 21, units = "c
 ```{r kable regressions 50 m}
 kable(reg_var_50m, digits = c(4,4,3,3,3,2,3), caption="Regressions on values at 50 m depth.")
 kable(reg_ano_50m, digits = c(4,4,3,3,3,2,3), caption="Regressions on anomalies at 50 m depth.")
-```
-
-```{r Changes in AT_nocarb, include=FALSE}
-ATnoC1p <- ggplot(mean0m, aes(x = sampling_date, y = ta_nocarb), na.rm=TRUE) +
-  scale_x_datetime(breaks = date_breaks("2 year"), labels = date_format("%Y")) +
-  geom_point(colour="black", na.rm=TRUE, size=size_point) + 
-  #geom_smooth(method=lm, colour="black", fill="grey", size=0.6, na.rm=TRUE) +
-  labs(title="1 m",x="",y=expression(paste(italic(A)[T], " non carbonate (",mu, "mol ", kg^-1,")"))) +
-  #annotate("text", x =as.POSIXct("2016-01-01"), y= min(mean0m$ta, na.rm=TRUE), 
-  #         label="*", colour="blue", size=9, fontface="plain") +
-  coord_fixed() +
-  Mytheme(size_labs = 8) +
-  theme(axis.text.x=element_blank()) +
-  #annotation_custom(grob_A_bl)
-ATnoC50p <- ggplot(mean50m, aes(x = sampling_date, y = ta_nocarb), na.rm=TRUE) +
-  scale_x_datetime(breaks = date_breaks("2 year"), labels = date_format("%Y")) +
-  geom_point(colour="black", na.rm=TRUE, size=size_point) + 
-  #geom_smooth(method=lm, colour="black", fill="grey", size=0.6, na.rm=TRUE) +
-  labs(title="50 m",x="",y=expression(paste(italic(A)[T], " non carbonate (",mu, "mol ", kg^-1,")"))) +
-  #annotate("text", x =as.POSIXct("2016-01-01"), y= min(mean0m$ta, na.rm=TRUE), 
-  #         label="*", colour="blue", size=9, fontface="plain") +
-  coord_fixed() +
-  Mytheme(size_labs = 8) +
-  theme(axis.text.x=element_blank()) +
-  #annotation_custom(grob_B_bl)
-g <- plot_grid(ATnoC1p, ATnoC50p, align='vh', ncol=1)
-ggsave(file="output_jp/figures/fig_paper_at_nocarb.png", g, width=15, height = 17, units = "cm")
-#cowplot::ggsave(file="output_jp/figures/at_nocarb.pdf", g, width = 18, height = 21, units = "cm")
 ```
 
 ## Annual, monthly and quarterly ranges of T, AT and pCO2 at 1m
