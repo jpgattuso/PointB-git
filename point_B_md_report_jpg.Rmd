@@ -1102,13 +1102,12 @@ dat3 %>% # this is to get rid of NaN; ugly but it works!
 dat <- readr::read_csv(file = "output_jp/data/output_somlit.csv", col_names = TRUE, na = c("NA", "NaN"))
 
 #Prepare data to upload to Pangaea 
-sd <- as.character(dat$sampling_date)
-  
-pangaea <- dplyr::select(dat, sd, depth, CSC_flag, salinity,
+pangaea <- dplyr::select(dat, sampling_date, depth, CSC_flag, salinity,
                   temperature, HCO3, CO3,
                   pH_insi, ta, dic, OmegaCalcite,
                   OmegaAragonite, pCO2, fCO2) %>%
-  dplyr::mutate(depth = replace(depth, depth == 0, 1))
+  dplyr::mutate(depth = replace(depth, depth == 0, 1),
+                sampling_date = as.character(dat$sampling_date))
 
 #Prepare SOMLIT data 
 somlit <- dat %>% 
