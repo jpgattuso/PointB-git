@@ -1097,14 +1097,14 @@ tmp <- tmp %>% dplyr::mutate(pH18 = pHat18) %>%
     dplyr::select(sampling_date, depth, pH18)
 
 dat3 <- left_join(dat2, tmp, by = c("sampling_date", "depth"))
-dat3 %>% 
+dat3 %>% # this is to get rid of NaN; ugly but it works!
   readr::write_csv(path = "output_jp/data/output_somlit.csv")
 dat <- readr::read_csv(file = "output_jp/data/output_somlit.csv", col_names = TRUE, na = c("NA", "NaN"))
 
-
-
 #Prepare data to upload to Pangaea 
-pangaea <- dplyr::select(dat, sampling_date, depth, CSC_flag, salinity,
+sd <- as.character(dat$sampling_date)
+  
+pangaea <- dplyr::select(dat, sd, depth, CSC_flag, salinity,
                   temperature, HCO3, CO3,
                   pH_insi, ta, dic, OmegaCalcite,
                   OmegaAragonite, pCO2, fCO2) %>%
@@ -1112,7 +1112,7 @@ pangaea <- dplyr::select(dat, sampling_date, depth, CSC_flag, salinity,
 
 #Prepare SOMLIT data 
 somlit <- dat %>% 
-  dplyr::select(sampling_date, depth, salinity, temperature, dic, ta, pH_insi, Pt, Sit)
+  dplyr::select(sampling_date, depth, salinity, temperature, dic, ta, pH_calc, Pt, Sit)
 
 #save data
 write_csv(somlit, path = "output_jp/data/output_somlit.csv")
