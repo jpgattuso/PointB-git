@@ -1,6 +1,6 @@
 ---
 title: "Time series of the carbonate chemistry at Point B"
-author: "Jean-Pierre Gattuso, CNRS-UPMC (gattuso@obs-vlfr.fr), Samir Alliouane, Lydia Kapsenberg and Laure Mousseau"
+author: "Jean-Pierre Gattuso, CNRS-SU (gattuso@obs-vlfr.fr), Samir Alliouane, Maïa Durozier, Lydia Kapsenberg and Laure Mousseau"
 date: '`r format(Sys.Date(), "%d %B %Y")`'
 output:
   html_document:
@@ -1884,7 +1884,7 @@ row.names(reg_ta_no_change) <- var_list
 ```{r kable regressions 1 m}
 kable(reg_var_1m, digits = c(4,4,3,3,3,2,3), caption="Regressions on values at 1 m depth.")
 kable(reg_ano_1m, digits = c(4,4,3,3,3,2,3), caption="Regressions on anomalies at 1 m depth.")  
-kable(tab_surf_salinity_AT_year, digits = c(2,2), caption="Regressions on values at 1 m depth for every year.")
+kable(tab_surf_salinity_AT_year, digits = c(2,2), caption="Regressions AT vs salinity on values at 1 m depth for every year.")
 ```
 
 ```{r Figure Interannual changes and anomalies at 50 m, include=FALSE}
