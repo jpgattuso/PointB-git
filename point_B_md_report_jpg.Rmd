@@ -1734,7 +1734,7 @@ anAT1p <- ggplot(data = ano_month0m, aes(x = sampling_date, y = ta_ano), na.rm=T
   Mytheme(size_labs = 8) +
   theme(axis.text.x=element_blank())
   #annotation_custom(grob_J_bl)
-anpH1p <- ggplot(data = ano_month0m, aes(x = sampling_date, y = pH_ano), na.rm=TRUE) +
+anpH1p <- ggplot(data = ano_month0m, aes(x = sampling_date, y = pH_calc_ano), na.rm=TRUE) +
   scale_x_datetime(date_breaks="4 year", date_minor_breaks="1 years", labels = date_format("%Y")) +
   geom_point(colour="blue", na.rm=TRUE, size=size_point) + 
   geom_smooth(method=lm, colour="black", fill="grey", size=0.6, na.rm=TRUE) +
@@ -2221,18 +2221,19 @@ kable(reg_var_50m, digits = c(4,4,3,3,3,2,3), caption="Regressions on values at 
 kable(reg_ano_50m, digits = c(4,4,3,3,3,2,3), caption="Regressions on anomalies at 50 m depth.")
 ```
 
-## Annual, monthly and quarterly ranges of T, AT and pCO2 at 1m
+## Annual, monthly and quarterly of T, AT and pCO2 at 1m
 
 ```{r monthly and quarterly temperature and AT at 1 m, include=FALSE}
 dat0m_month <- dat0m %>%
   group_by(year, monthd) %>%
-  summarise(Temperature = mean(temp_field, na.rm=TRUE),
+  summarise(salinity = mean(salinity, na.rm=TRUE),
+            temperature = mean(temperature, na.rm=TRUE),
             at = mean(ta, na.rm=TRUE),
-            pCO2 = mean(mean_pCO2, na.rm=TRUE),
+            pCO2 = mean(pCO2, na.rm=TRUE),
             ct = mean(dic, na.rm=TRUE)) %>%
   mutate(date = ymd(paste(year,monthd,"01")))
 
-fig_temp_month <- ggplot(data=dat0m_month, aes(x=year, y=Temperature)) + 
+fig_temp_month <- ggplot(data=dat0m_month, aes(x=year, y=temperature)) + 
   geom_line(aes(color=as.factor(monthd)), size=1) +
   xlab("Time") + ylab("Temperature") +
   Mytheme() +
@@ -2271,7 +2272,7 @@ j <- 0
 reg <- data.frame()
 for (i in 1:length(unique(dat0m_month$monthd))) { #one loops through all months
   j <- j + 1
-  lms <- summary(lm(data=dplyr::filter(dat0m_month, monthd==i), Temperature ~ year))
+  lms <- summary(lm(data=dplyr::filter(dat0m_month, monthd==i), temperature ~ year))
   # calculate probability of fstatistic because it cannot be extracted from lms above
   # see http://stats.stackexchange.com/questions/92824/extracting-the-model-p-value-for-a-multiple-regression-in-r
   # slope returned by lm is per second
@@ -2384,9 +2385,9 @@ ggsave(file="output_jp/figures/fig5.pdf", fig_paper_monthly_rate_AT_CT, width = 
 # Quarterly
 dat0m_quart <- dat0m %>%
   group_by(year, quarter) %>%
-  summarise(Temperature = mean(temp_field, na.rm=TRUE),
+  summarise(temperature = mean(temperature, na.rm=TRUE),
             at = mean(ta, na.rm=TRUE))
-fig_temp_quarter <- ggplot(data=dat0m_quart, aes(x=year, y=Temperature)) + 
+fig_temp_quarter <- ggplot(data=dat0m_quart, aes(x=year, y=temperature)) + 
   geom_line(aes(color=as.factor(quarter)), size=1) +
   xlab("Time") + ylab("Temperature") +
   Mytheme() +
@@ -2422,53 +2423,19 @@ kable(tab_ct_month, digits = c(4,4,3,3,3,2,3), caption="Regressions on annual mo
 ```{r monthly and quarterly temperature and AT at 50 m, include=FALSE}
 dat50m_month <- dat50m %>%
   group_by(year, monthd) %>%
-  summarise(Temperature = mean(temp_field, na.rm=TRUE),
+  summarise(salinity = mean(salinity, na.rm = TRUE),
+            temperature = mean(temperature, na.rm=TRUE),
             at = mean(ta, na.rm=TRUE),
-            pCO2 = mean(mean_pCO2, na.rm=TRUE),
+            pCO2 = mean(pCO2, na.rm=TRUE),
             ct = mean(dic, na.rm=TRUE)) %>%
   mutate(date = ymd(paste(year,monthd,"01")))
-
-# fig_temp_month <- ggplot(data=dat0m_month, aes(x=year, y=Temperature)) + 
-#   geom_line(aes(color=as.factor(monthd)), size=1) +
-#   xlab("Time") + ylab("Temperature") +
-#   Mytheme() +
-#   scale_color_viridis(name="Month", discrete=TRUE, option="plasma") + 
-#   theme(legend.position="top") +
-#   guides(col = guide_legend(ncol = 12, byrow = TRUE))
-# ggsave(file="output_jp/figures/fig_temp_month.png", fig_temp_month, width = 15, height = 10, units = "cm")
-# fig_at_month <- ggplot(data=dat0m_month, aes(x=year, y=at)) + 
-#   geom_line(aes(color=as.factor(monthd)), size=1) +
-#   guides(guide_legend(title = "Month")) +
-#   xlab("Time") + ylab("Total alkalinity") +
-#   Mytheme() +
-#   scale_color_viridis(name="Month", discrete=TRUE, option="plasma") + 
-#   theme(legend.position="top") +
-#   guides(col = guide_legend(ncol = 12, byrow = TRUE))
-# ggsave(file="output_jp/figures/fig_at_month.png", fig_at_month, width = 15, height = 10, units = "cm")
-# fig_pCO2_month <- ggplot(data=dat0m_month, aes(x=year, y=pCO2)) + 
-#   geom_line(aes(color=as.factor(monthd)), size=1) +
-#   xlab("Time") + ylab("pCO2") +
-#   Mytheme() +
-#   scale_color_viridis(name="Month", discrete=TRUE, option="plasma") + 
-#   theme(legend.position="top") +
-#   guides(col = guide_legend(ncol = 12, byrow = TRUE))
-# ggsave(file="output_jp/figures/fig_pCO2_month.png", fig_pCO2_month, width = 15, height = 10, units = "cm")
-# fig_ct_month <- ggplot(data=dat0m_month, aes(x=year, y=ct)) + 
-#   geom_line(aes(color=as.factor(monthd)), size=1) +
-#   xlab("Time") + ylab("Dissolved inorganic carbon") +
-#   Mytheme() +
-#   scale_color_viridis(name="Month", discrete=TRUE, option="plasma") + 
-#   theme(legend.position="top") +
-#   guides(col = guide_legend(ncol = 12, byrow = TRUE))
-# ggsave(file="output_jp/figures/fig_ct_month.png", fig_ct_month, width = 15, height = 10, units = "cm")
-
 
 # Regressions annual monthly temperature
 j <- 0
 reg <- data.frame()
 for (i in 1:length(unique(dat50m_month$monthd))) { #one loops through all months
   j <- j + 1
-  lms <- summary(lm(data=dplyr::filter(dat50m_month, monthd==i), Temperature ~ year))
+  lms <- summary(lm(data=dplyr::filter(dat50m_month, monthd==i), temperature ~ year))
   # calculate probability of fstatistic because it cannot be extracted from lms above
   # see http://stats.stackexchange.com/questions/92824/extracting-the-model-p-value-for-a-multiple-regression-in-r
   # slope returned by lm is per second
@@ -2581,13 +2548,13 @@ ggsave(file="output_jp/figures/fig4b.pdf", fig_paper_monthly_rate_AT_CT_50m, wid
 ## Deconvolution of pH changes at 1 m with my approach
 ```{r Deconvolution of pH changes at 1 m my appproach, include=FALSE}
 #We construct a dataframe with monthly means for the entire series (mXX) as well as real data (without prefix m)
-deconv_dat_pH_1m <- tibble(date=as.POSIXct(dat0m$sampling_date), mAT=means_month0m$AT[dat0m$monthd]*1e-6, mCT=means_month0m$CT[dat0m$monthd]*1e-6, mS=means_month0m$Salinity[dat0m$monthd], mT=means_month0m$Temperature[dat0m$monthd], P=dat0m$mean_P, Pt=dat0m$mean_Pt, Sit=dat0m$mean_Sit, AT=dat0m$ta*1e-6, CT=dat0m$dic*1e-6, S=dat0m$mean_salinity, T=dat0m$temp_field)
+deconv_dat_pH_1m <- tibble(date=as.POSIXct(dat0m$sampling_date), mAT=dat0m_month$at[dat0m$monthd]*1e-6, mCT=dat0m_month$ct[dat0m$monthd]*1e-6, mS=dat0m_month$salinity[dat0m$monthd], mT=dat0m_month$temperature[dat0m$monthd], P=dat0m$depth/10, Pt=dat0m$Pt, Sit=dat0m$Sit, AT=dat0m$ta*1e-6, CT=dat0m$dic*1e-6, S=dat0m$salinity, T=dat0m$temperature)
 
 #d <- NULL; deconv <- NULL # d is for the data to use in carb, deconv is to store the results
 deconv_pH_1m <- tibble(date = as.POSIXct(dat0m$sampling_date))
 
 # delta pHT due to temperature
-d <- filter(deconv_dat_pH_1m, !is.na(mAT), !is.na(mCT), !is.na(mS), !is.na(T)) # we eliminate rows with NAs
+d <- dplyr::filter(deconv_dat_pH_1m, !is.na(mAT), !is.na(mCT), !is.na(mS), !is.na(T)) # we eliminate rows with NAs
 deconv_pH_T_1m <- tibble(date = d$date,
                      deconv_pH_T_1m = carb(flag=15, var1=d$mAT, var2=d$mCT, S=d$mS,
                                            T=d$T, P=d$P, Pt=d$Pt, Sit=d$Sit, 
@@ -2794,42 +2761,42 @@ deconv_garcia_dat_pH_1m <- NULL
 dat0m <- ungroup(dat0m)
 y <- dat0m %>%
   group_by(year) %>% # First, yearly means
-  summarise(yS = mean(mean_salinity, na.rm = TRUE), 
-            yT = mean(temp_field, na.rm = TRUE),
+  summarise(yS = mean(salinity, na.rm = TRUE), 
+            yT = mean(temperature, na.rm = TRUE),
             yCT = mean(dic, na.rm = TRUE),
             yAT = mean(ta, na.rm = TRUE),
-            yP = mean(mean_P, na.rm = TRUE),
-            yPt = mean(mean_Pt, na.rm = TRUE),
-            ySit = mean(mean_Sit, na.rm = TRUE)
+            yP = mean(P, na.rm = TRUE),
+            yPt = mean(Pt, na.rm = TRUE),
+            ySit = mean(Sit, na.rm = TRUE)
             ) %>%
   ungroup()
 # Second, monthly means
 dat0m$year_month <- format(dat0m$sampling_date, '%Y-%m')
 ym <- dat0m %>%
   group_by(year_month) %>% # First, monthly means
-  summarise(ymS = mean(mean_salinity, na.rm = TRUE), 
-            ymT = mean(temp_field, na.rm = TRUE),
+  summarise(ymS = mean(salinity, na.rm = TRUE), 
+            ymT = mean(temperature, na.rm = TRUE),
             ymCT = mean(dic, na.rm = TRUE),
             ymAT = mean(ta, na.rm = TRUE),
-            ymP = mean(mean_P, na.rm = TRUE),
-            ymPt = mean(mean_Pt, na.rm = TRUE),
-            ymSit = mean(mean_Sit, na.rm = TRUE)
+            ymP = mean(P, na.rm = TRUE),
+            ymPt = mean(Pt, na.rm = TRUE),
+            ymSit = mean(Sit, na.rm = TRUE)
             ) %>%
   ungroup() 
 # Third, total means (no grouping)
 t <- dat0m %>%
-  summarise(tS = mean(mean_salinity, na.rm = TRUE),
-         tT = mean(temp_field, na.rm = TRUE),
+  summarise(tS = mean(salinity, na.rm = TRUE),
+         tT = mean(temperature, na.rm = TRUE),
          tAT = mean(ta, na.rm = TRUE),
          tCT = mean(dic, na.rm = TRUE),
-         tP = mean(mean_P, na.rm = TRUE),
-         tPt = mean(mean_Pt, na.rm = TRUE),
-         tSit = mean(mean_Sit, na.rm = TRUE)
+         tP = mean(P, na.rm = TRUE),
+         tPt = mean(Pt, na.rm = TRUE),
+         tSit = mean(Sit, na.rm = TRUE)
          )
 # bring all variables together
 deconv_garcia_dat_pH_1m <- dat0m %>%
   select(sampling_date, year, monthd, year_month, CT = dic, AT = ta,
-         S = mean_salinity, T = temp_field) %>%
+         S = salinity, T = temperature) %>%
   left_join(y) %>%
   left_join(ym) %>%
   mutate(tS = t$tS,
@@ -3198,9 +3165,9 @@ deconv_garcia_year_month <- tibble(
 
 ```{r Garcia-Ibanez delta pH using total means for not changing variables, include=FALSE}
 ### delta pH due to temperature using total means for not changing variables
-d <- filter(deconv_garcia_dat_pH_1m, !is.na(tAT), !is.na(tCT), !is.na(tS), 
+d <- dplyr::filter(deconv_garcia_dat_pH_1m, !is.na(tAT), !is.na(tCT), !is.na(tS), 
             !is.na(T)) # we eliminate date with NAs
-d$pH_T_t <- carb(
+d$pH_T_t <- seacarb::carb(
   flag = 15,
   var1 = d$tAT * 1e-6,
   var2 = d$tCT * 1e-6,
@@ -3518,15 +3485,15 @@ kable(deconv_garcia_total_pH_ano, digits = c(1,4,4,7,4,4,4,4,0), caption="Contri
 ```{r Deconvolution of pCO2 changes at 1 m with my approach, include=FALSE}
 # We follow the method of Garcia-Ibanez described above.
 # construct a dataframe with monthly means for the entire series (mXX) as well as real data (without mrefix m)
-deconv_dat_pCO2_1m <- tbl_df(
-  data.frame(date=as.POSIXct(dat0m$sampling_date), mAT=means_month0m$AT[dat0m$monthd]*1e-6, mCT=means_month0m$CT[dat0m$monthd]*1e-6, mS=means_month0m$Salinity[dat0m$monthd], mT=means_month0m$Temperature[dat0m$monthd], P=dat0m$mean_P, Pt=dat0m$mean_Pt, Sit=dat0m$mean_Sit, AT=dat0m$ta*1e-6, CT=dat0m$dic*1e-6, S=dat0m$mean_salinity, T=dat0m$temp_field)
+deconv_dat_pCO2_1m <- as_tibble(
+  data.frame(date=as.POSIXct(dat0m$sampling_date), mAT=dat0m_month$at[dat0m$monthd]*1e-6, mCT=dat0m_month$ct[dat0m$monthd]*1e-6, mS=dat0m_month$salinity[dat0m$monthd], mT=dat0m_month$temperature[dat0m$monthd], P=dat0m$depth/10, Pt=dat0m$Pt, Sit=dat0m$Sit, AT=dat0m$ta*1e-6, CT=dat0m$dic*1e-6, S=dat0m$salinity, T=dat0m$temperature)
 )
 
 #d <- NULL; deconv <- NULL # d is for the data to use in carb, deconv is to store the results
-deconv_pCO2_1m <- tibble(date=as.POSIXct(dat0m$sampling_date))
-d <- filter(deconv_dat_pCO2_1m, !is.na(mAT), !is.na(mCT), !is.na(mS), !is.na(T)) # we eliminate rows with NAs
+deconv_pCO2_1m <- tibble(date = as.POSIXct(dat0m$sampling_date))
+d <- dplyr::filter(deconv_dat_pCO2_1m, !is.na(mAT), !is.na(mCT), !is.na(mS), !is.na(T)) # we eliminate rows with NAs
 deconv_pCO2_T_1m <- tibble(date=d$date,
-                               deconv_pCO2_T_1m=carb(flag=15, var1=d$mAT, var2=d$mCT,
+                               deconv_pCO2_T_1m = seacarb::carb(flag=15, var1=d$mAT, var2=d$mCT,
                                                      S=d$mS, T=d$T, P=d$P, Pt=d$Pt,
                                                      Sit=d$Sit, k1k2 = "l", 
                                                      kf = "pf", 
@@ -3704,7 +3671,7 @@ kable(reg_deconv_pCO2_1m, digits = c(4,4,11,3,3,2,3), caption="Regressions on va
 kable(reg_deconv_pCO2_1m_ano, digits = c(4,4,11,3,3,2,3), caption="Regressions on anomalies at 1 m depth.")
 ```
 
-Using the real values rather than anomalies, the sum of the slopes is slightly higher than the slope found earlier (`r round(sum(as.data.frame(reg_deconv_pCO2_1m)$Slope), digits=4)` vs `r round(as.data.frame(reg_var_1m)["mean_pCO2", "Slope"], digits=4)`).
+Using the real values rather than anomalies, the sum of the slopes is slightly higher than the slope found earlier (`r round(sum(as.data.frame(reg_deconv_pCO2_1m)$Slope), digits=4)` vs `r round(as.data.frame(reg_var_1m)["pCO2", "Slope"], digits=4)`).
 
 Using the anomalies rather than the real values, the sum of the slopes is slightly lower than the slope found earlier (`r round(sum(as.data.frame(reg_deconv_pCO2_1m_ano)$Slope), digits=4)` vs `r round(as.data.frame(reg_ano_1m)["pCO2_ano", "Slope"], digits=4)`).
 
@@ -3715,18 +3682,18 @@ deconv_garcia_dat_pCO2_1m <- NULL
 
 # total means (no grouping)
 t <- dat0m %>%
-  summarise(tS = mean(mean_salinity, na.rm = TRUE),
-         tT = mean(temp_field, na.rm = TRUE),
+  summarise(tS = mean(salinity, na.rm = TRUE),
+         tT = mean(temperature, na.rm = TRUE),
          tAT = mean(ta, na.rm = TRUE),
          tCT = mean(dic, na.rm = TRUE),
-         tP = mean(mean_P, na.rm = TRUE),
-         tPt = mean(mean_Pt, na.rm = TRUE),
-         tSit = mean(mean_Sit, na.rm = TRUE)
+         tP = mean(P, na.rm = TRUE),
+         tPt = mean(Pt, na.rm = TRUE),
+         tSit = mean(Sit, na.rm = TRUE)
          )
 # bring all variables together
 deconv_garcia_dat_pCO2_1m <- dat0m %>%
   select(sampling_date, year, monthd, year_month, CT = dic, AT = ta,
-         S = mean_salinity, T = temp_field) %>%
+         S = salinity, T = temperature) %>%
   mutate(tS = t$tS,
          tT = t$tT,
          tAT = t$tAT,
@@ -3970,15 +3937,13 @@ kable(deconv_garcia_total_pCO2_ano, digits = c(1,4,4,7,4,4,4,4,0), caption="Cont
 ## Deconvolution of pH changes at 50 m
 ```{r Deconvolution of pH changes at 50 m, include=FALSE}
 #We construct a dataframe with monthly means for the entire series (mXX) as well as real data (without mrefix m)
-deconv_dat_50m <- tbl_df(
-  data.frame(date=as.POSIXct(dat50m$sampling_date), mAT=means_month50m$AT[dat50m$monthd]*1e-6, mCT=means_month0m$CT[dat50m$monthd]*1e-6, mS=means_month50m$Salinity[dat50m$monthd], mT=means_month0m$Temperature[dat50m$monthd], P=dat50m$mean_P, Pt=dat50m$mean_Pt, Sit=dat50m$mean_Sit, AT=dat50m$ta*1e-6, CT=dat50m$dic*1e-6, S=dat50m$mean_salinity, T=dat50m$temp_field)
-)
+deconv_dat_50m <- tibble(date=as.POSIXct(dat50m$sampling_date), mAT=dat0m$ta[dat50m$monthd]*1e-6, mCT=dat0m$dic[dat50m$monthd]*1e-6, mS=dat0m$salinity[dat50m$monthd], mT=dat0m$temperature[dat50m$monthd], P=dat50m$depth/10, Pt=dat50m$Pt, Sit=dat50m$Sit, AT=dat50m$ta*1e-6, CT=dat50m$dic*1e-6, S=dat50m$salinity, T=dat50m$temperature)
 
 #d <- NULL; deconv_50m <- NULL # d is for the data to use in carb, deconv is to store the results
 deconv_pH_50m <- tibble(date=as.POSIXct(dat50m$sampling_date))
 d <- filter(deconv_dat_50m, !is.na(mAT), !is.na(mCT), !is.na(mS), !is.na(T)) # we eliminate rows with NAs
 deconv_pH_T_50m <- tibble(date=d$date,
-                     deconv_pH_T_50m=carb(flag=15, var1=d$mAT, var2=d$mCT, S=d$mS, T=d$T, 
+                     deconv_pH_T_50m = seacarb::carb(flag=15, var1=d$mAT, var2=d$mCT, S=d$mS, T=d$T, 
                                       P=d$P, Pt=d$Pt, Sit=d$Sit, k1k2 = "l", kf = "pf", 
                                       pHscale = "T", b="l10")$pH
                      )
@@ -4155,7 +4120,7 @@ kable(reg_deconv_pH_50m, digits = c(4,4,11,3,3,2,3), caption="Regressions on val
 kable(reg_deconv_pH_50m_ano, digits = c(4,4,11,3,3,2,3), caption="Regressions on anomalies at 50 m depth.")
 ```
 
-Using the real values rather than anomalies, the sum of the slopes is higher that the slope found earlier (`r round(sum(as.data.frame(reg_deconv_pH_50m)$Slope), digits=4)` vs `r round(as.data.frame(reg_var_1m)["mean_pH", "Slope"], digits=4)`).
+Using the real values rather than anomalies, the sum of the slopes is higher that the slope found earlier (`r round(sum(as.data.frame(reg_deconv_pH_50m)$Slope), digits=4)` vs `r round(as.data.frame(reg_var_1m)["pH", "Slope"], digits=4)`).
 
 Using the anomalies rather than the real values, the sum of the slopes is much closer to the slope found earlier (`r round(sum(as.data.frame(reg_deconv_pH_50m_ano)$Slope), digits=4)` vs `r round(as.data.frame(reg_ano_1m)["pH_ano", "Slope"], digits=4)`).
 
@@ -4163,12 +4128,13 @@ Using the anomalies rather than the real values, the sum of the slopes is much c
 ```{r Deconvolution of pCO2 changes at 50 m, include=FALSE}
 # We follow the method of Garcia-Ibanez described above.
 # construct a dataframe with monthly means for the entire series (mXX) as well as real data (without mrefix m)
-deconv_dat_50m <- tbl_df(
-  data.frame(date=as.POSIXct(dat50m$sampling_date), mAT=means_month0m$AT[dat50m$monthd]*1e-6, mCT=means_month0m$CT[dat50m$monthd]*1e-6, mS=means_month0m$Salinity[dat50m$monthd], mT=means_month0m$Temperature[dat50m$monthd], P=dat50m$mean_P, Pt=dat50m$mean_Pt, Sit=dat50m$mean_Sit, AT=dat50m$ta*1e-6, CT=dat50m$dic*1e-6, S=dat50m$mean_salinity, T=dat50m$temp_field)
-)
+deconv_dat_50m <- tibble(date=as.POSIXct(dat50m$sampling_date), mAT=dat0m$ta[dat50m$monthd]*1e-6, mCT=dat0m$dic[dat50m$monthd]*1e-6, mS=dat0m$salinity[dat50m$monthd], mT=dat0m$temperature[dat50m$monthd], P=dat50m$depth/10, Pt=dat50m$Pt, Sit=dat50m$Sit, AT=dat50m$ta*1e-6, CT=dat50m$dic*1e-6, S=dat50m$salinity, T=dat50m$temperature)
+
 
 #d <- NULL; deconv_50m <- NULL # d is for the data to use in carb, deconv is to store the results
-deconv_pCO2_50m <- tibble(date=as.POSIXct(dat50m$sampling_date))
+#deconv_pCO2_50m <- dplyr::mutate(date = as.POSIXct(dat50m$sampling_date))
+#d <- NULL; deconv <- NULL # d is for the data to use in carb, deconv is to store the results
+deconv_pCO2_50m <- tibble(date = as.POSIXct(dat50m$sampling_date))
 d <- filter(deconv_dat_50m, !is.na(mAT), !is.na(mCT), !is.na(mS), !is.na(T)) # we eliminate rows with NAs
 deconv_pCO2_T_50m <- tibble(date=d$date,
                      deconv_pCO2_T_50m=carb(flag=15, var1=d$mAT, var2=d$mCT, S=d$mS, T=d$T, 
@@ -4347,7 +4313,7 @@ kable(reg_deconv_pCO2_50m, digits = c(4,4,11,3,3,2,3), caption="Regressions on v
 kable(reg_deconv_pCO2_50m_ano, digits = c(4,4,11,3,3,2,3), caption="Regressions on anomalies at 50 m depth.")
 ```
 
-Using the real values rather than anomalies, the sum of the slopes is larger than the slope found earlier (`r round(sum(as.data.frame(reg_deconv_pCO2_50m)$Slope), digits=4)` vs `r round(as.data.frame(reg_var_1m)["mean_pCO2", "Slope"], digits=4)`).
+Using the real values rather than anomalies, the sum of the slopes is larger than the slope found earlier (`r round(sum(as.data.frame(reg_deconv_pCO2_50m)$Slope), digits=4)` vs `r round(as.data.frame(reg_var_1m)["pCO2", "Slope"], digits=4)`).
 
 Using the anomalies rather than the real values, the sum of the slopes is lower than the slope found earlier (`r round(sum(as.data.frame(reg_deconv_pCO2_50m_ano)$Slope), digits=4)` vs `r round(as.data.frame(reg_ano_1m)["pCO2_ano", "Slope"], digits=4)`).
 
@@ -4359,18 +4325,18 @@ deconv_garcia_dat_pH_50m <- NULL
 # Third, total means (no grouping)
 dat50m <- ungroup(dat50m)
 t <- dat50m %>%
-  summarise(tS = mean(mean_salinity, na.rm = TRUE),
-         tT = mean(temp_field, na.rm = TRUE),
+  summarise(tS = mean(salinity, na.rm = TRUE),
+         tT = mean(temperature, na.rm = TRUE),
          tAT = mean(ta, na.rm = TRUE),
          tCT = mean(dic, na.rm = TRUE),
-         tP = mean(mean_P, na.rm = TRUE),
-         tPt = mean(mean_Pt, na.rm = TRUE),
-         tSit = mean(mean_Sit, na.rm = TRUE)
+         tP = mean(P, na.rm = TRUE),
+         tPt = mean(Pt, na.rm = TRUE),
+         tSit = mean(Sit, na.rm = TRUE)
          )
 # bring all variables together
 deconv_garcia_dat_pH_50m <- dat50m %>%
   select(sampling_date, year, monthd, CT = dic, AT = ta,
-         S = mean_salinity, T = temp_field) %>%
+         S = salinity, T = temperature) %>%
   mutate(tS = t$tS,
          tT = t$tT,
          tAT = t$tAT,
@@ -4631,18 +4597,18 @@ deconv_garcia_dat_pCO2_50m <- NULL
 
 # total means (no grouping)
 t <- dat50m %>%
-  summarise(tS = mean(mean_salinity, na.rm = TRUE),
-         tT = mean(temp_field, na.rm = TRUE),
+  summarise(tS = mean(salinity, na.rm = TRUE),
+         tT = mean(temperature, na.rm = TRUE),
          tAT = mean(ta, na.rm = TRUE),
          tCT = mean(dic, na.rm = TRUE),
-         tP = mean(mean_P, na.rm = TRUE),
-         tPt = mean(mean_Pt, na.rm = TRUE),
-         tSit = mean(mean_Sit, na.rm = TRUE)
+         tP = mean(P, na.rm = TRUE),
+         tPt = mean(Pt, na.rm = TRUE),
+         tSit = mean(Sit, na.rm = TRUE)
          )
 # bring all variables together
 deconv_garcia_dat_pCO2_50m <- dat50m %>%
   select(sampling_date, year, monthd, CT = dic, AT = ta,
-         S = mean_salinity, T = temp_field) %>%
+         S = salinity, T = temperature) %>%
   mutate(tS = t$tS,
          tT = t$tT,
          tAT = t$tAT,
@@ -4887,8 +4853,8 @@ kable(deconv_garcia_total_pCO2_50m_ano, digits = c(1,4,4,7,4,4,4,4,0), caption="
 ```{r Total alkalinity Point B, include=FALSE}
 
 # AT versus salinity at the surface per month with facet
-p1 <- ggplot(data=dplyr::filter(means_depth, depth== 0)) +
-  aes(mean_salinity, ta) +
+p1 <- ggplot(data=dplyr::filter(dat, depth== 0)) +
+  aes(salinity, ta) +
   geom_point(na.rm=TRUE, size=size_point) +
   stat_smooth(method=lm, na.rm=TRUE, show.legend=FALSE, se=FALSE, colour="black", size=0.5) +
   facet_wrap(~ month) +
@@ -4902,8 +4868,8 @@ print(p1)
 dev.off()
 
 # AT versus salinity at the surface per year with facet
-p1 <- ggplot(data=dplyr::filter(means_depth, depth== 0)) +
-  aes(mean_salinity, ta) +
+p1 <- ggplot(data=dplyr::filter(dat, depth== 0)) +
+  aes(salinity, ta) +
   geom_point(na.rm=TRUE, size=size_point) +
   stat_smooth(method=lm, na.rm=TRUE, show.legend=FALSE, se=FALSE, colour="black", size=0.5) +
   facet_wrap(~ year) +
@@ -4916,13 +4882,13 @@ ggsave(p1, file = "output_jp/figures/fig_ta_vs_salinity_year_pointB_0m.png",
 
 # AT versus salinity at the surface per year with loop
 panel <- c("(a)","(b)","(c)","(d)","(e)","(f)","(g)","(h)","(i)", "(j)", "(k)", "(l)", "(m)")
-tmp <- filter(means_depth, depth== 0, sampling_date < cutoff_date)
+tmp <- filter(dat, depth== 0, sampling_date < cutoff_date)
 p <- NULL; j <- 0
 for (i in unique(tmp$year)[-length(unique(tmp$year))]) {
   #i <- 13
   j <- j+1
   print(j)
-  p[[j]] <- ggplot(data=filter(tmp, tmp$year==i), aes(x=mean_salinity, y=ta, colour=month)) +
+  p[[j]] <- ggplot(data=filter(tmp, tmp$year==i), aes(x=salinity, y=ta, colour=month)) +
     geom_point(na.rm=TRUE, size=2) +
     stat_smooth(method=lm, na.rm=TRUE, show.legend=FALSE, se=FALSE, colour="black", size=0.5) +
     scale_x_continuous(limits = c(36.8, 38.5), breaks=c(37, 37.5, 38, 38.5), expand = c(0,0)) +
@@ -4956,7 +4922,7 @@ if (j %in% c(1,4,7, 10)) {p[[j]] <- p[[j]] + labs(y=expression(paste(italic(A)[T
   #   #p[[j]] <- p[[j]] + theme(plot.margin = margin(t = 0, r = 0, b = 0, l = 0, unit = "cm"))
 }
 g1 <- plot_grid(p[[1]], p[[2]], p[[3]], p[[4]], p[[5]], p[[6]], p[[7]], p[[8]], 
-                p[[9]], p[[10]], p[[11]], p[[12]], p[[13]], ncol=3, align="vh")
+                p[[9]], p[[10]], p[[11]], p[[12]], ncol=3, align="vh")
 grobs <- ggplotGrob(p[[1]] + theme(legend.position="top"))$grobs
 legend_top <- grobs[[which(sapply(grobs, function(x) x$name) == "guide-box")]]
 g <- plot_grid(legend_top, g1, ncol = 1, rel_heights = c(0.15, 1))
@@ -4964,7 +4930,7 @@ ggsave(file="output_jp/figures/fig6.pdf", g, width = 16, height = 15, units = "c
 
 
 # AT=f(S) with all data
-lms <- summary(lm(data = dat0m, ta ~ mean_salinity))
+lms <- summary(lm(data = dat0m, ta ~ salinity))
 prob <- pf(lms$fstatistic[1],lms$fstatistic[2],lms$fstatistic[3],lower.tail=FALSE)
 reg_AT_S_all <- cbind(as.numeric(c(lms$coefficients[2,1], lms$coefficients[2,2], 
                                        lms$coefficients[2,4], lms$coefficients[1,1],
@@ -4975,7 +4941,7 @@ row.names(reg_AT_S_all) <- c("Slope", "SE Slope", "P Slope","Intercept","SE int.
                     "R2","P value")
 
 p1 <- ggplot(data=dat0m) +
-  aes(x= mean_salinity, y=ta) +
+  aes(x= salinity, y=ta) +
   geom_point(na.rm=TRUE, size=size_point) +
   stat_smooth(method=lm, na.rm=TRUE, show.legend=FALSE, se=FALSE, colour="black", size=0.5) +
   labs(title = "With monthly means", x = "Salinity", y = expression(paste("Total alkalinity (",mu, "mol ", kg^-1,")"))) +
@@ -4983,7 +4949,7 @@ p1 <- ggplot(data=dat0m) +
 ggsave(p1, filename = "output_jp/figures/fig_ta_vs_salinity_all_pointB_0m.png", width = 20, height = 13, units = "cm")
 
 # AT=f(S) with monthly means
-lms <- summary(lm(data = means_month0m, AT ~ Salinity))
+lms <- summary(lm(data = dat0m, ta ~ salinity))
 prob <- pf(lms$fstatistic[1],lms$fstatistic[2],lms$fstatistic[3],lower.tail=FALSE)
 reg_AT_S_monthly <- cbind(as.numeric(c(lms$coefficients[2,1], lms$coefficients[2,2], 
                                        lms$coefficients[2,4], lms$coefficients[1,1],
@@ -4993,7 +4959,7 @@ colnames(reg_AT_S_monthly) <- c("AT")
 row.names(reg_AT_S_monthly) <- c("Slope", "SE Slope", "P Slope","Intercept","SE int.","P int.", "F", "df",
                     "R2","P value")
 
-p1 <- ggplot(data=means_month0m) +
+p1 <- ggplot(data=dat_month0m) +
   aes(x= Salinity, y=AT) +
   geom_point(na.rm=TRUE, size=size_point) +
   stat_smooth(method=lm, na.rm=TRUE, show.legend=FALSE, se=FALSE, colour="black", size=0.5) +
@@ -5037,7 +5003,7 @@ precip_cumsum <-
   Mytheme(size_labs = 9) +
   theme(aspect.ratio = 1/2,
         plot.margin = margin(t=0.25, r=0.5, b=0, l=0, unit = "cm"),
-        axis.title.x = element_text(margin=margin(t=0.15, r=0, b=0.25, l=0, unit = "cm"))) +
+        axis.title.x = element_text(margin=margin(t=0.15, r=0, b=0.25, l=0, unit = "cm")))
   #annotation_custom(grob_A)
   
 precip_ta <- ggplot(w_AT_precip, aes(x = rr_cumsum, y = ta)) +
@@ -5048,10 +5014,10 @@ precip_ta <- ggplot(w_AT_precip, aes(x = rr_cumsum, y = ta)) +
   Mytheme(size_labs = 9) +
   theme(aspect.ratio = 1/2,
         plot.margin = margin(t=0.25, r=0.5, b=0, l=0, unit = "cm"),
-        axis.title.x = element_text(margin=margin(t=0.15, r=0, b=0.25, l=0, unit = "cm"))) +
+        axis.title.x = element_text(margin=margin(t=0.15, r=0, b=0.25, l=0, unit = "cm")))
   #annotation_custom(grob_B_bl)
 
-precip_S <- ggplot(w_AT_precip, aes(x = rr_cumsum, y = mean_salinity)) +
+precip_S <- ggplot(w_AT_precip, aes(x = rr_cumsum, y = salinity)) +
   geom_point(colour = "blue", na.rm=TRUE) +
   labs(title = NULL,
        x = "Weekly precipitation (mm)", 
@@ -5059,7 +5025,7 @@ precip_S <- ggplot(w_AT_precip, aes(x = rr_cumsum, y = mean_salinity)) +
   Mytheme(size_labs = 9) +
     theme(aspect.ratio = 1/2,
         plot.margin = margin(t=0.25, r=0.5, b=0, l=0, unit = "cm"),
-        axis.title.x = element_text(margin=margin(t=0.15, r=0, b=0.25, l=0, unit = "cm"))) +
+        axis.title.x = element_text(margin=margin(t=0.15, r=0, b=0.25, l=0, unit = "cm")))
 #annotation_custom(grob_C_bl)
 
 g <- plot_grid(precip_cumsum, precip_ta, precip_S, ncol=1, align="h")
@@ -5119,7 +5085,7 @@ plot_continuous_discrete_pH  <- ggplot(data = filter(continuous_discrete,!is.na(
   scale_x_datetime(date_breaks="4 months", 
                date_minor_breaks="1 month", labels=date_format("%b %Y")) +
   Mytheme() +
-  theme(panel.grid.major.x = element_blank()) +
+  theme(panel.grid.major.x = element_blank())
   #annotation_custom(grob_A)
 
   # Plot Seafet temperature
@@ -5130,7 +5096,7 @@ plot_continuous_discrete_T  <- ggplot(data = filter(continuous_discrete,!is.na(T
   scale_x_datetime(date_breaks="4 months", 
                date_minor_breaks="1 month", labels=date_format("%b %Y")) +
   Mytheme() +
-  theme(panel.grid.major.x = element_blank()) +
+  theme(panel.grid.major.x = element_blank())
   #annotation_custom(grob_B)
 
 # Zoom on a few days
@@ -5142,7 +5108,7 @@ plot_zoom <- ggplot(data =dat) +
   labs(x = NULL, y=expression(paste(pH[T])), title = NULL) +
   scale_x_datetime(breaks = date_breaks("1 days"), labels = date_format("%d %b")) +
   Mytheme() +
-  theme(panel.grid.major.x = element_blank()) +
+  theme(panel.grid.major.x = element_blank())
   #annotation_custom(grob_E)
 
 # Offset between seafet pH and spec pH (Fig. 2 Kapsenberg et al.)
@@ -5156,7 +5122,7 @@ plot_offset <- ggplot(data = filter(dat, !is.na(diff_pH))) +
   scale_x_datetime(date_breaks="4 months", 
                date_minor_breaks="1 month", labels=date_format("%b %Y")) +
   Mytheme() +
-  theme(panel.grid.major.x = element_blank()) +
+  theme(panel.grid.major.x = element_blank())
   #annotation_custom(grob_C)
 
 # Range of daily pH changes
@@ -5173,7 +5139,7 @@ range_month <-
   group_by(Month = month(date, label=TRUE, abbr=FALSE)) %>%
   summarize(pH_range_month = mean(pH_range, na.rm=TRUE))
 # add chla in range_month
-range_month <- inner_join(range_month, select(means_month0m, Month, Temperature, Chla), by="Month")
+range_month <- inner_join(range_month, select(dat_month0m, Month, Temperature, Chla), by="Month")
 range_month$monthd <- c(1:12)
 
 #regressions
@@ -5196,7 +5162,7 @@ plot_range_pH_Temperature <-  ggplot(data = range_month) +
        y = expression(paste(pH[T], " range"))) +
   Mytheme(size_labs = 9) +
   theme(aspect.ratio=1/2,
-        axis.title.x = element_text(margin=margin(t=0.25, r=0, b=0.25, l=0, unit = "cm"))) +
+        axis.title.x = element_text(margin=margin(t=0.25, r=0, b=0.25, l=0, unit = "cm")))
   #annotation_custom(grob_A)
 ggsave("output_jp/figures/plot_range_pH_Temperature.png", plot_range_pH_Temperature)
 
@@ -5207,7 +5173,7 @@ plot_range <-
   geom_boxplot(notch=TRUE, size=0.2, fill="grey50", outlier.color = "blue", outlier.size = 0.3) +
   labs(y =expression(paste(pH[T], " range")), x=NULL, title=NULL) +
   Mytheme() +
-  theme(panel.grid.major.x = element_blank()) +
+  theme(panel.grid.major.x = element_blank())
   #annotation_custom(grob_D)
 
 g <- plot_grid(plot_continuous_discrete_pH, plot_continuous_discrete_T, plot_offset, plot_range, plot_zoom, align='vh', ncol=1)
@@ -5233,7 +5199,7 @@ plot_range_pH_Chla_week <-  ggplot(data =  range_year_week) +
        y = "pH range") +
   Mytheme(size_labs = 9) +
   theme(aspect.ratio=1/2,
-        axis.title.x = element_text(margin=margin(t=0.25, r=0, b=0.25, l=0, unit = "cm"))) +
+        axis.title.x = element_text(margin=margin(t=0.25, r=0, b=0.25, l=0, unit = "cm")))
   #annotation_custom(grob_B)
 ggsave("output_jp/figures/plot_range_pH_Chla_week.png", plot_range_pH_Chla_week)
 
@@ -5279,7 +5245,7 @@ CO2_pr_i <- tbl_df(fortify.zoo(CO2_pr_zoo_i)) %>% # change to df
   mutate(year=year(dt), monthd = month(dt), month = month(dt, label = TRUE, abbr = FALSE))
 # add seawater pCO2
 tmp <- ungroup(dat0m) %>%
-  select(sampling_date, mean_pCO2)
+  select(sampling_date, pCO2)
 tmp$dt <- as.Date(tmp$sampling_date)
 CO2_pr_i <- left_join(CO2_pr_i, tmp)
 # Calculate monthly means
@@ -5317,10 +5283,10 @@ reg_atm_CO2 <- cbind(reg_atm_CO2, reg_atm_CO2_ano)
 
 # plots CO2
 # CO2_pr_i_melt <- CO2_pr_i %>%
-#   select(dt, atm_CO2, mean_pCO2) %>%
+#   select(dt, atm_CO2, pCO2) %>%
 #   melt(id.var = "dt")
 CO2_pr_i_melt <- CO2_pr_i %>%
-  select(dt, atm_CO2, mean_pCO2) %>%
+  select(dt, atm_CO2, pCO2) %>%
   gather(key = variable, value=value, -dt, na.rm = TRUE)
 
 fig_CO2_time_series <- ggplot(data=CO2_pr_i_melt) +
@@ -5329,7 +5295,7 @@ fig_CO2_time_series <- ggplot(data=CO2_pr_i_melt) +
   labs(title=NULL, x="Time", y="CO2") +
   Mytheme() +
   theme(legend.position="top") +
-  guides(col = guide_legend(ncol = 2, byrow = TRUE)) +
+  guides(col = guide_legend(ncol = 2, byrow = TRUE))
   #annotation_custom(grob_A)
 
 fig_CO2_ano <- ggplot(data = ano_atm_CO2, aes(x = as.POSIXct(dt), y = atm_CO2_ano)) +
@@ -5337,10 +5303,10 @@ fig_CO2_ano <- ggplot(data = ano_atm_CO2, aes(x = as.POSIXct(dt), y = atm_CO2_an
   geom_point(colour="orange", na.rm=TRUE, size=size_point) + 
   geom_smooth(method=lm, colour="black", fill="grey", size=0.6) +
   labs(title=NULL, x="Time", y=expression(paste("Atmospheric ", CO[2]))) +
-  Mytheme() +
+  Mytheme()
   #annotation_custom(grob_B)
 
-fig_delta_CO2 <- ggplot(data = CO2_pr_i, aes(x = as.POSIXct(dt), y = mean_pCO2 - atm_CO2), na.rm=TRUE) +
+fig_delta_CO2 <- ggplot(data = CO2_pr_i, aes(x = as.POSIXct(dt), y = pCO2 - atm_CO2), na.rm=TRUE) +
   scale_x_datetime(breaks = date_breaks("2 year"), labels = date_format("%Y")) +
   geom_point(colour="orange", na.rm=TRUE, size=size_point) + 
   #geom_smooth(method=lm, colour="black", fill="grey", size=0.6) +
