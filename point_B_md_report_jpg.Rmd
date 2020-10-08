@@ -734,6 +734,12 @@ z <- z %>%
     month = month(sampling_date, label = TRUE, abbr = FALSE),
     #render all variables as.numeric instead of character
     salinity_field = as.numeric(salinity_field),
+    # Mercuric chloride correction (Dickson et al. 2007, SOP3a)
+    # 100 ul added except between 2019-07-30 and 2020-10-06 when 200 ul were added
+    ta_dup = ifelse(sampling_date >= "2019-07-30" & sampling_date <= "2020-10-06", 
+                    ta_dup * 1.0004, ta_dup * 1.0002),
+    ct_dup = ifelse(sampling_date >= "2019-07-30" & sampling_date <= "2020-10-06", 
+                    ct_dup * 1.0004, ct_dup * 1.0002),
     # convert from umol/l to umol/kg
     PO4 = as.numeric(PO4 / (
       rho(S = salinity_field, T = temp_field , P = 0) / 1000
