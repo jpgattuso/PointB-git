@@ -1876,8 +1876,6 @@ colnames(reg_ta_no_change) <-
 row.names(reg_ta_no_change) <- var_list
 ```
 
-* The change in temperature is `r round(reg_var_1m[2, 1], digits=3)`± `r round(reg_var_1m[2,2], digits=3)` °C per year. 
-* The change in pH is `r 1000*round(reg_var_1m[7,1], digits=4)` ± `r 1000*round(reg_var_1m[7,2], digits=4)` mpH units per year. If the observed total alkalinity data are corrected from their rate of change (i.e. assuming that they have not increased during the period of measurement, but kept their subannual variability), the rate of change is `r 1000*round(reg_ta_no_change[1,1], digits=4)` ± `r 1000*round(reg_ta_no_change[1,2], digits=4)` mpH units per year.
 
 ## Interannual changes at 1 m
 ![fig_paper_interannual_1m.png](output_jp/figures/fig_paper_interannual_1m.png)
@@ -1891,6 +1889,10 @@ kable(reg_var_1m, digits = c(4,4,3,3,3,2,3), caption="Regressions on values at 1
 kable(reg_ano_1m, digits = c(4,4,3,3,3,2,3), caption="Regressions on anomalies at 1 m depth.")  
 kable(tab_surf_salinity_AT_year, digits = c(2,2), caption="Regressions AT vs salinity on values at 1 m depth for every year.")
 ```
+Changes at 1 m depth calculated on anomalies are:
+
+* temperature: `r round(reg_ano_1m[2, 1], digits=3)`± `r round(reg_ano_1m[2,2], digits=3)` °C per year. 
+* pH: `r 1000*round(reg_ano_1m[5,1], digits=4)` ± `r 1000*round(reg_ano_1m[5,2], digits=4)` mpH units per year.
 
 ```{r Figure Interannual changes and anomalies at 50 m, include=FALSE}
 size_point <- 0.4 # size of data points
