@@ -500,8 +500,8 @@ CAT1 <- ggplot(dplyr::filter(z, depth == 0 & qflag_ta != 3), aes(x = sampling_da
        color = "flag")
 #remove outliers and replot
 z <- z %>% 
-  dplyr::mutate(qflag_ta = ifelse(depth == 0 & ta_dup > 2700, NA, #these are identifed outliers
-                            ifelse(depth == 0 & ta_dup < 2400, 3, qflag_ta)))
+  dplyr::mutate(qflag_ta = ifelse((depth == 0 & ta_dup > 2700) |
+                                    (depth == 0 & ta_dup < 2400), 3, qflag_ta))
 cols <- c("1" = "red", "2" = "blue", "3" = "darkgreen", "4" = "orange")
 CAT1 <- ggplot(dplyr::filter(z, depth == 0 & qflag_ta != 3), aes(x = sampling_date, y = ta_dup, color = as.factor(qflag_ta))) +
   scale_x_datetime(breaks = date_breaks("2 year"), labels = date_format("%Y")) +
@@ -512,7 +512,7 @@ CAT1 <- ggplot(dplyr::filter(z, depth == 0 & qflag_ta != 3), aes(x = sampling_da
        title="Total alkalinity at 1 m, 3 outliers removed",
        color = "flag")
 
-CCT1 <- ggplot(dplyr::filter(z, depth == 0), aes(x = sampling_date, y = dic, color = as.factor(qflag_dic))) +
+CCT1 <- ggplot(dplyr::filter(z, depth == 0), aes(x = sampling_date, y = dic_dup, color = as.factor(qflag_dic))) +
   scale_x_datetime(breaks = date_breaks("2 year"), labels = date_format("%Y")) +
   geom_point(na.rm=TRUE) +
   theme_bw() + 
@@ -522,7 +522,14 @@ CCT1 <- ggplot(dplyr::filter(z, depth == 0), aes(x = sampling_date, y = dic, col
        color = "flag")
 #remove outliers and replot
 z <- z %>% 
-  dplyr::mutate(qflag_dic = ifelse(depth == 0 & dic_dup > 2300, NA, qflag_dic)) #this is an indentifed outlier
+  #dplyr::mutate(qflag_dic = ifelse(depth == 0 & dic_dup > 2300, 3, qflag_dic)) #this is an indentifed outlier
+dplyr::mutate(qflag_dic = ifelse((depth == 0 & dic_dup > 2350) |
+  (depth == 0 & dic_dup > 2300 & year(z$sampling_date) == 2009) |
+  (depth == 0 & dic_dup > 2300 & year(z$sampling_date) == 2009) |
+  (depth == 0 & dic_dup > 2310 & year(z$sampling_date) == 2017) |
+  (depth == 0 & dic_dup < 2230 & year(z$sampling_date) == 2014) |
+  (depth == 0 & dic_dup < 2210 & year(z$sampling_date) == 2017), 3, qflag_dic))
+
 CCT1 <- ggplot(dplyr::filter(z, depth == 0), aes(x = sampling_date, y = dic_dup, color = as.factor(qflag_dic))) +
   scale_x_datetime(breaks = date_breaks("2 year"), labels = date_format("%Y")) +
   geom_point(na.rm=TRUE) +
@@ -1167,7 +1174,10 @@ kable(dat_month50m, digits = 3, caption="Monthly means at 50 m")
 ```
 
 ## Interannual changes
+TODO calculate slopes as suggested by JOI.
+
 ```{r Figure Interannual changes and anomalies at 1 m, include=FALSE}
+#TODO calculate slopes as suggested by JOI.
 size_point <- 0.4 # size of data points
 
 # Plot interannual changes
