@@ -24,7 +24,8 @@ if (Sys.getenv("LOGNAME") == "samir") {
   path = "../../pCloud Sync/exp153_carbonates_point_B/"
   path_sami = "../../pCloud\ Sync/exp176_sami/sami_data/sami_raw_export/Data_deployment/EOL"
 }
-cutoff_date <- "2020-01-01" #to limit regressions on complete years
+#cutoff_date <- "2020-01-01" #to limit regressions on complete years
+cutoff_date <- "2020-09-01" #to limit regressions on complete years
 require(readxl)
 require(seacarb)
 library(cowplot)
@@ -432,7 +433,7 @@ kable(tab_dyf_surf_salinity_AT_year, caption="")
 
 ```{r Initialization Point B, include=FALSE}
 z <-  read_delim(
-  paste0(path, "data/Data_DIC_tmp.csv"),
+  paste0(path, "data/Data_DIC.csv"),
   delim = ",",
   col_names = TRUE,
   col_types = "ccccdddddddddddcddddddddddddddd",
@@ -503,11 +504,11 @@ z <- z %>%
   dplyr::mutate(qflag_ta = ifelse((depth == 0 & ta_dup > 2700) |
                                     (depth == 0 & ta_dup < 2400), 3, qflag_ta))
 cols <- c("1" = "red", "2" = "blue", "3" = "darkgreen", "4" = "orange")
-CAT1 <- ggplot(dplyr::filter(z, depth == 0 & qflag_ta != 3), aes(x = sampling_date, y = ta_dup, color = as.factor(qflag_ta))) +
+CAT1 <- ggplot(dplyr::filter(z, depth == 0), aes(x = sampling_date, y = ta_dup, color = as.factor(qflag_ta))) +
   scale_x_datetime(breaks = date_breaks("2 year"), labels = date_format("%Y")) +
   geom_point(na.rm=TRUE) +
   theme_bw() + 
-  scale_colour_manual(values = c("red", "blue")) +
+  scale_colour_manual(values = c("blue", "red")) +
   labs(y = expression(paste(italic(A)[T]," ","(",mu, mol.kg^-1,")")),x="",
        title="Total alkalinity at 1 m, 3 outliers removed",
        color = "flag")
@@ -516,7 +517,7 @@ CCT1 <- ggplot(dplyr::filter(z, depth == 0), aes(x = sampling_date, y = dic_dup,
   scale_x_datetime(breaks = date_breaks("2 year"), labels = date_format("%Y")) +
   geom_point(na.rm=TRUE) +
   theme_bw() + 
-  scale_colour_manual(values = cols) +
+  scale_colour_manual(values = c("blue", "red")) +
   labs(y = expression(paste(italic(C)[T]," ","(",mu, mol.kg^-1,")")),x="",
        title="Dissolved inorganic carbon at 1 m, 3 outliers removed",
        color = "flag")
@@ -534,51 +535,57 @@ CCT1 <- ggplot(dplyr::filter(z, depth == 0), aes(x = sampling_date, y = dic_dup,
   scale_x_datetime(breaks = date_breaks("2 year"), labels = date_format("%Y")) +
   geom_point(na.rm=TRUE) +
   theme_bw() + 
-  scale_colour_manual(values = cols) +
+  scale_colour_manual(values = c("blue", "red")) +
   labs(y = expression(paste(italic(C)[T]," ","(",mu, mol.kg^-1,")")),x="",
        title="Dissolved inorganic carbon at 1 m, outliers removed",
        color = "flag")
 
 # Check for outliers at 50 m
-CAT50 <- ggplot(dplyr::filter(z, depth == 0 & qflag_ta != 3), aes(x = sampling_date, y = ta_dup, color = as.factor(qflag_ta))) +
+CAT50 <- ggplot(dplyr::filter(z, depth == 50 & qflag_ta != 3), aes(x = sampling_date, y = ta_dup, color = as.factor(qflag_ta))) +
   scale_x_datetime(breaks = date_breaks("2 year"), labels = date_format("%Y")) +
   geom_point(na.rm=TRUE) +
   theme_bw() + 
-  scale_colour_manual(values = c("red", "blue")) +
+  scale_colour_manual(values = c("blue", "red")) +
   labs(y = expression(paste(italic(A)[T]," ","(",mu, mol.kg^-1,")")),x="",
-       title="Total alkalinity at 50 m, 3 outliers removed",
+       title="Total alkalinity at 50 m",
        color = "flag")
 #remove outliers and replot
-z <- z %>% 
-  dplyr::mutate(qflag_ta = ifelse(depth == 50 & ta_dup < 2500, 3, qflag_ta))
-CAT50 <- ggplot(dplyr::filter(z, depth == 50 & qflag_ta != 3), 
+z <- z %>%
+  dplyr::mutate(qflag_ta = ifelse((depth == 50 & ta_dup < 2520) |
+                                  (depth == 50 & ta_dup > 2600), 
+                                  3, qflag_ta))
+CAT50 <- ggplot(dplyr::filter(z, depth == 50), 
                 aes(x = sampling_date, y = ta_dup, color = as.factor(qflag_ta))) +
   scale_x_datetime(breaks = date_breaks("2 year"), labels = date_format("%Y")) +
   geom_point(na.rm=TRUE) +
   theme_bw() + 
-  scale_colour_manual(values = c("red", "blue")) +
+  scale_colour_manual(values = c("blue", "red")) +
   labs(y = expression(paste(italic(A)[T]," ","(",mu, mol.kg^-1,")")),x="",
-       title="Total alkalinity at 50 m, outliers removed",
+       title="Total alkalinity at 50 m,  outliers removed",
        color = "flag")
 
-cols <- c("1" = "red", "2" = "blue", "3" = "darkgreen", "4" = "orange")
+CAT1cols <- c("1" = "red", "2" = "blue", "3" = "darkgreen", "4" = "orange")
 CCT50 <- ggplot(dplyr::filter(z, depth == 50 & qflag_dic != 3), 
                 aes(x = sampling_date, y = dic_dup, color = as.factor(qflag_dic))) +
   scale_x_datetime(breaks = date_breaks("2 year"), labels = date_format("%Y")) +
   geom_point(na.rm=TRUE) +
   theme_bw() + 
-  scale_colour_manual(values = cols) +
+  scale_colour_manual(values = c("blue", "red")) +
   labs(y = expression(paste(italic(C)[T]," ","(",mu, mol.kg^-1,")")),x="",
        title="Dissolved inorganic carbon at 50 m, outliers removed",
        color = "flag")
 #remove outliers and replot
-# no outlier identified
-CCT50 <- ggplot(dplyr::filter(z, depth == 50 & qflag_dic != 3), 
+z <- z %>%
+  dplyr::mutate(qflag_dic = ifelse((depth == 50 & dic_dup < 2200) |
+        (depth == 50 & dic_dup < 2190) |
+        (depth == 50 & dic_dup > 2275 &  year(z$sampling_date) == 2008), 
+                                  3, qflag_dic))
+CCT50 <- ggplot(dplyr::filter(z, depth == 50), 
                 aes(x = sampling_date, y = dic_dup, color = as.factor(qflag_dic))) +
   scale_x_datetime(breaks = date_breaks("2 year"), labels = date_format("%Y")) +
   geom_point(na.rm=TRUE) +
   theme_bw() + 
-  scale_colour_manual(values = cols) +
+  scale_colour_manual(values = c("blue", "red")) +
   labs(y = expression(paste(italic(C)[T]," ","(",mu, mol.kg^-1,")")),x="",
        title="Dissolved inorganic carbon at 50 m, outliers removed",
        color = "flag")
@@ -589,6 +596,10 @@ png(file = "output_jp/figures/fig_outliers.png",
 grid.arrange(CAT1, CCT1, CAT50, CCT50, ncol=1)
 dev.off()
 ```
+Outliers removed.
+![output_jp/figures/fig_outliers.png](output_jp/figures/fig_outliers.png)
+
+
 
 ```{r Calculate means except pH, include=FALSE}
 # AT and CT, one removes  values flagged as 3
