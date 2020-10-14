@@ -431,7 +431,9 @@ kable(tab_dyf_surf_salinity_AT_year, caption="")
 
 ## Point B
 
-```{r Initialization Point B, include=FALSE}
+**Statistics on input data are:**
+
+```{r Initialization Point B, include=TRUE, message = FALSE}
 z <-  read_delim(
   paste0(path, "data/Data_DIC.csv"),
   delim = ",",
@@ -482,7 +484,8 @@ z <- z %>%
     id = row_number(z$sampling_date)
   )
 
-print(skim(z))
+skim(z)
+
 # read POC and PON data
 pom <- read_csv(file = paste0(path, "data/POC-PON/POC-2007-2015_PtB_1m.csv"), comment="#")
 pom$date <- as.POSIXct(pom$date)
@@ -507,6 +510,7 @@ cols <- c("1" = "red", "2" = "blue", "3" = "darkgreen", "4" = "orange")
 CAT1 <- ggplot(dplyr::filter(z, depth == 0), aes(x = sampling_date, y = ta_dup, color = as.factor(qflag_ta))) +
   scale_x_datetime(breaks = date_breaks("2 year"), labels = date_format("%Y")) +
   geom_point(na.rm=TRUE) +
+  lims(y = c(2450, 2650)) +
   theme_bw() + 
   scale_colour_manual(values = c("blue", "red")) +
   labs(y = expression(paste(italic(A)[T]," ","(",mu, mol.kg^-1,")")),x="",
@@ -517,7 +521,7 @@ CCT1 <- ggplot(dplyr::filter(z, depth == 0), aes(x = sampling_date, y = dic_dup,
   scale_x_datetime(breaks = date_breaks("2 year"), labels = date_format("%Y")) +
   geom_point(na.rm=TRUE) +
   theme_bw() + 
-  scale_colour_manual(values = c("blue", "red")) +
+  scale_colour_manual(values = c("blue", "red", "green")) +
   labs(y = expression(paste(italic(C)[T]," ","(",mu, mol.kg^-1,")")),x="",
        title="Dissolved inorganic carbon at 1 m, 3 outliers removed",
        color = "flag")
@@ -544,6 +548,7 @@ CCT1 <- ggplot(dplyr::filter(z, depth == 0), aes(x = sampling_date, y = dic_dup,
 CAT50 <- ggplot(dplyr::filter(z, depth == 50 & qflag_ta != 3), aes(x = sampling_date, y = ta_dup, color = as.factor(qflag_ta))) +
   scale_x_datetime(breaks = date_breaks("2 year"), labels = date_format("%Y")) +
   geom_point(na.rm=TRUE) +
+  #lims(y = c(2450, 2650)) +
   theme_bw() + 
   scale_colour_manual(values = c("blue", "red")) +
   labs(y = expression(paste(italic(A)[T]," ","(",mu, mol.kg^-1,")")),x="",
@@ -596,7 +601,7 @@ png(file = "output_jp/figures/fig_outliers.png",
 grid.arrange(CAT1, CCT1, CAT50, CCT50, ncol=1)
 dev.off()
 ```
-Outliers removed.
+**Removal of outliers.**
 ![output_jp/figures/fig_outliers.png](output_jp/figures/fig_outliers.png)
 
 
@@ -611,7 +616,7 @@ mean_at_dic <- z %>%
                 ta = mean(ta_dup, na.rm = TRUE),
                 dic = mean(dic_dup, na.rm = TRUE)) %>% 
   dplyr::ungroup() %>% 
-  dplyr::select(sampling_date, depth, ta, dic) %>% 
+  #dplyr::select(sampling_date, depth, ta, dic) %>% 
   dplyr::distinct()
 # salinity and temperature field
 mean_sal_temp <- z %>%
