@@ -2553,9 +2553,9 @@ ggsave(file="output_jp/figures/fig4b.pdf", fig_paper_monthly_rate_AT_CT_50m, wid
 <!-- kable(reg_deconv_pH_1m_ano, digits = c(4,4,11,3,3,2,3), caption="Regressions on anomalies at 1 m depth.") -->
 <!-- ``` -->
 
-<!-- Using the real values rather than anomalies, in contrast to Garcia-Ibanez et al., the sum of the slopes is higher that the slope found earlier (`r round(sum(as.data.frame(reg_deconv_pH_1m)$Slope), digits=4)` vs `r round(as.data.frame(reg_var_1m)["mean_pH", "Slope"], digits=4)`). -->
+<!-- Using the real values rather than anomalies, in contrast to Garcia-Ibanez et al., the sum of the slopes is higher that the slope found earlier (`r #round(sum(as.data.frame(reg_deconv_pH_1m)$Slope), digits=4)` vs `r #round(as.data.frame(reg_var_1m)["mean_pH", "Slope"], digits=4)`). -->
 
-<!-- Using the anomalies rather than the real values, the sum of the slopes is much closer to the slope found earlier (`r round(sum(as.data.frame(reg_deconv_pH_1m_ano)$Slope), digits=4)` vs `r round(as.data.frame(reg_ano_1m)["pH_ano", "Slope"], digits=4)`). -->
+<!-- Using the anomalies rather than the real values, the sum of the slopes is much closer to the slope found earlier (`r #round(sum(as.data.frame(reg_deconv_pH_1m_ano)$Slope), digits=4)` vs `r #round(as.data.frame(reg_ano_1m)["pH_ano", "Slope"], digits=4)`). -->
 
 <!-- ## Deconvolution of observed pH changes at 1 m according to Garcia-Ibanez -->
 <!-- ```{r Prepare observed data for Garcia-Ibanez pH, include=FALSE} -->
@@ -3157,11 +3157,11 @@ ggsave(file="output_jp/figures/fig4b.pdf", fig_paper_monthly_rate_AT_CT_50m, wid
 
 <!-- pH is calculated from AT and CT. There are 4 explanatory variables: T, S, AT and CT. One variable is used at a time while data used for the 3 remaining variables are yearly, year/monthly or total means (also for Pt, Sit and P). Propagation of errors was performed according to http://www.met.rdg.ac.uk/~swrhgnrj/combining_errors.pdf -->
 
-<!-- Using Garcia-Ibanez's approach, the sum of the contributions of each variable to pH changes is `r round(deconv_garcia$dpHT_dt[5], digits=4)`, `r round(deconv_garcia$dpHT_dt[10], digits=4)` and `r round(deconv_garcia$dpHT_dt[15], digits=4)`, respectively using yearly, year/monthly or total means. This is compared with the regression of the observed values against time (that is the real change) of `r round(as.data.frame(reg_var_1m)["mean_pH", "Slope"], digits=4)`.  -->
+<!-- Using Garcia-Ibanez's approach, the sum of the contributions of each variable to pH changes is `r #round(deconv_garcia$dpHT_dt[5], digits=4)`, `r #round(deconv_garcia$dpHT_dt[10], digits=4)` and `r #round(deconv_garcia$dpHT_dt[15], digits=4)`, respectively using yearly, year/monthly or total means. This is compared with the regression of the observed values against time (that is the real change) of `r #round(as.data.frame(reg_var_1m)["mean_pH", "Slope"], digits=4)`.  -->
 
-<!-- With my approach, using the observed values rather than anomalies, the sum of the slopes is `r round(sum(as.data.frame(reg_deconv_pH_1m)$Slope), digits=4)` compared with regression of the observed values against time (that is the real change) of `r round(as.data.frame(reg_var_1m)["mean_pH", "Slope"], digits=4)`. -->
+<!-- With my approach, using the observed values rather than anomalies, the sum of the slopes is `r #round(sum(as.data.frame(reg_deconv_pH_1m)$Slope), digits=4)` compared with regression of the observed values against time (that is the real change) of `r #round(as.data.frame(reg_var_1m)["mean_pH", "Slope"], digits=4)`. -->
 
-<!-- With my approach, using the anomalies rather than the observed values, the sum of the slopes is `r round(sum(as.data.frame(reg_deconv_pH_1m_ano)$Slope), digits=4)` compared with regression of the anomalies values against time (that is the real change) of `r round(as.data.frame(reg_ano_1m)["pH_ano", "Slope"], digits=4)`. -->
+<!-- With my approach, using the anomalies rather than the observed values, the sum of the slopes is `r #round(sum(as.data.frame(reg_deconv_pH_1m_ano)$Slope), digits=4)` compared with regression of the anomalies values against time (that is the real change) of `r #round(as.data.frame(reg_ano_1m)["pH_ano", "Slope"], digits=4)`. -->
 
 <!-- **To summarize**: -->
 
@@ -3474,9 +3474,9 @@ ggsave(file="output_jp/figures/fig4b.pdf", fig_paper_monthly_rate_AT_CT_50m, wid
 <!-- kable(reg_deconv_pCO2_1m_ano, digits = c(4,4,11,3,3,2,3), caption="Regressions on anomalies at 1 m depth.") -->
 <!-- ``` -->
 
-<!-- Using the real values rather than anomalies, the sum of the slopes is slightly higher than the slope found earlier (`r round(sum(as.data.frame(reg_deconv_pCO2_1m)$Slope), digits=4)` vs `r round(as.data.frame(reg_var_1m)["pCO2", "Slope"], digits=4)`). -->
+<!-- Using the real values rather than anomalies, the sum of the slopes is slightly higher than the slope found earlier (`r #round(sum(as.data.frame(reg_deconv_pCO2_1m)$Slope), digits=4)` vs `r #round(as.data.frame(reg_var_1m)["pCO2", "Slope"], digits=4)`). -->
 
-<!-- Using the anomalies rather than the real values, the sum of the slopes is slightly lower than the slope found earlier (`r round(sum(as.data.frame(reg_deconv_pCO2_1m_ano)$Slope), digits=4)` vs `r round(as.data.frame(reg_ano_1m)["pCO2_ano", "Slope"], digits=4)`). -->
+<!-- Using the anomalies rather than the real values, the sum of the slopes is slightly lower than the slope found earlier (`r #round(sum(as.data.frame(reg_deconv_pCO2_1m_ano)$Slope), digits=4)` vs `r #round(as.data.frame(reg_ano_1m)["pCO2_ano", "Slope"], digits=4)`). -->
 
 <!-- ## Deconvolution of pCO2 changes at 1 m according to Garcia-Ibanez -->
 <!-- ```{r Prepare observed data for Garcia-Ibanez pCO2 at 1 m, include=FALSE} -->
@@ -3923,9 +3923,9 @@ ggsave(file="output_jp/figures/fig4b.pdf", fig_paper_monthly_rate_AT_CT_50m, wid
 <!-- kable(reg_deconv_pH_50m_ano, digits = c(4,4,11,3,3,2,3), caption="Regressions on anomalies at 50 m depth.") -->
 <!-- ``` -->
 
-<!-- Using the real values rather than anomalies, the sum of the slopes is higher that the slope found earlier (`r round(sum(as.data.frame(reg_deconv_pH_50m)$Slope), digits=4)` vs `r round(as.data.frame(reg_var_1m)["pH", "Slope"], digits=4)`). -->
+<!-- Using the real values rather than anomalies, the sum of the slopes is higher that the slope found earlier (`r #round(sum(as.data.frame(reg_deconv_pH_50m)$Slope), digits=4)` vs `r #round(as.data.frame(reg_var_1m)["pH", "Slope"], digits=4)`). -->
 
-<!-- Using the anomalies rather than the real values, the sum of the slopes is much closer to the slope found earlier (`r round(sum(as.data.frame(reg_deconv_pH_50m_ano)$Slope), digits=4)` vs `r round(as.data.frame(reg_ano_1m)["pH_ano", "Slope"], digits=4)`). -->
+<!-- Using the anomalies rather than the real values, the sum of the slopes is much closer to the slope found earlier (`r #round(sum(as.data.frame(reg_deconv_pH_50m_ano)$Slope), digits=4)` vs `r #round(as.data.frame(reg_ano_1m)["pH_ano", "Slope"], digits=4)`). -->
 
 <!-- ## Deconvolution of pCO2 changes at 50 m -->
 <!-- ```{r Deconvolution of pCO2 changes at 50 m, include=FALSE} -->
@@ -4116,9 +4116,9 @@ ggsave(file="output_jp/figures/fig4b.pdf", fig_paper_monthly_rate_AT_CT_50m, wid
 <!-- kable(reg_deconv_pCO2_50m_ano, digits = c(4,4,11,3,3,2,3), caption="Regressions on anomalies at 50 m depth.") -->
 <!-- ``` -->
 
-<!-- Using the real values rather than anomalies, the sum of the slopes is larger than the slope found earlier (`r round(sum(as.data.frame(reg_deconv_pCO2_50m)$Slope), digits=4)` vs `r round(as.data.frame(reg_var_1m)["pCO2", "Slope"], digits=4)`). -->
+<!-- Using the real values rather than anomalies, the sum of the slopes is larger than the slope found earlier (`r #round(sum(as.data.frame(reg_deconv_pCO2_50m)$Slope), digits=4)` vs `r #round(as.data.frame(reg_var_1m)["pCO2", "Slope"], digits=4)`). -->
 
-<!-- Using the anomalies rather than the real values, the sum of the slopes is lower than the slope found earlier (`r round(sum(as.data.frame(reg_deconv_pCO2_50m_ano)$Slope), digits=4)` vs `r round(as.data.frame(reg_ano_1m)["pCO2_ano", "Slope"], digits=4)`). -->
+<!-- Using the anomalies rather than the real values, the sum of the slopes is lower than the slope found earlier (`r #round(sum(as.data.frame(reg_deconv_pCO2_50m_ano)$Slope), digits=4)` vs `r #round(as.data.frame(reg_ano_1m)["pCO2_ano", "Slope"], digits=4)`). -->
 
 <!-- ## Deconvolution of observed pH changes at 50 m according to Garcia-Ibanez -->
 <!-- ```{r Prepare observed data for Garcia-Ibanez pH at 50 m, include=FALSE} -->
