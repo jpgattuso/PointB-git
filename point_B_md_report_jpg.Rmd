@@ -500,7 +500,42 @@ pom$date <- as.POSIXct(pom$date)
 ```{r Check outliers, include=TRUE}
 # "C" means "check"
 # Check for outliers at 1 m
-# AT
+
+# Create qflags salinity_field and temp_field
+z <- z %>% 
+  dplyr::mutate(qflag_salinity_field = ifelse(!is.na(salinity_field), 2, 3),
+                qflag_temp_field = ifelse(!is.na(temp_field), 2, 3))
+# Salinity 1 m
+CS1_xts <- z %>% 
+  dplyr::filter(depth == 0) %>%
+  dplyr::select(sampling_date, salinity_field, qflag_salinity_field) %>% 
+  dplyr::mutate(salinity_field_q2 = ifelse(qflag_salinity_field == 2, salinity_field, NA),
+                salinity_field_q3 = ifelse(qflag_salinity_field == 3, salinity_field, NA)) %>% 
+  dplyr::select(-qflag_salinity_field, -salinity_field)
+CS1_xts <- as.xts(CS1_xts, order.by = CS1_xts$sampling_date)
+dygraph(CS1_xts, group = "pointB", main="Salinity 1 m: remove outliers?", ylab="Salinity") %>%
+      dySeries("salinity_field_q2", color = "blue", strokeWidth = 0, label = "flag2") %>%
+      dySeries("salinity_field_q3", color = "red", strokeWidth = 0, label = "flag3") %>%
+      dyHighlight(highlightCircleSize = 8,highlightSeriesBackgroundAlpha =0.2,hideOnMouseOut =TRUE) %>%
+      dyOptions( drawGrid = TRUE, drawPoints = TRUE, pointSize = 2) %>%
+    dyLegend(show = "follow")   %>%
+      dyRangeSelector(height = 30, dateWindow= NULL)
+# Temperature 1 m
+CT1_xts <- z %>% 
+  dplyr::filter(depth == 0) %>%
+  dplyr::select(sampling_date, temp_field, qflag_temp_field) %>% 
+  dplyr::mutate(temp_field_q2 = ifelse(qflag_temp_field == 2, temp_field, NA),
+                temp_field_q3 = ifelse(qflag_temp_field == 3, temp_field, NA)) %>% 
+  dplyr::select(-qflag_temp_field, -temp_field)
+CT1_xts <- as.xts(CT1_xts, order.by = CT1_xts$sampling_date)
+dygraph(CT1_xts, group = "pointB", main="Temperature 1 m: remove outliers?", ylab="Salinity") %>%
+      dySeries("temp_field_q2", color = "blue", strokeWidth = 0, label = "flag2") %>%
+      dySeries("temp_field_q3", color = "red", strokeWidth = 0, label = "flag3") %>%
+      dyHighlight(highlightCircleSize = 8,highlightSeriesBackgroundAlpha =0.2,hideOnMouseOut =TRUE) %>%
+      dyOptions( drawGrid = TRUE, drawPoints = TRUE, pointSize = 2) %>%
+    dyLegend(show = "follow")   %>%
+      dyRangeSelector(height = 30, dateWindow= NULL)
+# AT 1 m
 CAT1_xts <- z %>% 
   dplyr::filter(depth == 0) %>%
   dplyr::select(sampling_date, ta_dup, qflag_ta) %>% 
@@ -515,8 +550,7 @@ dygraph(CAT1_xts, group = "pointB", main="AT: remove outliers", ylab="Total alka
       dyOptions( drawGrid = TRUE, drawPoints = TRUE, pointSize = 2) %>%
     dyLegend(show = "follow")   %>%
       dyRangeSelector(height = 30, dateWindow= NULL)
-
-# CT
+# CT 1 m
 CCT1_xts <- z %>% 
   dplyr::filter(depth == 0) %>%
   dplyr::select(sampling_date, dic_dup, qflag_dic) %>% 
@@ -532,9 +566,37 @@ dygraph(CCT1_xts, group = "pointB", main="CT: remove outliers", ylab="Dissolved 
     dyLegend(show = "follow")   %>%
       dyRangeSelector(height = 30, dateWindow= NULL)
 
-# Check for outliers at 50 m
-
-# AT
+# Salinity 50 m
+CS50_xts <- z %>% 
+  dplyr::filter(depth == 50) %>%
+  dplyr::select(sampling_date, salinity_field, qflag_salinity_field) %>% 
+  dplyr::mutate(salinity_field_q2 = ifelse(qflag_salinity_field == 2, salinity_field, NA),
+                salinity_field_q3 = ifelse(qflag_salinity_field == 3, salinity_field, NA)) %>% 
+  dplyr::select(-qflag_salinity_field, -salinity_field)
+CS50_xts <- as.xts(CS50_xts, order.by = CS50_xts$sampling_date)
+dygraph(CS50_xts, group = "pointB", main="Salinity 50 m: remove outliers", ylab="Salinity") %>%
+      dySeries("salinity_field_q2", color = "blue", strokeWidth = 0, label = "flag2") %>%
+      dySeries("salinity_field_q3", color = "red", strokeWidth = 0, label = "flag3") %>%
+      dyHighlight(highlightCircleSize = 8,highlightSeriesBackgroundAlpha =0.2,hideOnMouseOut =TRUE) %>%
+      dyOptions( drawGrid = TRUE, drawPoints = TRUE, pointSize = 2) %>%
+    dyLegend(show = "follow")   %>%
+      dyRangeSelector(height = 30, dateWindow= NULL)
+# Temperature 50 m
+CT1_xts <- z %>% 
+  dplyr::filter(depth == 50) %>%
+  dplyr::select(sampling_date, temp_field, qflag_temp_field) %>% 
+  dplyr::mutate(temp_field_q2 = ifelse(qflag_temp_field == 2, temp_field, NA),
+                temp_field_q3 = ifelse(qflag_temp_field == 3, temp_field, NA)) %>% 
+  dplyr::select(-qflag_temp_field, -temp_field)
+CT1_xts <- as.xts(CT1_xts, order.by = CT1_xts$sampling_date)
+dygraph(CT1_xts, group = "pointB", main="Salinity 50 m: remove outliers", ylab="Salinity") %>%
+      dySeries("temp_field_q2", color = "blue", strokeWidth = 0, label = "flag2") %>%
+      dySeries("temp_field_q3", color = "red", strokeWidth = 0, label = "flag3") %>%
+      dyHighlight(highlightCircleSize = 8,highlightSeriesBackgroundAlpha =0.2,hideOnMouseOut =TRUE) %>%
+      dyOptions( drawGrid = TRUE, drawPoints = TRUE, pointSize = 2) %>%
+    dyLegend(show = "follow")   %>%
+      dyRangeSelector(height = 30, dateWindow= NULL)
+# AT 50 m
 CAT50_xts <- z %>% 
   dplyr::filter(depth == 50) %>%
   dplyr::select(sampling_date, ta_dup, qflag_ta) %>% 
@@ -549,8 +611,7 @@ dygraph(CAT50_xts, group = "pointB", main="AT: remove outliers", ylab="Total alk
       dyOptions( drawGrid = TRUE, drawPoints = TRUE, pointSize = 2) %>%
     dyLegend(show = "follow")   %>%
       dyRangeSelector(height = 30, dateWindow= NULL)
-
-# CT
+# CT 50 m
 CCT50_xts <- z %>% 
   dplyr::filter(depth == 50) %>%
   dplyr::select(sampling_date, dic_dup, qflag_dic) %>% 
@@ -573,10 +634,9 @@ z <- z %>%
     (depth == 0 & ta_dup > 2595) ~ 3,
     (depth == 0 & ta_dup < 2400) ~ 3,
     TRUE ~ qflag_ta))
-
 CAT1 <- ggplot(dplyr::filter(z, depth == 0 & !is.na(ta_dup)), aes(x = sampling_date, y = ta_dup, color = as.factor(qflag_ta))) +
   scale_x_datetime(breaks = date_breaks("2 year"), labels = date_format("%Y")) +
-  geom_point(na.rm=TRUE) +
+  geom_point(na.rm=TRUE, size = 0.6) +
   lims(y = c(2450, 2650)) +
   theme_bw() + 
   scale_colour_manual(values = c("blue", "red")) +
@@ -594,17 +654,15 @@ z <- z %>%
     (depth == 0 & dic_dup < 2230 & year(z$sampling_date) == 2014) ~ 3,
     (depth == 0 & dic_dup < 2210 & year(z$sampling_date) == 2017) ~ 3,
     TRUE ~ qflag_ta))
-
 CCT1 <- ggplot(dplyr::filter(z, depth == 0), aes(x = sampling_date, y = dic_dup, color = as.factor(qflag_dic))) +
   scale_x_datetime(breaks = date_breaks("2 year"), labels = date_format("%Y")) +
-  geom_point(na.rm=TRUE) +
+  geom_point(na.rm=TRUE, size = 0.6) +
   lims(y = c(2150, 2350)) +
   theme_bw() + 
   scale_colour_manual(values = c("blue", "red")) +
   labs(y = expression(paste(italic(C)[T]," ","(",mu, mol.kg^-1,")")),x="",
        title="Dissolved inorganic carbon at 1 m, outliers removed",
        color = "flag")
-
 z <- z %>% 
   dplyr::mutate(qflag_ta = case_when(
     (depth == 50 & ta_dup < 2520) ~ 3,
@@ -615,7 +673,7 @@ z <- z %>%
 CAT50 <- ggplot(dplyr::filter(z, depth == 50), 
                 aes(x = sampling_date, y = ta_dup, color = as.factor(qflag_ta))) +
   scale_x_datetime(breaks = date_breaks("2 year"), labels = date_format("%Y")) +
-  geom_point(na.rm=TRUE) +
+  geom_point(na.rm=TRUE, size = 0.6) +
   theme_bw() + 
   scale_colour_manual(values = c("blue", "red")) +
   labs(y = expression(paste(italic(A)[T]," ","(",mu, mol.kg^-1,")")),x="",
@@ -630,7 +688,7 @@ z <- z %>%
 CCT50 <- ggplot(dplyr::filter(z, depth == 50), 
                 aes(x = sampling_date, y = dic_dup, color = as.factor(qflag_dic))) +
   scale_x_datetime(breaks = date_breaks("2 year"), labels = date_format("%Y")) +
-  geom_point(na.rm=TRUE) +
+  geom_point(na.rm=TRUE, size = 0.6) +
   theme_bw() + 
   scale_colour_manual(values = c("blue", "red")) +
   labs(y = expression(paste(italic(C)[T]," ","(",mu, mol.kg^-1,")")),x="",
@@ -648,24 +706,36 @@ ggsave("output_jp/figures/fig_outliers.png", p, width = 18, height = 25, units =
 ```
 **After removal of outliers.**
 ![output_jp/figures/fig_outliers.png](output_jp/figures/fig_outliers.png)
-
-
+```{r Handle qflags 3, include=FALSE}
+# values flagged as 3 set to NA
+z <- z %>% 
+  dplyr::mutate(salinity_field = ifelse(qflag_salinity_field == 2, salinity_field, NA),
+                temp_field = ifelse(qflag_temp_field == 2, temp_field, NA),
+                ta_dup = ifelse(qflag_ta == 2, ta_dup, NA),
+                dic_dup = ifelse(qflag_dic == 2, dic_dup, NA),
+                NO2 = ifelse(qNO2 == 2, NO2, NA),
+                NO3 = ifelse(qNO3 == 2, NO3, NA),
+                PO4 = ifelse(qPO4 == 2, PO4, NA),
+                SIOH4 = ifelse(qSIOH4 == 2, SIOH4, NA),
+                pH_s_eol_temp_lab = ifelse(qflag_pH_s_eol == 2, pH_s_eol_temp_lab, NA),
+                pH_s_ptb_temp_lab = ifelse(qflag_pH_s_ptb == 3, pH_s_ptb_temp_lab, NA )
+  )
+```
 
 ```{r Calculate means except pH, include=FALSE}
-# AT and CT, one removes  values flagged as 3
+# AT and CT
 mean_at_dic <- z %>%
   dplyr::select(sampling_date, depth, ta_dup, qflag_ta, dic_dup, qflag_dic) %>% 
   dplyr::group_by(sampling_date, depth) %>%
-  dplyr::mutate(ta_dup = ifelse(qflag_ta != 3, ta_dup, NA),
-                dic_dup = ifelse(qflag_dic != 3, dic_dup, NA),
-                ta = mean(ta_dup, na.rm = TRUE),
+  dplyr::mutate(ta = mean(ta_dup, na.rm = TRUE),
                 dic = mean(dic_dup, na.rm = TRUE)) %>% 
   dplyr::ungroup() %>% 
   #dplyr::select(sampling_date, depth, ta, dic) %>% 
   dplyr::distinct()
 # salinity and temperature field
 mean_sal_temp <- z %>%
-  dplyr::select(sampling_date, depth, salinity_field, temp_field) %>% 
+  dplyr::select(sampling_date, depth, salinity_field, qflag_salinity_field, temp_field,
+                qflag_temp_field) %>% 
   dplyr::group_by(sampling_date, depth) %>%
   dplyr::mutate(salinity = mean(salinity_field, na.rm = TRUE),
                 temperature = mean(temp_field, na.rm = TRUE)) %>% 
@@ -684,10 +754,6 @@ mean_Chla <- z %>%
 mean_nuts <- z %>%
   dplyr::select(sampling_date, depth, NO2, qNO2, NO3, qNO3, PO4, qPO4, SIOH4, qSIOH4) %>% 
   dplyr::group_by(sampling_date, depth) %>%
-  dplyr::mutate(NO2 = ifelse(qNO2 == 2, NO2, NA),
-                NO3 = ifelse(qNO3 == 2, NO3, NA),
-                PO4 = ifelse(qPO4 == 2, PO4, NA),
-                SIOH4 = ifelse(qSIOH4 == 2, SIOH4, NA)) %>% 
   dplyr::mutate(NO2 = mean(NO2, na.rm = TRUE),
                 NO3 = mean(NO3, na.rm = TRUE),
                 PO4 = mean(PO4, na.rm = TRUE),
@@ -701,24 +767,23 @@ dat1 <- dplyr::full_join(mean_sal_temp, mean_at_dic)  %>%
   dplyr::full_join(mean_Chla) %>% 
   dplyr::distinct()
 # Check that there is only one row per date and depth
-zzz <- dat1 %>% filter(depth==50) %>% select(sampling_date, depth) %>% group_by(sampling_date) %>% mutate(n=n()) %>% ungroup() %>% filter(n!=1)
-zzz
+# zzz <- dat1 %>% filter(depth==50) %>% select(sampling_date, depth) %>% group_by(sampling_date) %>% mutate(n=n()) %>% ungroup() %>% filter(n!=1)
+# zzz
 ```
 
 ```{r Calculate and compare spec pH, include=FALSE}
-
 #First, create df with pH variables plus mean ta
 tmp <- z %>% 
   dplyr::select(sampling_date, depth, salinity_field, temp_field, contains("eol"), contains("ptb")) %>% 
   dplyr::left_join(dat1, by = c("sampling_date", "depth"))
 
-# calculate in situ spec pH at eol
+# set to NA qglags = 3; calculate in situ spec pH at eol
 eol <- tmp %>%
   dplyr::select(sampling_date, depth, ta, dic, salinity_field, temp_field, 
-                pH_s_eol_temp_lab, qflag_pH_s_eol, temp_lab_eol, PO4, SIOH4) %>%
+                pH_s_eol_temp_lab, temp_lab_eol, PO4, SIOH4) %>%
   tidyr::drop_na(sampling_date, depth, ta, salinity_field, temp_field, 
-                pH_s_eol_temp_lab, qflag_pH_s_eol, temp_lab_eol) %>%
-  dplyr::filter(qflag_pH_s_eol != 3) %>% 
+                pH_s_eol_temp_lab, temp_lab_eol) %>%
+  #dplyr::filter(qflag_pH_s_eol != 3) %>% 
   dplyr::mutate(pH_s_eol_temp_insi = pHinsi(pH = pH_s_eol_temp_lab, ALK=ta,
                              Tinsi = temp_field,
                              Tlab =temp_lab_eol,
@@ -728,7 +793,7 @@ eol <- tmp %>%
                              pHscale = "T", b = "l10")) %>% 
   dplyr::group_by(sampling_date, depth) %>%
   dplyr::mutate(pH_s_eol_temp_insi = mean(pH_s_eol_temp_insi, na.rm = TRUE)) %>% 
-  dplyr::select(-c(pH_s_eol_temp_lab, qflag_pH_s_eol, temp_lab_eol)) %>% # no 
+  dplyr::select(-c(pH_s_eol_temp_lab, temp_lab_eol)) %>% # no 
   # longer needed and prevents efficient unique()
   dplyr::ungroup() %>% 
   dplyr::distinct()
@@ -736,10 +801,10 @@ eol <- tmp %>%
 # calculate in situ spec pH at Point B
 ptb <- tmp %>%
   dplyr::select(sampling_date, depth, ta, dic, salinity_field, temp_field, 
-                pH_s_ptb_temp_lab, qflag_pH_s_ptb, temp_lab_ptb, PO4, SIOH4) %>%
+                pH_s_ptb_temp_lab, temp_lab_ptb, PO4, SIOH4) %>%
   tidyr::drop_na(sampling_date, depth, ta, salinity_field, temp_field, 
-                pH_s_ptb_temp_lab, qflag_pH_s_ptb, temp_lab_ptb) %>%
-  dplyr::filter(qflag_pH_s_ptb != 3) %>% 
+                pH_s_ptb_temp_lab, temp_lab_ptb) %>%
+  #dplyr::filter(qflag_pH_s_ptb != 3) %>% 
   dplyr::mutate(pH_s_ptb_temp_insi = pHinsi(pH=pH_s_ptb_temp_lab, ALK=ta,
                              Tinsi=temp_field,
                              Tlab=temp_lab_ptb,
@@ -749,7 +814,7 @@ ptb <- tmp %>%
                              pHscale = "T", b="l10")) %>% 
   dplyr::group_by(sampling_date, depth) %>%
   dplyr::mutate(pH_s_ptb_temp_insi = mean(pH_s_ptb_temp_insi, na.rm = TRUE)) %>% 
-  dplyr::select(-c(pH_s_ptb_temp_lab, qflag_pH_s_ptb, temp_lab_ptb)) %>% # no 
+  dplyr::select(-c(pH_s_ptb_temp_lab, temp_lab_ptb)) %>% # no 
   # longer needed and prevents efficient unique()
   dplyr::ungroup() %>% 
   dplyr::distinct()
@@ -792,11 +857,11 @@ CPHb
 # Difference between pH eol and ptb
 eol_ptb <- eol_ptb %>% 
   dplyr::mutate(diff_pH = pH_s_eol_temp_insi - pH_s_ptb_temp_insi)
-diff_pH <- ggplot(data = eol_ptb, aes(diff_pH)) +
+p <- ggplot(data = eol_ptb, aes(diff_pH)) +
   geom_histogram(na.rm = TRUE) +
   geom_vline(xintercept = -0.015) +
   geom_vline(xintercept = 0.015)
-print(diff_pH)
+print(p)
 
 # calculate mean pH when data are available both at eol and point B and abs(difference) < 0.01
 # if not one uses the Point B pH
@@ -816,6 +881,8 @@ eol_ptb <- eol_ptb %>%
 #   dplyr::select(-dplyr::contains(c("eol", "ptb", "qflag", "qNO3", "qNO2", "qPO4", "qSIOH4"))) %>% 
 #     distinct()
 ```
+
+pH spec: the mean value is calculated when data are available both at eol and point B and abs(difference) < 0.01. If not one uses the Point B pH.
 
 ```{r Calculate means other than ta, dic, pH, include=FALSE}
 dat <- dplyr::full_join(dat1, eol_ptb, by = c("sampling_date", "depth")) %>% 
@@ -908,7 +975,6 @@ pangaea <- dplyr::select(dat, sampling_date, depth, CSC_flag, salinity,
 #Prepare SOMLIT data 
 somlit <- dat %>% 
   dplyr::select(sampling_date, depth, salinity, temperature, dic, ta, pH_calc, Pt, Sit)
-
 #save data
 write_csv(somlit, path = "output_jp/data/output_somlit.csv")
 write_csv(dat, path="output_jp/data/output.csv")
@@ -922,7 +988,7 @@ dat_no_NA <- dat %>%
 evar1 <-
   mean(c(3.6, 3.5, 1.2, 1.99, 2.4, 3.0, 3.9, 2.6, 0.5, 2.6, 3.2))*1e-6 #AT, extracted from SNAPO-CO2 reports
 evar2 <-
-  mean(c(3.2, 3.7, 3.4, 2.25, 2, 2.8, 4.9, 4, 1.5, 2.7, 2))      *1e-6 #CT, extracted from SNAPO-CO2 reports
+  mean(c(3.2, 3.7, 3.4, 2.25, 2, 2.8, 4.9, 4, 1.5, 2.7, 2))*1e-6 #CT, extracted from SNAPO-CO2 reports
 
 epKstd  <- c(0.002, 0.01,  0.02, 0.01,  0.01, 0.01, 0.01)
 
@@ -1141,7 +1207,7 @@ ggsave("output_jp/figures/fig4.pdf", g, width = 8, height = 28, units = "cm")
 g <- T1vp + S1vp + AT1vp + CT1vp + pH1vp + pCO21vp + Oa1vp + 
   patchwork::plot_layout(ncol = 2, heights = unit(c(5, 5, 5, 5, 5, 5, 5), c('cm', 'cm', 'cm', 'cm', 'cm', 'cm', 'cm')))  +
   patchwork::plot_layout(guides="collect", heights = c(1, 1, 1, 1, 1, 1, 1))
-ggsave("output_jp/figures/fig_paper_monthly_means_1m.png", g, width = 18, height = 14, units = "cm")
+ggsave("output_jp/figures/fig_paper_monthly_means_1m.png", g, width = 20, height = 20, units = "cm")
 
 
 # g <- plot_grid(T1vp, S1vp, AT1vp, CT1vp, pH1vp, pCO21vp, Oa1vp, ncol=1,
@@ -1255,7 +1321,7 @@ TODO: calculate slopes as suggested by JOI.
 
 ```{r Figure Interannual changes and anomalies at 1 m, include=FALSE}
 #TODO calculate slopes as suggested by JOI.
-size_point <- 0.4 # size of data points
+size_point <- 0.2 # size of data points
 
 # Plot interannual changes
 T1p <- ggplot(dat0m, aes(x = sampling_date, y = temperature), na.rm=TRUE) +
@@ -1302,10 +1368,10 @@ AT1p <- ggplot(dat0m, aes(x = sampling_date, y = ta), na.rm=TRUE) +
 pH1p <- ggplot(dat0m, aes(x = sampling_date, y = pH_calc), na.rm=TRUE) +
   scale_x_datetime(date_breaks="4 year", date_minor_breaks="1 years", labels = date_format("%Y")) +
   geom_point(colour="black", na.rm=TRUE, size=size_point) + 
-  geom_point(data=dat0m, aes(x = sampling_date, y = pH_calc), color= "blue", size=1) +
+  geom_point(data=dat0m, aes(x = sampling_date, y = pH_calc), color= "blue", size=size_point) +
   #geom_point(data=dat0m, aes(x = sampling_date, y = mean_pH_s_ptb_temp_insi), color ="red", size=1) +
   #geom_smooth(method=lm, colour="black", fill="grey", size=0.6, na.rm=TRUE) +
- labs(title=NULL, x="", y=expression(paste(pH[T],"calculated"))) +
+ labs(title=NULL, x="", y=expression(paste(pH[T]," calculated"))) +
   coord_fixed() +
   Mytheme(size_labs = 8) #+
   #theme(axis.text.x=element_blank())
@@ -1551,7 +1617,7 @@ anpH1p <- ggplot(data = ano_month0m, aes(x = sampling_date, y = pH_calc_ano), na
   scale_x_datetime(date_breaks="4 year", date_minor_breaks="1 years", labels = date_format("%Y")) +
   geom_point(colour="blue", na.rm=TRUE, size=size_point) + 
   geom_smooth(method=lm, colour="black", fill="grey", size=0.6, na.rm=TRUE) +
-  labs(title=NULL,x="",y=expression(paste(pH[T]))) +
+ labs(title=NULL, x="", y=expression(paste(pH[T]," calculated"))) +
   annotate("text", x =as.POSIXct("2016-01-01"), y= min(ano_month0m$pH_ano, na.rm=TRUE), 
            label="", colour="black", size=9, fontface="plain") +
   coord_fixed() +
@@ -1581,9 +1647,13 @@ anOa1p <- ggplot(data = ano_month0m, aes(x = sampling_date, y = OmegaAragonite_a
   Mytheme(size_labs = 8)
   #annotation_custom(grob_N_bl)
 
-g <- plot_grid(T1p, anT1p, S1p, anS1p, AT1p, anAT1p, CT1p, anCT1p, pH1p, anpH1p, pCO21p, anpCO21p, Oa1p, anOa1p, align='vh', ncol=2)
-ggsave(file="output_jp/figures/fig_paper_interannual_1m.png", g, width=15, height = 17, units = "cm")
-ggsave(file="output_jp/figures/fig2.pdf", g, width = 18, height = 21, units = "cm")
+g <- T1p + anT1p + S1p + anS1p + AT1p + anAT1p + CT1p + anCT1p + pH1p + anpH1p + pCO21p + anpCO21p + Oa1p + anOa1p + 
+  patchwork::plot_layout(ncol = 2, guides="collect")
+ggsave("output_jp/figures/fig_paper_interannual_1m.png", g, width=15, height = 17, units = "cm")
+
+# g <- plot_grid(T1p, anT1p, S1p, anS1p, AT1p, anAT1p, CT1p, anCT1p, pH1p, anpH1p, pCO21p, anpCO21p, Oa1p, anOa1p, align='vh', ncol=2)
+# ggsave(file="output_jp/figures/fig_paper_interannual_1m.png", g, width=15, height = 17, units = "cm")
+# ggsave(file="output_jp/figures/fig2.pdf", g, width = 18, height = 21, units = "cm")
 
 # AT as a function of salinity for every year
 j <- 0
@@ -1687,7 +1757,7 @@ row.names(reg_ta_no_change) <- var_list
 
 ## Interannual changes at 1 m
 ![fig_paper_interannual_1m.png](output_jp/figures/fig_paper_interannual_1m.png)
-![fig_poc_pon.png](output_jp/figures/fig_poc_pon.png)
+<!-- ![fig_poc_pon.png](output_jp/figures/fig_poc_pon.png) -->
 ![fig_ta_vs_salinity_month_pointB_0m.png](output_jp/figures/fig_ta_vs_salinity_month_pointB_0m.png)
 
 
@@ -1753,9 +1823,9 @@ AT50p <- ggplot(dat50m, aes(x = sampling_date, y = ta), na.rm=TRUE) +
 pH50p <- ggplot(dat50m, aes(x = sampling_date, y = pH_calc), na.rm=TRUE) +
   scale_x_datetime(breaks = date_breaks("2 year"), labels = date_format("%Y")) +
   geom_point(colour="black", na.rm=TRUE, size=size_point) + 
-  geom_point(data=dat50m, aes(x = sampling_date, y = pH_calc), color ="red", size=1) +
+  geom_point(data=dat50m, aes(x = sampling_date, y = pH_calc), color ="red", size=size_point) +
   #geom_smooth(method=lm, colour="black", fill="grey", size=0.6, na.rm=TRUE) +
- labs(title=NULL,x="", y=expression(paste(pH[T],"calculated"))) +
+ labs(title=NULL,x="", y=expression(paste(pH[T]," calculated"))) +
   # annotate("text", x =as.POSIXct("2016-01-01"), y= min(dat50m$mean_pH, na.rm=TRUE), 
   #          label="*", colour="blue", size=10, fontface="plain") +
   coord_fixed() +
@@ -1949,8 +2019,8 @@ anT50p <- ggplot(data = ano_month50m, aes(x = sampling_date, y = Temperature_ano
   geom_point(colour="blue", na.rm=TRUE, size=size_point) + 
   geom_smooth(method=lm, colour="black", fill="grey", size=0.6, na.rm=TRUE) +
   labs(title=NULL,x="", y="Temp. (°C)") +
-  annotate("text", x =as.POSIXct("2016-01-01"), y= min(ano_month50m$Temperature_ano, na.rm=TRUE), 
-           label="*", colour="black", size=10, fontface="plain") +
+  # annotate("text", x =as.POSIXct("2016-01-01"), y= min(ano_month50m$Temperature_ano, na.rm=TRUE), 
+  #          label="*", colour="black", size=10, fontface="plain") +
   coord_fixed() +
   Mytheme(size_labs = 8) +
   theme(axis.text.x=element_blank())
@@ -1971,8 +2041,8 @@ anCT50p <- ggplot(data = ano_month50m, aes(x = sampling_date, y = dic_ano), na.r
   geom_point(colour="blue", na.rm=TRUE, size=size_point) + 
   geom_smooth(method=lm, colour="black", fill="grey", size=0.6, na.rm=TRUE) +
   labs(title=NULL,x="", y=expression(paste(italic(C)[T], " (",mu, "mol ", kg^-1,")"))) +
-  annotate("text", x =as.POSIXct("2016-01-01"), y= min(ano_month50m$dic_ano, na.rm=TRUE), 
-           label="*", colour="black", size=10, fontface="plain") +
+  # annotate("text", x =as.POSIXct("2016-01-01"), y= min(ano_month50m$dic_ano, na.rm=TRUE), 
+  #          label="*", colour="black", size=10, fontface="plain") +
   coord_fixed() +
   Mytheme(size_labs = 8) +
   theme(axis.text.x=element_blank())
@@ -1983,8 +2053,7 @@ anAT50p <- ggplot(data = ano_month50m, aes(x = sampling_date, y = ta_ano), na.rm
   geom_point(colour="blue", na.rm=TRUE, size=size_point) + 
   geom_smooth(method=lm, colour="black", fill="grey", size=0.6, na.rm=TRUE) +
   labs(title=NULL,x="", y=expression(paste(italic(A)[T], " (",mu, "mol ", kg^-1,")"))) +
-  annotate("text", x =as.POSIXct("2016-01-01"), y= min(ano_month50m$ta_ano, na.rm=TRUE), 
-           label="*", colour="black", size=10, fontface="plain") +
+  #annotate("text", x =as.POSIXct("2016-01-01"), y= min(ano_month50m$ta_ano, na.rm=TRUE), label="*", colour="black", size=10, fontface="plain") +
   theme(axis.text.x=element_blank()) +
   coord_fixed() +
   Mytheme(size_labs = 8) +
@@ -1994,9 +2063,8 @@ anpH50p <- ggplot(data = ano_month50m, aes(x = sampling_date, y = pH_calc_ano), 
   scale_x_datetime(breaks = date_breaks("2 year"), labels = date_format("%Y")) +
   geom_point(colour="blue", na.rm=TRUE, size=size_point) + 
   geom_smooth(method=lm, colour="black", fill="grey", size=0.6, na.rm=TRUE) +
-  labs(title=NULL,x="",y=expression(paste(pH[T]))) +
-  annotate("text", x =as.POSIXct("2016-01-01"), y= min(ano_month50m$pH_ano, na.rm=TRUE), 
-           label="*", colour="black", size=10, fontface="plain") +
+ labs(title=NULL, x="", y=expression(paste(pH[T]," calculated"))) +
+  #annotate("text", x =as.POSIXct("2016-01-01"), y= min(ano_month50m$pH_ano, na.rm=TRUE),  label="*", colour="black", size=10, fontface="plain") +
   coord_fixed() +
   Mytheme(size_labs = 8) +
   theme(axis.text.x=element_blank())
@@ -2006,8 +2074,7 @@ anpCO250p <- ggplot(data = ano_month50m, aes(x = sampling_date, y = pCO2_ano), n
   geom_point(colour="blue", na.rm=TRUE, size=size_point) + 
   geom_smooth(method=lm, colour="black", fill="grey", size=0.6, na.rm=TRUE) +
   labs(title=NULL,x="",y=expression(paste(pCO[2], " (",mu, "atm)"))) +
-  annotate("text", x =as.POSIXct("2016-01-01"), y= min(ano_month50m$pCO2_ano, na.rm=TRUE), 
-           label="*", colour="black", size=10, fontface="plain") +
+  #annotate("text", x =as.POSIXct("2016-01-01"), y= min(ano_month50m$pCO2_ano, na.rm=TRUE),  label="*", colour="black", size=10, fontface="plain") +
   coord_fixed() +
   Mytheme(size_labs = 8) +
   theme(axis.text.x=element_blank())
@@ -2018,8 +2085,7 @@ anOa50p <- ggplot(data = ano_month50m, aes(x = sampling_date, y = OmegaAragonite
   geom_point(colour="blue", na.rm=TRUE, size=size_point) + 
   geom_smooth(method=lm, colour="black", fill="grey", size=0.6, na.rm=TRUE) +
   labs(title=NULL,x="",y=expression(paste(Omega[a]))) +
-  annotate("text", x =as.POSIXct("2016-01-01"), y= min(ano_month50m$OmegaAragonite_ano, na.rm=TRUE), 
-           label="*", colour="black", size=10, fontface="plain") +
+  #annotate("text", x =as.POSIXct("2016-01-01"), y= min(ano_month50m$OmegaAragonite_ano, na.rm=TRUE), label="*", colour="black", size=10, fontface="plain") +
   coord_fixed() +
   Mytheme(size_labs = 8)
   #annotation_custom(grob_N)
@@ -2228,11 +2294,12 @@ kable(tab_pCO2_month, digits = c(4,4,3,3,3,2,3), caption="Regressions on annual 
 kable(tab_ct_month, digits = c(4,4,3,3,3,2,3), caption="Regressions on annual monthly values of CT at 1 m depth.")
 ```
 
-![fig_temp_month.png](output_jp/figures/fig_temp_month.png)
-![fig_at_month.png](output_jp/figures/fig_at_month.png)
-![fig_pCO2_month.png](output_jp/figures/fig_pCO2_month.png)
-![fig_temp_quarter.png](output_jp/figures/fig_temp_quarter.png)
-![fig_at_quarter.png](output_jp/figures/fig_at_quarter.png)
+<!-- ![fig_temp_month.png](output_jp/figures/fig_temp_month.png) -->
+<!-- ![fig_at_month.png](output_jp/figures/fig_at_month.png) -->
+<!-- ![fig_pCO2_month.png](output_jp/figures/fig_pCO2_month.png) -->
+<!-- ![fig_temp_quarter.png](output_jp/figures/fig_temp_quarter.png) -->
+<!-- ![fig_at_quarter.png](output_jp/figures/fig_at_quarter.png) -->
+
 ## Annual, monthly and quarterly ranges of T, AT and pCO2 at 50 m
 
 ```{r monthly and quarterly temperature and AT at 50 m, include=FALSE}
