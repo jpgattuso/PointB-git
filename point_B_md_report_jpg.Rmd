@@ -570,10 +570,10 @@ dygraph(CCT50_xts, group = "pointB", main="CT: remove outliers", ylab="Dissolved
 ```{r Remove outliers and plot, include=TRUE}
 z <- z %>% 
   dplyr::mutate(qflag_ta = case_when(
-    (depth == 0 & ta_dup > 2700) ~ 3,
+    (depth == 0 & ta_dup > 2595) ~ 3,
     (depth == 0 & ta_dup < 2400) ~ 3,
     TRUE ~ qflag_ta))
-#cols <- c("1" = "red", "2" = "blue", "3" = "darkgreen", "4" = "orange")
+
 CAT1 <- ggplot(dplyr::filter(z, depth == 0 & !is.na(ta_dup)), aes(x = sampling_date, y = ta_dup, color = as.factor(qflag_ta))) +
   scale_x_datetime(breaks = date_breaks("2 year"), labels = date_format("%Y")) +
   geom_point(na.rm=TRUE) +
@@ -581,14 +581,15 @@ CAT1 <- ggplot(dplyr::filter(z, depth == 0 & !is.na(ta_dup)), aes(x = sampling_d
   theme_bw() + 
   scale_colour_manual(values = c("blue", "red")) +
   labs(y = expression(paste(italic(A)[T]," ","(",mu, mol.kg^-1,")")),x="",
-       title="Total alkalinity at 1 m, 3 outliers removed",
+       title="Total alkalinity at 1 m, outliers removed",
        color = "flag")
-
 z <- z %>% 
   dplyr::mutate(qflag_dic = case_when(
     (depth == 0 & dic_dup > 2350) ~ 3,
+    (depth == 0 & dic_dup > 2270 & year(z$sampling_date) == 2008) ~ 3,
     (depth == 0 & dic_dup > 2300 & year(z$sampling_date) == 2009) ~ 3,
     (depth == 0 & dic_dup > 2300 & year(z$sampling_date) == 2009) ~ 3,
+    (depth == 0 & dic_dup < 2223 & year(z$sampling_date) == 2012) ~ 3,
     (depth == 0 & dic_dup > 2310 & year(z$sampling_date) == 2017) ~ 3,
     (depth == 0 & dic_dup < 2230 & year(z$sampling_date) == 2014) ~ 3,
     (depth == 0 & dic_dup < 2210 & year(z$sampling_date) == 2017) ~ 3,
@@ -597,6 +598,7 @@ z <- z %>%
 CCT1 <- ggplot(dplyr::filter(z, depth == 0), aes(x = sampling_date, y = dic_dup, color = as.factor(qflag_dic))) +
   scale_x_datetime(breaks = date_breaks("2 year"), labels = date_format("%Y")) +
   geom_point(na.rm=TRUE) +
+  lims(y = c(2150, 2350)) +
   theme_bw() + 
   scale_colour_manual(values = c("blue", "red")) +
   labs(y = expression(paste(italic(C)[T]," ","(",mu, mol.kg^-1,")")),x="",
@@ -607,6 +609,8 @@ z <- z %>%
   dplyr::mutate(qflag_ta = case_when(
     (depth == 50 & ta_dup < 2520) ~ 3,
     (depth == 50 & ta_dup > 2600) ~ 3,
+    (depth == 50 & ta_dup > 2560 & year(z$sampling_date) == 2009) ~ 3,
+    (depth == 50 & ta_dup < 2535 & year(z$sampling_date) == 2015) ~ 3,
     TRUE ~ qflag_ta))
 CAT50 <- ggplot(dplyr::filter(z, depth == 50), 
                 aes(x = sampling_date, y = ta_dup, color = as.factor(qflag_ta))) +
@@ -615,15 +619,13 @@ CAT50 <- ggplot(dplyr::filter(z, depth == 50),
   theme_bw() + 
   scale_colour_manual(values = c("blue", "red")) +
   labs(y = expression(paste(italic(A)[T]," ","(",mu, mol.kg^-1,")")),x="",
-       title="Total alkalinity at 50 m,  outliers removed",
+       title="Total alkalinity at 50 m, outliers removed",
        color = "flag")
-
-#CAT1cols <- c("1" = "red", "2" = "blue", "3" = "darkgreen", "4" = "orange")
 z <- z %>% 
   dplyr::mutate(qflag_dic = case_when(
-    (depth == 50 & dic_dup < 2200) ~ 3,
     (depth == 50 & dic_dup < 2190) ~ 3,
     (depth == 50 & dic_dup > 2275 &  year(z$sampling_date) == 2008) ~ 3,
+    (depth == 50 & dic_dup > 2290 &  year(z$sampling_date) == 2012) ~ 3,
     TRUE ~ qflag_ta))
 CCT50 <- ggplot(dplyr::filter(z, depth == 50), 
                 aes(x = sampling_date, y = dic_dup, color = as.factor(qflag_dic))) +
@@ -634,7 +636,10 @@ CCT50 <- ggplot(dplyr::filter(z, depth == 50),
   labs(y = expression(paste(italic(C)[T]," ","(",mu, mol.kg^-1,")")),x="",
        title="Dissolved inorganic carbon at 50 m, outliers removed",
        color = "flag")
-CAT1 + CCT1 + CAT50 + CCT50 + plot_layout(ncol = 1, heights = unit(c(5, 5, 5, 5), c('cm', 'cm', 'cm', 'cm')))  + plot_layout(guides="collect")
+p <- CAT1 + CCT1 + CAT50 + CCT50 + plot_layout(ncol = 1, heights = unit(c(5, 5, 5, 5), c('cm', 'cm', 'cm', 'cm')))  +
+  plot_layout(guides="collect", heights = c(1, 1, 1, 1)) + 
+  plot_annotation(tag_levels = 'A')
+ggsave("output_jp/figures/fig_outliers.png", p, width = 18, height = 25, units = "cm")
 #combine graphs on one page
 # png(file = "output_jp/figures/fig_outliers.png",
 #     width = 17, height = 25, units = "cm", res = 300)
@@ -801,7 +806,7 @@ eol_ptb <- eol_ptb %>%
   ungroup() %>% 
   dplyr::mutate(pH_insi = dplyr::case_when(
     !is.na(pH_s_eol_temp_insi) & is.na(pH_s_ptb_temp_insi) ~ pH_s_eol_temp_insi,
-    is.na(pH_s_eol_temp_insi) & !is.na(pH_s_ptb_temp_insi)  ~ pH_s_ptb_temp_insi,
+    !is.na(pH_s_eol_temp_insi) & !is.na(pH_s_ptb_temp_insi)  ~ pH_s_ptb_temp_insi,
     !is.na(pH_s_eol_temp_insi) & !is.na(pH_s_ptb_temp_insi) & abs(eol_ptb$diff_pH) <= 0.015 ~ mean_pH,
     TRUE ~ pH_s_ptb_temp_insi)) %>% 
   dplyr::select(-mean_pH)
@@ -1288,10 +1293,10 @@ AT1p <- ggplot(dat0m, aes(x = sampling_date, y = ta), na.rm=TRUE) +
 pH1p <- ggplot(dat0m, aes(x = sampling_date, y = pH_calc), na.rm=TRUE) +
   scale_x_datetime(date_breaks="4 year", date_minor_breaks="1 years", labels = date_format("%Y")) +
   geom_point(colour="black", na.rm=TRUE, size=size_point) + 
-  geom_point(data=dat0m, aes(x = sampling_date, y = pH_insi), color= "blue", size=1) +
+  geom_point(data=dat0m, aes(x = sampling_date, y = pH_calc), color= "blue", size=1) +
   #geom_point(data=dat0m, aes(x = sampling_date, y = mean_pH_s_ptb_temp_insi), color ="red", size=1) +
   #geom_smooth(method=lm, colour="black", fill="grey", size=0.6, na.rm=TRUE) +
- labs(title=NULL, x="", y=expression(paste(pH[T]))) +
+ labs(title=NULL, x="", y=expression(paste(pH[T],"calculated"))) +
   coord_fixed() +
   Mytheme(size_labs = 8) #+
   #theme(axis.text.x=element_blank())
@@ -1739,9 +1744,9 @@ AT50p <- ggplot(dat50m, aes(x = sampling_date, y = ta), na.rm=TRUE) +
 pH50p <- ggplot(dat50m, aes(x = sampling_date, y = pH_calc), na.rm=TRUE) +
   scale_x_datetime(breaks = date_breaks("2 year"), labels = date_format("%Y")) +
   geom_point(colour="black", na.rm=TRUE, size=size_point) + 
-  geom_point(data=dat50m, aes(x = sampling_date, y = pH_insi), color ="red", size=1) +
+  geom_point(data=dat50m, aes(x = sampling_date, y = pH_calc), color ="red", size=1) +
   #geom_smooth(method=lm, colour="black", fill="grey", size=0.6, na.rm=TRUE) +
- labs(title=NULL,x="", y=expression(paste(pH[T]))) +
+ labs(title=NULL,x="", y=expression(paste(pH[T],"calculated"))) +
   # annotate("text", x =as.POSIXct("2016-01-01"), y= min(dat50m$mean_pH, na.rm=TRUE), 
   #          label="*", colour="blue", size=10, fontface="plain") +
   coord_fixed() +
