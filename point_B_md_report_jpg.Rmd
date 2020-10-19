@@ -653,7 +653,7 @@ z <- z %>%
     (depth == 0 & dic_dup > 2310 & year(z$sampling_date) == 2017) ~ 3,
     (depth == 0 & dic_dup < 2230 & year(z$sampling_date) == 2014) ~ 3,
     (depth == 0 & dic_dup < 2210 & year(z$sampling_date) == 2017) ~ 3,
-    TRUE ~ qflag_ta))
+    TRUE ~ qflag_dic))
 CCT1 <- ggplot(dplyr::filter(z, depth == 0), aes(x = sampling_date, y = dic_dup, color = as.factor(qflag_dic))) +
   scale_x_datetime(breaks = date_breaks("2 year"), labels = date_format("%Y")) +
   geom_point(na.rm=TRUE, size = 0.6) +
@@ -684,7 +684,7 @@ z <- z %>%
     (depth == 50 & dic_dup < 2190) ~ 3,
     (depth == 50 & dic_dup > 2275 &  year(z$sampling_date) == 2008) ~ 3,
     (depth == 50 & dic_dup > 2290 &  year(z$sampling_date) == 2012) ~ 3,
-    TRUE ~ qflag_ta))
+    TRUE ~ qflag_dic))
 CCT50 <- ggplot(dplyr::filter(z, depth == 50), 
                 aes(x = sampling_date, y = dic_dup, color = as.factor(qflag_dic))) +
   scale_x_datetime(breaks = date_breaks("2 year"), labels = date_format("%Y")) +
