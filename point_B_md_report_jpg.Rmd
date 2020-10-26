@@ -537,33 +537,47 @@ dygraph(CT1_xts, group = "pointB", main="Temperature 1 m: remove outliers?", yla
       dyRangeSelector(height = 30, dateWindow= NULL)
 # AT 1 m
 CAT1_xts <- z %>% 
+  dplyr::group_by(sampling_date)%>%
   dplyr::filter(depth == 0) %>%
   dplyr::select(sampling_date, ta_dup, qflag_ta) %>% 
   dplyr::mutate(ta_dup_q2 = ifelse(qflag_ta == 2, ta_dup, NA),
-                ta_dup_q3 = ifelse(qflag_ta == 3, ta_dup, NA)) %>% 
+                ta_dup_q3 = ifelse(qflag_ta == 3, ta_dup, NA),
+                at_diff = abs(ta_dup_q2 - lag(ta_dup_q2))) %>% 
   dplyr::select(-qflag_ta, -ta_dup)
+
 CAT1_xts <- as.xts(CAT1_xts, order.by = CAT1_xts$sampling_date)
 dygraph(CAT1_xts, group = "pointB", main="AT 1 m: remove outliers", ylab="Total alkalinity") %>%
-      dySeries("ta_dup_q2", color = "blue", strokeWidth = 0, label = "flag2") %>%
-      dySeries("ta_dup_q3", color = "red", strokeWidth = 0, label = "flag3") %>%
+      dySeries("ta_dup_q2", color = "blue", strokeWidth = 0, label = "flag2",axis = "y2") %>%
+      dySeries("ta_dup_q3", color = "red", strokeWidth = 0, pointSize=4, label = "flag3",axis = "y2") %>%
+      dySeries("at_diff", label = "AT delta", color ="green", strokeWidth=0, pointSize=3,axis = "y") %>%   
+      dyAxis("y", axisLineColor="green", label = "Delta (µmoles/kg)",axisLabelColor = "green", axisLineWidth=5) %>%
+      dyAxis("y2", axisLineColor="blue", label = "Values (µmoles/kg)",axisLabelColor = "blue", axisLineWidth=5) %>%
+      dyLimit(15,color = "green", strokePattern =  "dotdash" ) %>% 
       dyHighlight(highlightCircleSize = 8,highlightSeriesBackgroundAlpha =0.2,hideOnMouseOut =TRUE) %>%
       dyOptions( drawGrid = TRUE, drawPoints = TRUE, pointSize = 2) %>%
-    dyLegend(show = "follow")   %>%
+      dyLegend(show = "follow")   %>%
       dyRangeSelector(height = 30, dateWindow= NULL)
+
 # CT 1 m
 CCT1_xts <- z %>% 
+  dplyr::group_by(sampling_date)%>%
   dplyr::filter(depth == 0) %>%
   dplyr::select(sampling_date, dic_dup, qflag_dic) %>% 
   dplyr::mutate(dic_dup_q2 = ifelse(qflag_dic == 2, dic_dup, NA),
-                dic_dup_q3 = ifelse(qflag_dic == 3, dic_dup, NA)) %>% 
+                dic_dup_q3 = ifelse(qflag_dic == 3, dic_dup, NA),
+                ct_diff = abs(dic_dup_q2 - lag(dic_dup_q2))) %>% 
   dplyr::select(-qflag_dic, -dic_dup)
 CCT1_xts <- as.xts(CCT1_xts, order.by = CCT1_xts$sampling_date)
 dygraph(CCT1_xts, group = "pointB", main="CT 1 m: remove outliers", ylab="Dissolved inorganic carbon") %>%
-      dySeries("dic_dup_q2", color = "blue", strokeWidth = 0, label = "flag2") %>%
-      dySeries("dic_dup_q3", color = "red", strokeWidth = 0, label = "flag3") %>%
+      dySeries("dic_dup_q2", color = "blue", strokeWidth = 0, label = "flag2",axis = "y2") %>%
+      dySeries("dic_dup_q3", color = "red", strokeWidth = 0, pointSize=4,label = "flag3",axis = "y2") %>%
+      dySeries("ct_diff", label = "CT delta", color ="green", strokeWidth=0, pointSize=3,axis = "y") %>% 
+      dyAxis("y", axisLineColor="green", label = "Delta (µmoles/kg)",axisLabelColor = "green", axisLineWidth=5) %>%
+      dyAxis("y2", axisLineColor="blue", label = "Values (µmoles/kg)",axisLabelColor = "blue", axisLineWidth=5) %>%
+      dyLimit(15,color = "green", strokePattern =  "dotdash" ) %>% 
       dyHighlight(highlightCircleSize = 8,highlightSeriesBackgroundAlpha =0.2,hideOnMouseOut =TRUE) %>%
       dyOptions( drawGrid = TRUE, drawPoints = TRUE, pointSize = 2) %>%
-    dyLegend(show = "follow")   %>%
+      dyLegend(show = "follow")   %>%
       dyRangeSelector(height = 30, dateWindow= NULL)
 
 # Salinity 50 m
@@ -579,7 +593,7 @@ dygraph(CS50_xts, group = "pointB", main="Salinity 50 m: remove outliers", ylab=
       dySeries("salinity_field_q3", color = "red", strokeWidth = 0, label = "flag3") %>%
       dyHighlight(highlightCircleSize = 8,highlightSeriesBackgroundAlpha =0.2,hideOnMouseOut =TRUE) %>%
       dyOptions( drawGrid = TRUE, drawPoints = TRUE, pointSize = 2) %>%
-    dyLegend(show = "follow")   %>%
+      dyLegend(show = "follow")   %>%
       dyRangeSelector(height = 30, dateWindow= NULL)
 # Temperature 50 m
 CT1_xts <- z %>% 
@@ -592,75 +606,58 @@ CT1_xts <- as.xts(CT1_xts, order.by = CT1_xts$sampling_date)
 dygraph(CT1_xts, group = "pointB", main="Temperature 50 m: remove outliers", ylab="Temperature") %>%
       dySeries("temp_field_q2", color = "blue", strokeWidth = 0, label = "flag2") %>%
       dySeries("temp_field_q3", color = "red", strokeWidth = 0, label = "flag3") %>%
+      dyLegend(show = "follow")   %>%
       dyHighlight(highlightCircleSize = 8,highlightSeriesBackgroundAlpha =0.2,hideOnMouseOut =TRUE) %>%
       dyOptions( drawGrid = TRUE, drawPoints = TRUE, pointSize = 2) %>%
-    dyLegend(show = "follow")   %>%
       dyRangeSelector(height = 30, dateWindow= NULL)
 
 # AT 50 m
-# creat a new df to calculate the diff between duplicates AT and duplicates CT
- diff <- z %>%
-   dplyr::filter(depth ==50) %>%
-    dplyr::group_by(sampling_date) %>%
-   dplyr::select(sampling_date, dic_dup, ta_dup)%>%   
-   dplyr::mutate(at_diff = abs(ta_dup - lag(ta_dup)),
-                 ct_diff = abs(dic_dup - lag(dic_dup)))
- # plot the differences between duplicates
-at_diff_xts <- dplyr::select(diff, sampling_date, at_diff, ta_dup)
-at_diff_xts <- as.xts(at_diff_xts, order.by = diff$sampling_date)
-dygraph(at_diff_xts, main="Differences between AT duplicates 50 m", ylab="AT") %>%
-    dySeries("at_diff", label = "AT delta", color ="red", strokeWidth=0, pointSize=4) %>%
-    dySeries("ta_dup", label = "AT duplicates", color = "blue", strokeWidth = 0, pointSize = 2, axis = "y2") %>%
-    dyAxis("y", axisLineColor="red",label = "Delta (µmole/kg)", axisLabelColor ="red", axisLineWidth=5) %>%
-    dyAxis("y2", axisLineColor="blue", label = "Value (µmole/kg)",axisLabelColor = "blue", axisLineWidth=5) %>%
-    dyHighlight(highlightCircleSize = 8,highlightSeriesBackgroundAlpha = 0.5,hideOnMouseOut = TRUE) %>%
-    dyLegend(show = "always")   %>%
-    dyOptions(drawGrid = TRUE, drawPoints = TRUE, pointSize = c(1,8,1),useDataTimezone = FALSE, digitsAfterDecimal=2) %>%
-    dyRangeSelector(height = 30, dateWindow= NULL) 
 # plot duplicates with color flags (2 in blue or 3 in red)
 CAT50_xts <- z %>% 
+  dplyr::group_by(sampling_date)%>%
   dplyr::filter(depth == 50) %>%
   dplyr::select(sampling_date, ta_dup, qflag_ta) %>% 
   dplyr::mutate(ta_dup_q2 = ifelse(qflag_ta == 2, ta_dup, NA),
-                ta_dup_q3 = ifelse(qflag_ta == 3, ta_dup, NA)) %>% 
+                ta_dup_q3 = ifelse(qflag_ta == 3, ta_dup, NA),
+                at_diff = abs(ta_dup_q2 - lag(ta_dup_q2))) %>% 
   dplyr::select(-qflag_ta, -ta_dup)
-CAT50_xts <- as.xts(CAT50_xts, order.by = CAT50_xts$sampling_date)
+CAT50_xts <- as.xts(CAT50_xts, order.by = as.Date(CAT50_xts$sampling_date))
 dygraph(CAT50_xts, group = "pointB", main="AT 50 m: remove outliers", ylab="Total alkalinity") %>%
-      dySeries("ta_dup_q2", color = "blue", strokeWidth = 0, label = "flag2") %>%
-      dySeries("ta_dup_q3", color = "red", strokeWidth = 0, label = "flag3") %>%
+      dySeries("ta_dup_q2", color = "blue", strokeWidth = 0, label = "flag2",axis = "y2") %>%
+      dySeries("ta_dup_q3", color = "red", strokeWidth = 0, pointSize=4, label = "flag3",axis = "y2") %>%
+      dySeries("at_diff", label = "AT delta", color ="green", strokeWidth=0, pointSize=3,axis = "y") %>% 
+      dyAxis("y", axisLineColor="green", label = "Delta (µmoles/kg)",axisLabelColor = "green", axisLineWidth=5) %>%
+      dyAxis("y2", axisLineColor="blue", label = "Values (µmoles/kg)",axisLabelColor = "blue", axisLineWidth=5) %>%
+      dyLimit(15,color = "green", strokePattern =  "dotdash" ) %>% 
       dyHighlight(highlightCircleSize = 8,highlightSeriesBackgroundAlpha =0.2,hideOnMouseOut =TRUE) %>%
       dyOptions( drawGrid = TRUE, drawPoints = TRUE, pointSize = 2) %>%
-    dyLegend(show = "follow")   %>%
+      dyLegend(show = "follow")   %>%
       dyRangeSelector(height = 30, dateWindow= NULL)
 
 # CT 50 m
- # plot the differences between duplicates
-ct_diff_xts <- dplyr::select(diff, sampling_date, ct_diff, dic_dup)
-ct_diff_xts <- as.xts(ct_diff_xts, order.by = diff$sampling_date)
-dygraph(ct_diff_xts, main="Differences between CT duplicates 50 m", ylab="CT") %>%
-    dySeries("ct_diff", label = "CT delta", color ="red", strokeWidth=0, pointSize=4) %>%
-    dySeries("dic_dup", label = "CT duplicates", color = "blue", strokeWidth = 0, pointSize = 2, axis = "y2") %>%
-    dyAxis("y", axisLineColor="red",label = "Delta (µmole/kg)", axisLabelColor ="red", axisLineWidth=5) %>%
-    dyAxis("y2", axisLineColor="blue", label = "Value (µmole/kg)",axisLabelColor = "blue", axisLineWidth=5) %>%
-    dyHighlight(highlightCircleSize = 8,highlightSeriesBackgroundAlpha = 0.5,hideOnMouseOut = TRUE) %>%
-    dyLegend(show = "always")   %>%
-    dyOptions(drawGrid = TRUE, drawPoints = TRUE, pointSize = c(1,8,1),useDataTimezone = FALSE, digitsAfterDecimal=2) %>%
-    dyRangeSelector(height = 30, dateWindow= NULL) 
 # plot duplicates with color flags (2 in blue or 3 in red)
 CCT50_xts <- z %>% 
-  dplyr::filter(depth == 50) %>%
+  dplyr::group_by(sampling_date)%>%
+  dplyr::filter(depth == 50) %>% 
   dplyr::select(sampling_date, dic_dup, qflag_dic) %>% 
   dplyr::mutate(dic_dup_q2 = ifelse(qflag_dic == 2, dic_dup, NA),
-                dic_dup_q3 = ifelse(qflag_dic == 3, dic_dup, NA)) %>% 
+                dic_dup_q3 = ifelse(qflag_dic == 3, dic_dup, NA),
+                 ct_diff = abs(dic_dup_q2 - lag(dic_dup_q2))) %>% 
   dplyr::select(-qflag_dic, -dic_dup)
-CCT50_xts <- as.xts(CCT50_xts, order.by = CCT50_xts$sampling_date)
+CCT50_xts <- as.xts(CCT50_xts, order.by = as.Date(CCT50_xts$sampling_date))
 dygraph(CCT50_xts, group = "pointB", main="CT 50 m: remove outliers", ylab="Dissolved inorganic carbon") %>%
-      dySeries("dic_dup_q2", color = "blue", strokeWidth = 0, label = "flag2") %>%
-      dySeries("dic_dup_q3", color = "red", strokeWidth = 0, label = "flag3") %>%
-      dyHighlight(highlightCircleSize = 8,highlightSeriesBackgroundAlpha =0.2,hideOnMouseOut =TRUE) %>%
-      dyOptions( drawGrid = TRUE, drawPoints = TRUE, pointSize = 2) %>%
+    dySeries("dic_dup_q2", color = "blue", strokeWidth = 0, label = "flag2",axis = "y2") %>%
+    dySeries("dic_dup_q3", color = "red", strokeWidth = 0, label = "flag3", pointSize=4,axis = "y2") %>%
+    dySeries("ct_diff", label = "CT delta", color ="green", strokeWidth=0, pointSize=3,axis = "y") %>% 
+    dyAxis("y", axisLineColor="green", label = "Delta (µmoles/kg)",axisLabelColor = "green", axisLineWidth=5) %>%
+    dyAxis("y2", axisLineColor="blue", label = "Values (µmoles/kg)",axisLabelColor = "blue", axisLineWidth=5) %>%
+
+    dyLimit(15,color = "green", strokePattern =  "dotdash" ) %>% 
     dyLegend(show = "follow")   %>%
-      dyRangeSelector(height = 30, dateWindow= NULL)
+    dyHighlight(highlightCircleSize = 8,highlightSeriesBackgroundAlpha =0.2,hideOnMouseOut =TRUE) %>%
+    dyOptions( useDataTimezone = TRUE,drawGrid = TRUE, drawPoints = TRUE, pointSize = 2) %>%
+
+    dyRangeSelector(height = 30, dateWindow= NULL)
 ```
 
 ```{r Remove outliers and plot, include=TRUE}
