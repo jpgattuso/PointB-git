@@ -496,6 +496,8 @@ skim(z)
 pom <- read_csv(file = paste0(path, "data/POC-PON/POC-2007-2015_PtB_1m.csv"), comment="#")
 pom$date <- as.POSIXct(pom$date)
 ```
+When the difference(s) between replicate values of AT and CT is larger than 15 umol/kg, the outlier(s) are visually identified in the plots below and assigned a flag value of 3 (shown in red in subsequent plots). 
+
 
 ```{r Check outliers, include=TRUE}
 # "C" means "check"
@@ -661,6 +663,7 @@ dygraph(CCT50_xts, group = "pointB", main="CT 50 m: remove outliers", ylab="Diss
 ```
 
 ```{r Remove outliers and plot, include=TRUE}
+#AT 0M
 z <- z %>% 
   dplyr::mutate(qflag_ta = case_when(
     (depth == 0 & ta_dup > 2595) ~ 3,
@@ -675,6 +678,7 @@ CAT1 <- ggplot(dplyr::filter(z, depth == 0 & !is.na(ta_dup)), aes(x = sampling_d
   labs(y = expression(paste(italic(A)[T]," ","(",mu, mol.kg^-1,")")),x="",
        title="Total alkalinity at 1 m, outliers removed",
        color = "flag")
+# CT0M
 z <- z %>% 
   dplyr::mutate(qflag_dic = case_when(
     (depth == 0 & dic_dup > 2350) ~ 3,
@@ -695,13 +699,45 @@ CCT1 <- ggplot(dplyr::filter(z, depth == 0), aes(x = sampling_date, y = dic_dup,
   labs(y = expression(paste(italic(C)[T]," ","(",mu, mol.kg^-1,")")),x="",
        title="Dissolved inorganic carbon at 1 m, outliers removed",
        color = "flag")
+#AT 50 M
 z <- z %>% 
   dplyr::mutate(qflag_ta = case_when(
     (depth == 50 & ta_dup < 2520) ~ 3,
     (depth == 50 & ta_dup > 2600) ~ 3,
     (depth == 50 & ta_dup > 2560 & year(z$sampling_date) == 2009) ~ 3,
     (depth == 50 & ta_dup < 2535 & year(z$sampling_date) == 2015) ~ 3,
-    TRUE ~ qflag_ta))
+    (depth == 50 & ta_dup > 2570 & ta_dup < 2571 & ymd(sampling_date) == "2009-11-10") ~ 3,
+    (depth == 50 & ta_dup > 2542 & ta_dup < 2543 & ymd( z$sampling_date) == "2013-03-20") ~ 3,
+    (depth == 50 & ta_dup > 2486 & ta_dup < 2487 & ymd( z$sampling_date) == "2014-08-19") ~ 3,
+    (depth == 50 & ta_dup > 2533 & ta_dup < 2534 & ymd( z$sampling_date) == "2015-03-10") ~ 3,
+    (depth == 50 & ta_dup > 2668 & ta_dup < 2669 & ymd( z$sampling_date) == "2016-02-16") ~ 3,
+            (depth == 50 & ta_dup > 2575 & ta_dup < 2576 & ymd( z$sampling_date) == "2017-04-18") ~ 3,
+            (depth == 50 & ta_dup > 2572 & ta_dup < 2573 & ymd( z$sampling_date) == "2017-05-02") ~ 3,
+            (depth == 50 & ta_dup > 2584 & ta_dup < 2585 & ymd( z$sampling_date) == "2017-07-25") ~ 3,
+            (depth == 50 & ta_dup > 2573 & ta_dup < 2574 & ymd( z$sampling_date) == "2017-09-19") ~ 3,
+            (depth == 50 & ta_dup > 2566 & ta_dup < 2567 & ymd( z$sampling_date) == "2017-10-17") ~ 3,
+                (depth == 50 & ta_dup > 2554 & ta_dup < 2555 & ymd( z$sampling_date) == "2018-01-10") ~ 3,
+                (depth == 50 & ta_dup > 2595 & ta_dup < 2596 & ymd( z$sampling_date) == "2018-05-14") ~ 3,
+                (depth == 50 & ta_dup > 2598 & ta_dup < 2599 & ymd( z$sampling_date) == "2018-05-22") ~ 3,
+                (depth == 50 & ta_dup > 2585 & ta_dup < 2586 & ymd( z$sampling_date) == "2018-05-29") ~ 3,
+                (depth == 50 & ta_dup > 2526 & ta_dup < 2527 & ymd( z$sampling_date) == "2018-06-19") ~ 3,
+                (depth == 50 & ta_dup > 2580 & ta_dup < 2581 & ymd( z$sampling_date) == "2018-07-24") ~ 3,
+                (depth == 50 & ta_dup > 2579 & ta_dup < 2580 & ymd( z$sampling_date) == "2018-07-31") ~ 3,
+                (depth == 50 & ta_dup > 2534 & ta_dup < 2535 & ymd( z$sampling_date) == "2018-08-21") ~ 3,
+                (depth == 50 & ta_dup > 2584 & ta_dup < 2585 & ymd( z$sampling_date) == "2018-09-11") ~ 3,
+                (depth == 50 & ta_dup > 2601 & ta_dup < 2602 & ymd( z$sampling_date) == "2018-10-23") ~ 3,
+                (depth == 50 & ta_dup > 2572 & ta_dup < 2573 & ymd( z$sampling_date) == "2018-11-20") ~ 3,
+                (depth == 50 & ta_dup > 2606 & ta_dup < 2607 & ymd( z$sampling_date) == "2018-12-04") ~ 3,
+                (depth == 50 & ta_dup > 2526 & ta_dup < 2527 & ymd( z$sampling_date) == "2018-12-11") ~ 3,
+                (depth == 50 & ta_dup > 2530 & ta_dup < 2531 & ymd( z$sampling_date) == "2018-12-18") ~ 3,
+                    (depth == 50 & ta_dup > 2588 & ta_dup < 2589 & ymd( z$sampling_date) == "2019-01-02") ~ 3,
+                    (depth == 50 & ta_dup > 2516 & ta_dup < 2517 & ymd( z$sampling_date) == "2019-01-29") ~ 3,
+                    (depth == 50 & ta_dup > 2549 & ta_dup < 2550 & ymd( z$sampling_date) == "2019-02-19") ~ 3,
+                    (depth == 50 & ta_dup > 2585 & ta_dup < 2586 & ymd( z$sampling_date) == "2019-04-02") ~ 3,
+                    (depth == 50 & ta_dup > 2576 & ta_dup < 2577 & ymd( z$sampling_date) == "2019-06-05") ~ 3,
+                    (depth == 50 & ta_dup > 2560 & ta_dup < 2561 & ymd( z$sampling_date) == "2019-10-29") ~ 3,
+TRUE ~ qflag_ta))
+
 CAT50 <- ggplot(dplyr::filter(z, depth == 50), 
                 aes(x = sampling_date, y = ta_dup, color = as.factor(qflag_ta))) +
   scale_x_datetime(breaks = date_breaks("2 year"), labels = date_format("%Y")) +
@@ -711,11 +747,59 @@ CAT50 <- ggplot(dplyr::filter(z, depth == 50),
   labs(y = expression(paste(italic(A)[T]," ","(",mu, mol.kg^-1,")")),x="",
        title="Total alkalinity at 50 m, outliers removed",
        color = "flag")
+#CT 50 M
 z <- z %>% 
   dplyr::mutate(qflag_dic = case_when(
     (depth == 50 & dic_dup < 2190) ~ 3,
     (depth == 50 & dic_dup > 2275 &  year(z$sampling_date) == 2008) ~ 3,
     (depth == 50 & dic_dup > 2290 &  year(z$sampling_date) == 2012) ~ 3,
+      (depth == 50 & dic_dup > 2290 & dic_dup < 2291 & ymd( z$sampling_date) == "2008-05-20") ~ 3,
+      (depth == 50 & dic_dup > 2228 & dic_dup < 2229 & ymd( z$sampling_date) == "2009-05-19") ~ 3,
+          (depth == 50 & dic_dup > 2248 & dic_dup < 2249 & ymd( z$sampling_date) == "2009-06-09") ~ 3,
+          (depth == 50 & dic_dup > 2237 & dic_dup < 2238 & ymd( z$sampling_date) == "2009-11-10") ~ 3,
+          (depth == 50 & dic_dup > 2246 & dic_dup < 2247 & ymd( z$sampling_date) == "2012-10-30") ~ 3,
+          (depth == 50 & dic_dup > 2259 & dic_dup < 2260 & ymd( z$sampling_date) == "2012-11-27") ~ 3,
+          (depth == 50 & dic_dup > 2254 & dic_dup < 2255 & ymd( z$sampling_date) == "2013-03-20") ~ 3,
+          (depth == 50 & dic_dup > 2226 & dic_dup < 2227 & ymd( z$sampling_date) == "2014-08-05") ~ 3,
+                  (depth == 50 & dic_dup > 2264 & dic_dup < 2265 & ymd( z$sampling_date) == "2016-03-01") ~ 3,
+                  (depth == 50 & dic_dup > 2289 & dic_dup < 2290 & ymd( z$sampling_date) == "2016-05-10") ~ 3,
+                  (depth == 50 & dic_dup > 2298 & dic_dup < 2299 & ymd( z$sampling_date) == "2016-05-24") ~ 3,
+                  (depth == 50 & dic_dup > 2273 & dic_dup < 2274 & ymd( z$sampling_date) == "2016-11-02") ~ 3,
+                      (depth == 50 & dic_dup > 2271 & dic_dup < 2272 & ymd( z$sampling_date) == "2017-03-07") ~ 3,
+                      (depth == 50 & dic_dup > 2288 & dic_dup < 2289 & ymd( z$sampling_date) == "2017-04-18") ~ 3,
+                      (depth == 50 & dic_dup > 2243 & dic_dup < 2244 & ymd( z$sampling_date) == "2017-05-23") ~ 3,
+                      (depth == 50 & dic_dup > 2274 & dic_dup < 2275 & ymd( z$sampling_date) == "2017-05-30") ~ 3,
+                      (depth == 50 & dic_dup > 2269 & dic_dup < 2270 & ymd( z$sampling_date) == "2017-06-06") ~ 3,
+                      (depth == 50 & dic_dup > 2269 & dic_dup < 2270 & ymd( z$sampling_date) == "2017-06-14") ~ 3, 
+                          (depth == 50 & dic_dup > 2265 & dic_dup < 2266 & ymd( z$sampling_date) == "2017-07-04") ~ 3,
+                          (depth == 50 & dic_dup > 2281 & dic_dup < 2282 & ymd( z$sampling_date) == "2017-07-11") ~ 3,
+                          (depth == 50 & dic_dup > 2294 & dic_dup < 2295 & ymd( z$sampling_date) == "2017-07-25") ~ 3,
+                          (depth == 50 & dic_dup > 2241 & dic_dup < 2242 & ymd( z$sampling_date) == "2017-09-13") ~ 3,
+                          (depth == 50 & dic_dup > 2296 & dic_dup < 2297 & ymd( z$sampling_date) == "2017-09-19") ~ 3,
+                          (depth == 50 & dic_dup > 2284 & dic_dup < 2285 & ymd( z$sampling_date) == "2017-10-17") ~ 3,
+                          (depth == 50 & dic_dup > 2241 & dic_dup < 2242 & ymd( z$sampling_date) == "2017-10-31") ~ 3,
+                          (depth == 50 & dic_dup > 2279 & dic_dup < 2280 & ymd( z$sampling_date) == "2018-01-10") ~ 3,
+                          (depth == 50 & dic_dup > 2306 & dic_dup < 2307 & ymd( z$sampling_date) == "2018-05-14") ~ 3,
+                          (depth == 50 & dic_dup > 2294 & dic_dup < 2295 & ymd( z$sampling_date) == "2018-05-22") ~ 3,
+                          (depth == 50 & dic_dup > 2301 & dic_dup < 2302 & ymd( z$sampling_date) == "2018-05-29") ~ 3,
+                          (depth == 50 & dic_dup > 2249 & dic_dup < 2250 & ymd( z$sampling_date) == "2018-06-26") ~ 3,
+                          (depth == 50 & dic_dup > 2303 & dic_dup < 2304 & ymd( z$sampling_date) == "2018-07-24") ~ 3,
+                          (depth == 50 & dic_dup > 2241 & dic_dup < 2242 & ymd( z$sampling_date) == "2018-08-21") ~ 3,
+                          (depth == 50 & dic_dup > 2282 & dic_dup < 2283 & ymd( z$sampling_date) == "2018-09-17") ~ 3,
+                          (depth == 50 & dic_dup > 2223 & dic_dup < 2224 & ymd( z$sampling_date) == "2018-09-26") ~ 3,
+                          (depth == 50 & dic_dup > 2258 & dic_dup < 2259 & ymd( z$sampling_date) == "2018-10-23") ~ 3,
+                          (depth == 50 & dic_dup > 2181 & dic_dup < 2182 & ymd( z$sampling_date) == "2018-11-06") ~ 3,
+                          (depth == 50 & dic_dup > 2253 & dic_dup < 2254 & ymd( z$sampling_date) == "2018-11-20") ~ 3,
+                          (depth == 50 & dic_dup > 2271 & dic_dup < 2272 & ymd( z$sampling_date) == "2018-12-04") ~ 3,
+                          (depth == 50 & dic_dup > 2215 & dic_dup < 2216 & ymd( z$sampling_date) == "2018-12-11") ~ 3,
+                          (depth == 50 & dic_dup > 2220 & dic_dup < 2221 & ymd( z$sampling_date) == "2018-12-18") ~ 3,
+                          (depth == 50 & dic_dup > 2274 & dic_dup < 2275 & ymd( z$sampling_date) == "2019-01-02") ~ 3,
+                  (depth == 50 & dic_dup > 2217 & dic_dup < 2218 & ymd( z$sampling_date) == "2019-01-19") ~ 3,
+                  (depth == 50 & dic_dup > 2294 & dic_dup < 2295 & ymd( z$sampling_date) == "2019-02-19") ~ 3,
+                  (depth == 50 & dic_dup > 2278 & dic_dup < 2279 & ymd( z$sampling_date) == "2019-03-06") ~ 3,
+                  (depth == 50 & dic_dup > 2264 & dic_dup < 2265 & ymd( z$sampling_date) == "2019-06-05") ~ 3,
+                  (depth == 50 & dic_dup > 2227 & dic_dup < 2228 & ymd( z$sampling_date) == "2019-10-29") ~ 3,
+                  (depth == 50 & dic_dup > 2237 & dic_dup < 2238 & ymd( z$sampling_date) == "2019-11-26") ~ 3,
     TRUE ~ qflag_dic))
 CCT50 <- ggplot(dplyr::filter(z, depth == 50), 
                 aes(x = sampling_date, y = dic_dup, color = as.factor(qflag_dic))) +
