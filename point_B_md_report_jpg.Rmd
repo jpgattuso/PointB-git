@@ -404,33 +404,6 @@ ggsave(file = "output_jp/figures/dyf_surf_salinity_AT_year.png", dyf_surf_salini
 
 #Results
 
-## Time series salinity at DYFAMED
-```{r}
-kable(tab_fig_dyf_surf_date_salinity)
-
-```
-
-
-## AT vs salinity at DYFAMED (all depths)[section added 2017-11-21]
-
-
-## AT vs time and salinity at DYFAMED
-These are for surface (< 12 m) values, with outliers removed. The slope of salinity vs time is significant for all years but not post-2007 (P = 0.08), which is the relevant period of interest.
-
-![figures/dyf_surf_salinity_AT_year.png](output_jp/figures/dyf_surf_salinity_AT_year.png)
-
-The relationship with salinity is highly significant: 
-<!-- cat(sprintf("%.3f + salinity x %.3f (P = %.3f)", int_dyf, slo_dyf, tab_dyf_surf_salinity_AT[8,3])) -->
-`r int_dyf` + salinity x `r slo_dyf`$ (P = `r tab_dyf_surf_salinity_AT[8,3]`)
-
-```{r DYFAMED AT vs salinity, include=TRUE}
-kable(tab_fig_dyf_surf_date_AT)
-print(dyf_surf_salinity_AT)
-kable(tab_dyf_surf_salinity_AT, caption="")
-print(dyf_surf_salinity_AT_year)
-kable(tab_dyf_surf_salinity_AT_year, caption="")
-```
-
 ## Point B
 
 **Statistics on input data are:**
