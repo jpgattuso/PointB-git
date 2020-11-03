@@ -1201,66 +1201,46 @@ size_point <- 0.2 # size of data points
 T1p <- ggplot(dat0m, aes(x = sampling_date, y = temperature), na.rm=TRUE) +
   scale_x_datetime(date_breaks="4 year", date_minor_breaks="1 years", labels = date_format("%Y")) +
   geom_point(colour="black", na.rm=TRUE, size=size_point) + 
-  #geom_smooth(method=lm, colour="black", fill="grey", size=0.6, na.rm=TRUE) +
   labs(title=NULL,x="", y="Temp. (°C)") +
   coord_fixed() +
   Mytheme(size_labs = 8) +
   theme(axis.text.x=element_blank())
-  #annotation_custom(grob_A_bl)
 S1p <- ggplot(dat0m, aes(x = sampling_date, y = salinity), na.rm=TRUE) +
   scale_x_datetime(date_breaks="4 year", date_minor_breaks="1 years", labels = date_format("%Y")) +
     scale_y_continuous(limits=c(35.5, 39), breaks=c(36,37,38)) +
   geom_point(colour="black", na.rm=TRUE, size=size_point) + 
-  #geom_smooth(method=lm, colour="black", fill="grey", size=0.6, na.rm=TRUE) +
   labs(title=NULL,x="", y="Salinity") +
   coord_fixed() +
   Mytheme(size_labs = 8) +
   theme(axis.text.x=element_blank())
-  #annotation_custom(grob_B_bl)
 CT1p <- ggplot(dat0m, aes(x = sampling_date, y = dic), na.rm=TRUE) +
   scale_x_datetime(date_breaks="4 year", date_minor_breaks="1 years", labels = date_format("%Y")) +
   geom_point(colour="black", na.rm=TRUE, size=size_point) + 
-  #geom_smooth(method=lm, colour="black", fill="grey", size=0.6, na.rm=TRUE) +
   labs(title=NULL,x="",y=expression(paste(italic(C)[T], " (",mu, "mol ", kg^-1,")"))) +
-  #annotate("text", x =as.POSIXct("2016-01-01"), y= min(dat0m$dic, na.rm=TRUE), 
-  #         label="*", colour="blue", size=10, fontface="plain") +
   coord_fixed() +
   Mytheme(size_labs = 8) +
   theme(axis.text.x=element_blank())
-  #annotation_custom(grob_D_bl)
 AT1p <- ggplot(dat0m, aes(x = sampling_date, y = ta), na.rm=TRUE) +
   scale_x_datetime(date_breaks="4 year", date_minor_breaks="1 years", labels = date_format("%Y")) +
   geom_point(colour="black", na.rm=TRUE, size=size_point) + 
-  #geom_smooth(method=lm, colour="black", fill="grey", size=0.6, na.rm=TRUE) +
   labs(title=NULL,x="",y=expression(paste(italic(A)[T], " (",mu, "mol ", kg^-1,")"))) +
-  #annotate("text", x =as.POSIXct("2016-01-01"), y= min(dat0m$ta, na.rm=TRUE), 
-  #         label="*", colour="blue", size=9, fontface="plain") +
   coord_fixed() +
   Mytheme(size_labs = 8) +
   theme(axis.text.x=element_blank())
-  #annotation_custom(grob_C_bl)
 pH1p <- ggplot(dat0m, aes(x = sampling_date, y = pH_calc), na.rm=TRUE) +
   scale_x_datetime(date_breaks="4 year", date_minor_breaks="1 years", labels = date_format("%Y")) +
   geom_point(colour="black", na.rm=TRUE, size=size_point) + 
   geom_point(data=dat0m, aes(x = sampling_date, y = pH_calc), color= "blue", size=size_point) +
-  #geom_point(data=dat0m, aes(x = sampling_date, y = mean_pH_s_ptb_temp_insi), color ="red", size=1) +
-  #geom_smooth(method=lm, colour="black", fill="grey", size=0.6, na.rm=TRUE) +
  labs(title=NULL, x="", y=expression(paste(pH[T]," calculated"))) +
   coord_fixed() +
   Mytheme(size_labs = 8) #+
-  #theme(axis.text.x=element_blank())
-  #annotation_custom(grob_E_bl)
 pCO21p <- ggplot(dat0m, aes(x = sampling_date, y = pCO2), na.rm=TRUE) +
   scale_x_datetime(date_breaks="4 year", date_minor_breaks="1 years", labels = date_format("%Y")) +
   geom_point(colour="black", na.rm=TRUE, size=size_point) + 
-  #geom_smooth(method=lm, colour="black", fill="grey", size=0.6, na.rm=TRUE) +
   labs(title=NULL,x="",y=expression(paste(pCO[2], " (",mu, "atm)"))) +
-  #annotate("text", x =as.POSIXct("2016-01-01"), y= min(dat0m$mean_pCO2, na.rm=TRUE), 
-  #         label="*", colour="blue", size=9, fontface="plain") +
   coord_fixed() +
   Mytheme(size_labs = 8) +
   theme(axis.text.x=element_blank())
-  #annotation_custom(grob_F_bl)
 Oa1p <- ggplot(dat0m, aes(x = sampling_date, y = OmegaAragonite), na.rm=TRUE) +
   scale_x_datetime(date_breaks="4 year", date_minor_breaks="1 years", labels = date_format("%Y")) +
   geom_point(colour="black", na.rm=TRUE, size=size_point) + 
@@ -1268,7 +1248,6 @@ Oa1p <- ggplot(dat0m, aes(x = sampling_date, y = OmegaAragonite), na.rm=TRUE) +
   labs(title=NULL,x="",y=expression(paste(Omega[a]))) +
   coord_fixed() +
   Mytheme(size_labs = 8)
-  #annotation_custom(grob_G_bl)
 ATvsCT1p <- ggplot(dat0m, aes(x = sampling_date, y = ta/dic), na.rm=TRUE) +
   scale_x_datetime(date_breaks="4 year", date_minor_breaks="1 years", labels = date_format("%Y")) +
   geom_point(colour="#482173FF", na.rm=TRUE, size=size_point) +
@@ -1845,7 +1824,6 @@ anS50p <- ggplot(data = ano_month50m, aes(x = sampling_date, y = Salinity_ano), 
   geom_point(colour="blue", na.rm=TRUE, size=size_point) + 
   geom_smooth(method=lm, colour="black", fill="grey", size=0.6, na.rm=TRUE) +
   labs(title=NULL,x="", y="Salinity") +
-  annotate("text", x =as.POSIXct("2016-01-01"), y= min(ano_month50m$Salinity_ano, na.rm=TRUE), label="*", colour="black", size=10, fontface="plain") +
   coord_fixed() +
   Mytheme(size_labs = 8) +
   theme(axis.text.x=element_blank())
