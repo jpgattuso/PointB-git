@@ -1860,8 +1860,7 @@ row.names(reg_ta_no_change) <- var_list
 
 ```{r kable regressions 1 m}
 kable(reg_var_1m, digits = c(4,4,3,3,3,2,3), caption="Regressions on values at 1 m depth.")
-kable(reg_ano_1m, digits = c(4,4,3,3,3,2,3), caption="Regressions on anomalies at 1 m depth.")  
-kable(tab_surf_salinity_AT_year, digits = c(2,2), caption="Regressions AT vs salinity on values at 1 m depth for every year.")
+kable(reg_ano_1m, digits = c(4,4,3,3,3,2,3), caption="Regressions on anomalies at 1 m depth.")
 ```
 Changes at 1 m depth calculated on anomalies are:
 
@@ -2537,9 +2536,8 @@ colnames(reg_AT_S_all) <- c("AT")
 row.names(reg_AT_S_all) <- c("Slope", "SE Slope", "P Slope","Intercept","SE int.","P int.", "F", "df", "R2","P value")
 ```
 
-The relationship between AT and salinity using all data is shown below.
-![fig_ta_vs_salinity_all_pointB_0m.png](output_jp/figures/fig_ta_vs_salinity_all_pointB_0m.png)
-
+The relationship between AT (in umol/kg) and salinity using mean data at 1 m is:
+AT = `r round(reg_AT_S_all[4], digit=2)` + S x `r round(reg_AT_S_all[1], digit=2)`
 
 ## Daily and monthly changes in pH and T
 ```{r Daily and seasonal changes, include=FALSE}
@@ -2708,17 +2706,6 @@ The average error in pH due to spatiotemporal mismatch between sensor and discre
 The quantiles of interest for the daily pH range of the total scale are `r quant ` (respectively 2.5% and 97.5%).
 
 The changes in the daily pH range do not seem to be driven by the concentration of Chl-a nor by temperature as the relationships between pH range with temperature and Chla are not significant. For temperature r-square is `r summary(reg_Temperature)$r.squared` with a p-value of `r summary(reg_Temperature)$fstatistic[1]`. For Chla r-square is `r summary(reg_Chla)$r.squared` with a p-value of `r summary(reg_Chla)$fstatistic[1]`. 
-
-
-```{r kable pH range vs temperature and Chla}
-pander(summary(reg_Temperature), digits = c(5,5,5,3,3), caption="Regressions on values monthly means of pH range as a function of temperature")
-pander(summary(reg_Chla), digits = c(5,5,5,3,3), caption="Regressions on values monthly means of pH range as a function of Chla")
-```
-
-
-![plot_range_pH_Chla_month.png](output_jp/figures/plot_range_pH_Chla_month.png)
-![plot_range_pH_Chla_temp.png](output_jp/figures/plot_range_pH_Chla_temp.png)
-
 
 ## CO2
 ```{r CO2, include=FALSE}
@@ -2917,8 +2904,3 @@ deff_quarterly <- ggplot() +
        y=expression(paste(italic(A)[T]," ","(",mu, mol.kg^-1,")"))) +
   scale_color_viridis(name = "Month", discrete = TRUE, option = "plasma")
 ```
-
-Test of a Deffayes plot.
-![fig_deffayes_monthly.png](output_jp/figures/fig_deffayes_monthly.png)
-
-
