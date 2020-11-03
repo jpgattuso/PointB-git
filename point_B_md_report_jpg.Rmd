@@ -660,6 +660,10 @@ dygraph(CCT50_xts, group = "pointB", main="CT 50 m: remove outliers", ylab="Diss
     dyOptions( useDataTimezone = TRUE,drawGrid = TRUE, drawPoints = TRUE, pointSize = 2) %>%
 
     dyRangeSelector(height = 30, dateWindow= NULL)
+
+# Salinity is a predictor of AT -> using the regression defined above
+#d_all$at_calc <- slope_s_at * d_all$sal_mix + intercept_s_at
+#z$at_calc <- 2.403554e+01 * z$salinity + 1.644841e+03
 ```
 
 ```{r Remove outliers and plot, include=TRUE}
