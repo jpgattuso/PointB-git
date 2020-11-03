@@ -1777,35 +1777,6 @@ g <- T1p + anT1p + S1p + anS1p + AT1p + anAT1p + CT1p + anCT1p + pH1p + anpH1p +
   patchwork::plot_layout(ncol = 2, guides="collect")
 ggsave("output_jp/figures/fig_paper_interannual_1m.png", g, width=15, height = 17, units = "cm")
 
-# g <- plot_grid(T1p, anT1p, S1p, anS1p, AT1p, anAT1p, CT1p, anCT1p, pH1p, anpH1p, pCO21p, anpCO21p, Oa1p, anOa1p, align='vh', ncol=2)
-# ggsave(file="output_jp/figures/fig_paper_interannual_1m.png", g, width=15, height = 17, units = "cm")
-# ggsave(file="output_jp/figures/fig2.pdf", g, width = 18, height = 21, units = "cm")
-
-# AT as a function of salinity for every year
-j <- 0
-reg <- data.frame()
-for (i in 1:(length(unique(dat0m$year))-1)) { #one loops through all years except the last
-  j <- j + 1
-  yr <- unique(dat0m$year)[i]
-  d_reg <- filter(dat0m, year==yr)
-#  fm <- as.formula(paste0(i, " ~ sampling_date"))
-  #fit[[i]] <- lm(fm, data = dat0m)
-  lms <- summary(lm(data=d_reg, ta ~ salinity))
-  # calculate probability of fstatistic because it cannot be extracted from lms above
-  # see http://stats.stackexchange.com/questions/92824/extracting-the-model-p-value-for-a-multiple-regression-in-r
-  # slope returned by lm is per second
-  prob <- pf(lms$fstatistic[1],lms$fstatistic[2],lms$fstatistic[3],lower.tail=FALSE)
-  reg <- rbind(reg, as.numeric(c(lms$coefficients[2,1], lms$coefficients[2,2], 
-                                 lms$coefficients[2,4], lms$coefficients[1,1], lms$coefficients[1,2],
-                                 lms$coefficients[1,4], lms$fstatistic[1],   lms$fstatistic[3],
-                                 lms$r.squared, prob)))
-}
-names(reg) <- c("Slope", "SE Slope", "P Slope","Intercept","SE int.","P int.", "F", "df",
-                "R2","P value")
-row.names(reg) <- as.character(unique(dat0m$year)[-length(unique(dat0m$year))]) # remove last year
-#transform in latex table and save
-tab_surf_salinity_AT_year <- reg
-
 # POC and PON
 pom_l <-pom %>% 
   filter(depth==1 | depth==50) %>%
