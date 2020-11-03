@@ -618,7 +618,7 @@ dygraph(CT1_xts, group = "pointB", main="Temperature 50 m: remove outliers", yla
 CAT50_xts <- z %>% 
   dplyr::group_by(sampling_date)%>%
   dplyr::filter(depth == 50) %>%
-  dplyr::select(sampling_date, ta_dup, qflag_ta) %>% 
+  dplyr::select(sampling_date, ta_dup, qflag_ta, at_calc) %>% 
   dplyr::mutate(ta_dup_q2 = ifelse(qflag_ta == 2, ta_dup, NA),
                 ta_dup_q3 = ifelse(qflag_ta == 3, ta_dup, NA),
                 at_diff = abs(ta_dup_q2 - lag(ta_dup_q2))) %>% 
@@ -628,6 +628,8 @@ dygraph(CAT50_xts, group = "pointB", main="AT 50 m: remove outliers", ylab="Tota
       dySeries("ta_dup_q2", color = "blue", strokeWidth = 0, label = "flag2",axis = "y2") %>%
       dySeries("ta_dup_q3", color = "red", strokeWidth = 0, pointSize=4, label = "flag3",axis = "y2") %>%
       dySeries("at_diff", label = "AT delta", color ="green", strokeWidth=0, pointSize=3,axis = "y") %>% 
+        dySeries("at_calc", label = "AT calc", color ="black", strokeWidth=0, pointSize=3,axis = "y2") %>% 
+
       dyAxis("y", axisLineColor="green", label = "Delta (µmoles/kg)",axisLabelColor = "green", axisLineWidth=5) %>%
       dyAxis("y2", axisLineColor="blue", label = "Values (µmoles/kg)",axisLabelColor = "blue", axisLineWidth=5) %>%
       dyLimit(15,color = "green", strokePattern =  "dotdash" ) %>% 
@@ -663,7 +665,7 @@ dygraph(CCT50_xts, group = "pointB", main="CT 50 m: remove outliers", ylab="Diss
 
 # Salinity is a predictor of AT -> using the regression defined above
 #d_all$at_calc <- slope_s_at * d_all$sal_mix + intercept_s_at
-#z$at_calc <- 2.403554e+01 * z$salinity + 1.644841e+03
+#z$at_calc <- 2.403554e+01 * z$salinity_field + 1.644841e+03
 ```
 
 ```{r Remove outliers and plot, include=TRUE}
