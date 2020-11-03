@@ -1623,77 +1623,52 @@ T50p <- ggplot(dat50m, aes(x = sampling_date, y = temperature), na.rm=TRUE) +
   scale_x_datetime(breaks = date_breaks("2 year"), labels = date_format("%Y")) +
   scale_y_continuous(limits = c(12.5, 22.6)) +
   geom_point(colour="black", na.rm=TRUE, size=size_point) + 
-  #geom_smooth(method=lm, colour="black", fill="grey", size=0.6, na.rm=TRUE) +
   labs(title=NULL,x="", y="Temp. (°C)") +
-  # annotate("text", x =as.POSIXct("2016-01-01"), y= min(dat50m$temp_field, na.rm=TRUE), 
-  #          label="*", colour="blue", size=10, fontface="plain") +
   coord_fixed() +
   Mytheme(size_labs = 8) +
   theme(axis.text.x=element_blank())
-  #annotation_custom(grob_A)
 S50p <- ggplot(dat50m, aes(x = sampling_date, y = salinity), na.rm=TRUE) +
   scale_x_datetime(breaks = date_breaks("2 year"), labels = date_format("%Y")) +
-#    scale_y_continuous(limits=c(37, 39), breaks=c(37,38,39)) +
   geom_point(colour="black", na.rm=TRUE, size=size_point) + 
-  #geom_smooth(method=lm, colour="black", fill="grey", size=0.6, na.rm=TRUE) +
   labs(title=NULL,x="",y="Salinity") +
-  # annotate("text", x =as.POSIXct("2016-01-01"), y= min(dat50m$mean_salinity, na.rm=TRUE), 
-  #          label="*", colour="blue", size=10, fontface="plain") +
   coord_fixed() +
   Mytheme(size_labs = 8) +
   theme(axis.text.x=element_blank())
-  #annotation_custom(grob_B)
 CT50p <- ggplot(dat50m, aes(x = sampling_date, y = dic), na.rm=TRUE) +
   scale_x_datetime(breaks = date_breaks("2 year"), labels = date_format("%Y")) +
   geom_point(colour="black", na.rm=TRUE, size=size_point) + 
-  #geom_smooth(method=lm, colour="black", fill="grey", size=0.6, na.rm=TRUE) +
   labs(title=NULL,x="",y=expression(paste(italic(C)[T], " (",mu, "mol ", kg^-1,")"))) +
   coord_fixed() +
   Mytheme(size_labs = 8) +
   theme(axis.text.x=element_blank())
-  #annotation_custom(grob_D)
 AT50p <- ggplot(dat50m, aes(x = sampling_date, y = ta), na.rm=TRUE) +
   scale_x_datetime(breaks = date_breaks("2 year"), labels = date_format("%Y")) +
   scale_y_continuous(breaks=c(2530, 2550, 2570)) +
   geom_point(colour="black", na.rm=TRUE, size=size_point) + 
-  #geom_smooth(method="loess", span=0.4, se=FALSE, colour="orange") +
-  #geom_smooth(method=lm, colour="black", fill="grey", size=0.6, na.rm=TRUE) +
   labs(title=NULL,x="",y=expression(paste(italic(A)[T], " (",mu, "mol ", kg^-1,")"))) +
   coord_fixed() +
   Mytheme(size_labs = 8) +
   theme(axis.text.x=element_blank())
-  #annotation_custom(grob_C)
 pH50p <- ggplot(dat50m, aes(x = sampling_date, y = pH_calc), na.rm=TRUE) +
   scale_x_datetime(breaks = date_breaks("2 year"), labels = date_format("%Y")) +
   geom_point(colour="black", na.rm=TRUE, size=size_point) + 
-  geom_point(data=dat50m, aes(x = sampling_date, y = pH_calc), color ="red", size=size_point) +
-  #geom_smooth(method=lm, colour="black", fill="grey", size=0.6, na.rm=TRUE) +
  labs(title=NULL,x="", y=expression(paste(pH[T]," calculated"))) +
-  # annotate("text", x =as.POSIXct("2016-01-01"), y= min(dat50m$mean_pH, na.rm=TRUE), 
-  #          label="*", colour="blue", size=10, fontface="plain") +
   coord_fixed() +
   Mytheme(size_labs = 8) +
   theme(axis.text.x=element_blank())
-  #annotation_custom(grob_E)
 pCO250p <- ggplot(dat50m, aes(x = sampling_date, y = pCO2), na.rm=TRUE) +
   scale_x_datetime(breaks = date_breaks("2 year"), labels = date_format("%Y")) +
   geom_point(colour="black", na.rm=TRUE, size=size_point) + 
-  #geom_smooth(method=lm, colour="black", fill="grey", size=0.6, na.rm=TRUE) +
   labs(title=NULL,x="",y=expression(paste(pCO[2], " (",mu, "atm)"))) +
   coord_fixed() +
   Mytheme(size_labs = 8) +
   theme(axis.text.x=element_blank())
-  #annotation_custom(grob_F)
 Oa50p <- ggplot(dat50m, aes(x = sampling_date, y = OmegaAragonite), na.rm=TRUE) +
   scale_x_datetime(breaks = date_breaks("2 year"), labels = date_format("%Y")) +
   geom_point(colour="black", na.rm=TRUE, size=size_point) + 
-  #geom_smooth(method=lm, colour="black", fill="grey", size=0.6, na.rm=TRUE) +
   labs(title=NULL,x="",y=expression(paste(Omega[a]))) +
-  # annotate("text", x =as.POSIXct("2016-01-01"), y= min(dat50m$mean_OmegaAragonite, na.rm=TRUE), 
-  #          label="*", colour="blue", size=10, fontface="plain") +  
   coord_fixed() +
   Mytheme(size_labs = 8)
-  #annotation_custom(grob_G)
 ATvsCT50p <- ggplot(dat50m, aes(x = sampling_date, y = ta/dic), na.rm=TRUE) +
   scale_x_datetime(breaks = date_breaks("2 year"), labels = date_format("%Y")) +
   geom_point(colour="black", na.rm=TRUE, size=size_point) +
@@ -1862,15 +1837,11 @@ anT50p <- ggplot(data = ano_month50m, aes(x = sampling_date, y = Temperature_ano
   geom_point(colour="blue", na.rm=TRUE, size=size_point) + 
   geom_smooth(method=lm, colour="black", fill="grey", size=0.6, na.rm=TRUE) +
   labs(title=NULL,x="", y="Temp. (°C)") +
-  # annotate("text", x =as.POSIXct("2016-01-01"), y= min(ano_month50m$Temperature_ano, na.rm=TRUE), 
-  #          label="*", colour="black", size=10, fontface="plain") +
   coord_fixed() +
   Mytheme(size_labs = 8) +
   theme(axis.text.x=element_blank())
-  #annotation_custom(grob_H)
 anS50p <- ggplot(data = ano_month50m, aes(x = sampling_date, y = Salinity_ano), na.rm=TRUE) +
   scale_x_datetime(breaks = date_breaks("2 year"), labels = date_format("%Y")) +
-  #scale_y_continuous(breaks=c(-2,-1,0,0.5)) +
   geom_point(colour="blue", na.rm=TRUE, size=size_point) + 
   geom_smooth(method=lm, colour="black", fill="grey", size=0.6, na.rm=TRUE) +
   labs(title=NULL,x="", y="Salinity") +
@@ -1878,60 +1849,48 @@ anS50p <- ggplot(data = ano_month50m, aes(x = sampling_date, y = Salinity_ano), 
   coord_fixed() +
   Mytheme(size_labs = 8) +
   theme(axis.text.x=element_blank())
-  #annotation_custom(grob_I)
 anCT50p <- ggplot(data = ano_month50m, aes(x = sampling_date, y = dic_ano), na.rm=TRUE) +
   scale_x_datetime(breaks = date_breaks("2 year"), labels = date_format("%Y")) +
   geom_point(colour="blue", na.rm=TRUE, size=size_point) + 
   geom_smooth(method=lm, colour="black", fill="grey", size=0.6, na.rm=TRUE) +
   labs(title=NULL,x="", y=expression(paste(italic(C)[T], " (",mu, "mol ", kg^-1,")"))) +
-  # annotate("text", x =as.POSIXct("2016-01-01"), y= min(ano_month50m$dic_ano, na.rm=TRUE), 
-  #          label="*", colour="black", size=10, fontface="plain") +
   coord_fixed() +
   Mytheme(size_labs = 8) +
   theme(axis.text.x=element_blank())
-  #annotation_custom(grob_K)
 anAT50p <- ggplot(data = ano_month50m, aes(x = sampling_date, y = ta_ano), na.rm=TRUE) +
   scale_x_datetime(breaks = date_breaks("2 year"), labels = date_format("%Y")) +
   scale_y_continuous(breaks=c(-20, 0, 20)) +
   geom_point(colour="blue", na.rm=TRUE, size=size_point) + 
   geom_smooth(method=lm, colour="black", fill="grey", size=0.6, na.rm=TRUE) +
   labs(title=NULL,x="", y=expression(paste(italic(A)[T], " (",mu, "mol ", kg^-1,")"))) +
-  #annotate("text", x =as.POSIXct("2016-01-01"), y= min(ano_month50m$ta_ano, na.rm=TRUE), label="*", colour="black", size=10, fontface="plain") +
   theme(axis.text.x=element_blank()) +
   coord_fixed() +
   Mytheme(size_labs = 8) +
   theme(axis.text.x=element_blank())
-  #annotation_custom(grob_J)
 anpH50p <- ggplot(data = ano_month50m, aes(x = sampling_date, y = pH_calc_ano), na.rm=TRUE) +
   scale_x_datetime(breaks = date_breaks("2 year"), labels = date_format("%Y")) +
   geom_point(colour="blue", na.rm=TRUE, size=size_point) + 
   geom_smooth(method=lm, colour="black", fill="grey", size=0.6, na.rm=TRUE) +
  labs(title=NULL, x="", y=expression(paste(pH[T]," calculated"))) +
-  #annotate("text", x =as.POSIXct("2016-01-01"), y= min(ano_month50m$pH_ano, na.rm=TRUE),  label="*", colour="black", size=10, fontface="plain") +
   coord_fixed() +
   Mytheme(size_labs = 8) +
   theme(axis.text.x=element_blank())
-  #annotation_custom(grob_L)
 anpCO250p <- ggplot(data = ano_month50m, aes(x = sampling_date, y = pCO2_ano), na.rm=TRUE) +
   scale_x_datetime(breaks = date_breaks("2 year"), labels = date_format("%Y")) +
   geom_point(colour="blue", na.rm=TRUE, size=size_point) + 
   geom_smooth(method=lm, colour="black", fill="grey", size=0.6, na.rm=TRUE) +
   labs(title=NULL,x="",y=expression(paste(pCO[2], " (",mu, "atm)"))) +
-  #annotate("text", x =as.POSIXct("2016-01-01"), y= min(ano_month50m$pCO2_ano, na.rm=TRUE),  label="*", colour="black", size=10, fontface="plain") +
   coord_fixed() +
   Mytheme(size_labs = 8) +
   theme(axis.text.x=element_blank())
-  #annotation_custom(grob_M)
 anOa50p <- ggplot(data = ano_month50m, aes(x = sampling_date, y = OmegaAragonite_ano), na.rm=TRUE) +
   scale_x_datetime(breaks = date_breaks("2 year"), labels = date_format("%Y")) +
   scale_y_continuous(breaks=c(-0.2,0,0.2)) +
   geom_point(colour="blue", na.rm=TRUE, size=size_point) + 
   geom_smooth(method=lm, colour="black", fill="grey", size=0.6, na.rm=TRUE) +
   labs(title=NULL,x="",y=expression(paste(Omega[a]))) +
-  #annotate("text", x =as.POSIXct("2016-01-01"), y= min(ano_month50m$OmegaAragonite_ano, na.rm=TRUE), label="*", colour="black", size=10, fontface="plain") +
   coord_fixed() +
   Mytheme(size_labs = 8)
-  #annotation_custom(grob_N)
 
 g <- plot_grid(T50p, anT50p, S50p, anS50p, AT50p, anAT50p, CT50p, anCT50p, pH50p, anpH50p, pCO250p, anpCO250p, Oa50p, anOa50p, align='vh', ncol=2)
 ggsave(file="output_jp/figures/fig_paper_interannual_50m.png", g, width=15, height = 17, units = "cm")
@@ -1944,7 +1903,6 @@ ggsave(file="output_jp/figures/fig3.pdf", g, width = 18, height = 21, units = "c
 kable(reg_var_50m, digits = c(4,4,3,3,3,2,3), caption="Regressions on values at 50 m depth.")
 kable(reg_ano_50m, digits = c(4,4,3,3,3,2,3), caption="Regressions on anomalies at 50 m depth.")
 ```
-
 
 ## Relationship between salinity and total alkalinity
 ```{r Total alkalinity Point B, include=FALSE}
@@ -2000,7 +1958,6 @@ plot_continuous_discrete_pH  <- ggplot(data = filter(continuous_discrete,!is.na(
                date_minor_breaks="1 month", labels=date_format("%b %Y")) +
   Mytheme() +
   theme(panel.grid.major.x = element_blank())
-  #annotation_custom(grob_A)
 
   # Plot Seafet temperature
 plot_continuous_discrete_T  <- ggplot(data = filter(continuous_discrete,!is.na(T_seaF))) +
@@ -2011,7 +1968,6 @@ plot_continuous_discrete_T  <- ggplot(data = filter(continuous_discrete,!is.na(T
                date_minor_breaks="1 month", labels=date_format("%b %Y")) +
   Mytheme() +
   theme(panel.grid.major.x = element_blank())
-  #annotation_custom(grob_B)
 
 # Zoom on a few days
 date_min <- as.numeric(as.POSIXct("2015-05-01"))
@@ -2023,7 +1979,6 @@ plot_zoom <- ggplot(data =dat) +
   scale_x_datetime(breaks = date_breaks("1 days"), labels = date_format("%d %b")) +
   Mytheme() +
   theme(panel.grid.major.x = element_blank())
-  #annotation_custom(grob_E)
 
 # Offset between seafet pH and spec pH (Fig. 2 Kapsenberg et al.)
 dat <- mutate(continuous_discrete, diff_pH = pHspec_Tptb - pHT_sfint)
@@ -2037,7 +1992,6 @@ plot_offset <- ggplot(data = filter(dat, !is.na(diff_pH))) +
                date_minor_breaks="1 month", labels=date_format("%b %Y")) +
   Mytheme() +
   theme(panel.grid.major.x = element_blank())
-  #annotation_custom(grob_C)
 
 # Range of daily pH changes
 range <- tbl_df(
@@ -2077,7 +2031,6 @@ plot_range_pH_Temperature <-  ggplot(data = range_month) +
   Mytheme(size_labs = 9) +
   theme(aspect.ratio=1/2,
         axis.title.x = element_text(margin=margin(t=0.25, r=0, b=0.25, l=0, unit = "cm")))
-  #annotation_custom(grob_A)
 ggsave("output_jp/figures/plot_range_pH_Temperature.png", plot_range_pH_Temperature)
 
 size_point <- 0.4 # size of data points
@@ -2088,7 +2041,6 @@ plot_range <-
   labs(y =expression(paste(pH[T], " range")), x=NULL, title=NULL) +
   Mytheme() +
   theme(panel.grid.major.x = element_blank())
-  #annotation_custom(grob_D)
 
 g <- plot_grid(plot_continuous_discrete_pH, plot_continuous_discrete_T, plot_offset, plot_range, plot_zoom, align='vh', ncol=1)
 ggsave("output_jp/figures/fig_paper_time_series.png", g, width = 18, height = 14, units = "cm")
@@ -2114,7 +2066,6 @@ plot_range_pH_Chla_week <-  ggplot(data =  range_year_week) +
   Mytheme(size_labs = 9) +
   theme(aspect.ratio=1/2,
         axis.title.x = element_text(margin=margin(t=0.25, r=0, b=0.25, l=0, unit = "cm")))
-  #annotation_custom(grob_B)
 ggsave("output_jp/figures/plot_range_pH_Chla_week.png", plot_range_pH_Chla_week)
 
 plot_range_pH_Chla_temp <- plot_grid(plot_range_pH_Temperature,
