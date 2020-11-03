@@ -500,6 +500,10 @@ When the difference(s) between replicate values of AT and CT is larger than 15 u
 
 
 ```{r Check outliers, include=TRUE}
+# Salinity is a predictor of AT -> using the regression defined above
+#d_all$at_calc <- slope_s_at * d_all$sal_mix + intercept_s_at
+z$at_calc <- 2.403554e+01 * z$salinity_field + 1.644841e+03
+
 # "C" means "check"
 # Check for outliers at 1 m
 
@@ -662,10 +666,6 @@ dygraph(CCT50_xts, group = "pointB", main="CT 50 m: remove outliers", ylab="Diss
     dyOptions( useDataTimezone = TRUE,drawGrid = TRUE, drawPoints = TRUE, pointSize = 2) %>%
 
     dyRangeSelector(height = 30, dateWindow= NULL)
-
-# Salinity is a predictor of AT -> using the regression defined above
-#d_all$at_calc <- slope_s_at * d_all$sal_mix + intercept_s_at
-#z$at_calc <- 2.403554e+01 * z$salinity_field + 1.644841e+03
 ```
 
 ```{r Remove outliers and plot, include=TRUE}
@@ -831,7 +831,7 @@ ggsave("output_jp/figures/fig_outliers.png", p, width = 18, height = 25, units =
 **After removal of outliers.**
 ![output_jp/figures/fig_outliers.png](output_jp/figures/fig_outliers.png)
 ```{r Handle qflags 3, include=FALSE}
-# values flagged as 3 set to NA
+# values other than flag 2 set to NA
 z <- z %>% 
   dplyr::mutate(salinity_field = ifelse(qflag_salinity_field == 2, salinity_field, NA),
                 temp_field = ifelse(qflag_temp_field == 2, temp_field, NA),
@@ -854,7 +854,7 @@ mean_at_dic <- z %>%
   dplyr::mutate(ta = mean(ta_dup, na.rm = TRUE),
                 dic = mean(dic_dup, na.rm = TRUE)) %>% 
   dplyr::ungroup() %>% 
-  #dplyr::select(sampling_date, depth, ta, dic) %>% 
+  dplyr::select(sampling_date, depth, ta, dic) %>% 
   dplyr::distinct()
 # salinity and temperature field
 mean_sal_temp <- z %>%
@@ -1107,32 +1107,32 @@ write_rds(dat, "output_jp/data/output.rds")
 ```
 
 ```{r Uncertainties, include=FALSE, echo=FALSE}
-# dat_no_NA <- dat %>% 
-#   dplyr::filter(!is.na(ta) & !is.na(dic) & !is.na(salinity) & !is.na(temperature))
-# evar1 <-
-#   mean(c(3.6, 3.5, 1.2, 1.99, 2.4, 3.0, 3.9, 2.6, 0.5, 2.6, 3.2))*1e-6 #AT, extracted from SNAPO-CO2 reports
-# evar2 <-
-#   mean(c(3.2, 3.7, 3.4, 2.25, 2, 2.8, 4.9, 4, 1.5, 2.7, 2))*1e-6 #CT, extracted from SNAPO-CO2 reports
-# 
-# epKstd  <- c(0.002, 0.01,  0.02, 0.01,  0.01, 0.01, 0.01)
-# 
-# tmp <- seacarb::errors(flag = 15, var1 = dat_no_NA$ta*1e-6, var2 = dat_no_NA$dic*1e-6, 
-#   S = dat_no_NA$salinity, T = dat_no_NA$temperature, P = dat_no_NA$depth/10, Pt = 1e-6*dat_no_NA$Pt, Sit = 1e-6*dat_no_NA$Sit,
-#   evar1 = evar1, evar2 = evar1, eS = 0.01, eT = 0.1, ePt = 0, eSit = 0,
-#   epK = epKstd, 
-#   #method = "ga", r = 0.0, runs = 10000, 
-#   k1k2 = "l", kf = "pf", pHscale = "T", b = "l10", warn = "y"
-#   )
-# mean_err <- tmp %>% summarise_all(mean)
-# 
-# # Calculate the average percent errors for key parameters
-# mean_err_percent <- data.frame(
-#   H = mean(100 * mean_err$H / 10^-(dat_no_NA$pH_calc)),
-#   pCO2 = mean(100 * mean_err$pCO2 / dat_no_NA$pCO2),
-#   fCO2 = mean(100 * mean_err$fCO2 / dat_no_NA$fCO2),
-#   OmegaAragonite = mean(100 * mean_err$OmegaAragonite / dat_no_NA$OmegaAragonite),
-#   OmegaCalcite   = mean(100 * mean_err$OmegaCalcite   / dat_no_NA$OmegaCalcite)
-# )
+dat_no_NA <- dat %>%
+  dplyr::filter(!is.na(ta) & !is.na(dic) & !is.na(salinity) & !is.na(temperature))
+evar1 <-
+  mean(c(3.6, 3.5, 1.2, 1.99, 2.4, 3.0, 3.9, 2.6, 0.5, 2.6, 3.2))*1e-6 #AT, extracted from SNAPO-CO2 reports
+evar2 <-
+  mean(c(3.2, 3.7, 3.4, 2.25, 2, 2.8, 4.9, 4, 1.5, 2.7, 2))*1e-6 #CT, extracted from SNAPO-CO2 reports
+
+epKstd  <- c(0.002, 0.01,  0.02, 0.01,  0.01, 0.01, 0.01)
+
+tmp <- seacarb::errors(flag = 15, var1 = dat_no_NA$ta*1e-6, var2 = dat_no_NA$dic*1e-6,
+  S = dat_no_NA$salinity, T = dat_no_NA$temperature, P = dat_no_NA$depth/10, Pt = 1e-6*dat_no_NA$Pt, Sit = 1e-6*dat_no_NA$Sit,
+  evar1 = evar1, evar2 = evar1, eS = 0.01, eT = 0.1, ePt = 0, eSit = 0,
+  epK = epKstd,
+  #method = "ga", r = 0.0, runs = 10000,
+  k1k2 = "l", kf = "pf", pHscale = "T", b = "l10", warn = "y"
+  )
+mean_err <- tmp %>% summarise_all(mean)
+
+# Calculate the average percent errors for key parameters
+mean_err_percent <- data.frame(
+  H = mean(100 * mean_err$H / 10^-(dat_no_NA$pH_calc)),
+  pCO2 = mean(100 * mean_err$pCO2 / dat_no_NA$pCO2),
+  fCO2 = mean(100 * mean_err$fCO2 / dat_no_NA$fCO2),
+  OmegaAragonite = mean(100 * mean_err$OmegaAragonite / dat_no_NA$OmegaAragonite),
+  OmegaCalcite   = mean(100 * mean_err$OmegaCalcite   / dat_no_NA$OmegaCalcite)
+)
 ```
 
 The average uncertainties of the derived carbonate parameters were calculated according to the Gaussian method (Dickson & Riley, 1978) implemented in the "errors" function of the R package seacarb 3.1 (Gattuso et al., 2016). More detail is available in Orr et al. (2018). The uncertainties are `r format(mean_err$H, digits =1, scientific = TRUE)` mol H+, `r format(mean_err$pCO2, digits=0)` umol pCO2, and `r format(mean_err$OmegaAragonite, digits=1)` unit of the aragonite saturation state.
@@ -1443,7 +1443,7 @@ kable(dat_month50m, digits = 3, caption="Monthly means at 50 m")
 ## Interannual changes
 TODO: calculate slopes as suggested by JOI.
 
-**NOTE: cutoff date is** `r print(cutoff_date))`.
+**NOTE: cutoff date is** `r cutoff_date`.
 
 ```{r Figure Interannual changes and anomalies at 1 m, include=FALSE}
 #TODO calculate slopes as suggested by JOI.
