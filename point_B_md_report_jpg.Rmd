@@ -1790,7 +1790,6 @@ fig_poc_pon <- ggplot(data = filter(pom_l, depth==1), aes(x = date, y = value), 
 ggsave(file="output_jp/figures/fig_poc_pon.png", fig_poc_pon, width = 18, height = 20, units = "cm")
 ```
 
-
 ```{r Removing the effect of changes in AT at 1m, include=FALSE}
 #intercept_ta <- 0
 first_at <- intercept_ta + decimal_date(dat$sampling_date[1]) * slope_ta # 1st AT value of the time series
@@ -2536,14 +2535,6 @@ reg_AT_S_all <- cbind(as.numeric(c(lms$coefficients[2,1], lms$coefficients[2,2],
                                    lms$coefficients[1,4], lms$r.squared, prob)))
 colnames(reg_AT_S_all) <- c("AT")
 row.names(reg_AT_S_all) <- c("Slope", "SE Slope", "P Slope","Intercept","SE int.","P int.", "F", "df", "R2","P value")
-
-p1 <- ggplot(data=dat0m) +
-  aes(x= salinity, y=ta) +
-  geom_point(na.rm=TRUE, size=size_point) +
-  stat_smooth(method=lm, na.rm=TRUE, show.legend=FALSE, se=FALSE, colour="black", size=0.5) +
-  labs(title = "With monthly means", x = "Salinity", y = expression(paste("Total alkalinity (",mu, "mol ", kg^-1,")"))) +
-  Mytheme()
-ggsave(p1, filename = "output_jp/figures/fig_ta_vs_salinity_all_pointB_0m.png", width = 20, height = 13, units = "cm")
 ```
 
 The relationship between AT and salinity using all data is shown below.
