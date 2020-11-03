@@ -24,8 +24,8 @@ if (Sys.getenv("LOGNAME") == "samir") {
   path = "../../pCloud Sync/exp153_carbonates_point_B/"
   path_sami = "../../pCloud\ Sync/exp176_sami/sami_data/sami_raw_export/Data_deployment/EOL"
 }
-#cutoff_date <- "2020-01-01" #to limit regressions on complete years
-cutoff_date <- "2020-09-01" #to limit regressions on complete years
+cutoff_date <- "2020-01-01" #to limit regressions on complete years
+#cutoff_date <- "2020-09-01" #to limit regressions on complete years
 require(readxl)
 require(seacarb)
 library(cowplot)
@@ -1101,35 +1101,35 @@ write_rds(dat, "output_jp/data/output.rds")
 ```
 
 ```{r Uncertainties, include=FALSE, echo=FALSE}
-dat_no_NA <- dat %>% 
-  dplyr::filter(!is.na(ta) & !is.na(dic) & !is.na(salinity) & !is.na(temperature))
-evar1 <-
-  mean(c(3.6, 3.5, 1.2, 1.99, 2.4, 3.0, 3.9, 2.6, 0.5, 2.6, 3.2))*1e-6 #AT, extracted from SNAPO-CO2 reports
-evar2 <-
-  mean(c(3.2, 3.7, 3.4, 2.25, 2, 2.8, 4.9, 4, 1.5, 2.7, 2))*1e-6 #CT, extracted from SNAPO-CO2 reports
-
-epKstd  <- c(0.002, 0.01,  0.02, 0.01,  0.01, 0.01, 0.01)
-
-tmp <- seacarb::errors(flag = 15, var1 = dat_no_NA$ta*1e-6, var2 = dat_no_NA$dic*1e-6, 
-  S = dat_no_NA$salinity, T = dat_no_NA$temperature, P = dat_no_NA$depth/10, Pt = 1e-6*dat_no_NA$Pt, Sit = 1e-6*dat_no_NA$Sit,
-  evar1 = evar1, evar2 = evar1, eS = 0.01, eT = 0.1, ePt = 0, eSit = 0,
-  epK = epKstd, 
-  #method = "ga", r = 0.0, runs = 10000, 
-  k1k2 = "l", kf = "pf", pHscale = "T", b = "l10", warn = "y"
-  )
-mean_err <- tmp %>% summarise_all(mean)
-
-# Calculate the average percent errors for key parameters
-mean_err_percent <- data.frame(
-  H = mean(100 * mean_err$H / 10^-(dat_no_NA$pH_calc)),
-  pCO2 = mean(100 * mean_err$pCO2 / dat_no_NA$pCO2),
-  fCO2 = mean(100 * mean_err$fCO2 / dat_no_NA$fCO2),
-  OmegaAragonite = mean(100 * mean_err$OmegaAragonite / dat_no_NA$OmegaAragonite),
-  OmegaCalcite   = mean(100 * mean_err$OmegaCalcite   / dat_no_NA$OmegaCalcite)
-)
+# dat_no_NA <- dat %>% 
+#   dplyr::filter(!is.na(ta) & !is.na(dic) & !is.na(salinity) & !is.na(temperature))
+# evar1 <-
+#   mean(c(3.6, 3.5, 1.2, 1.99, 2.4, 3.0, 3.9, 2.6, 0.5, 2.6, 3.2))*1e-6 #AT, extracted from SNAPO-CO2 reports
+# evar2 <-
+#   mean(c(3.2, 3.7, 3.4, 2.25, 2, 2.8, 4.9, 4, 1.5, 2.7, 2))*1e-6 #CT, extracted from SNAPO-CO2 reports
+# 
+# epKstd  <- c(0.002, 0.01,  0.02, 0.01,  0.01, 0.01, 0.01)
+# 
+# tmp <- seacarb::errors(flag = 15, var1 = dat_no_NA$ta*1e-6, var2 = dat_no_NA$dic*1e-6, 
+#   S = dat_no_NA$salinity, T = dat_no_NA$temperature, P = dat_no_NA$depth/10, Pt = 1e-6*dat_no_NA$Pt, Sit = 1e-6*dat_no_NA$Sit,
+#   evar1 = evar1, evar2 = evar1, eS = 0.01, eT = 0.1, ePt = 0, eSit = 0,
+#   epK = epKstd, 
+#   #method = "ga", r = 0.0, runs = 10000, 
+#   k1k2 = "l", kf = "pf", pHscale = "T", b = "l10", warn = "y"
+#   )
+# mean_err <- tmp %>% summarise_all(mean)
+# 
+# # Calculate the average percent errors for key parameters
+# mean_err_percent <- data.frame(
+#   H = mean(100 * mean_err$H / 10^-(dat_no_NA$pH_calc)),
+#   pCO2 = mean(100 * mean_err$pCO2 / dat_no_NA$pCO2),
+#   fCO2 = mean(100 * mean_err$fCO2 / dat_no_NA$fCO2),
+#   OmegaAragonite = mean(100 * mean_err$OmegaAragonite / dat_no_NA$OmegaAragonite),
+#   OmegaCalcite   = mean(100 * mean_err$OmegaCalcite   / dat_no_NA$OmegaCalcite)
+# )
 ```
 
-The average uncertainties of the derived carbonate parameters were calculated according to the Gaussian method (Dickson & Riley, 1978) implemented in the "errors" function of the R package seacarb 3.1 (Gattuso et al., 2016). More detail is available in Orr et al. (sbm). The uncertainties are `r format(mean_err$H, digits =1, scientific = TRUE)` mol H+, `r format(mean_err$pCO2, digits=0)` umol pCO2, and `r format(mean_err$OmegaAragonite, digits=1)` unit of the aragonite saturation state.
+The average uncertainties of the derived carbonate parameters were calculated according to the Gaussian method (Dickson & Riley, 1978) implemented in the "errors" function of the R package seacarb 3.1 (Gattuso et al., 2016). More detail is available in Orr et al. (2018). The uncertainties are `r format(mean_err$H, digits =1, scientific = TRUE)` mol H+, `r format(mean_err$pCO2, digits=0)` umol pCO2, and `r format(mean_err$OmegaAragonite, digits=1)` unit of the aragonite saturation state.
 
 ```{r Monthly means, include=TRUE, message= FALSE, }
 #separate each means_depth and handle last incomplete year
@@ -1436,6 +1436,8 @@ kable(dat_month50m, digits = 3, caption="Monthly means at 50 m")
 
 ## Interannual changes
 TODO: calculate slopes as suggested by JOI.
+
+**NOTE: cutoff date is** `r print(cutoff_date))`.
 
 ```{r Figure Interannual changes and anomalies at 1 m, include=FALSE}
 #TODO calculate slopes as suggested by JOI.
@@ -2545,96 +2547,18 @@ ggsave(file="output_jp/figures/fig_paper_monthly_rate_AT_CT_50m.png", fig_paper_
 ggsave(file="output_jp/figures/fig4b.pdf", fig_paper_monthly_rate_AT_CT_50m, width = 16, height= 10, units = "cm")
 ```
 
-## Issue of total alkalinity
+## Relationship between salinity and total alkalinity
 ```{r Total alkalinity Point B, include=FALSE}
-
-# AT versus salinity at the surface per month with facet
-p1 <- ggplot(data=dplyr::filter(dat, depth== 0)) +
-  aes(salinity, ta) +
-  geom_point(na.rm=TRUE, size=size_point) +
-  stat_smooth(method=lm, na.rm=TRUE, show.legend=FALSE, se=FALSE, colour="black", size=0.5) +
-  facet_wrap(~ month) +
-  scale_x_continuous(limits = c(36.8, 38.4), breaks=c(37, 37.5, 38), expand = c(0,0)) +
-  scale_y_continuous(limits = c(2490, 2600), expand = c(0,0)) +
-  labs(title = "Point B (1 m, with month of sampling)", x = "Salinity", y = expression(paste("Total alkalinity (",mu, "mol ", kg^-1,")"))) +
-  Mytheme()
-png(file = "output_jp/figures/fig_ta_vs_salinity_month_pointB_0m.png", 
-    width = 20, height = 13, units = "cm", res = 300)
-print(p1)
-dev.off()
-
-# AT versus salinity at the surface per year with facet
-p1 <- ggplot(data=dplyr::filter(dat, depth== 0)) +
-  aes(salinity, ta) +
-  geom_point(na.rm=TRUE, size=size_point) +
-  stat_smooth(method=lm, na.rm=TRUE, show.legend=FALSE, se=FALSE, colour="black", size=0.5) +
-  facet_wrap(~ year) +
-  scale_x_continuous(limits = c(36.8, 38.4), breaks=c(37, 37.5, 38), expand = c(0,0)) +
-  scale_y_continuous(limits = c(2490, 2600), expand = c(0,0)) +
-  labs(title = NULL, x = "Salinity", y = expression(paste("Total alkalinity (",mu, "mol ", kg^-1,")"))) +
-Mytheme_facet()
-ggsave(p1, file = "output_jp/figures/fig_ta_vs_salinity_year_pointB_0m.png", 
-    width = 6, height = 6)
-
-# AT versus salinity at the surface per year with loop
-panel <- c("(a)","(b)","(c)","(d)","(e)","(f)","(g)","(h)","(i)", "(j)", "(k)", "(l)", "(m)")
-tmp <- filter(dat, depth== 0, sampling_date < cutoff_date)
-p <- NULL; j <- 0
-for (i in unique(tmp$year)[-length(unique(tmp$year))]) {
-  #i <- 13
-  j <- j+1
-  print(j)
-  p[[j]] <- ggplot(data=filter(tmp, tmp$year==i), aes(x=salinity, y=ta, colour=month)) +
-    geom_point(na.rm=TRUE, size=2) +
-    stat_smooth(method=lm, na.rm=TRUE, show.legend=FALSE, se=FALSE, colour="black", size=0.5) +
-    scale_x_continuous(limits = c(36.8, 38.5), breaks=c(37, 37.5, 38, 38.5), expand = c(0,0)) +
-    scale_y_continuous(limits = c(2490, 2600), expand = c(0,0)) +
-    labs(title = NULL, x = NULL, y = NULL) +
-    annotate(geom = "text", x=36.9, y=2495, label= as.character(i), hjust=0, vjust=0, size=3) +
-    annotate(geom = "text", x=36.9, y=2590, label= panel[[j]], hjust=0, vjust=0, size=3) +
-    Mytheme(size_labs = 9) +
-    scale_color_viridis(name="Month", discrete=TRUE, option="plasma") + 
-    theme(aspect.ratio = 1,
-          plot.margin = margin(t = 0, r = 0, b = 0, l = 0, unit = "cm"),
-          panel.grid.major = element_blank(),
-          panel.grid.minor = element_blank(),
-          legend.title = element_blank(),
-          legend.key = element_rect(colour = 'white', fill = 'white', size = 0),
-          legend.background = element_rect(fill="white", size=0.15),
-          legend.key.width = unit(1, "cm"),
-          legend.position='none')
-if (j %in% c(1,4,7, 10)) {p[[j]] <- p[[j]] + labs(y=expression(paste(italic(A)[T], " (",mu, "mol ", kg^-1,")")))}
-  else {
-    p[[j]] <- p[[j]] + theme(axis.text.y = element_blank())
-    p[[j]] <- p[[j]] + theme(plot.margin = margin(t = 0, r = 0.3, b = 0, l = 0, unit = "cm"))
-  }
- if (j %in% c(7,8,9)) {p[[j]] <- p[[j]] + labs(x = "Salinity")
- p[[j]] <- p[[j]] + theme(axis.title.x = element_text(margin=margin(t = 0.2, r = 0, b = 0.2, l = 0, unit="cm")))
- }
- else {
-    p[[j]] <- p[[j]] + theme(axis.text.x = element_blank())
- }
-  #   #p[[j]] <- p[[j]] + theme(axis.title.x = element_text(margin=margin(t = 0.2, r = 0, b = 0.2, l = 0, unit="cm")))
-  #   #p[[j]] <- p[[j]] + theme(plot.margin = margin(t = 0, r = 0, b = 0, l = 0, unit = "cm"))
-}
-g1 <- plot_grid(p[[1]], p[[2]], p[[3]], p[[4]], p[[5]], p[[6]], p[[7]], p[[8]], 
-                p[[9]], p[[10]], p[[11]], p[[12]], ncol=3, align="vh")
-grobs <- ggplotGrob(p[[1]] + theme(legend.position="top"))$grobs
-legend_top <- grobs[[which(sapply(grobs, function(x) x$name) == "guide-box")]]
-g <- plot_grid(legend_top, g1, ncol = 1, rel_heights = c(0.15, 1))
-ggsave(file="output_jp/figures/fig6.pdf", g, width = 16, height = 15, units = "cm")
-
-
-# AT=f(S) with all data
+# AT=f(S) at 0 m 
 lms <- summary(lm(data = dat0m, ta ~ salinity))
 prob <- pf(lms$fstatistic[1],lms$fstatistic[2],lms$fstatistic[3],lower.tail=FALSE)
-reg_AT_S_all <- cbind(as.numeric(c(lms$coefficients[2,1], lms$coefficients[2,2], 
-                                       lms$coefficients[2,4], lms$coefficients[1,1],
-                                       lms$coefficients[1,2], lms$fstatistic[1], lms$fstatistic[3], 
-                                       lms$coefficients[1,4], lms$r.squared, prob)))
+reg_AT_S_all <- cbind(as.numeric(c(lms$coefficients[2,1], lms$coefficients[2,2],
+                                   lms$coefficients[2,4], lms$coefficients[1,1],
+                                   lms$coefficients[1,2], lms$fstatistic[1],
+                                   lms$fstatistic[3],
+                                   lms$coefficients[1,4], lms$r.squared, prob)))
 colnames(reg_AT_S_all) <- c("AT")
-row.names(reg_AT_S_all) <- c("Slope", "SE Slope", "P Slope","Intercept","SE int.","P int.", "F", "df",
-                    "R2","P value")
+row.names(reg_AT_S_all) <- c("Slope", "SE Slope", "P Slope","Intercept","SE int.","P int.", "F", "df", "R2","P value")
 
 p1 <- ggplot(data=dat0m) +
   aes(x= salinity, y=ta) +
@@ -2643,106 +2567,10 @@ p1 <- ggplot(data=dat0m) +
   labs(title = "With monthly means", x = "Salinity", y = expression(paste("Total alkalinity (",mu, "mol ", kg^-1,")"))) +
   Mytheme()
 ggsave(p1, filename = "output_jp/figures/fig_ta_vs_salinity_all_pointB_0m.png", width = 20, height = 13, units = "cm")
-
-# AT=f(S) with monthly means
-lms <- summary(lm(data = dat0m, ta ~ salinity))
-prob <- pf(lms$fstatistic[1],lms$fstatistic[2],lms$fstatistic[3],lower.tail=FALSE)
-reg_AT_S_monthly <- cbind(as.numeric(c(lms$coefficients[2,1], lms$coefficients[2,2], 
-                                       lms$coefficients[2,4], lms$coefficients[1,1],
-                                       lms$coefficients[1,2], lms$fstatistic[1], lms$fstatistic[3], 
-                                       lms$coefficients[1,4], lms$r.squared, prob)))
-colnames(reg_AT_S_monthly) <- c("AT")
-row.names(reg_AT_S_monthly) <- c("Slope", "SE Slope", "P Slope","Intercept","SE int.","P int.", "F", "df",
-                    "R2","P value")
-
-p1 <- ggplot(data=dat_month0m) +
-  aes(x= Salinity, y=AT) +
-  geom_point(na.rm=TRUE, size=size_point) +
-  stat_smooth(method=lm, na.rm=TRUE, show.legend=FALSE, se=FALSE, colour="black", size=0.5) +
-  labs(title = "With all data", x = "Salinity", 
-       y = expression(paste("Total alkalinity (",mu, "mol ", kg^-1,")"))) +
-  Mytheme()
-png(file = "output_jp/figures/fig_ta_vs_salinity_monthly_means_pointB_0m.png", 
-    width = 20, height = 13, units = "cm", res = 300)
-print(p1)
-dev.off()
-
-
-# Alkalinity as a function of precipitation
-w <- tibble::as_tibble(read.table(paste0(path, "data/meteo_nice_airport/Meteo_2007_2015.csv"), header=T, sep=",", dec=".", as.is=T, na.strings = c("NA", "-999", "999999")))
-w$sampling_date <- ymd(w$sampling_date)
-w$days <- wday(w$sampling_date, label = TRUE, abbr = FALSE)
-w$group <- format(w$sampling_date - 1, "%Y%W") # Group the weeks tuesday to monday
-w <- w %>%
-   group_by(group) %>%
-   mutate(rr_cumsum =  cumsum(rr)  ) #cumsum of precipitation tuesday to monday
-# take the monday precipitation value (cumsum) and match it with TA of the day after (tuesday).
- w_monday <- w %>%
-   filter(days == "Monday" | days== "Lundi")
- w_monday$group <- as.numeric(w_monday$group)
- w_monday$group <-w_monday$group + 1 # Add + 1 to w$group to match with AT
- 
-#dat0m$days <- wday(dat0m$sampling_date)
-dat0m$group <- format(dat0m$sampling_date, "%Y%W") # Create "group" column in dat0m for AT
-dat0m$group <- as.numeric(dat0m$group)
-
-# merge the 2 df
-w_AT_precip <- left_join(dat0m,w_monday[,c(2,43:45)], by="group") %>%
-  rename(sampling_date=sampling_date.x)
- 
-# PLOTS
-precip_cumsum <-
-  ggplot(w_AT_precip, aes(x = sampling_date, y = rr_cumsum)) +
-  scale_x_datetime(breaks = date_breaks("2 year"), labels = date_format("%Y")) +
-  geom_point(colour = "blue", na.rm=TRUE) +
-  labs(title = NULL, x = "Time", y = "Weekly precipitation (mm)") +
-  Mytheme(size_labs = 9) +
-  theme(aspect.ratio = 1/2,
-        plot.margin = margin(t=0.25, r=0.5, b=0, l=0, unit = "cm"),
-        axis.title.x = element_text(margin=margin(t=0.15, r=0, b=0.25, l=0, unit = "cm")))
-  #annotation_custom(grob_A)
-  
-precip_ta <- ggplot(w_AT_precip, aes(x = rr_cumsum, y = ta)) +
-  geom_point(colour = "blue", na.rm=TRUE) +
-  labs(title = NULL,
-       x = "Weekly precipitation (mm)", 
-       y = expression(paste(italic(A)[T]," ","(",mu, "mol ", kg^-1,")"))) +
-  Mytheme(size_labs = 9) +
-  theme(aspect.ratio = 1/2,
-        plot.margin = margin(t=0.25, r=0.5, b=0, l=0, unit = "cm"),
-        axis.title.x = element_text(margin=margin(t=0.15, r=0, b=0.25, l=0, unit = "cm")))
-  #annotation_custom(grob_B_bl)
-
-precip_S <- ggplot(w_AT_precip, aes(x = rr_cumsum, y = salinity)) +
-  geom_point(colour = "blue", na.rm=TRUE) +
-  labs(title = NULL,
-       x = "Weekly precipitation (mm)", 
-       y = "Salinity") +
-  Mytheme(size_labs = 9) +
-    theme(aspect.ratio = 1/2,
-        plot.margin = margin(t=0.25, r=0.5, b=0, l=0, unit = "cm"),
-        axis.title.x = element_text(margin=margin(t=0.15, r=0, b=0.25, l=0, unit = "cm")))
-#annotation_custom(grob_C_bl)
-
-g <- plot_grid(precip_cumsum, precip_ta, precip_S, ncol=1, align="h")
-ggsave("output_jp/figures/precip.png",g, width = 18, height = 14, units = "cm")
-ggsave("output_jp/figures/figS2.pdf",g, width = 8, height = 14, units = "cm")
 ```
 
 The relationship between AT and salinity using all data is shown below.
 ![fig_ta_vs_salinity_all_pointB_0m.png](output_jp/figures/fig_ta_vs_salinity_all_pointB_0m.png)
-
-The relationship between AT and salinity using monthly means is shown below.
-![fig_ta_vs_salinity_monthly_means_pointB_0m.png](output_jp/figures/fig_ta_vs_salinity_monthly_means_pointB_0m.png)
-
-```{r reg_AT_S_monthly}
-  kable(reg_AT_S_monthly, digits = c(3), padding = 0, caption="Regression parameters of the AT=f(S) relationship derived using monthly means.")
-  kable(reg_AT_S_all, digits = c(3), padding = 0, caption="Regression parameters of the AT=f(S) relationship derived using all data.")
-```
-
-
-Salinity and total alkalinity data were compared with the weekly, from Tuesday to Monday, sum of precipitation data (Nice airport). Note that the analysis is incomplete as the 2015 data are currenly missing.
-![precip.png](output_jp/figures/precip.png)
 
 
 ## Daily and monthly changes in pH and T
