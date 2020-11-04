@@ -1581,10 +1581,6 @@ row.names(reg_ta_no_change) <- var_list
 
 ## Interannual changes at 1 m
 ![fig_paper_interannual_1m.png](output_jp/figures/fig_paper_interannual_1m.png)
-<!-- ![fig_poc_pon.png](output_jp/figures/fig_poc_pon.png) -->
-![fig_ta_vs_salinity_month_pointB_0m.png](output_jp/figures/fig_ta_vs_salinity_month_pointB_0m.png)
-
-
 
 ```{r kable regressions 1 m}
 kable(reg_var_1m, digits = c(4,4,3,3,3,2,3), caption="Regressions on values at 1 m depth.")
