@@ -591,7 +591,7 @@ z <- z %>%
                 PO4 = ifelse(qPO4 == 2, PO4, NA),
                 SIOH4 = ifelse(qSIOH4 == 2, SIOH4, NA),
                 pH_s_eol_temp_lab = ifelse(qflag_pH_s_eol == 2, pH_s_eol_temp_lab, NA),
-                pH_s_ptb_temp_lab = ifelse(qflag_pH_s_ptb == 3, pH_s_ptb_temp_lab, NA )
+                pH_s_ptb_temp_lab = ifelse(qflag_pH_s_ptb == 2, pH_s_ptb_temp_lab, NA )
   )
 ```
 
@@ -848,6 +848,10 @@ pangaea <- dplyr::select(dat, sampling_date, depth, CSC_flag, salinity,
 #Prepare SOMLIT data 
 somlit <- dat %>% 
   dplyr::select(sampling_date, depth, salinity, temperature, dic, ta, pH_calc, Pt, Sit)
+#Prepare data for villefranche_CC 
+vlfrcc <- dat %>% 
+  dplyr::select(sampling_date, depth, salinity, temperature, dic, ta, pH_calc, Pt, Sit)
+
 #save data
 write_csv(somlit, path = "output_jp/data/output_somlit.csv")
 write_csv(dat, path="output_jp/data/output.csv")
