@@ -736,7 +736,7 @@ p <- ggplot(data = eol_ptb, aes(diff_pH)) +
   geom_vline(xintercept = 0.015)
 print(p)
 
-# calculate mean pH when data are available both at eol and point B and abs(difference) < 0.01
+# calculate mean pH when data are available both at eol and point B and abs(difference) < 0.015
 # if not one uses the Point B pH
 eol_ptb <- eol_ptb %>% 
   rowwise() %>%
