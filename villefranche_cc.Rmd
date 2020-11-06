@@ -511,8 +511,10 @@ Les "quality flags" "qflag\_sample", "qflag\_ta", "qflag\_DIC" qui apparaissent 
 ## Point B
 
 ```{r read data in output_vlfrcc, include=FALSE}
-z <- readr::read_csv(file = "output_jp/data/output_vlfrcc.csv", col_names = TRUE, na = c("NA", "NaN"))
+dat <- readr::read_csv(file = "output_jp/data/output_vlfrcc.csv", col_names = TRUE, na = c("NA", "NaN"))
 
+dat0m <- dplyr::filter(dat, depth==0)
+dat50m <- dplyr::filter(dat, depth==50)
 ```
 
 ## **Atmospheric vs. Seawater pCO2**
@@ -538,7 +540,7 @@ CO2_pr_i <- tbl_df(fortify.zoo(CO2_pr_zoo_i)) %>% # change to df
   dplyr::rename(dt=Index, atm_CO2=CO2_pr_zoo_i) %>%
   dplyr::mutate(year=year(dt), monthd = month(dt), month = month(dt, label = TRUE, abbr = FALSE))
 # add seawater pCO2
-tmp <- dplyr::ungroup(mean0m) %>%
+tmp <- dplyr::ungroup(dat0m) %>%
   dplyr::select(sampling_date, mean_pCO2)
 tmp$dt <- as.Date(tmp$sampling_date)
 CO2_pr_i <- dplyr::left_join(CO2_pr_i, tmp)
