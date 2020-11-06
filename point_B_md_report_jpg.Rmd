@@ -442,7 +442,6 @@ z <- z %>%
           (depth == 0 & ta_dup > 2523 & ta_dup < 2524 & ymd(sampling_date) == "2018-07-17") ~ 3,
           (depth == 0 & ta_dup > 2531 & ta_dup < 2532 & ymd(sampling_date) == "2018-08-28") ~ 3,
           (depth == 0 & ta_dup > 2542 & ta_dup < 2543 & ymd(sampling_date) == "2018-09-26") ~ 3,
-          (depth == 0 & ta_dup > 2542 & ta_dup < 2543 & ymd(sampling_date) == "2018-09-26") ~ 3,
           (depth == 0 & ta_dup > 2579 & ta_dup < 2580 & ymd(sampling_date) == "2018-10-02") ~ 3,
           (depth == 0 & ta_dup > 2583 & ta_dup < 2584 & ymd(sampling_date) == "2018-10-23") ~ 3,
           (depth == 0 & ta_dup > 2530 & ta_dup < 2531 & ymd(sampling_date) == "2018-12-11") ~ 3,
@@ -876,9 +875,7 @@ pangaea <- dplyr::select(dat, sampling_date, depth, CSC_flag, salinity,
 somlit <- dat %>% 
   dplyr::select(sampling_date, depth, salinity, temperature, dic, ta, pH_calc, Pt, Sit)
 #Prepare data for villefranche_CC 
-vlfrcc <- dat %>% 
-  dplyr::select(sampling_date, depth, salinity, temperature, dic, ta, pH_calc, pH_insi, Pt, Sit)
-vlfrcc <- left_join(vlfrcc, eol_ptb %>% dplyr::select(sampling_date, depth, pH_s_eol_temp_insi, pH_s_ptb_temp_insi), by=c("sampling_date", "depth"))
+vlfrcc <- left_join(dat, eol_ptb %>% dplyr::select(sampling_date, depth, pH_s_eol_temp_insi, pH_s_ptb_temp_insi), by=c("sampling_date", "depth"))
 
 #save data
 write_csv(somlit, path = "output_jp/data/output_somlit.csv")
