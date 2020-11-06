@@ -510,7 +510,7 @@ Les "quality flags" "qflag\_sample", "qflag\_ta", "qflag\_DIC" qui apparaissent 
 
 ## Point B
 
-```{r Initialization Point B, include=FALSE}
+```{r read data in output_vlfrcc, include=FALSE}
 z <- readr::read_csv(file = "output_jp/data/output_vlfrcc.csv", col_names = TRUE, na = c("NA", "NaN"))
 
 ```
