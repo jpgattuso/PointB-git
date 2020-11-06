@@ -850,12 +850,15 @@ somlit <- dat %>%
   dplyr::select(sampling_date, depth, salinity, temperature, dic, ta, pH_calc, Pt, Sit)
 #Prepare data for villefranche_CC 
 vlfrcc <- dat %>% 
-  dplyr::select(sampling_date, depth, salinity, temperature, dic, ta, pH_calc, Pt, Sit)
+  dplyr::select(sampling_date, depth, salinity, temperature, dic, ta, pH_calc, pH_insi, Pt, Sit)
+vlfrcc <- left_join(vlfrcc, eol_ptb %>% dplyr::select(sampling_date, depth, pH_s_eol_temp_insi, pH_s_ptb_temp_insi), by=c("sampling_date", "depth"))
 
 #save data
 write_csv(somlit, path = "output_jp/data/output_somlit.csv")
 write_csv(dat, path="output_jp/data/output.csv")
 write_csv(pangaea, path="output_jp/data/output_pangaea.csv")
+write_csv(vlfrcc, path="output_jp/data/output_vlfrcc.csv")
+
 write_rds(dat, "output_jp/data/output.rds")
 ```
 
