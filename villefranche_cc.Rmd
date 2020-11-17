@@ -539,11 +539,11 @@ CO2_pr_zoo_i <- na.approx(CO2_pr_zoo) # interpolate NAs
 CO2_pr_i <- tbl_df(fortify.zoo(CO2_pr_zoo_i)) %>% # change to df
   dplyr::rename(dt=Index, atm_CO2=CO2_pr_zoo_i) %>%
   dplyr::mutate(year=year(dt), monthd = month(dt), month = month(dt, label = TRUE, abbr = FALSE))
-# add seawater pCO2
-tmp <- dplyr::ungroup(dat0m) %>%
-  dplyr::select(sampling_date, mean_pCO2)
-tmp$dt <- as.Date(tmp$sampling_date)
-CO2_pr_i <- dplyr::left_join(CO2_pr_i, tmp)
+# # add seawater pCO2
+# tmp <- dplyr::ungroup(dat0m) %>%
+#   dplyr::select(sampling_date, mean_pCO2)
+# tmp$dt <- as.Date(tmp$sampling_date)
+# CO2_pr_i <- dplyr::left_join(CO2_pr_i, tmp)
 # Calculate monthly means
 tmp <- CO2_pr_i %>%
   dplyr::group_by(monthd) %>%
@@ -582,7 +582,7 @@ reg_atm_CO2 <- cbind(reg_atm_CO2, reg_atm_CO2_ano)
 #   select(dt, atm_CO2, mean_pCO2) %>%
 #   melt(id.var = "dt")
 CO2_pr_i_melt <- CO2_pr_i %>%
-  dplyr::select(dt, atm_CO2, mean_pCO2) %>%
+  dplyr::select(dt, atm_CO2) %>% #, mean_pCO2) %>%
   gather(key = variable, value=value, -dt, na.rm = TRUE)
 
 fig_CO2_time_series <- ggplot(data=CO2_pr_i_melt) +
@@ -596,19 +596,19 @@ fig_CO2_time_series <- ggplot(data=CO2_pr_i_melt) +
 
 fig_CO2_ano <- ggplot(data = ano_atm_CO2, aes(x = as.POSIXct(dt), y = atm_CO2_ano)) +
   scale_x_datetime(breaks = date_breaks("2 year"), labels = date_format("%Y")) +
-  geom_point(colour="orange", na.rm=TRUE, size=size_point) +
+  geom_point(colour="orange", na.rm=TRUE, size=0.4) +
   geom_smooth(method=lm, colour="black", fill="grey", size=0.6) +
   labs(title=NULL, x="Time", y=expression(paste("Atmospheric ", CO[2]))) +
   Mytheme() +
   annotation_custom(grob_B)
 
-fig_delta_CO2 <- ggplot(data = CO2_pr_i, aes(x = as.POSIXct(dt), y = mean_pCO2 - atm_CO2), na.rm=TRUE) +
-  scale_x_datetime(breaks = date_breaks("2 year"), labels = date_format("%Y")) +
-  geom_point(colour="orange", na.rm=TRUE, size=size_point) +
-  #geom_smooth(method=lm, colour="black", fill="grey", size=0.6) +
-  labs(title="Positive values indicate a source for the atmosphere", x="Time", y=expression(paste("Seawater ", pCO[2], " - atmospheric ", CO[2]))) +
-  Mytheme() +
-  geom_hline(yintercept = 0)
+# fig_delta_CO2 <- ggplot(data = CO2_pr_i, aes(x = as.POSIXct(dt), y = mean_pCO2 - atm_CO2), na.rm=TRUE) +
+#   scale_x_datetime(breaks = date_breaks("2 year"), labels = date_format("%Y")) +
+#   geom_point(colour="orange", na.rm=TRUE, size=0.4) +
+#   #geom_smooth(method=lm, colour="black", fill="grey", size=0.6) +
+#   labs(title="Positive values indicate a source for the atmosphere", x="Time", y=expression(paste("Seawater ", pCO[2], " - atmospheric ", CO[2]))) +
+#   Mytheme() +
+#   geom_hline(yintercept = 0)
 
 g <- arrangeGrob(fig_CO2_time_series, fig_CO2_ano, ncol=1)
 ggsave("figures/fig_atm_CO2.png", g)
@@ -624,11 +624,12 @@ There are missing data:
 
 ```{r kable NAs atm CO2}
   kable(NAs_by_year, digits = c(0,0), padding = 0, caption="Number of days without atmospheric CO2 data.")
+
+# The rate of increase of seawater pCO2 (`r round(reg_var_1m[7,1], digit=2)` uatm per year) is much larger than that of atmospheric CO2 (`r round(reg_atm_CO2[1,1], digit=2)` ppm per year).
 ```
 
 Missing values were filled by linear interpolation between nearest values in order to obtain the same sampling number per year. The rate of increase was calculated by regressing the CO$_2$ concentration (`r round(reg_atm_CO2[1,1], digit=2)` ppm per year) and the anomaly (`r round(reg_atm_CO2[1,2], digit=2)` ppm per year) following subtraction of monthly means against time.
 
-The rate of increase of seawater pCO2 (`r round(reg_var_1m[7,1], digit=2)` uatm per year) is much larger than that of atmospheric CO2 (`r round(reg_atm_CO2[1,1], digit=2)` ppm per year).
 
 ![atm_CO2](figures/fig_atm_CO2.png)
 
@@ -637,14 +638,12 @@ The rate of increase of seawater pCO2 (`r round(reg_var_1m[7,1], digit=2)` uatm 
 ```
 
 ## **seafet pH**
+
 ```{r seafet pH, echo=FALSE, warning = FALSE, message = FALSE, out.width='100%'}
-# the continuous_discrete file is already read in chunk "Daily and seasonal changes"
+continuous_discrete <- read.table(paste0(path, "data/continuous_discrete.csv"), header=TRUE, sep=",", dec=".", as.is=TRUE)
+
+continuous_discrete$datetime <- ymd_hms(continuous_discrete$date)
 #round time into nearest hour
-continuous_discrete$datetime_round <-round_date(continuous_discrete$datetime,unit = "hour" )
-```
-## point B
-```{r point b, echo=FALSE, warning = FALSE, message = FALSE, out.width='100%'}
-y <- read.table(paste0(path, "data/Data_DIC.csv"), header=TRUE, sep=",", dec=".", as.is=TRUE)
 continuous_discrete$datetime <-round_date(continuous_discrete$datetime,unit = "hour" )
 
 ## PLOT
@@ -664,7 +663,7 @@ dyOptions(
   dyRangeSelector(height = 30)
 ```
 
-## SAMI pH
+## **SAMI pH**
 
 ### Deployment
 
@@ -773,6 +772,15 @@ Samir:
 (@) In the manual, the accuracy should be better or equal to +/- 0.006 (maximum accuracy acceptable with a tris validation). This is not the case here. We have 0.0091. What do you think is the cause for this problem?  <span style="color:blue">I am not sure what is going on.  I suspect a slight difference between your method and ours, or between Dickson Tris and ours, or both.  You could apply the offset to your samples.  If you do that, make sure that you validate the same way and apply the offset every time you deploy.</span>
 
 (@) Please, could you further explain: "the problem that occurs when we set the salinity before deployment". When we set the salinity to 38, this is not recorded and we found the default salinity of 35 when we download the data.  <span style="color:blue">This is a little confusing, but you do not need to set the salinity before deployment.  You do need to set the salinity before processing the data.  The number that salinity is set to at the time of processing will be used.</span>
+
+### **November 2020 from Nuria**
+
+About the Copper Mesh we have to screw for deployment:
+
+Do you feel like water is not getting through the mesh? 
+
+The mesh could be removed, if you prefer. The filter might need more frequent replacement if you used it this way though.
+It is possible that when the mesh corrodes significantly from the seawater that it becomes less porous. I'm not confident on which option is the best. If you are deploying at a sight that is cold and low fouling/low dissolved solids, you could go without the entire filter. Since every site is different, it is difficult to predict the outcome.
 
 ## **EOL**
 Here we read data from the EOL ctd and calculate total alkalinity using the relationship with salinity. We also compare salinity and temperature with the SOMLIT data.
@@ -894,7 +902,7 @@ dyOptions(
 saveRDS(eol, file = paste0(path, "data/eol/eol_data.rds"))
 ```
 
-## Rade Hydro, SOMLIT (ctd_hydro, Point B / B+)
+## **Rade Hydro, SOMLIT (ctd_hydro, Point B / B+)**
 
 Time is not included in dataset. Thus, we decided to add a generic time of 07:00 
 
