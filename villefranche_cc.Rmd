@@ -511,10 +511,10 @@ Les "quality flags" "qflag\_sample", "qflag\_ta", "qflag\_DIC" qui apparaissent 
 ## Point B
 
 ```{r read data in output_vlfrcc, include=FALSE}
-dat <- readr::read_csv(file = "output_jp/data/output_vlfrcc.csv", col_names = TRUE, na = c("NA", "NaN"))
+dat_somlit <- readr::read_csv(file = "output_jp/data/output_vlfrcc.csv", col_names = TRUE, na = c("NA", "NaN"))
 
-dat0m <- dplyr::filter(dat, depth==0)
-dat50m <- dplyr::filter(dat, depth==50)
+dat0m <- dplyr::filter(dat_somlit, depth==0)
+dat50m <- dplyr::filter(dat_somlit, depth==50)
 ```
 
 ## **Atmospheric vs. Seawater pCO2**
@@ -728,11 +728,6 @@ dyOptions(
   dyRangeSelector(height = 30)
 ```
 
-<<<<<<< HEAD
-### **Tris** 
-=======
->>>>>>> work1
-
 ## **SAMI - Sunburst Infos**
 
 Here are gathered important emails from Sunburst concerning SAMI handling (reggie@sunburstsensors.com):
@@ -856,16 +851,23 @@ files <- httr::GET(url) %>%
   unlist()
 urls <- str_c(url, files)
 eol <- purrr::map_dfr(urls, read_csv, comment="#", col_types=cols(Date="c", Heure="c"))
+#backup eol
+eol1 <- eol
 eol <- dplyr::mutate(eol, datetime=str_c(Date, " ", Heure) %>% parse_datetime(format="%Y%m%d %H%M%S"))
 
 # replace outliers O2 data by NA + remove O2 > 6 units
 eol <- dplyr::mutate(eol, O2 = case_when(O2 > 6 ~ NA_real_,
                                          O2 >= 999 ~ NA_real_ ,
-                                       TRUE ~ O2
-                                        ))
+                                         TRUE ~ O2
+                                        ),
+                        Turb = case_when(Turb > 999 ~ NA_real_,
+                                         TRUE ~ Turb),
+                        Fluo = case_when(Fluo > 999 ~ NA_real_,
+                                        TRUE ~ Fluo)
+)
 
 #round time to nearest hour and take it in considetation as datetime.
-eol$datetime <-round_date(eol$datetime,unit = "hour" )
+eol$datetime <-round_date(eol$datetime,unit = "30 mins" )
 
 eol <- eol%>%
   dplyr::rename(temp_eol = T,
@@ -890,8 +892,6 @@ dyOptions(
 
 ### SAVE
 saveRDS(eol, file = paste0(path, "data/eol/eol_data.rds"))
->>>>>>> 83bcaa2d704f2248be1a41f55f2a7f447e7419ba
-
 ```
 
 ## Rade Hydro, SOMLIT (ctd_hydro, Point B / B+)
@@ -1449,6 +1449,56 @@ p_Sptb_Seol <-  ggreg2(fit, "sal_eol", "mean_sal_rhB") +
 
 print(p_Sptb_Seol)
 ```
+
+```{r Total alkalinity Point B, include=FALSE}
+# AT=f(S) at 0 m 
+lms <- summary(lm(data = dat0m, ta ~ salinity))
+prob <- pf(lms$fstatistic[1],lms$fstatistic[2],lms$fstatistic[3],lower.tail=FALSE)
+reg_AT_S_all <- cbind(as.numeric(c(lms$coefficients[2,1], lms$coefficients[2,2],
+                                   lms$coefficients[2,4], lms$coefficients[1,1],
+                                   lms$coefficients[1,2], lms$fstatistic[1],
+                                   lms$fstatistic[3],
+                                   lms$coefficients[1,4], lms$r.squared, prob)))
+colnames(reg_AT_S_all) <- c("AT")
+row.names(reg_AT_S_all) <- c("Slope", "SE Slope", "P Slope","Intercept","SE int.","P int.", "F", "df", "R2","P value")
+
+ta_sal_xts <- dplyr::select(dat0m,sampling_date, salinity, ta)
+ta_sal_xts <- as.xts(ta_sal_xts, order.by=ta_sal_xts$sampling_date)
+
+dygraph(ta_sal_xts,  main = "TA / Salinity 1m SOMLIT", ylab = "") %>%
+    dySeries("salinity", drawPoints = TRUE, pointSize=4, label = "Sal", color ="blue") %>%
+   dySeries("ta", drawPoints = TRUE, pointSize=2, label = "TA", color="red", axis="y2")%>%
+ # dyLegend(show = "always", width = 600)%>%
+  #dyAxis("y",valueRange = c(-0.1, 0.11))%>%
+dyOptions(
+    drawGrid = TRUE,
+    drawPoints = TRUE,
+    useDataTimezone = TRUE)%>%
+  dyRangeSelector(height = 30)
+
+#plot regression lm
+fit <- lm(data = dat0m, ta ~ salinity, nperm = 99)
+p_ta_sal_lm <- ggplot(dat0m,aes(x=salinity, y= ta, label = monthd))+
+  geom_text( aes(color=factor(monthd))) +
+  scale_color_discrete(guide="none")+
+    labs(x="Salinity ", y="TA", color = "Months")  +
+    stat_smooth(method = "lm", col = "black") +
+    labs(title = paste("", "\nAdj R2 = ",signif(summary(fit)$adj.r.squared, 5),
+                       ";\nIntercept =",signif(fit$coef[[1]],5 ),
+                       ";\nSlope =",signif(fit$coef[[2]], 5),
+                       ";\nP =", signif(summary(fit)$coef[2,4], 5),
+                       ";\nRMSE =", signif(sqrt(mean(fit$residuals^2)), 5))) +
+  theme_bw() + theme(aspect.ratio=1,
+        axis.text=element_text(size=7),
+        axis.title.y= element_text(size =7),
+        axis.title.x= element_text(size =7),
+        plot.margin = unit(c(0.5,1,1,1), "cm"),
+        plot.title = element_text(size=7, hjust=0.05,margin = margin(l = 10, b = -70)))
+print(p_ta_sal_lm)
+```
+
+The relationship between AT (in umol/kg) and salinity using mean data at 1 m is:
+AT = `r round(reg_AT_S_all[4], digit=2)` + S x `r round(reg_AT_S_all[1], digit=2)`
 
 ### **Oxygen**
 
