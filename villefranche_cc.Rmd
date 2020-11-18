@@ -1458,7 +1458,7 @@ p_Sptb_Seol <-  ggreg2(fit, "sal_eol", "mean_sal_rhB") +
 print(p_Sptb_Seol)
 ```
 
-```{r Total alkalinity Point B, include=FALSE}
+```{r Total alkalinity Point B, echo=FALSE, message=FALSE, warning=FALSE, out.width='100%'}}
 # AT=f(S) at 0 m 
 lms <- summary(lm(data = dat0m, ta ~ salinity))
 prob <- pf(lms$fstatistic[1],lms$fstatistic[2],lms$fstatistic[3],lower.tail=FALSE)
@@ -1485,7 +1485,7 @@ dyOptions(
   dyRangeSelector(height = 30)
 
 #plot regression lm
-fit <- lm(data = dat0m, ta ~ salinity, nperm = 99)
+fit <- lm(data = dat0m, ta ~ salinity)
 p_ta_sal_lm <- ggplot(dat0m,aes(x=salinity, y= ta, label = monthd))+
   geom_text( aes(color=factor(monthd))) +
   scale_color_discrete(guide="none")+
