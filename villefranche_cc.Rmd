@@ -1460,7 +1460,7 @@ p_Sptb_Seol <-  ggreg2(fit, "sal_eol", "mean_sal_rhB") +
 print(p_Sptb_Seol)
 ```
 
-```{r Total alkalinity Point B, echo=FALSE, message=FALSE, warning=FALSE, out.width='100%'}
+```{r Total alkalinity Point B 0m, echo=FALSE, message=FALSE, warning=FALSE, out.width='100%'}
 # AT=f(S) at 0 m 
 lms <- summary(lm(data = dat0m, ta ~ salinity))
 prob <- pf(lms$fstatistic[1],lms$fstatistic[2],lms$fstatistic[3],lower.tail=FALSE)
@@ -1505,6 +1505,85 @@ p_ta_sal_lm <- ggplot(dat0m,aes(x=salinity, y= ta, label = monthd))+
         plot.margin = unit(c(0.5,1,1,1), "cm"),
         plot.title = element_text(size=7, hjust=0.05,margin = margin(l = 10, b = -70)))
 print(p_ta_sal_lm)
+
+# plot 2008
+dat0m2008 <- dat0m %>% dplyr::filter(year ==2008)
+fit <- lm(data = dat0m2008, ta ~ salinity)
+p_ta_sal_lm2008 <- ggplot(dat0m2008,aes(x=salinity, y= ta, label = monthd))+
+  geom_text( aes(color=factor(monthd))) +
+  scale_color_discrete(guide="none")+
+    labs(x="Salinity 2008", y="TA 2008", color = "Months",title = "Only 2008")  +
+    stat_smooth(method = "lm", col = "black") +
+    labs(title = paste("", "\nAdj R2 = ",signif(summary(fit)$adj.r.squared, 5),
+                       ";\nIntercept =",signif(fit$coef[[1]],5 ),
+                       ";\nSlope =",signif(fit$coef[[2]], 5),
+                       ";\nP =", signif(summary(fit)$coef[2,4], 5),
+                       ";\nRMSE =", signif(sqrt(mean(fit$residuals^2)), 5))) +
+  theme_bw() + theme(aspect.ratio=1,
+        axis.text=element_text(size=7),
+        axis.title.y= element_text(size =7),
+        axis.title.x= element_text(size =7),
+        plot.margin = unit(c(0.5,1,1,1), "cm"),
+        plot.title = element_text(size=7, hjust=0.05,margin = margin(l = 10, b = -70)))
+print(p_ta_sal_lm2008)
+
+# plot 2018
+dat0m2018 <- dat0m %>% dplyr::filter(year ==2018)
+fit <- lm(data = dat0m2018, ta ~ salinity)
+p_ta_sal_lm2018 <- ggplot(dat0m2018,aes(x=salinity, y= ta, label = monthd))+
+  geom_text( aes(color=factor(monthd))) +
+  scale_color_discrete(guide="none")+
+    labs(x="Salinity 2018", y="TA 2018", color = "Months",title = "Only 2018")  +
+    stat_smooth(method = "lm", col = "black") +
+    labs(title = paste("", "\nAdj R2 = ",signif(summary(fit)$adj.r.squared, 5),
+                       ";\nIntercept =",signif(fit$coef[[1]],5 ),
+                       ";\nSlope =",signif(fit$coef[[2]], 5),
+                       ";\nP =", signif(summary(fit)$coef[2,4], 5),
+                       ";\nRMSE =", signif(sqrt(mean(fit$residuals^2)), 5))) +
+  theme_bw() + theme(aspect.ratio=1,
+        axis.text=element_text(size=7),
+        axis.title.y= element_text(size =7),
+        axis.title.x= element_text(size =7),
+        plot.margin = unit(c(0.5,1,1,1), "cm"),
+        plot.title = element_text(size=7, hjust=0.05,margin = margin(l = 10, b = -70)))
+print(p_ta_sal_lm2018)
+```
+
+```{r Total alkalinity Point B 50 m, echo=FALSE, message=FALSE, warning=FALSE, out.width='100%'}
+# AT=f(S) at 50 m 
+ta_sal_xts50m <- dplyr::select(dat50m,sampling_date, salinity, ta)
+ta_sal_xts50m <- as.xts(ta_sal_xts50m, order.by=ta_sal_xts50m$sampling_date)
+
+dygraph(ta_sal_xts50m,  main = "TA / Salinity 50 m SOMLIT", ylab = "") %>%
+    dySeries("salinity", drawPoints = TRUE, pointSize=4, label = "Sal", color ="blue") %>%
+   dySeries("ta", drawPoints = TRUE, pointSize=2, label = "TA", color="red", axis="y2")%>%
+ # dyLegend(show = "always", width = 600)%>%
+  #dyAxis("y",valueRange = c(-0.1, 0.11))%>%
+dyOptions(
+    drawGrid = TRUE,
+    drawPoints = TRUE,
+    useDataTimezone = TRUE)%>%
+  dyRangeSelector(height = 30)
+
+#plot regression lm
+fit <- lm(data = dat50m, ta ~ salinity)
+p_ta_sal_lm50m <- ggplot(dat50m,aes(x=salinity, y= ta, label = monthd))+
+  geom_text( aes(color=factor(monthd))) +
+  scale_color_discrete(guide="none")+
+    labs(x="Salinity ", y="TA", color = "Months")  +
+    stat_smooth(method = "lm", col = "black") +
+    labs(title = paste("", "\nAdj R2 = ",signif(summary(fit)$adj.r.squared, 5),
+                       ";\nIntercept =",signif(fit$coef[[1]],5 ),
+                       ";\nSlope =",signif(fit$coef[[2]], 5),
+                       ";\nP =", signif(summary(fit)$coef[2,4], 5),
+                       ";\nRMSE =", signif(sqrt(mean(fit$residuals^2)), 5))) +
+  theme_bw() + theme(aspect.ratio=1,
+        axis.text=element_text(size=7),
+        axis.title.y= element_text(size =7),
+        axis.title.x= element_text(size =7),
+        plot.margin = unit(c(0.5,1,1,1), "cm"),
+        plot.title = element_text(size=7, hjust=0.05,margin = margin(l = 10, b = -70)))
+print(p_ta_sal_lm50m)
 
 ```
 
