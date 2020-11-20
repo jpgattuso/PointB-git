@@ -861,6 +861,8 @@ urls <- str_c(url, files)
 eol <- purrr::map_dfr(urls, read_csv, comment="#", col_types=cols(Date="c", Heure="c"))
 #backup eol
 eol1 <- eol
+eol1 <- dplyr::mutate(eol1, datetime=str_c(Date, " ", Heure) %>% parse_datetime(format="%Y%m%d %H%M%S"))
+
 eol <- dplyr::mutate(eol, datetime=str_c(Date, " ", Heure) %>% parse_datetime(format="%Y%m%d %H%M%S"))
 
 # replace outliers O2 data by NA + remove O2 > 6 units
@@ -1458,7 +1460,7 @@ p_Sptb_Seol <-  ggreg2(fit, "sal_eol", "mean_sal_rhB") +
 print(p_Sptb_Seol)
 ```
 
-```{r Total alkalinity Point B, include=FALSE}
+```{r Total alkalinity Point B, echo=FALSE, message=FALSE, warning=FALSE, out.width='100%'}
 # AT=f(S) at 0 m 
 lms <- summary(lm(data = dat0m, ta ~ salinity))
 prob <- pf(lms$fstatistic[1],lms$fstatistic[2],lms$fstatistic[3],lower.tail=FALSE)
@@ -1485,7 +1487,7 @@ dyOptions(
   dyRangeSelector(height = 30)
 
 #plot regression lm
-fit <- lm(data = dat0m, ta ~ salinity, nperm = 99)
+fit <- lm(data = dat0m, ta ~ salinity)
 p_ta_sal_lm <- ggplot(dat0m,aes(x=salinity, y= ta, label = monthd))+
   geom_text( aes(color=factor(monthd))) +
   scale_color_discrete(guide="none")+
@@ -1503,6 +1505,32 @@ p_ta_sal_lm <- ggplot(dat0m,aes(x=salinity, y= ta, label = monthd))+
         plot.margin = unit(c(0.5,1,1,1), "cm"),
         plot.title = element_text(size=7, hjust=0.05,margin = margin(l = 10, b = -70)))
 print(p_ta_sal_lm)
+
+```
+
+```{r comparaison sal 5m / sal EOL, echo=FALSE, warning = FALSE, message = FALSE, out.width='100%'}
+#add the EoL data.
+rh_B_Bplus_eol_5m_mean <-  left_join(rh_B_Bplus_5m_mean, eol, by="datetime")
+# delta between salinities pB / eol
+rh_B_Bplus_eol_5m_mean <- rh_B_Bplus_eol_5m_mean %>% 
+  dplyr::mutate(sal_eol_rhB_detla = mean_sal_rhB - sal_eol, 
+                sal_eol_rhBplus_detla = mean_sal_rhBplus - sal_eol)
+#plot
+sal_rhB_eol_xts <- dplyr::select(rh_B_Bplus_eol_5m_mean,datetime, mean_sal_rhB, sal_eol, sal_eol_rhB_detla)
+sal_rhB_eol_xts <- as.xts(sal_rhB_eol_xts, order.by=sal_rhB_eol_xts$datetime)
+
+dygraph(sal_rhB_eol_xts,  main = "Salinity 5m EOL / radHydro", ylab = "") %>%
+    dySeries("mean_sal_rhB", drawPoints = TRUE, pointSize=4, label = "Sal rhB", color ="blue", axis="y2") %>%
+   dySeries("sal_eol", drawPoints = TRUE, pointSize=2, label = "Sal EOL", color="red", axis="y2")%>%
+     dySeries("sal_eol_rhB_detla", drawPoints = TRUE, pointSize=2, label = "delta", color="black")%>%
+ # dyLegend(show = "always", width = 600)%>%
+  #dyAxis("y",valueRange = c(-0.1, 0.11))%>%
+dyOptions(
+    drawGrid = TRUE,
+    drawPoints = TRUE,
+    useDataTimezone = TRUE)%>%
+  dyRangeSelector(height = 30)
+
 ```
 
 The relationship between AT (in umol/kg) and salinity using mean data at 1 m is:
