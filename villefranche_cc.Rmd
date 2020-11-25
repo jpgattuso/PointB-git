@@ -1063,6 +1063,52 @@ rh_B_Bplus_5m_mean$datetime <- ymd_hms(rh_B_Bplus_5m_mean$datetime, tz="Europe/P
 rh_B_Bplus_5m_mean$datetime <- with_tz(rh_B_Bplus_5m_mean$datetime, "UTC")
 ```
 
+#### Point B CTD Deep: 50 m depth
+```{r eol pointb Oxy 50m, echo=FALSE, warning = FALSE, message = FALSE, out.width='100%'}
+# Reading the Winkler PointB data perweek.
+winkler<- tbl_df(
+  read_delim(file=paste0(path,"/data/data_ptb_winkler.txt"), 
+delim = "\t", 
+col_names = TRUE,# col_types = typ,
+na = c("NA", "999999.00")) %>%
+dplyr::rename(date = DATE, 
+              ptb_oxy_wink= "O (Oxygène)")) 
+winkler$date <- as.POSIXct(winkler$date)
+winkler$ptb_oxy_wink <- as.numeric(as.character(winkler$ptb_oxy_wink))
+
+# Select 50m ptb_oxy_wink data 
+wink_50m <- winkler %>%
+  dplyr::group_by(date) %>%
+  dplyr::select(date,ptb_oxy_wink,qO, PROF_TEXT )%>%
+   dplyr::filter(PROF_TEXT == "F"& ptb_oxy_wink < 20)%>%
+  dplyr::filter(qO == 2  |qO == 6)
+
+# Adding the Winkler PointB 50m data perweek to pointB CTD 50 m
+ptb_wink_ctd_50m <- left_join(rh_B_Bplus_50m_mean, wink_50m , by="date")
+
+# PLOT all oxyegen data as time series
+ptb_wink_ctd_xts <- dplyr::select(ptb_wink_ctd_50m, datetime, mean_oxy_mll_rhB, ptb_oxy_wink)
+ptb_wink_ctd_xts <- as.xts(ptb_wink_ctd_xts, order.by=ptb_wink_ctd_xts$datetime)
+
+dygraph(ptb_wink_ctd_xts,  main = "Oxygen (ml/l) 50m: PTB (CTD + Winkler)", ylab = "") %>%
+dySeries("mean_oxy_mll_rhB", drawPoints = TRUE, pointSize=4, label = "Oxy PTB", color ="blue") %>%
+dySeries("ptb_oxy_wink", drawPoints = TRUE, pointSize=2, label = "Oxy winkler PTB", color ="green")%>%
+ # dyLegend(show = "always", width = 600)%>%
+  #dyAxis("y",valueRange = c(-0.1, 0.11))%>%
+dyOptions(
+    drawGrid = TRUE,
+    drawPoints = TRUE,
+    useDataTimezone = TRUE)%>%
+  dyRangeSelector(height = 30)
+###
+titre <- "Oxygen 50m: Point B CTD vs Point B Winkler"
+fit <- lmodel2(data = ptb_wink_ctd_50m, ptb_oxy_wink ~ mean_oxy_mll_rhB, nperm = 99)
+p_Oxyptbwink_Oxyptb <-  ggreg2(fit, "mean_oxy_mll_rhB", "ptb_oxy_wink") +
+  geom_abline(aes(slope= 1, intercept =0), linetype = 2) +
+  mytheme+labs(x="Oxy Point B CTD", y="Oxy Point B Winkler")
+print(p_Oxyptbwink_Oxyptb)
+```
+
 ### Time series Point B / B+ (1 m)
 #### Temperature all dataset  {.tabset} 
 
@@ -1732,37 +1778,3 @@ p_Oxyptbwink_Oxyptb <-  ggreg2(fit, "mean_oxy_mll_rhB", "ptb_oxy_wink") +
 print(p_Oxyptbwink_Oxyptb)
 ```
 
-#### Point B CTD Deep: 49 to 51 m depth / EOL
-```{r eol pointb Oxy 50m, echo=FALSE, warning = FALSE, message = FALSE, out.width='100%'}
-# Select 50m ptb_oxy_wink data 
-wink_50m <- winkler %>%
-  dplyr::group_by(date) %>%
-  dplyr::select(date,ptb_oxy_wink,qO, PROF_TEXT )%>%
-   dplyr::filter(PROF_TEXT == "F"& ptb_oxy_wink < 20)%>%
-  dplyr::filter(qO == 2  |qO == 6)
-
-# Adding the Winkler PointB 50m data perweek to pointB CTD 50 m
-ptb_wink_ctd_50m <- left_join(rh_B_Bplus_50m_mean, wink_50m , by="date")
-
-# PLOT all oxyegen data as time series
-ptb_wink_ctd_xts <- dplyr::select(ptb_wink_ctd_50m, datetime, mean_oxy_mll_rhB, ptb_oxy_wink)
-ptb_wink_ctd_xts <- as.xts(ptb_wink_ctd_xts, order.by=ptb_wink_ctd_xts$datetime)
-
-dygraph(ptb_wink_ctd_xts,  main = "Oxygen (ml/l) 50m: PTB (CTD + Winkler)", ylab = "") %>%
-dySeries("mean_oxy_mll_rhB", drawPoints = TRUE, pointSize=4, label = "Oxy PTB", color ="blue") %>%
-dySeries("ptb_oxy_wink", drawPoints = TRUE, pointSize=2, label = "Oxy winkler PTB", color ="green")%>%
- # dyLegend(show = "always", width = 600)%>%
-  #dyAxis("y",valueRange = c(-0.1, 0.11))%>%
-dyOptions(
-    drawGrid = TRUE,
-    drawPoints = TRUE,
-    useDataTimezone = TRUE)%>%
-  dyRangeSelector(height = 30)
-###
-titre <- "Oxygen 50m: Point B CTD vs Point B Winkler"
-fit <- lmodel2(data = ptb_wink_ctd_50m, ptb_oxy_wink ~ mean_oxy_mll_rhB, nperm = 99)
-p_Oxyptbwink_Oxyptb <-  ggreg2(fit, "mean_oxy_mll_rhB", "ptb_oxy_wink") +
-  geom_abline(aes(slope= 1, intercept =0), linetype = 2) +
-  mytheme+labs(x="Oxy Point B CTD", y="Oxy Point B Winkler")
-print(p_Oxyptbwink_Oxyptb)
-```
