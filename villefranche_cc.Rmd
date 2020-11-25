@@ -1064,6 +1064,7 @@ rh_B_Bplus_5m_mean$datetime <- with_tz(rh_B_Bplus_5m_mean$datetime, "UTC")
 ```
 
 ### Time series Point B / B+ (1 m)
+#### Temperature all dataset  {.tabset} 
 
 ```{r plot ctd_hydro 1m, echo=FALSE, warning = FALSE, message = FALSE, out.width='100%'}
 ## Temp
@@ -1431,6 +1432,37 @@ p_Tptb_Teol <-  ggreg2(fit, "temp_eol", "mean_temp_rhB") +
 
 print(p_Tptb_Teol)
 ```
+```{r eol pointb 5m Temp, echo=FALSE, warning = FALSE, message = FALSE, out.width='100%'}
+### 2nd approach with pointB data from "rade hydro" 
+###
+#eol_ptb <- left_join(mean_eol, continuous_discrete, by="datetime_round")
+#eol_ptb <- left_join(  mean_eol%>%select(datetime, mean_temp_eol), rh_B_Bplus_mean%>%select(datetime, mean_temp_rhB),  by="datetime")
+
+eol_ptb_5m <- full_join(rh_B_Bplus_5m_mean, eol , by="datetime")
+
+eol_ptb_temp_xts <- dplyr::select(eol_ptb_5m, datetime, mean_temp_rhB, temp_eol)
+eol_ptb_temp_xts <- as.xts(eol_ptb_temp_xts, order.by=eol_ptb_5m$datetime)
+
+dygraph(eol_ptb_temp_xts,  main = "Temperature 5m: EOL - PTB", ylab = "") %>%
+dySeries("mean_temp_rhB", drawPoints = TRUE, pointSize=4, label = "Temp PTB", color ="blue") %>%
+dySeries("temp_eol", drawPoints = TRUE, pointSize=2, label = "Temp EOL", color ="red")%>%
+ # dyLegend(show = "always", width = 600)%>%
+ #dyAxis("y",valueRange = c(-0.1, 0.11))%>%
+dyOptions(
+    drawGrid = TRUE,
+    drawPoints = TRUE,
+    useDataTimezone = TRUE)%>%
+  dyRangeSelector(height = 30)
+
+###
+titre <- "Temperature 5m: EOL vs Point B"
+fit <- lmodel2(data = eol_ptb_5m, mean_temp_rhB ~ temp_eol, nperm = 99)
+p_Tptb_Teol_5m <-  ggreg2(fit, "temp_eol", "mean_temp_rhB") +
+  geom_abline(aes(slope= 1, intercept =0), linetype = 2) +
+  mytheme+labs(x="T EOL", y="T Point B")
+
+print(p_Tptb_Teol_5m)
+```
 
 ### **Salinity**
 
@@ -1547,6 +1579,26 @@ p_ta_sal_lm2018 <- ggplot(dat0m2018,aes(x=salinity, y= ta, label = monthd))+
         plot.margin = unit(c(0.5,1,1,1), "cm"),
         plot.title = element_text(size=7, hjust=0.05,margin = margin(l = 10, b = -70)))
 print(p_ta_sal_lm2018)
+# plot 2019
+dat0m2019 <- dat0m %>% dplyr::filter(year ==2019)
+fit <- lm(data = dat0m2019, ta ~ salinity)
+p_ta_sal_lm2019 <- ggplot(dat0m2019,aes(x=salinity, y= ta, label = monthd))+
+  geom_text( aes(color=factor(monthd))) +
+  scale_color_discrete(guide="none")+
+    labs(x="Salinity 2019", y="TA 2019", color = "Months",title = "Only 2019")  +
+    stat_smooth(method = "lm", col = "black") +
+    labs(title = paste("", "\nAdj R2 = ",signif(summary(fit)$adj.r.squared, 5),
+                       ";\nIntercept =",signif(fit$coef[[1]],5 ),
+                       ";\nSlope =",signif(fit$coef[[2]], 5),
+                       ";\nP =", signif(summary(fit)$coef[2,4], 5),
+                       ";\nRMSE =", signif(sqrt(mean(fit$residuals^2)), 5))) +
+  theme_bw() + theme(aspect.ratio=1,
+        axis.text=element_text(size=7),
+        axis.title.y= element_text(size =7),
+        axis.title.x= element_text(size =7),
+        plot.margin = unit(c(0.5,1,1,1), "cm"),
+        plot.title = element_text(size=7, hjust=0.05,margin = margin(l = 10, b = -70)))
+print(p_ta_sal_lm2019)
 ```
 
 ```{r Total alkalinity Point B 50 m, echo=FALSE, message=FALSE, warning=FALSE, out.width='100%'}
@@ -1713,31 +1765,4 @@ p_Oxyptbwink_Oxyptb <-  ggreg2(fit, "mean_oxy_mll_rhB", "ptb_oxy_wink") +
   geom_abline(aes(slope= 1, intercept =0), linetype = 2) +
   mytheme+labs(x="Oxy Point B CTD", y="Oxy Point B Winkler")
 print(p_Oxyptbwink_Oxyptb)
-```
-
-## pH comparaison
-
-### **continuous pH time series**
-Here SAMI and seafet data are shown.
-
-```{r plots pH sami seafet, echo=FALSE, warning = FALSE, message = FALSE, out.width='70%'}
-
-ptb_wink_ctd_50m <- left_join(rh_B_Bplus_50m_mean, wink_50m , by="date")
-
-```
-
-
-### **spectro vs calculated pH (T insitu)**
-<br>
-```{r plots pH spectro15 vs calc15, echo=FALSE, warning = FALSE, message = FALSE, out.width='70%'}
-
-fit <- lmodel2(data = continuous_discrete, pHcalc_ptB ~ pHspec_Tptb, nperm = 99)
-titre <- "pH calculated from AT and CT vs spec pH, Point B"
-p_spec_cal <- ggreg2(fit, "pHspec_Tptb", "pHcalc_ptB") +
-  geom_line(aes(x = pHspec_Tptb, y = pHspec_Tptb), linetype = 2) +
-  labs(x=expression(paste("Spectro ",pH[T], ", T in situ")), y=expression(paste("Calculated ",pH[T], ",T in situ"))) +
-  mytheme + theme(legend.position="bottom")
-  ggsave(file = "figures/fig_comparison_pH.png", p_spec_cal,  width = 15, height = 15, units = "cm")
-
-print(p_spec_cal)
 ```
