@@ -6,8 +6,8 @@ output:
   rmarkdown::html_document:
     code_folding: hide
     fig_caption: yes
-    toc: no
-    toc_float: no
+    toc: yes
+    toc_float: yes
 ---
 
 
