@@ -72,6 +72,8 @@ header3 <- colnames(col3)
 pH3 <- read.csv(url(myurl3), header=F, stringsAsFactors = TRUE, skip=1)
 colnames(pH3) <- header3
 pH3$DateTime..UTC. <- as.POSIXct(strptime(pH3$DateTime..UTC., format="%m/%d/%Y %H:%M:%S"))
+
+knitr::include_graphics('https://docs.google.com/spreadsheets/d/e/2PACX-1vSmth08Q-Tw1RFznKeStSMJkKeFgYZac9WIR3ETLYWkznouAD6A-1n2uza1YgotXQ/pub?gid=798409504&single=true&output=pdf')
 ```
 # Operating mode
 All seven SeaFET sensors were deployed in a tank (open-flow). The first deployment was done together with 4 Pi-SAMI sensors and discrete samplings were done to measure pH using a spectrophotometric method (purified m-cresol). A second deployment of 2 weeks was then performed (without the deployment of pi-SAMI) and spectrophotometric pH were measured during the second week.
