@@ -174,10 +174,10 @@ Samples were collected from XX-l Niskin bottles, transferred to glass bottles, o
 
 Calculations of the carbonate system parameters were performed using the R package \emph{seacarb} (Lavigne2014). The total concentrations of silicate and phosphate were used when available. Otherwise they were set to 0. The total boron concentration was calculated using the formulation of (Lee2010b). The following constants were used: $K_1$ and $K_2$ from (Lueker2000, $K_f$ from (Perez1987b) and $K_s$ from (Dickson1990).
 
-## Data available and quality control
+## **Data available and quality control**
 All data are used in the following; none were eliminated according to the quality flags (\textbf{this remains to be done}).
 
-## Les codes du SNAPOCO2
+## **Les codes du SNAPOCO2**
 
 Les "quality flags" "qflag\_sample", "qflag\_ta", "qflag\_DIC" qui apparaissent dans les fichiers de données du LOCEAN sont établis sur la base des codes WOCE (World Ocean Circulation Experiment) : WOCE Operations Manual (1994), WHP Office Report 90-1, WOCE Report N.67/91, p52-53. Woods Hole, Mass., USA.
 
@@ -197,7 +197,7 @@ Les "quality flags" "qflag\_sample", "qflag\_ta", "qflag\_DIC" qui apparaissent 
 	- H : pas d'élastique.
 
 
-## Les codes de Villefranche (inspirés des codes SOMLIT)
+## **Les codes de Villefranche (inspirés des codes SOMLIT)**
 
 - Codification qflag\_taking concernant le prélèvement des échantillons en mer : (i.e pour l'étape : "qflag\_taking")
 	- 0 : ancien code qui signifie OK
@@ -323,7 +323,7 @@ Atmospheric concentration of CO2 measured at Plateau Rosa from 1993 to 2019 were
 Note that contributors should be contacted for proper acknowledgement for use of the data or offer of co-authorship
 <http://ds.data.jma.go.jp/gmd/wdcgg/cgi-bin/wdcgg/accessdata.cgi?lang=&contributor_index=200612120057>
 
-## Table
+## **Table**
 
 There are missing data:
 
@@ -333,7 +333,7 @@ There are missing data:
 # The rate of increase of seawater pCO2 (`r round(reg_var_1m[7,1], digit=2)` uatm per year) is much larger than that of atmospheric CO2 (`r round(reg_atm_CO2[1,1], digit=2)` ppm per year).
 ```
 
-## Plots
+## **Plots**
 
 Missing values were filled by linear interpolation between nearest values in order to obtain the same sampling number per year. The rate of increase was calculated by regressing the CO$_2$ concentration (`r round(reg_atm_CO2[1,1], digit=2)` ppm per year) and the anomaly (`r round(reg_atm_CO2[1,2], digit=2)` ppm per year) following subtraction of monthly means against time.
 
@@ -346,7 +346,7 @@ Missing values were filled by linear interpolation between nearest values in ord
 
 # **seafet pH**  {.tabset .tabset-pills}
 
-## Deployment
+## **Deployment**
 
 ```{r seafet pH, echo=FALSE, warning = FALSE, message = FALSE, out.width='100%'}
 continuous_discrete <- read.table(paste0(path, "data/continuous_discrete.csv"), header=TRUE, sep=",", dec=".", as.is=TRUE)
@@ -374,7 +374,7 @@ dyOptions(
 
 # **SAMI pH**  {.tabset .tabset-pills}
 
-## Deployment
+## **Deployment**
 
 ```{r sami pH, echo=FALSE, warning = FALSE, message = FALSE, out.width='100%'}
 # read deployment file
@@ -436,12 +436,21 @@ dyOptions(
   dyRangeSelector(height = 30)
 ```
 
-# **SAMI - Sunburst Infos** {.tabset .tabset-pills}
+## **Logs - Informations**
 
-Here are gathered important emails from Sunburst concerning SAMI handling (reggie@sunburstsensors.com):
+![](/https://docs.google.com/spreadsheets/d/e/2PACX-1vSmth08Q-Tw1RFznKeStSMJkKeFgYZac9WIR3ETLYWkznouAD6A-1n2uza1YgotXQ/pub?gid=798409504&single=true&output=pdf)
+
+test
+
+<embed src="https://docs.google.com/spreadsheets/d/e/2PACX-1vSmth08Q-Tw1RFznKeStSMJkKeFgYZac9WIR3ETLYWkznouAD6A-1n2uza1YgotXQ/pub?gid=798409504&single=true&output=pdf" width="500" height="375" 
+ type="application/pdf">
+
+## **Sunburst - TRIS info**
  
-## **TRIS infos (29/10/2019 à 18:53)**
- 
+ Here are gathered important emails from Sunburst concerning SAMI handling (reggie@sunburstsensors.com):
+
+  +   **29/10/2019 at 18:53**
+
 **The blank signals are stable, indicating no air bubbles in the lines. Absorbances show a good curve in the expected range, indicating that the pump and valve are working properly.**
 pH measurements are extremely temperature sensitive.  In order to get best results, the following procedures must be followed:
 - the PiSAMI must be completely submersed in the sample and equilibrated to the sample temperature
@@ -452,22 +461,28 @@ pH measurements are extremely temperature sensitive.  In order to get best resul
 I suspect that some of the offsets you are seeing between theoretical pH or discrete pH and PiSAMI pH have to do with temperature.  For example, see the 161019 file.  If you measured discrete pH at 25C, it would differ from the SAMI pH by ~0.04-0.05 pH.  The Tris file that you sent me only has 2 samples in it, so I cannot see all of your data.  However, these two samples come out to  a difference between theoretical pH (at SAMI internal temperature) and measured pH of 0.0046 and 0.0056 (see the Diff column).  However, the pH does differ substantially from the pH of Tris at 22.118C.
 I believe that the apparently poor precision you are seeing in some of the seawater analysis also is due to temperature,  If you have a flow-through system, the temperature of the water seems to not be stable.  The instability in pH mimics the changes in water temperature, indicating that the pH of the water is also changing (see the 181019 file).
 
-## **29/10/2019 à 20:10**
+## **Sunburst - Temperature Int/Ext**
+
++   **29/10/2019 at 20:10**
 
 - **<span style="color:red"> Seawater pH </span> is calculated at TempInt, then corrected to <span style="color:red"> TempExt </span> (using -0.015 pH/C)**; in this case you would compare pH of discrete samples at TempExt.
 - **<span style="color:red"> Tris pH </span> is calculated at <span style="color:red"> TempInt </span>**; in this case you would compare theoretical pH of Tris at TempInt.
 
-## **pH measurement method (Tris and seawater) 16/12/2019 à 20:40**
+## **Sunburst - Tris and seawater calculations **
+ 
+ + **16/12/2019 à 20:40**
  
  - **When Tris pH is calculated, the software takes an average of several measurements, whereas when seawater pH is calculated the software will extrapolate to a pH without indicator.**  We do this because seawater pH is perturbed by the indicator, whereas Tris pH is not.  
 
 With the PiSAMI there is a thermistor inside the instrument and one on the outside.  pH is calculated at the internal temperature.  
-- **For seawater, the pH is then corrected to the external temperature. ** 
-- **For Tris the internal temperature is used to calculate the measured and theoretical pH and the difference.**  You can see that when Tris pH is calculated from the QC program, the standard deviation is much smaller, although it seems that the average error is not much different (0.0091 +/-0.0019).  I also did a rough correction of Tris pH to the external pH, and the offset does not change.
+  - **For seawater, the pH is then corrected to the external temperature. ** 
+  - **For Tris the internal temperature is used to calculate the measured and theoretical pH and the difference.**  You can see that when Tris pH is calculated from the QC program, the standard deviation is much smaller, although it seems that the average error is not much different (0.0091 +/-0.0019).  I also did a rough correction of Tris pH to the external pH, and the offset does not change.
 
 **<span style="color:red"> You could consider applying this offset to your field data, given that it is the same, or similar, both pre- and post-deployment. </span>**
 
-## **17/01/2020 à 22:36**
+## **Sunburst - TRIS calculation**
+
++ **17/01/2020 à 22:36**
 
 Samir: 
 
@@ -482,7 +497,9 @@ Samir:
 
 (@) Please, could you further explain: "the problem that occurs when we set the salinity before deployment". When we set the salinity to 38, this is not recorded and we found the default salinity of 35 when we download the data.  <span style="color:blue">This is a little confusing, but you do not need to set the salinity before deployment.  You do need to set the salinity before processing the data.  The number that salinity is set to at the time of processing will be used.</span>
 
-## **November 2020 from Nuria**
+## **Sunburst - Copper mesh clogging**
+
++ **November 2020 from Nuria**
 
 About the Copper Mesh we have to screw for deployment:
 
@@ -491,7 +508,7 @@ Do you feel like water is not getting through the mesh?
 The mesh could be removed, if you prefer. The filter might need more frequent replacement if you used it this way though.
 It is possible that when the mesh corrodes significantly from the seawater that it becomes less porous. I'm not confident on which option is the best. If you are deploying at a sight that is cold and low fouling/low dissolved solids, you could go without the entire filter. Since every site is different, it is difficult to predict the outcome.
 
-# **EOL brut** {.tabset .tabset-pills}
+# **EOL raw data** {.tabset .tabset-pills}
 Here we read data from the EOL ctd and calculate total alkalinity using the relationship with salinity. We also compare salinity and temperature with the SOMLIT data.
 
 ```{r EOL data, echo=FALSE, warning = FALSE, message = FALSE, out.width='100%'}
@@ -772,7 +789,7 @@ rh_B_Bplus_5m_mean$datetime <- ymd_hms(rh_B_Bplus_5m_mean$datetime, tz="Europe/P
 rh_B_Bplus_5m_mean$datetime <- with_tz(rh_B_Bplus_5m_mean$datetime, "UTC")
 ```
 
-## **Temperatures**
+## **Temperature**
 
 ### **1 m**
 
@@ -853,7 +870,7 @@ p_rh_temp <-  ggreg2(fit, "mean_temp_rhB", "mean_temp_rhBplus") +
 print(p_rh_temp)
 ```
 
-## **Salinities**
+## **Salinity**
 
 ### **1 m**
 ```{r plot ctd_hydro 1m Sal, echo=FALSE, warning = FALSE, message = FALSE, out.width='100%'}
@@ -936,34 +953,11 @@ p_rh_sal <-  ggreg2(fit, "mean_sal_rhB", "mean_sal_rhBplus") +
 print(p_rh_sal)
 ```
 
-## **Oxygens**
+## **Oxygen**
 
 ### **1 m**
 
 ```{r plot ctd_hydro 1m Oxy, echo=FALSE, warning = FALSE, message = FALSE, out.width='100%'}
-## Oxy ml/l 1m
-rh_oxymll_xts <- dplyr::select(rh_B_Bplus_1m_mean, date, mean_oxy_mll_rhBplus, mean_oxy_mll_rhB)
-rh_oxymll_xts <- as.xts(rh_oxymll_xts, order.by=rh_oxymll_xts$date)
-
-dygraph(rh_oxymll_xts,  main = "Oxygen (ml/l) 1m Rade Hydro: B / B+", ylab = "") %>%
-    dySeries("mean_oxy_mll_rhB", drawPoints = TRUE, pointSize=4, label = "Oxy_mll B", color ="blue") %>%
-   dySeries("mean_oxy_mll_rhBplus", drawPoints = TRUE, pointSize=2, label = "Oxy_mll B+", color="red")%>%
- # dyLegend(show = "always", width = 600)%>%
-  #dyAxis("y",valueRange = c(-0.1, 0.11))%>%
-dyOptions(
-    drawGrid = TRUE,
-    drawPoints = TRUE,
-    useDataTimezone = TRUE)%>%
-  dyRangeSelector(height = 30)
-
-# Property plot
-titre <- "Oxygen (ml/l) 1m Rade Hydro: B vs B+"
-fit <- lmodel2(data = rh_B_Bplus_1m_mean, mean_oxy_mll_rhBplus ~ mean_oxy_mll_rhB, nperm = 99)
-p_rh_oxy_mll <-  ggreg2(fit, "mean_oxy_mll_rhB", "mean_oxy_mll_rhBplus") +
-  geom_abline(aes(intercept = 0, slope = 1), linetype = 2) +
-  mytheme+labs(x="Oxy_mll Point B", y="Oxy_mll Point B+")
-print(p_rh_oxy_mll)
-
 ## Oxy umolkg 1m
 rh_oxyumolkg_xts <- dplyr::select(rh_B_Bplus_1m_mean, date, mean_oxy_umolkg_rhBplus, mean_oxy_umolkg_rhB)
 rh_oxyumolkg_xts <- as.xts(rh_oxyumolkg_xts, order.by=rh_oxyumolkg_xts$date)
@@ -991,29 +985,6 @@ print(p_rh_oxy_umolkg)
 ### **5 m**
 
 ```{r plot ctd_hydro 5m Oxy, echo=FALSE, warning = FALSE, message = FALSE, out.width='100%'}
-## Oxy ml/l 5m
-rh_oxymll_xts <- dplyr::select(rh_B_Bplus_5m_mean, date, mean_oxy_mll_rhBplus, mean_oxy_mll_rhB)
-rh_oxymll_xts <- as.xts(rh_oxymll_xts, order.by=rh_oxymll_xts$date)
-
-dygraph(rh_oxymll_xts,  main = "Oxygen (ml/l) 5m Rade Hydro: B / B+", ylab = "") %>%
-    dySeries("mean_oxy_mll_rhB", drawPoints = TRUE, pointSize=4, label = "Oxy_mll B", color ="blue") %>%
-   dySeries("mean_oxy_mll_rhBplus", drawPoints = TRUE, pointSize=2, label = "Oxy_mll B+", color="red")%>%
- # dyLegend(show = "always", width = 600)%>%
-  #dyAxis("y",valueRange = c(-0.1, 0.11))%>%
-dyOptions(
-    drawGrid = TRUE,
-    drawPoints = TRUE,
-    useDataTimezone = TRUE)%>%
-  dyRangeSelector(height = 30)
-
-# Property plot
-titre <- "Oxygen (ml/l) 5m Rade Hydro: B vs B+"
-fit <- lmodel2(data = rh_B_Bplus_5m_mean, mean_oxy_mll_rhBplus ~ mean_oxy_mll_rhB, nperm = 99)
-p_rh_oxy_mll <-  ggreg2(fit, "mean_oxy_mll_rhB", "mean_oxy_mll_rhBplus") +
-  geom_abline(aes(intercept = 0, slope = 1), linetype = 2) +
-  mytheme+labs(x="Oxy_mll Point B", y="Oxy_mll Point B+")
-print(p_rh_oxy_mll)
-
 ## Oxy umolkg 5m
 rh_oxyumolkg_xts <- dplyr::select(rh_B_Bplus_5m_mean, date, mean_oxy_umolkg_rhBplus, mean_oxy_umolkg_rhB)
 rh_oxyumolkg_xts <- as.xts(rh_oxyumolkg_xts, order.by=rh_oxyumolkg_xts$date)
@@ -1041,29 +1012,6 @@ print(p_rh_oxy_umolkg)
 ### **50 m**
 
 ```{r plot ctd_hydro 50m Oxy, echo=FALSE, warning = FALSE, message = FALSE, out.width='100%'}
-## Oxy ml/l 50m
-rh_oxymll_xts <- dplyr::select(rh_B_Bplus_50m_mean, date, mean_oxy_mll_rhBplus, mean_oxy_mll_rhB)
-rh_oxymll_xts <- as.xts(rh_oxymll_xts, order.by=rh_oxymll_xts$date)
-
-dygraph(rh_oxymll_xts,  main = "Oxygen (ml/l) 50m Rade Hydro: B / B+", ylab = "") %>%
-    dySeries("mean_oxy_mll_rhB", drawPoints = TRUE, pointSize=4, label = "Oxy_mll B", color ="blue") %>%
-   dySeries("mean_oxy_mll_rhBplus", drawPoints = TRUE, pointSize=2, label = "Oxy_mll B+", color="red")%>%
- # dyLegend(show = "always", width = 600)%>%
-  #dyAxis("y",valueRange = c(-0.1, 0.11))%>%
-dyOptions(
-    drawGrid = TRUE,
-    drawPoints = TRUE,
-    useDataTimezone = TRUE)%>%
-  dyRangeSelector(height = 30)
-
-# Property plot
-titre <- "Oxygen (ml/l) 50m Rade Hydro: B vs B+"
-fit <- lmodel2(data = rh_B_Bplus_50m_mean, mean_oxy_mll_rhBplus ~ mean_oxy_mll_rhB, nperm = 99)
-p_rh_oxy_mll <-  ggreg2(fit, "mean_oxy_mll_rhB", "mean_oxy_mll_rhBplus") +
-  geom_abline(aes(intercept = 0, slope = 1), linetype = 2) +
-  mytheme+labs(x="Oxy_mll Point B", y="Oxy_mll Point B+")
-print(p_rh_oxy_mll)
-
 ## Oxy umolkg 50m
 rh_oxyumolkg_xts <- dplyr::select(rh_B_Bplus_50m_mean, date, mean_oxy_umolkg_rhBplus, mean_oxy_umolkg_rhB)
 rh_oxyumolkg_xts <- as.xts(rh_oxyumolkg_xts, order.by=rh_oxyumolkg_xts$date)
@@ -1111,11 +1059,11 @@ wink_50m <- winkler %>%
 ptb_wink_ctd_50m <- left_join(rh_B_Bplus_50m_mean, wink_50m , by="date")
 
 # PLOT all oxyegen data as time series
-ptb_wink_ctd_xts <- dplyr::select(ptb_wink_ctd_50m, datetime, mean_oxy_mll_rhB, ptb_oxy_wink)
+ptb_wink_ctd_xts <- dplyr::select(ptb_wink_ctd_50m, datetime, mean_oxy_umolkg_rhB, ptb_oxy_wink)
 ptb_wink_ctd_xts <- as.xts(ptb_wink_ctd_xts, order.by=ptb_wink_ctd_xts$datetime)
 
-dygraph(ptb_wink_ctd_xts,  main = "Oxygen (ml/l) 50m: PTB (CTD + Winkler)", ylab = "") %>%
-dySeries("mean_oxy_mll_rhB", drawPoints = TRUE, pointSize=4, label = "Oxy PTB", color ="blue") %>%
+dygraph(ptb_wink_ctd_xts,  main = "Oxygen (µmol/kg) 50m: PTB (CTD + Winkler)", ylab = "") %>%
+dySeries("mean_oxy_umolkg_rhB", drawPoints = TRUE, pointSize=4, label = "Oxy PTB", color ="blue") %>%
 dySeries("ptb_oxy_wink", drawPoints = TRUE, pointSize=2, label = "Oxy winkler PTB", color ="green")%>%
  # dyLegend(show = "always", width = 600)%>%
   #dyAxis("y",valueRange = c(-0.1, 0.11))%>%
@@ -1126,8 +1074,8 @@ dyOptions(
   dyRangeSelector(height = 30)
 ###
 titre <- "Oxygen 50m: Point B CTD vs Point B Winkler"
-fit <- lmodel2(data = ptb_wink_ctd_50m, ptb_oxy_wink ~ mean_oxy_mll_rhB, nperm = 99)
-p_Oxyptbwink_Oxyptb <-  ggreg2(fit, "mean_oxy_mll_rhB", "ptb_oxy_wink") +
+fit <- lmodel2(data = ptb_wink_ctd_50m, ptb_oxy_wink ~ mean_oxy_umolkg_rhB, nperm = 99)
+p_Oxyptbwink_Oxyptb <-  ggreg2(fit, "mean_oxy_umolkg_rhB", "ptb_oxy_wink") +
   geom_abline(aes(slope= 1, intercept =0), linetype = 2) +
   mytheme+labs(x="Oxy Point B CTD", y="Oxy Point B Winkler")
 print(p_Oxyptbwink_Oxyptb)
@@ -1141,7 +1089,7 @@ In this section, T, S and Oxy are compared between EOL and SOMLIT data.
 
 Here, SOMLIT data were used and binded with EOL data by datetime in order to compare.
 
-## **Temperatures** 
+## **Temperature** 
 
 ### **EOL / Point B 1 m**
 
@@ -1205,7 +1153,7 @@ p_Tptb_Teol_5m <-  ggreg2(fit, "temp_eol", "mean_temp_rhB") +
 print(p_Tptb_Teol_5m)
 ```
 
-##**Salinities**
+## **Salinity**
 
 ### **EOL / Point B 1 m**
 
@@ -1235,55 +1183,6 @@ p_Sptb_Seol <-  ggreg2(fit, "sal_eol", "mean_sal_rhB") +
 print(p_Sptb_Seol)
 ```
 
-### **EOL / Point B 1 m: TA/Sal relationship**
-
-```{r Total alkalinity Point B 0m, echo=FALSE, message=FALSE, warning=FALSE, out.width='100%'}
-# AT=f(S) at 0 m 
-lms <- summary(lm(data = dat0m, ta ~ salinity))
-prob <- pf(lms$fstatistic[1],lms$fstatistic[2],lms$fstatistic[3],lower.tail=FALSE)
-reg_AT_S_all <- cbind(as.numeric(c(lms$coefficients[2,1], lms$coefficients[2,2],
-                                   lms$coefficients[2,4], lms$coefficients[1,1],
-                                   lms$coefficients[1,2], lms$fstatistic[1],
-                                   lms$fstatistic[3],
-                                   lms$coefficients[1,4], lms$r.squared, prob)))
-colnames(reg_AT_S_all) <- c("AT")
-row.names(reg_AT_S_all) <- c("Slope", "SE Slope", "P Slope","Intercept","SE int.","P int.", "F", "df", "R2","P value")
-
-ta_sal_xts <- dplyr::select(dat0m,sampling_date, salinity, ta)
-ta_sal_xts <- as.xts(ta_sal_xts, order.by=ta_sal_xts$sampling_date)
-
-dygraph(ta_sal_xts,  main = "TA / Salinity 1m SOMLIT", ylab = "") %>%
-    dySeries("salinity", drawPoints = TRUE, pointSize=4, label = "Sal", color ="blue") %>%
-   dySeries("ta", drawPoints = TRUE, pointSize=2, label = "TA", color="red", axis="y2")%>%
- # dyLegend(show = "always", width = 600)%>%
-  #dyAxis("y",valueRange = c(-0.1, 0.11))%>%
-dyOptions(
-    drawGrid = TRUE,
-    drawPoints = TRUE,
-    useDataTimezone = TRUE)%>%
-  dyRangeSelector(height = 30)
-
-#plot regression lm
-fit <- lm(data = dat0m, ta ~ salinity)
-p_ta_sal_lm <- ggplot(dat0m,aes(x=salinity, y= ta, label = monthd))+
-  geom_text( aes(color=factor(monthd))) +
-  scale_color_discrete(guide="none")+
-    labs(x="Salinity ", y="TA", color = "Months")  +
-    stat_smooth(method = "lm", col = "black") +
-    labs(title = paste("", "\nAdj R2 = ",signif(summary(fit)$adj.r.squared, 5),
-                       ";\nIntercept =",signif(fit$coef[[1]],5 ),
-                       ";\nSlope =",signif(fit$coef[[2]], 5),
-                       ";\nP =", signif(summary(fit)$coef[2,4], 5),
-                       ";\nRMSE =", signif(sqrt(mean(fit$residuals^2)), 5))) +
-  theme_bw() + theme(aspect.ratio=1,
-        axis.text=element_text(size=7),
-        axis.title.y= element_text(size =7),
-        axis.title.x= element_text(size =7),
-        plot.margin = unit(c(0.5,1,1,1), "cm"),
-        plot.title = element_text(size=7, hjust=0.05,margin = margin(l = 10, b = -70)))
-print(p_ta_sal_lm)
-```
-
 ### **EOL / Point B 5 m**
 
 ```{r comparaison sal 5m / sal EOL, echo=FALSE, warning = FALSE, message = FALSE, out.width='100%'}
@@ -1310,10 +1209,7 @@ dyOptions(
   dyRangeSelector(height = 30)
 ```
 
-The relationship between AT (in umol/kg) and salinity using mean data at 1 m is:
-AT = `r round(reg_AT_S_all[4], digit=2)` + S x `r round(reg_AT_S_all[1], digit=2)`
-
-## **Oxygens**
+## **Oxygen**
 
 ###  **EOL / Point B 1 m**
 
