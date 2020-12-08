@@ -1,0 +1,440 @@
+---
+title: "SeaFET and SAMI pH sensors tests"
+author: "Frédéric Gazeau"
+date: '`r format(Sys.Date(), "%d %B %Y")`'
+output: html_document
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(ade4)
+library(data.table)
+library(lubridate)
+library(dplyr)
+library(tidyr)
+library(seacarb)
+library(gridExtra)
+library(lmPerm)
+library(tinytex)
+library(xtable)
+library(knitr)
+library(vegan)
+library(FactoMineR)
+library(factoextra)
+library(cowplot)
+library(reshape)
+library(scales)
+library(lmodel2)
+library(grid)
+library(pracma)
+library(corrplot)
+library(kableExtra)
+library(dygraphs)
+library(RColorBrewer)
+#shape
+shape <- c(19, 1, 19, 1, 19, 1, 19, 1, 19, 1, 19, 17)
+#Line type
+linetype <- c("solid", "dashed", "solid", "dashed", "solid", "dashed", "solid", "solid", "dashed", "solid", "dashed", "blank")
+#color
+color <- c("red", "blue", "green", "purple", "pink", "brown", "orange", "cyan", "gray", "salmon", "seagreen", "black")
+#Size
+size <- c(3, 3, 3, 3, 3, 3, 3, 6)
+#Background and axes
+mytheme <- theme_bw() +
+  theme(axis.text.x=element_text(size=12, color="black", angle=-45, hjust = 0),
+        axis.title.x=element_text(size=14),
+        axis.text.y=element_text(size=12, color="black"),
+        axis.title.y=element_text(size=14),
+        plot.title = element_text(face="bold", size=16, hjust = 0.5),
+        legend.text = element_text(size=12),
+        legend.title = element_blank(),
+        strip.text.x = element_text(size = 12),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank()
+  )
+```
+```{r data download, echo=FALSE}
+myurl <- "https://docs.google.com/spreadsheets/d/e/2PACX-1vTuR5HMofnKdAPJ0-DfmoceZCgGLrfZFhAmPH_r5joaQews4GO3TroRD-uT-pjMleMFeGwhxOISwtVm/pub?gid=0&single=true&output=csv"
+col <- read.csv(url(myurl), header=TRUE, stringsAsFactors = FALSE)
+header <- colnames(col)
+pH <- read.csv(url(myurl), header=F, stringsAsFactors = TRUE, skip=1)
+colnames(pH) <- header
+pH$DateTime..UTC. <- as.POSIXct(strptime(pH$DateTime..UTC., format="%m/%d/%Y %H:%M:%S"))
+myurl2 <- "https://docs.google.com/spreadsheets/d/e/2PACX-1vTuR5HMofnKdAPJ0-DfmoceZCgGLrfZFhAmPH_r5joaQews4GO3TroRD-uT-pjMleMFeGwhxOISwtVm/pub?gid=2004353707&single=true&output=csv"
+col2 <- read.csv(url(myurl2), header=TRUE, stringsAsFactors = FALSE)
+header2 <- colnames(col2)
+pH2 <- read.csv(url(myurl2), header=F, stringsAsFactors = TRUE, skip=1)
+colnames(pH2) <- header2
+pH2$DateTime..UTC. <- as.POSIXct(strptime(pH2$DateTime..UTC., format="%m/%d/%Y %H:%M:%S"))
+myurl3 <- "https://docs.google.com/spreadsheets/d/e/2PACX-1vTuR5HMofnKdAPJ0-DfmoceZCgGLrfZFhAmPH_r5joaQews4GO3TroRD-uT-pjMleMFeGwhxOISwtVm/pub?gid=1694036802&single=true&output=csv"
+col3 <- read.csv(url(myurl3), header=TRUE, stringsAsFactors = FALSE)
+header3 <- colnames(col3)
+pH3 <- read.csv(url(myurl3), header=F, stringsAsFactors = TRUE, skip=1)
+colnames(pH3) <- header3
+pH3$DateTime..UTC. <- as.POSIXct(strptime(pH3$DateTime..UTC., format="%m/%d/%Y %H:%M:%S"))
+
+knitr::include_graphics('https://docs.google.com/spreadsheets/d/e/2PACX-1vSmth08Q-Tw1RFznKeStSMJkKeFgYZac9WIR3ETLYWkznouAD6A-1n2uza1YgotXQ/pub?gid=798409504&single=true&output=pdf')
+```
+# Operating mode
+All seven SeaFET sensors were deployed in a tank (open-flow). The first deployment was done together with 4 Pi-SAMI sensors and discrete samplings were done to measure pH using a spectrophotometric method (purified m-cresol). A second deployment of 2 weeks was then performed (without the deployment of pi-SAMI) and spectrophotometric pH were measured during the second week.
+![Fig. 1 - Deployment of the sensors in an open-flow tank](https://www.dropbox.com/s/7m20z33sb32suvg/IMG_2888.jpeg?dl=1)
+
+# Data availability
+The full dataset can be downloaded [here](https://docs.google.com/spreadsheets/d/1NeLwca5T1eW4nPWuoGi1ez_bnVY7FoLGnh9uQsEqpqQ/edit?usp=sharing)
+
+# **First deployment** {.tabset} 
+
+## Temperature (all)
+
+```{r plot T}
+#shape
+shape <- c(19, 1, 19, 1, 19, 1, 19, 1, 19, 1, 19)
+#Line type
+linetype <- c("solid", "dashed", "solid", "dashed", "solid", "dashed", "solid", "solid", "dashed", "solid", "dashed")
+#color
+color <- c("red", "blue", "green", "purple", "pink", "brown", "orange", "cyan", "gray", "salmon", "seagreen")
+ggplot(subset(pH, SENSOR != "SPECTRO"), aes(x=DateTime..UTC., y=pH.Temperature..Celsius., group=SENSOR, color=SENSOR, linetype=SENSOR, shape=SENSOR)) +
+  geom_point() +
+  mytheme +
+  scale_color_manual(values=color) +
+  scale_linetype_manual(values=linetype) +
+  scale_shape_manual(values=shape) +
+  xlab("Date") +
+  ylab(expression(Temperature~(degree~C)))
+```
+
+## Internal pH (only SEAFET)
+
+```{r plot pHint}
+#shape
+shape <- c(19, 1, 19, 1, 19, 1, 19, 17)
+#Line type
+linetype <- c("solid", "dashed", "solid", "dashed", "solid", "dashed", "solid", "blanck")
+#color
+color <- c("red", "blue", "green", "purple", "pink", "brown", "orange", "black")
+ggplot(filter(pH, !grepl('SAMI', SENSOR)), aes(x=DateTime..UTC., y=Internal.pH..pH., group=SENSOR, color=SENSOR, linetype=SENSOR, shape=SENSOR)) +
+  geom_point() +
+  mytheme +
+  scale_color_manual(values=color) +
+  scale_linetype_manual(values=linetype) +
+  scale_shape_manual(values=shape) +
+  xlab("Date") +
+  ylab(expression(Internal~pH))
+```
+
+## External pH (all)
+
+```{r plot pHext}
+#shape
+shape <- c(19, 1, 19, 1, 19, 1, 19, 1, 19, 1, 19, 17)
+#Line type
+linetype <- c("solid", "dashed", "solid", "dashed", "solid", "dashed", "solid", "solid", "dashed", "solid", "dashed", "blank")
+#color
+color <- c("red", "blue", "green", "purple", "pink", "brown", "orange", "cyan", "gray", "salmon", "seagreen", "black")
+#Size
+size <- c(3, 3, 3, 3, 3, 3, 3, 6)
+ggplot(pH, aes(x=DateTime..UTC., y=External.pH..pH., group=SENSOR, color=SENSOR, linetype=SENSOR, shape=SENSOR)) +
+  geom_point() +
+  mytheme +
+  scale_color_manual(values=color) +
+  scale_linetype_manual(values=linetype) +
+  scale_shape_manual(values=shape) +
+  xlab("Date") +
+  ylab(expression(External~pH))
+```
+
+## External pH (only SEAFET)
+
+```{r plot pHextSEAFET}
+#shape
+shape <- c(19, 1, 19, 1, 19, 1, 19, 17)
+#Line type
+linetype <- c("solid", "dashed", "solid", "dashed", "solid", "dashed", "solid", "blanck")
+#color
+color <- c("red", "blue", "green", "purple", "pink", "brown", "orange", "black")
+ggplot(filter(pH, !grepl('SAMI', SENSOR)), aes(x=DateTime..UTC., y=External.pH..pH., group=SENSOR, color=SENSOR, linetype=SENSOR, shape=SENSOR)) +
+  geom_point() +
+  mytheme +
+  scale_color_manual(values=color) +
+  scale_linetype_manual(values=linetype) +
+  scale_shape_manual(values=shape) +
+  xlab("Date") +
+  ylab(expression(External~pH))
+```
+
+## External pH (only SAMI)
+
+```{r plot pHextSAMI}
+#shape
+shape <- c(19, 1, 19, 1, 19, 17)
+#Line type
+linetype <- c("solid", "dashed", "solid", "dashed", "blank")
+#color
+color <- c("red", "blue", "green", "purple", "black")
+#Size
+size <- c(3, 3, 3, 3, 3, 3, 3, 6)
+ggplot(filter(pH, !grepl('SEAFET', SENSOR)), aes(x=DateTime..UTC., y=External.pH..pH., group=SENSOR, color=SENSOR, linetype=SENSOR, shape=SENSOR)) +
+  geom_point() +
+  mytheme +
+  scale_color_manual(values=color) +
+  scale_linetype_manual(values=linetype) +
+  scale_shape_manual(values=shape) +
+  xlab("Date") +
+  ylab(expression(External~pH))
+```
+
+## Variances (only SEAFET)
+
+```{r plot VAR}
+var_temp <- filter(pH, !grepl('SAMI|SPECTRO', SENSOR)) %>% group_by(DateTime..UTC.) %>% summarise(var(pH.Temperature..Celsius.))
+var_intpH <- filter(pH, !grepl('SAMI|SPECTRO', SENSOR)) %>% group_by(DateTime..UTC.) %>% summarise(var(Internal.pH..pH.))
+var_extpH <- filter(pH, !grepl('SAMI|SPECTRO', SENSOR)) %>% group_by(DateTime..UTC.) %>% summarise(var(External.pH..pH.))
+                  
+ggplot(var_temp, aes(x=DateTime..UTC., y=`var(pH.Temperature..Celsius.)`)) +
+  geom_point(size = 3) +
+  mytheme +
+  scale_color_manual(values=color) +
+  scale_linetype_manual(values=linetype) +
+  scale_shape_manual(values=shape) +
+  xlab("Date") +
+  ylab(expression(Temperature_variance))
+ggplot(var_intpH, aes(x=DateTime..UTC., y=`var(Internal.pH..pH.)`)) +
+  geom_point(size = 3) +
+  mytheme +
+  scale_color_manual(values=color) +
+  scale_linetype_manual(values=linetype) +
+  scale_shape_manual(values=shape) +
+  xlab("Date") +
+  ylab(expression(Internal_pH_variance))
+ggplot(var_extpH, aes(x=DateTime..UTC., y=`var(External.pH..pH.)`)) +
+  geom_point(size = 3) +
+  mytheme +
+  scale_color_manual(values=color) +
+  scale_linetype_manual(values=linetype) +
+  scale_shape_manual(values=shape) +
+  xlab("Date") +
+  ylab(expression(External_pH_variance))
+                  
+```
+
+## pH interne vs externe (only SEAFET)
+
+```{r plot intvsext}
+pHdiff1 <- mutate(pH, diffpH=Internal.pH..pH.-External.pH..pH.)
+#shape
+shape <- c(19, 1, 19, 1, 19, 1, 19, 17)
+#Line type
+linetype <- c("solid", "dashed", "solid", "dashed", "solid", "dashed", "solid", "blanck")
+#color
+color <- c("red", "blue", "green", "purple", "pink", "brown", "orange", "black")
+ggplot(filter(pHdiff1, !grepl('SAMI|SPECTRO', SENSOR)), aes(x=DateTime..UTC., y=diffpH,  group=SENSOR, color=SENSOR, linetype=SENSOR, shape=SENSOR)) +
+  geom_point(size = 3) +
+  geom_line()  +
+  mytheme +
+  scale_color_manual(values=color) +
+  scale_linetype_manual(values=linetype) +
+  scale_shape_manual(values=shape) +
+  xlab("Date") +
+  ylab(expression(Internal~vs~External~pH))
+```
+
+# **Second deployment** {.tabset} 
+
+## Temperature
+
+```{r plot T2}
+#shape
+shape <- c(19, 1, 19, 1, 19, 1, 19)
+#Line type
+linetype <- c("solid", "dashed", "solid", "dashed", "solid", "dashed", "solid")
+#color
+color <- c("red", "blue", "green", "purple", "pink", "brown", "orange")
+ggplot(subset(pH2, SENSOR != "SPECTRO"), aes(x=DateTime..UTC., y=pH.Temperature..Celsius., group=SENSOR, color=SENSOR, linetype=SENSOR, shape=SENSOR)) +
+  geom_point() +
+  mytheme +
+  scale_color_manual(values=color) +
+  scale_linetype_manual(values=linetype) +
+  scale_shape_manual(values=shape) +
+  xlab("Date") +
+  ylab(expression(Temperature~(degree~C)))
+```
+
+## Internal pH
+
+```{r plot pHint2}
+#shape
+shape <- c(19, 1, 19, 1, 19, 1, 19, 17)
+#Line type
+linetype <- c("solid", "dashed", "solid", "dashed", "solid", "dashed", "solid", "blanck")
+#color
+color <- c("red", "blue", "green", "purple", "pink", "brown", "orange", "black")
+ggplot(filter(pH2, !grepl('SAMI', SENSOR)), aes(x=DateTime..UTC., y=Internal.pH..pH., group=SENSOR, color=SENSOR, linetype=SENSOR, shape=SENSOR)) +
+  geom_point() +
+  mytheme +
+  scale_color_manual(values=color) +
+  scale_linetype_manual(values=linetype) +
+  scale_shape_manual(values=shape) +
+  xlab("Date") +
+  ylab(expression(Internal~pH))
+```
+
+## External pH
+```{r plot pHext2}
+#shape
+shape <- c(19, 1, 19, 1, 19, 1, 19, 17)
+#Line type
+linetype <- c("solid", "dashed", "solid", "dashed", "solid", "dashed", "solid", "blank")
+#color
+color <- c("red", "blue", "green", "purple", "pink", "brown", "orange", "black")
+#Size
+size <- c(3, 3, 3, 3, 3, 3, 3, 6)
+ggplot(pH2, aes(x=DateTime..UTC., y=External.pH..pH., group=SENSOR, color=SENSOR, linetype=SENSOR, shape=SENSOR)) +
+  geom_point() +
+  mytheme +
+  scale_color_manual(values=color) +
+  scale_linetype_manual(values=linetype) +
+  scale_shape_manual(values=shape) +
+  xlab("Date") +
+  ylab(expression(External~pH))
+```
+## Variances
+```{r plot VAR2}
+var_temp2 <- filter(pH2, !grepl('SAMI|SPECTRO', SENSOR)) %>% group_by(DateTime..UTC.) %>% summarise(var(pH.Temperature..Celsius.))
+var_intpH2 <- filter(pH2, !grepl('SAMI|SPECTRO', SENSOR)) %>% group_by(DateTime..UTC.) %>% summarise(var(Internal.pH..pH.))
+var_extpH2 <- filter(pH2, !grepl('SAMI|SPECTRO', SENSOR)) %>% group_by(DateTime..UTC.) %>% summarise(var(External.pH..pH.))
+                  
+ggplot(var_temp2, aes(x=DateTime..UTC., y=`var(pH.Temperature..Celsius.)`)) +
+  geom_point(size = 3) +
+  mytheme +
+  scale_color_manual(values=color) +
+  scale_linetype_manual(values=linetype) +
+  scale_shape_manual(values=shape) +
+  xlab("Date") +
+  ylab(expression(Temperature_variance))
+ggplot(var_intpH2, aes(x=DateTime..UTC., y=`var(Internal.pH..pH.)`)) +
+  geom_point(size = 3) +
+  mytheme +
+  scale_color_manual(values=color) +
+  scale_linetype_manual(values=linetype) +
+  scale_shape_manual(values=shape) +
+  xlab("Date") +
+  ylab(expression(Internal_pH_variance))
+ggplot(var_extpH2, aes(x=DateTime..UTC., y=`var(External.pH..pH.)`)) +
+  geom_point(size = 3) +
+  mytheme +
+  scale_color_manual(values=color) +
+  scale_linetype_manual(values=linetype) +
+  scale_shape_manual(values=shape) +
+  xlab("Date") +
+  ylab(expression(External_pH_variance))
+                  
+```
+## Variances (without SEAFET02148)
+```{r plot VAR2excl02148}
+var_temp2 <- filter(pH2, !grepl('SEAFET02148', SENSOR)) %>% group_by(DateTime..UTC.) %>% summarise(var(pH.Temperature..Celsius.))
+var_intpH2 <- filter(pH2, !grepl('SEAFET02148', SENSOR)) %>% group_by(DateTime..UTC.) %>% summarise(var(Internal.pH..pH.))
+var_extpH2 <- filter(pH2, !grepl('SEAFET02148|SPECTRO', SENSOR)) %>% group_by(DateTime..UTC.) %>% summarise(var(External.pH..pH.))
+                  
+ggplot(var_temp2, aes(x=DateTime..UTC., y=`var(pH.Temperature..Celsius.)`)) +
+  geom_point(size = 3) +
+  mytheme +
+  scale_color_manual(values=color) +
+  scale_linetype_manual(values=linetype) +
+  scale_shape_manual(values=shape) +
+  xlab("Date") +
+  ylab(expression(Temperature_variance))
+ggplot(var_intpH2, aes(x=DateTime..UTC., y=`var(Internal.pH..pH.)`)) +
+  geom_point(size = 3) +
+  mytheme +
+  scale_color_manual(values=color) +
+  scale_linetype_manual(values=linetype) +
+  scale_shape_manual(values=shape) +
+  xlab("Date") +
+  ylab(expression(Internal_pH_variance))
+ggplot(var_extpH2, aes(x=DateTime..UTC., y=`var(External.pH..pH.)`)) +
+  geom_point(size = 3) +
+  mytheme +
+  scale_color_manual(values=color) +
+  scale_linetype_manual(values=linetype) +
+  scale_shape_manual(values=shape) +
+  xlab("Date") +
+  ylab(expression(External_pH_variance))
+                  
+```
+## pH interne vs externe
+```{r plot intvsext2}
+pHdiff2 <- mutate(pH2, diffpH2=Internal.pH..pH.-External.pH..pH.)
+#shape
+shape <- c(19, 1, 19, 1, 19, 1, 19)
+#Line type
+linetype <- c("solid", "dashed", "solid", "dashed", "solid", "dashed", "solid")
+#color
+color <- c("red", "blue", "green", "purple", "pink", "brown", "orange")
+ggplot(filter(pHdiff2, !grepl('SAMI|SPECTRO', SENSOR)), aes(x=DateTime..UTC., y=diffpH2,  group=SENSOR, color=SENSOR, linetype=SENSOR, shape=SENSOR)) +
+  geom_point(size = 3) +
+  geom_line()  +
+  mytheme +
+  scale_color_manual(values=color) +
+  scale_linetype_manual(values=linetype) +
+  scale_shape_manual(values=shape) +
+  xlab("Date") +
+  ylab(expression(Internal~vs~External~pH))
+```
+# **SAMI deployment** {.tabset} 
+## Temperature
+```{r plot TSAMI}
+#shape
+shape <- c(19, 1, 19, 1, 19, 1, 19, 1, 19, 1, 19)
+#Line type
+linetype <- c("solid", "dashed", "solid", "dashed", "solid", "dashed", "solid", "solid", "dashed", "solid", "dashed")
+#color
+color <- c("red", "blue", "green", "purple", "pink", "brown", "orange", "cyan", "gray", "salmon", "seagreen")
+ggplot(subset(pH3, TempExt != "-273.15"), aes(x=DateTime..UTC., y=TempExt, group=SENSOR, color=SENSOR, linetype=SENSOR, shape=SENSOR)) +
+  geom_point() +
+  mytheme +
+  scale_color_manual(values=color) +
+  scale_linetype_manual(values=linetype) +
+  scale_shape_manual(values=shape) +
+  xlab("Date") +
+  ylab(expression(Temperature~(degree~C)))
+```
+##  pH
+```{r plot pHextSAMI2}
+#shape
+shape <- c(19, 1, 19, 1, 19, 17)
+#Line type
+linetype <- c("solid", "dashed", "solid", "dashed", "blank")
+#color
+color <- c("red", "blue", "green", "purple", "black")
+#Size
+size <- c(3, 3, 3, 3, 3, 3, 3, 6)
+ggplot(filter(pH3, !grepl('SEAFET', SENSOR)), aes(x=DateTime..UTC., y=SAMIpH, group=SENSOR, color=SENSOR, linetype=SENSOR, shape=SENSOR)) +
+  geom_point() +
+  geom_errorbar(aes(ymin=SAMIpH-pHerror, ymax=SAMIpH+pHerror, width=.1)) +
+  mytheme +
+  scale_color_manual(values=color) +
+  scale_linetype_manual(values=linetype) +
+  scale_shape_manual(values=shape) +
+  xlab("Date") +
+  ylab(expression(pH))
+```
+##  pH (filtered)
+```{r plot pHextSAMI2bis}
+#shape
+shape <- c(19, 1, 19, 1, 19, 17)
+#Line type
+linetype <- c("solid", "dashed", "solid", "dashed", "blank")
+#color
+color <- c("red", "blue", "green", "purple", "black")
+#Size
+size <- c(3, 3, 3, 3, 3, 3, 3, 6)
+ggplot(filter(pH3, SAMIpH < 8.2 & SAMIpH > 7.8), aes(x=DateTime..UTC., y=SAMIpH, group=SENSOR, color=SENSOR, linetype=SENSOR, shape=SENSOR)) +
+  geom_point() +
+  geom_errorbar(aes(ymin=SAMIpH-pHerror, ymax=SAMIpH+pHerror, width=.1)) +
+  mytheme +
+  scale_color_manual(values=color) +
+  scale_linetype_manual(values=linetype) +
+  scale_shape_manual(values=shape) +
+  xlab("Date") +
+  ylab(expression(pH))
+```
