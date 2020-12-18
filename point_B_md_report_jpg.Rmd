@@ -711,15 +711,24 @@ ptb <- tmp %>%
                              Pt=1e-6*PO4, Sit=1e-6*SIOH4,
                              k1k2 = "l", kf = "pf", ks="d",
                              pHscale = "T", b="l10")) %>% 
+  dplyr::mutate(pH_s_somlit_temp_25 = pHinsi(pH = pH_s_ptb_temp_lab, ALK = ta,
+  #somlit rather than ptb in name because "ptb" removed later
+                             Tinsi=25,
+                             Tlab=temp_lab_ptb,
+                             Pinsi=depth/10, S=salinity_field,
+                             Pt=1e-6*PO4, Sit=1e-6*SIOH4,
+                             k1k2 = "l", kf = "pf", ks="d",
+                             pHscale = "T", b="l10")) %>% 
   dplyr::group_by(sampling_date, depth) %>%
-  dplyr::mutate(pH_s_ptb_temp_insi = mean(pH_s_ptb_temp_insi, na.rm = TRUE)) %>% 
+  dplyr::mutate(pH_s_ptb_temp_insi = mean(pH_s_ptb_temp_insi, na.rm = TRUE),
+                pH_s_somlit_temp_25 = mean(pH_s_somlit_temp_25, na.rm = TRUE)) %>% 
   dplyr::select(-c(pH_s_ptb_temp_lab, temp_lab_ptb)) %>% # no 
   # longer needed and prevents efficient unique()
   dplyr::ungroup() %>% 
   dplyr::distinct()
 # join pH eol and pointB
 eol_ptb <- full_join(eol, ptb, by = c("sampling_date", "depth")) %>% 
-  dplyr::select(sampling_date, depth, pH_s_eol_temp_insi, pH_s_ptb_temp_insi) %>% 
+  dplyr::select(sampling_date, depth, pH_s_eol_temp_insi, pH_s_ptb_temp_insi, pH_s_somlit_temp_25) %>% 
   dplyr::distinct()
 
 # check outliers
@@ -753,6 +762,12 @@ CPHb <- ggplot(eol_ptb_long, aes(x = sampling_date, y = pH, colour = location)) 
        color = "") +
   facet_grid(depth ~ .)
 CPHb
+
+# create pH_s_somlit_temp_insi because "ptb" deleted later but this is needed for the somlit file
+eol_ptb <- eol_ptb %>% 
+  dplyr::mutate(pH_s_somlit_temp_insi = pH_s_ptb_temp_insi)
+
+
 # Difference between pH eol and ptb
 eol_ptb <- eol_ptb %>% 
   dplyr::mutate(diff_pH = pH_s_eol_temp_insi - pH_s_ptb_temp_insi)
@@ -872,8 +887,31 @@ pangaea <- dplyr::select(dat, sampling_date, depth, CSC_flag, salinity,
                 sampling_date = as.character(dat$sampling_date))
 
 #Prepare SOMLIT data 
-somlit <- dat %>% 
-  dplyr::select(sampling_date, depth, salinity, temperature, dic, ta, pH_calc, Pt, Sit)
+
+# pH25
+pH25 <- dat %>%   
+  dplyr::select(sampling_date, depth, salinity, temperature, ta, 
+                pH_calc, Pt, Sit) %>% 
+  tidyr::drop_na(salinity, temperature, ta, pH_calc) %>% 
+  dplyr::mutate(pH_calc_25 = seacarb::pHinsi(pH = pH_calc, ALK = ta,
+                             Tinsi=25,
+                             Tlab=temperature,
+                             Pinsi=depth/10, S=salinity,
+                             Pt=1e-6*Pt, Sit=1e-6*Sit,
+                             k1k2 = "l", kf = "pf", ks="d",
+                             pHscale = "T", b="l10")) %>% 
+  dplyr::select(sampling_date, depth, pH_calc_25)
+# join
+somlit <- left_join(dat, pH25, by = c("sampling_date", "depth")) %>% 
+  dplyr::select(sampling_date, depth, salinity, temperature, dic, ta, 
+                pH_calc, pH_calc_25, pH_s_somlit_temp_insi, pH_s_somlit_temp_25, Pt, Sit) %>%
+  dplyr::rename(pH_calc_insitu = pH_calc,
+                pH_spec_insitu = pH_s_somlit_temp_insi,
+                pH_spec_25 = pH_s_somlit_temp_25,
+                PO4 = Pt, 
+                SIOH4 = Sit) %>% 
+  tidyr::drop_na(c(salinity, temperature, dic, ta, pH_calc_insitu, pH_spec_insitu, pH_spec_25))
+
 #Prepare data for villefranche_CC 
 vlfrcc <- left_join(dat, eol_ptb %>% dplyr::select(sampling_date, depth, pH_s_eol_temp_insi, pH_s_ptb_temp_insi), by=c("sampling_date", "depth"))
 
