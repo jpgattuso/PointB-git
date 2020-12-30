@@ -213,7 +213,7 @@ z <- z %>%
       rho(S = salinity_field, T = temp_field , P = 0) / 1000
     )),
     SIOH4 = as.numeric(SIOH4 / (
-      1000 * rho(S = salinity_field, T = temp_field , P = 0) / 1000
+      rho(S = salinity_field, T = temp_field , P = 0) / 1000
     )),
     temp_lab_eol = as.numeric(temp_lab_eol),
     pH_s_eol_temp_lab = as.numeric(pH_s_eol_temp_lab),
