@@ -902,15 +902,15 @@ pH25 <- dat %>%
                              pHscale = "T", b="l10")) %>% 
   dplyr::select(sampling_date, depth, pH_calc_25)
 # join
-somlit <- left_join(dat, pH25, by = c("sampling_date", "depth")) %>% 
+somlit <- dplyr::left_join(dat, pH25, by = c("sampling_date", "depth")) %>% 
   dplyr::select(sampling_date, depth, salinity, temperature, dic, ta, 
                 pH_calc, pH_calc_25, pH_s_somlit_temp_insi, pH_s_somlit_temp_25, Pt, Sit) %>%
   dplyr::rename(pH_calc_insitu = pH_calc,
                 pH_spec_insitu = pH_s_somlit_temp_insi,
                 pH_spec_25 = pH_s_somlit_temp_25,
                 PO4 = Pt, 
-                SIOH4 = Sit) %>% 
-  tidyr::drop_na(c(salinity, temperature, dic, ta, pH_calc_insitu, pH_spec_insitu, pH_spec_25))
+                SIOH4 = Sit) #%>% 
+  #tidyr::drop_na(c(salinity, temperature, dic, ta, pH_calc_insitu, pH_spec_insitu, pH_spec_25))
 
 #Prepare data for villefranche_CC 
 vlfrcc <- left_join(dat, eol_ptb %>% dplyr::select(sampling_date, depth, pH_s_eol_temp_insi, pH_s_ptb_temp_insi), by=c("sampling_date", "depth"))
