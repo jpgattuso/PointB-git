@@ -105,7 +105,7 @@ lm_eqn = function(m) {
   as.character(as.expression(eq));                 
 }
 ######## function to make regression plot with model I equation in title
-ggreg <- function (fit, point_size=2) {
+ggreg_old <- function (fit, point_size=2) {
   ggplot(fit$model, aes_string(x = names(fit$model)[2],
                                y = names(fit$model)[1])) +
     geom_point(size = point_size, col = "blue") +
@@ -120,22 +120,29 @@ ggreg <- function (fit, point_size=2) {
 # function regression plot with equation (MA or OLS) in title
 # function regression plot with model II equation (MA) in title
 ## Dans labs ajout de la variable TITRE pour mettre titre avant chaque graphe
-ggreg2 <- function (fit, xdata, ydata, type = "MA", title = NULL) { # x and y are the names of the variables
-  fit_data <- data.frame(xdata, ydata)
+ggreg <- function (xdata, ydata, type = "OLS", plot = TRUE, title = "title") { # x and y are the names of the variables
+  fit_data <- tibble(xdata, ydata)
   colnames(fit_data) = c("xdata", "ydata")
+  fit <- print(lmodel2::lmodel2(ydata ~ xdata))
 if (type == "OLS") ty = 1 #one selects OLS only
 if (type == "MA") ty = 2 #one selects MA only
-reg <- fit$regression.results[ty,] #one selects OLS only
-intercept <- reg$Intercept
-slope <- reg$Slope
-  ggplot(data = fit_data, aes_string(x = xdata, y = ydata)) + 
-  geom_point(size = 2, col = "blue") +
-  geom_abline(aes(intercept = fit$regression.results[ty,2], slope = fit$regression.results[ty,3]),
+#reg <- fit$regression.results[ty,] #one selects OLS only
+intercept <- fit$regression.results$Intercept[ty]
+slope <- fit$regression.results$Slope[ty]
+if (plot == TRUE) {
+  plt <- ggplot(data = fit_data, aes(x = xdata, y = ydata)) + 
+  geom_point(na.rm = TRUE, size = 2, colour = "blue") +
+  geom_abline(aes(intercept = intercept, slope = slope),
               colour = "blue")  + 
-  labs(title = paste(title,"\n Adj R2 = ", signif(fit$rsquare, 3),
+  labs(title = paste(title, "; type: ", type,
+                     "\n R2 = ", round(fit$rsquare, digits = 2),
                      "; Intercept =", signif(intercept, 3),
                      "; Slope =", signif(slope, 3),
                      "; P =", signif(fit$P.param, 3)))
+  return(plt)
+  } else {
+  return(fit)
+}
 }
 ```
 ```{r test regression, include=FALSE}
@@ -1782,7 +1789,7 @@ var_list <-
   "Ndic_ano"
   )
 lms <- lapply(var_list, function(x) {
-  summary(lm(substitute(i ~ decimal_date(sampling_date), list(i = as.name(x))), data = ano_month50m))
+  summary(lm(substitute(i ~ decimal_date(sampling_date), list(i = as.name(x))), data = dplyr::filter(ano_month50m, sampling_date < cutoff_date)))
   })
 reg <- NULL
 for (i in 1:length(var_list)) {
@@ -1909,48 +1916,13 @@ reg_AT_S_all <- cbind(as.numeric(c(lms$coefficients[2,1], lms$coefficients[2,2],
 colnames(reg_AT_S_all) <- c("AT")
 row.names(reg_AT_S_all) <- c("Slope", "SE Slope", "P Slope","Intercept","SE int.","P int.", "F", "df", "R2","P value")
 
-ggreg(fit = lms, title = "AT vs Salinity")
-ggreg(xdata = dat0m$salinity, ydata = dat0m$ta, type = "OLS", plot = TRUE)
-
-ggreg <- function (xdata, ydata, type = "MA", plot = TRUE, title = NULL) { # x and y are the names of the variables
-  fit_data <- data.frame(xdata, ydata)
-  colnames(fit_data) = c("xdata", "ydata")
-  fit <- lmodel2::lmodel2(ydata ~ xdata)
-if (type == "OLS") ty = 1 #one selects OLS only
-if (type == "MA") ty = 2 #one selects MA only
-reg <- fit$regression.results[ty,] #one selects OLS only
-intercept <- reg$Intercept
-slope <- reg$Slope
-if (plot == TRUE) {
-  plt <- ggplot(data = fit_data, x = fit_data$xdata, y = fit_data$ydata) + 
-  geom_point(size = 2, col = "blue") +
-  geom_abline(aes(intercept = fit$regression.results[ty,2], slope = fit$regression.results[ty,3]),
-              colour = "blue")  + 
-  labs(title = paste(title,"\n Adj R2 = ", signif(fit$rsquare, 3),
-                     "; Intercept =", signif(intercept, 3),
-                     "; Slope =", signif(slope, 3),
-                     "; P =", signif(fit$P.param, 3)))
-  print(plt)
-}
-return(fit)
-}
-
-
-ydataggreg <- function (fit, point_size=2, title = NULL) {
-  ggplot(fit$model, aes_string(x = names(fit$model)[2],
-                               y = names(fit$model)[1])) +
-    geom_point(size = point_size, col = "blue") +
-    stat_smooth(method = "lm", col = "black") +
-    labs(title = paste(title, "\nAdj R2 = ", signif(summary(fit$adj.r.squared, 5)),
-                       "; Intercept =", signif(fit$coef[[1]],5),
-                       "; Slope =", signif(fit$coef[[2]], 5),
-                       "; P =", signif(summary(fit$coef[2,4], 5)))) +
-    theme(plot.title = element_text(size=7))
-}
+plt <- ggreg(xdata = dat0m$salinity, ydata = dat0m$ta, type = "OLS", title = "AT vs Sal", plot = TRUE)
+ggsave(file="output_jp/figures/at_sal.png", plt, width = 18, height = 21, units = "cm")
 ```
+![at_sal.png](output_jp/figures/at_sal.png)
 
 The relationship between AT (in umol/kg) and salinity using mean data at 1 m is:
-AT = `r round(reg_AT_S_all[4], digit=2)` + S x `r round(reg_AT_S_all[1], digit=2)`
+AT = `r round(reg_AT_S_all[4], digit=2)` + S x `r round(reg_AT_S_all[1], digit=2)` with an r2 of `r round(reg_AT_S_all[9], digit=2)`
 
 ## Daily and monthly changes in pH and T
 ```{r Daily and seasonal changes, include=FALSE}
