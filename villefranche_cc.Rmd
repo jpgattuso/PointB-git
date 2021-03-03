@@ -49,7 +49,7 @@ if (Sys.getenv("LOGNAME") == "gattuso") {
 if (Sys.getenv("LOGNAME") == "samir") {
   path = "../../pCloud Sync/exp153_carbonates_point_B/"
   path_sami = "../../pCloud\ Sync/exp176_sami/sami_data/sami_raw_export/Data_deployment/EOL/"
-  path_par ="../../pCloud Sync/Light_Series_Odyssey/Villefranche/"
+  path_par ="../../pCloud Sync/Light_Series_Odyssey/par_data/Villefranche/"
 }
 
 Sys.setenv(TZ='UTC')
@@ -492,9 +492,9 @@ dygraph(sami_xts, ylab = "") %>%
   dyShading(from = sami_events[3], to = sami_events[4], color = "white") %>%
    dyShading(from = sami_events[4], to = sami_events[5], color = "#CCCCCC") %>%
     dyShading(from = sami_events[5], to = sami_events[6], color = "#E0E0E0") %>%
-    dyShading(from = sami_events[6], to = sami_events[7], color = "CCCCCC") %>%
+    dyShading(from = sami_events[6], to = sami_events[7], color = "#CCCCCC") %>%
     dyShading(from = sami_events[7], to = sami_events[8], color = "white") %>%
-    dyShading(from = sami_events[8], to = sami_events[9], color = "E0E0E0") %>%
+    dyShading(from = sami_events[8], to = sami_events[9], color = "#E0E0E0") %>%
 
 
  # dyLegend(show = "always", width = 600)%>%
