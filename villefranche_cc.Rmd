@@ -14,6 +14,7 @@ output:
 ```{r setup, include=FALSE}
 rm(list = ls())
 require(tidyverse)
+require(data.table)
 require(readxl)
 require(pander)
 require(seacarb)
@@ -41,6 +42,7 @@ library("lmodel2") # modele II regression
 #library(plyr)
 library(pander)
 
+
 #define who is the user and define path
 if (Sys.getenv("LOGNAME") == "gattuso") {
   path = "../../pCloud\ Sync/Documents/experiments/exp153_carbonates_point_B/"
@@ -59,24 +61,6 @@ dc3 <- "#482173FF" #discrete color 1
 dc4 <- "#51C56AFF" #discrete color 2: 
 
 #################### Regression function 
-####
-# function regression plot with model II equation (MA) in title
-## Dans labs ajout de la variable TITRE pour mettre titre avant chaque graphe
-ggreg2 <- function (fit, xdata, ydata) { # x and y are the names of the variables
-  fit_data <- data.frame(fit$x, fit$y)
-  colnames(fit_data) = c(xdata, ydata)
-reg <- fit$regression.results[2,] #one selects MA only
-intercept <- reg$Intercept
-slope <- reg$Slope
-  ggplot(data = fit_data, aes_string(x = xdata, y = ydata)) + 
-  geom_point(size = 2, col = "blue") +
-  geom_abline(aes(intercept = fit$regression.results[2,2], slope = fit$regression.results[2,3]),
-              colour = "blue")  + 
-  labs(title = paste(titre,"\n Adj R2 = ", signif(fit$rsquare, 3),
-                     "; Intercept =", signif(intercept, 3),
-                     "; Slope =", signif(slope, 3),
-                     "; P =", signif(fit$P.param, 3)))
-}
 
 size_labs <- 3
 face_font <- "plain"
@@ -157,7 +141,8 @@ slope <- reg$Slope
   labs(title = paste(titre,"\n Adj R2 = ", signif(fit$rsquare, 3),
                      "; Intercept =", signif(intercept, 3),
                      "; Slope =", signif(slope, 3),
-                     "; P =", signif(fit$P.param, 3)))
+                     "; P =", signif(fit$P.param, 3),
+                     "; n =", (fit$n)))
 }
 
 mytheme <- theme_bw() +
@@ -230,7 +215,7 @@ dat50m <- dplyr::filter(dat_somlit, depth==50)
 typ <- c("cccccccdddddddddddddddddddd") # column type
 CO2_pr <- tbl_df(
   read_csv(file=paste0(path,"/data/CO2_data_PlateauRosa_daily_1993-2018_R.txt"), comment="#", col_types = typ)) %>%
-  tidyr::unite(col = date, year, month, day, sep = "-", remove = FALSE) %>% 
+  tidyr::unite(col = date, year, month, day, sep = "-", remove = FALSE) %>%
 dplyr::rename(dt = date,
               atm_CO2 = value) %>%
   dplyr::mutate(dt = ymd(dt),
@@ -241,8 +226,9 @@ duration <- CO2_pr$dt[length(CO2_pr$dt)] - CO2_pr$dt[1]
 CO2_pr_zoo <- zooreg(CO2_pr$atm_CO2, order.by=CO2_pr$dt) # create zoo time series
 CO2_pr_zoo_i <- na.approx(CO2_pr_zoo) # interpolate NAs
 CO2_pr_i <- tbl_df(fortify.zoo(CO2_pr_zoo_i)) %>% # change to df
-  dplyr::rename(dt=Index, atm_CO2=CO2_pr_zoo_i) %>%
-  dplyr::mutate(year=year(dt), monthd = month(dt), month = month(dt, label = TRUE, abbr = FALSE))
+  dplyr::rename(dt=Index, atm_CO2=CO2_pr_zoo_i) 
+CO2_pr_i <- CO2_pr_i %>%
+  dplyr::mutate(year=lubridate::year(dt), monthd = lubridate::month(dt), month = lubridate::month(dt, label = TRUE, abbr = FALSE))
 # # add seawater pCO2
 # tmp <- dplyr::ungroup(dat0m) %>%
 #   dplyr::select(sampling_date, mean_pCO2)
@@ -329,9 +315,9 @@ Note that contributors should be contacted for proper acknowledgement for use of
 There are missing data:
 
 ```{r kable NAs atm CO2}
-  kable(NAs_by_year, digits = c(0,0), padding = 0, caption="Number of days without atmospheric CO2 data.")
-
-# The rate of increase of seawater pCO2 (`r round(reg_var_1m[7,1], digit=2)` uatm per year) is much larger than that of atmospheric CO2 (`r round(reg_atm_CO2[1,1], digit=2)` ppm per year).
+   kable(NAs_by_year, digits = c(0,0), padding = 0, caption="Number of days without atmospheric CO2 data.")
+ 
+ # The rate of increase of seawater pCO2 (`r round(reg_var_1m[7,1], digit=2)` uatm per year) is much larger than that of atmospheric CO2 (`r round(reg_atm_CO2[1,1], digit=2)` ppm per year).
 ```
 
 ## **Plots**
@@ -339,10 +325,10 @@ There are missing data:
 Missing values were filled by linear interpolation between nearest values in order to obtain the same sampling number per year. The rate of increase was calculated by regressing the CO$_2$ concentration (`r round(reg_atm_CO2[1,1], digit=2)` ppm per year) and the anomaly (`r round(reg_atm_CO2[1,2], digit=2)` ppm per year) following subtraction of monthly means against time.
 
 
-![atm_CO2](figures/fig_atm_CO2.png)
+<!-- ![atm_CO2](figures/fig_atm_CO2.png) -->
 
 ```{r Table reg atm CO2}
-  kable(reg_atm_CO2, digits = c(2,2), caption="Regressions of atmospheric CO2 (time series and anomalies).")
+   kable(reg_atm_CO2, digits = c(2,2), caption="Regressions of atmospheric CO2 (time series and anomalies).")
 ```
 
 # **PAR EOL** {.tabset .tabset-pills}
@@ -1167,15 +1153,39 @@ Here, SOMLIT data were used and binded with EOL data by datetime in order to com
 # with pointB data from "rade hydro" 
 #eol_ptb <- left_join(mean_eol, continuous_discrete, by="datetime_round")
 #eol_ptb <- left_join(  mean_eol%>%select(datetime, mean_temp_eol), rh_B_Bplus_mean%>%select(datetime, mean_temp_rhB),  by="datetime")
+######
+# eol_ptb_1m <- full_join(rh_B_Bplus_1m_mean, eol , by="datetime")
+# #create the eol datetime column to keep the real hours and make the difference for the matching
+# eol_ptb_1m <- dplyr::mutate(eol_ptb_1m, datetime_eol=str_c(Date, " ", Heure) %>% parse_datetime(format="%Y%m%d %H%M%S"))
+# #####
 
-eol_ptb_1m <- full_join(rh_B_Bplus_1m_mean, eol , by="datetime")
+#combiine the 2 data frame by nearest time
+#put rh_B_Bplus_1m_mean as data.table
+rh_B_Bplus_1m_mean <- as.data.table(rh_B_Bplus_1m_mean)
+eol <- as.data.table(eol)
+# set datetime column as key column, easy to bind
+setkey( eol, datetime )
+setkey( rh_B_Bplus_1m_mean, datetime)
+# combine
+combined1 <- eol[ rh_B_Bplus_1m_mean, roll = "nearest" ]
 
-eol_ptb_temp_xts <- dplyr::select(eol_ptb_1m, datetime, mean_temp_rhB, temp_eol)
-eol_ptb_temp_xts <- as.xts(eol_ptb_temp_xts, order.by=eol_ptb_1m$datetime)
+# set a datetime column for eol
+combined1 <- dplyr::mutate(combined1, datetime_eol=str_c(Date, " ", Heure) %>% parse_datetime(format="%Y%m%d %H%M%S"))
+#calcul the difference between time and keep only closest time <6 hours.
+combined1 <- dplyr::mutate(combined1,delta_datetime = abs(difftime(datetime, datetime_eol, units="hours")))
+#keep only <6 hours
+combined1 <-  combined1    %>%    
+ dplyr::filter(delta_datetime <= 6)
+
+
+#eol_ptb_1m
+eol_ptb_temp_xts <- dplyr::select(combined1, datetime, mean_temp_rhB, temp_eol)
+eol_ptb_temp_xts <- as.xts(eol_ptb_temp_xts, order.by=combined1$datetime)
 
 dygraph(eol_ptb_temp_xts,  main = "Temperature 1m: EOL - PTB", ylab = "") %>%
-dySeries("mean_temp_rhB", drawPoints = TRUE, pointSize=4, label = "Temp PTB", color ="blue") %>%
-dySeries("temp_eol", drawPoints = TRUE, pointSize=2, label = "Temp EOL", color ="red")%>%
+dySeries("temp_eol", drawPoints = TRUE, pointSize=4, label = "Temp EOL", color ="red")%>%
+  dySeries("mean_temp_rhB", drawPoints = TRUE, pointSize=4, label = "Temp PTB", color ="blue") %>%
+
  # dyLegend(show = "always", width = 600)%>%
  #dyAxis("y",valueRange = c(-0.1, 0.11))%>%
 dyOptions(
@@ -1186,7 +1196,7 @@ dyOptions(
 
 ###
 titre <- "Temperature 1m: EOL vs Point B"
-fit <- lmodel2(data = eol_ptb_1m, mean_temp_rhB ~ temp_eol, nperm = 99)
+fit <- lmodel2(data = combined1, mean_temp_rhB ~ temp_eol, nperm = 99)
 p_Tptb_Teol <-  ggreg2(fit, "temp_eol", "mean_temp_rhB") +
   geom_abline(aes(slope= 1, intercept =0), linetype = 2) +
   mytheme+labs(x="T EOL", y="T Point B")
@@ -1197,10 +1207,28 @@ print(p_Tptb_Teol)
 ### **EOL / Point B 5 m**
 
 ```{r eol pointb 5m Temp, echo=FALSE, warning = FALSE, message = FALSE, out.width='100%'}
-eol_ptb_5m <- full_join(rh_B_Bplus_5m_mean, eol , by="datetime")
+#eol_ptb_5m <- full_join(rh_B_Bplus_5m_mean, eol , by="datetime")
 
-eol_ptb_temp_xts <- dplyr::select(eol_ptb_5m, datetime, mean_temp_rhB, temp_eol)
-eol_ptb_temp_xts <- as.xts(eol_ptb_temp_xts, order.by=eol_ptb_5m$datetime)
+###########
+#put rh_B_Bplus_1m_mean as data.table
+rh_B_Bplus_5m_mean <- as.data.table(rh_B_Bplus_5m_mean)
+# set datetime column as key column, easy to bind
+setkey( eol, datetime )
+setkey( rh_B_Bplus_5m_mean, datetime)
+# combine
+combined5 <- eol[ rh_B_Bplus_5m_mean, roll = "nearest" ]
+
+# set a datetime column for eol
+combined5 <- dplyr::mutate(combined5, datetime_eol=str_c(Date, " ", Heure) %>% parse_datetime(format="%Y%m%d %H%M%S"))
+#calcul the difference between time and keep only closest time <6 hours.
+combined5 <- dplyr::mutate(combined5,delta_datetime = abs(difftime(datetime, datetime_eol, units="hours")))
+#keep only <6 hours
+combined5 <-  combined5    %>%    
+ dplyr::filter(delta_datetime <= 6)
+########
+
+eol_ptb_temp_xts <- dplyr::select(combined5, datetime, mean_temp_rhB, temp_eol)
+eol_ptb_temp_xts <- as.xts(eol_ptb_temp_xts, order.by=combined5$datetime)
 
 dygraph(eol_ptb_temp_xts,  main = "Temperature 5m: EOL - PTB", ylab = "") %>%
 dySeries("mean_temp_rhB", drawPoints = TRUE, pointSize=4, label = "Temp PTB", color ="blue") %>%
@@ -1215,7 +1243,7 @@ dyOptions(
 
 ###
 titre <- "Temperature 5m: EOL vs Point B"
-fit <- lmodel2(data = eol_ptb_5m, mean_temp_rhB ~ temp_eol, nperm = 99)
+fit <- lmodel2(data = combined5, mean_temp_rhB ~ temp_eol, nperm = 99)
 p_Tptb_Teol_5m <-  ggreg2(fit, "temp_eol", "mean_temp_rhB") +
   geom_abline(aes(slope= 1, intercept =0), linetype = 2) +
   mytheme+labs(x="T EOL", y="T Point B")
@@ -1229,7 +1257,7 @@ print(p_Tptb_Teol_5m)
 
 ```{r eol pointb comp Sal, echo=FALSE, message=FALSE, warning=FALSE, out.width='100%'}
 
-eol_ptb_sal_xts <- dplyr::select(eol_ptb_1m, datetime, mean_sal_rhB, sal_eol)
+eol_ptb_sal_xts <- dplyr::select(combined1, datetime, mean_sal_rhB, sal_eol)
 eol_ptb_sal_xts <- as.xts(eol_ptb_sal_xts, order.by=eol_ptb_sal_xts$datetime)
 
 dygraph(eol_ptb_sal_xts,  main = "Salinity comparaison: EOL - PTB", ylab = "") %>%
@@ -1244,8 +1272,8 @@ dyOptions(
   dyRangeSelector(height = 30)
 
 ###
-titre <- "Salinity: EOL vs Point B"
-fit <- lmodel2(data = eol_ptb_1m, mean_sal_rhB ~ sal_eol, nperm = 99)
+titre <- "Salinity: EOL vs Point B 1m"
+fit <- lmodel2(data = combined1, mean_sal_rhB ~ sal_eol, nperm = 99)
 p_Sptb_Seol <-  ggreg2(fit, "sal_eol", "mean_sal_rhB") +
   geom_abline(aes(slope= 1, intercept =0), linetype = 2) +
   mytheme+labs(x="Sal EOL", y="Sal Point B")
@@ -1256,14 +1284,16 @@ print(p_Sptb_Seol)
 ### **EOL / Point B 5 m**
 
 ```{r comparaison sal 5m / sal EOL, echo=FALSE, warning = FALSE, message = FALSE, out.width='100%'}
-#add the EoL data.
-rh_B_Bplus_eol_5m_mean <-  left_join(rh_B_Bplus_5m_mean, eol, by="datetime")
+# #add the EoL data.
+# rh_B_Bplus_eol_5m_mean <-  left_join(rh_B_Bplus_5m_mean, eol, by="datetime")
+
+
 # delta between salinities pB / eol
-rh_B_Bplus_eol_5m_mean <- rh_B_Bplus_eol_5m_mean %>% 
+combined5 <- combined5 %>% 
   dplyr::mutate(sal_eol_rhB_detla = mean_sal_rhB - sal_eol, 
                 sal_eol_rhBplus_detla = mean_sal_rhBplus - sal_eol)
 #plot
-sal_rhB_eol_xts <- dplyr::select(rh_B_Bplus_eol_5m_mean,datetime, mean_sal_rhB, sal_eol, sal_eol_rhB_detla)
+sal_rhB_eol_xts <- dplyr::select(combined5,datetime, mean_sal_rhB, sal_eol, sal_eol_rhB_detla)
 sal_rhB_eol_xts <- as.xts(sal_rhB_eol_xts, order.by=sal_rhB_eol_xts$datetime)
 
 dygraph(sal_rhB_eol_xts,  main = "Salinity 5m EOL / radHydro", ylab = "") %>%
@@ -1277,6 +1307,15 @@ dyOptions(
     drawPoints = TRUE,
     useDataTimezone = TRUE)%>%
   dyRangeSelector(height = 30)
+
+
+titre <- "Salinity: EOL vs Point B 5m"
+fit <- lmodel2(data = combined5, mean_sal_rhB ~ sal_eol, nperm = 99)
+p_Sptb_Seol5 <-  ggreg2(fit, "sal_eol", "mean_sal_rhB") +
+  geom_abline(aes(slope= 1, intercept =0), linetype = 2) +
+  mytheme+labs(x="Sal EOL", y="Sal Point B")
+
+print(p_Sptb_Seol5)
 ```
 
 ## **Oxygen**
@@ -1291,12 +1330,27 @@ wink_1m <- winkler %>%
   dplyr::select(date,ptb_oxy_wink,qO, PROF_TEXT )%>%
    dplyr::filter(PROF_TEXT == "S" & ptb_oxy_wink < 20 )%>%
   dplyr::filter(qO == 2  |qO == 6)
+# put 09:00:00 as time (local time)
+wink_1m <- wink_1m %>%
+  dplyr::mutate(time = " 09:00:00") %>%
+  dplyr::mutate(datetime = paste0(date, time)) 
+wink_1m$datetime <- ymd_hms(wink_1m$datetime, tz="Europe/Paris")
+
+# convert local time to UTC time
+wink_1m$datetime <- with_tz(wink_1m$datetime, "UTC")
 
 # Adding the Winkler PointB 1m data perweek to eol_ptb_1m.
-eol_ptb_1m <- left_join(eol_ptb_1m, wink_1m , by="date")
+#eol_ptb_1m <- left_join(eol_ptb_1m, wink_1m , by="date")
+
+#put wink_1m as data.table
+wink_1m <- as.data.table(wink_1m)
+# set datetime column as key column, easy to bind
+setkey( wink_1m, datetime )
+# combine
+combined1 <- wink_1m[ combined1, roll = "nearest" ]
 
 # PLOT all oxyegen data as time series
-eol_ptb_oxy_xts <- dplyr::select(eol_ptb_1m, datetime, mean_oxy_mll_rhB, oxy_eol, ptb_oxy_wink)
+eol_ptb_oxy_xts <- dplyr::select(combined1, datetime, mean_oxy_mll_rhB, oxy_eol, ptb_oxy_wink)
 eol_ptb_oxy_xts <- as.xts(eol_ptb_oxy_xts, order.by=eol_ptb_oxy_xts$datetime)
 
 dygraph(eol_ptb_oxy_xts,  main = "Oxygen (ml/l) 1m: EOL - PTB (CTD + Winkler)", ylab = "") %>%
@@ -1313,21 +1367,21 @@ dyOptions(
 
 ###
 titre <- "Oxygen 1m: EOL vs Point B CTD"
-fit <- lmodel2(data = eol_ptb_1m, mean_oxy_mll_rhB ~ oxy_eol, nperm = 99)
+fit <- lmodel2(data = combined1, mean_oxy_mll_rhB ~ oxy_eol, nperm = 99)
 p_Oxyptb_Oxyeol <-  ggreg2(fit, "oxy_eol", "mean_oxy_mll_rhB") +
   geom_abline(aes(slope= 1, intercept =0), linetype = 2) +
   mytheme+labs(x="Oxy EOL", y="Oxy Point B CTD")
 print(p_Oxyptb_Oxyeol)
 
 titre <- "Oxygen 1m: EOL vs Point B Winkler"
-fit <- lmodel2(data = eol_ptb_1m, ptb_oxy_wink ~ oxy_eol, nperm = 99)
+fit <- lmodel2(data = combined1, ptb_oxy_wink ~ oxy_eol, nperm = 99)
 p_Oxyptbwink_Oxyeol <-  ggreg2(fit, "oxy_eol", "ptb_oxy_wink") +
   geom_abline(aes(slope= 1, intercept =0), linetype = 2) +
   mytheme+labs(x="Oxy EOL", y="Oxy Point B Winkler")
 print(p_Oxyptbwink_Oxyeol)
 
 titre <- "Oxygen 1m: Point B CTD vs Point B Winkler"
-fit <- lmodel2(data = eol_ptb_1m, ptb_oxy_wink ~ mean_oxy_mll_rhB, nperm = 99)
+fit <- lmodel2(data = combined1, ptb_oxy_wink ~ mean_oxy_mll_rhB, nperm = 99)
 p_Oxyptbwink_Oxyptb <-  ggreg2(fit, "mean_oxy_mll_rhB", "ptb_oxy_wink") +
   geom_abline(aes(slope= 1, intercept =0), linetype = 2) +
   mytheme+labs(x="Oxy Point B CTD", y="Oxy Point B Winkler")
