@@ -876,7 +876,8 @@ pangaea <- dplyr::select(dat, sampling_date, depth, CSC_flag, salinity,
                   pH_insi, ta, dic, OmegaCalcite,
                   OmegaAragonite, pCO2, fCO2) %>%
   dplyr::mutate(depth = replace(depth, depth == 0, 1),
-                sampling_date = as.character(dat$sampling_date))
+                sampling_date = as.character(dat$sampling_date)) %>% 
+  dplyr::filter(sampling_date <= as.POSIXct("2020-06-09"))
 #Prepare SOMLIT data 
 # pH25
 pH25 <- dat %>%   
