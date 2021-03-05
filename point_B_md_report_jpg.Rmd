@@ -911,7 +911,7 @@ write_csv(pangaea, file="output_jp/data/output_pangaea.csv")
 write_csv(vlfrcc, file="output_jp/data/output_vlfrcc.csv")
 write_rds(dat, "output_jp/data/output.rds")
 ```
-
+ 
 ```{r Uncertainties, include=FALSE, echo=FALSE}
 dat_no_NA <- dat %>%
   dplyr::filter(!is.na(ta) & !is.na(dic) & !is.na(salinity) & !is.na(temperature))
