@@ -494,12 +494,7 @@ dyOptions(
 
 ## **Logs - Informations**
 
-![](/https://docs.google.com/spreadsheets/d/e/2PACX-1vSmth08Q-Tw1RFznKeStSMJkKeFgYZac9WIR3ETLYWkznouAD6A-1n2uza1YgotXQ/pub?gid=798409504&single=true&output=pdf)
-
-test
-
-<embed src="https://docs.google.com/spreadsheets/d/e/2PACX-1vSmth08Q-Tw1RFznKeStSMJkKeFgYZac9WIR3ETLYWkznouAD6A-1n2uza1YgotXQ/pub?gid=798409504&single=true&output=pdf" width="500" height="375" 
- type="application/pdf">
+Put here log data files
 
 ## **Sunburst - TRIS info**
  
@@ -1159,7 +1154,7 @@ Here, SOMLIT data were used and binded with EOL data by datetime in order to com
 # eol_ptb_1m <- dplyr::mutate(eol_ptb_1m, datetime_eol=str_c(Date, " ", Heure) %>% parse_datetime(format="%Y%m%d %H%M%S"))
 # #####
 
-#combiine the 2 data frame by nearest time
+#combiine the 2 data frame by nearest time with package data.table
 #put rh_B_Bplus_1m_mean as data.table
 rh_B_Bplus_1m_mean <- as.data.table(rh_B_Bplus_1m_mean)
 eol <- as.data.table(eol)
