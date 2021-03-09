@@ -335,7 +335,7 @@ Missing values were filled by linear interpolation between nearest values in ord
 
 ## **Deployment**
 
-```{r PAR 10m}
+```{r PAR 10m, warning = FALSE}
 # YOU MUST add manually the "deployement"_calibrated" information in the end of the title file
 file_list_10m <- list.files(path  = paste0(path_par, "EOL_10m"), pattern = "*_calibrated.CSV")
 
@@ -356,7 +356,7 @@ colnames(par_10m)  <- c("datetime", "raw_value_10", "int_light_10")
 par_10m$datetime <- dmy_hms(par_10m$date)
 ```
 
-```{r PAR 20m}
+```{r PAR 20m, warning = FALSE}
  file_list_20m <- list.files(path  = paste0(path_par, "EOL_20m"), pattern = "*_calibrated.CSV")
 
 if (length(file_list_20m) == 0) {stop()} # script does not run if there is no data file to read
@@ -376,7 +376,7 @@ colnames(par_20m)  <- c("datetime", "raw_value_20", "int_light_20")
 par_20m$datetime <- dmy_hms(par_20m$date)
 ```
 
-```{r PAR 30m}
+```{r PAR 30m, warning = FALSE}
  file_list_30m <- list.files(path  = paste0(path_par, "EOL_30m"), pattern = "*_calibrated.CSV")
 
 if (length(file_list_30m) == 0) {stop()} # script does not run if there is no data file to read
