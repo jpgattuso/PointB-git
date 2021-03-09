@@ -352,8 +352,8 @@ for (file in file_list_10m){
   tidyr::unite(col="datetime", V2, V3, sep = " " )
 }
 
-colnames(par_10m)  <- c("datetime", "raw_value", "int_light")
-
+colnames(par_10m)  <- c("datetime", "raw_value_10", "int_light_10")
+par_10m$datetime <- dmy_hms(par_10m$date)
 ```
 
 ```{r PAR 20m}
@@ -372,7 +372,8 @@ for (file in file_list_20m){
   tidyr::unite(col="datetime", V2, V3, sep = " " )
 }
 
-colnames(par_20m)  <- c("datetime", "raw_value", "int_light")
+colnames(par_20m)  <- c("datetime", "raw_value_20", "int_light_20")
+par_20m$datetime <- dmy_hms(par_20m$date)
 ```
 
 ```{r PAR 30m}
@@ -391,8 +392,31 @@ for (file in file_list_30m){
   tidyr::unite(col="datetime", V2, V3, sep = " " )
 }
 
-colnames(par_30m)  <- c("datetime", "raw_value", "int_light")
+colnames(par_30m)  <- c("datetime", "raw_value_30", "int_light_30")
+par_30m$datetime <- dmy_hms(par_30m$date)
+
 ```
+
+```{r PAR plot}
+par_all <- left_join(par_10m,par_20m,by="datetime")
+par_all <- left_join(par_all,par_30m,by="datetime")
+par_all <- par_all[-1, ]
+
+par_xts <- dplyr::select(par_all, datetime, int_light_10, int_light_20, int_light_30)
+par_xts <- as.xts(par_xts, order.by=par_xts$datetime)
+
+dygraph(par_xts, ylab = "") %>%
+  dySeries("int_light_10", drawPoints = TRUE, pointSize=3, color="deepskyblue",label = "PAR 10m")%>%
+  dySeries("int_light_20", drawPoints = TRUE, pointSize=3, color = "dodgerblue", label = "PAR 20m") %>%
+  dySeries("int_light_30", drawPoints = TRUE, pointSize=3, color= "dodgerblue4", label = "PAR 30m") %>%
+ # dyLegend(show = "always", width = 600)%>%
+dyOptions(
+    drawGrid = TRUE,
+    drawPoints = TRUE,
+    useDataTimezone = TRUE)%>%
+  dyRangeSelector(height = 30)
+```
+
 # **seafet pH**  {.tabset .tabset-pills}
 
 ## **Deployment**
