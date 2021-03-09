@@ -397,7 +397,7 @@ par_30m$datetime <- dmy_hms(par_30m$date)
 
 ```
 
-```{r PAR plot}
+```{r PAR plot, warning = FALSE, out.width='100%'}
 par_all <- left_join(par_10m,par_20m,by="datetime")
 par_all <- left_join(par_all,par_30m,by="datetime")
 par_all <- par_all[-1, ]
