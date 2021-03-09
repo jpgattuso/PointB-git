@@ -1175,11 +1175,11 @@ combined1 <-  combined1    %>%
 
 ###
 #Fill ptB+ gaps with ptB data
-combined1 <- combiined1 %>% 
-  dplyr::mutate(mean_temp_rhBplus = ifelse(is.na(mean_temp_rhBplus), mean_temp_rhBplus, mean_temp_rhB),
-                mean_sal_rhBplus = ifelse(is.na(mean_sal_rhBplus), mean_sal_rhBplus, mean_sal_rhB),
-                mean_oxy_mll_rhBplus = ifelse(is.na(mean_oxy_mll_rhBplus), mean_oxy_mll_rhBplus, mean_oxy_mll_rhB),
-                mean_oxy_umolkg_rhBplus = ifelse(is.na(mean_oxy_umolkg_rhBplus), mean_oxy_umolkg_rhBplus, mean_oxy_umolkg_rhB))
+combined1 <- combined1 %>% 
+  dplyr::mutate(mean_temp_rhBplus = ifelse(is.na(mean_temp_rhBplus), mean_temp_rhB, mean_temp_rhBplus),
+                mean_sal_rhBplus = ifelse(is.na(mean_sal_rhBplus), mean_sal_rhB, mean_sal_rhBplus),
+                mean_oxy_mll_rhBplus = ifelse(is.na(mean_oxy_mll_rhBplus), mean_oxy_mll_rhB, mean_oxy_mll_rhBplus),
+                mean_oxy_umolkg_rhBplus = ifelse(is.na(mean_oxy_umolkg_rhBplus), mean_oxy_umolkg_rhB, mean_oxy_umolkg_rhBplus))
 ###
 
 #eol_ptb_1m
