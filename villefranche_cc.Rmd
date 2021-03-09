@@ -1136,7 +1136,8 @@ print(p_Oxyptbwink_Oxyptb)
 
 In this section, T, S and Oxy are compared between EOL and SOMLIT data. 
 
-- SOMLIT data are filtered in the "Rade hydro, SOMLIT" section above. Data from B station (not B+) and from 1 m to 3 m were selected. Time was not available at the beginning. We decided to add 09:00:00 as a local time. It was convert to UTC time in order to make the comparison with EOL data.
+- SOMLIT data are filtered in the "Rade hydro, SOMLIT" section above. Data from B+ station (not B) and from 1 m to 3 m were selected. Gaps in B+ data were filled up with B data.
+Time was not available at the beginning. We decided to add 09:00:00 as a local time. It was convert to UTC time in order to make the comparison with EOL data.
 
 Here, SOMLIT data were used and binded with EOL data by datetime in order to compare.
 
@@ -1172,14 +1173,22 @@ combined1 <- dplyr::mutate(combined1,delta_datetime = abs(difftime(datetime, dat
 combined1 <-  combined1    %>%    
  dplyr::filter(delta_datetime <= 6)
 
+###
+#Fill ptB+ gaps with ptB data
+combined1 <- combiined1 %>% 
+  dplyr::mutate(mean_temp_rhBplus = ifelse(is.na(mean_temp_rhBplus), mean_temp_rhBplus, mean_temp_rhB),
+                mean_sal_rhBplus = ifelse(is.na(mean_sal_rhBplus), mean_sal_rhBplus, mean_sal_rhB),
+                mean_oxy_mll_rhBplus = ifelse(is.na(mean_oxy_mll_rhBplus), mean_oxy_mll_rhBplus, mean_oxy_mll_rhB),
+                mean_oxy_umolkg_rhBplus = ifelse(is.na(mean_oxy_umolkg_rhBplus), mean_oxy_umolkg_rhBplus, mean_oxy_umolkg_rhB))
+###
 
 #eol_ptb_1m
-eol_ptb_temp_xts <- dplyr::select(combined1, datetime, mean_temp_rhB, temp_eol)
+eol_ptb_temp_xts <- dplyr::select(combined1, datetime, mean_temp_rhBplus, temp_eol)
 eol_ptb_temp_xts <- as.xts(eol_ptb_temp_xts, order.by=combined1$datetime)
 
 dygraph(eol_ptb_temp_xts,  main = "Temperature 1m: EOL - PTB", ylab = "") %>%
 dySeries("temp_eol", drawPoints = TRUE, pointSize=4, label = "Temp EOL", color ="red")%>%
-  dySeries("mean_temp_rhB", drawPoints = TRUE, pointSize=4, label = "Temp PTB", color ="blue") %>%
+  dySeries("mean_temp_rhBplus", drawPoints = TRUE, pointSize=4, label = "Temp PTB+", color ="blue") %>%
 
  # dyLegend(show = "always", width = 600)%>%
  #dyAxis("y",valueRange = c(-0.1, 0.11))%>%
@@ -1190,11 +1199,11 @@ dyOptions(
   dyRangeSelector(height = 30)
 
 ###
-titre <- "Temperature 1m: EOL vs Point B"
-fit <- lmodel2(data = combined1, mean_temp_rhB ~ temp_eol, nperm = 99)
-p_Tptb_Teol <-  ggreg2(fit, "temp_eol", "mean_temp_rhB") +
+titre <- "Temperature 1m: EOL vs Point B+"
+fit <- lmodel2(data = combined1, mean_temp_rhBplus ~ temp_eol, nperm = 99)
+p_Tptb_Teol <-  ggreg2(fit, "temp_eol", "mean_temp_rhBplus") +
   geom_abline(aes(slope= 1, intercept =0), linetype = 2) +
-  mytheme+labs(x="T EOL", y="T Point B")
+  mytheme+labs(x="T EOL", y="T Point B+")
 
 print(p_Tptb_Teol)
 ```
@@ -1222,11 +1231,11 @@ combined5 <-  combined5    %>%
  dplyr::filter(delta_datetime <= 6)
 ########
 
-eol_ptb_temp_xts <- dplyr::select(combined5, datetime, mean_temp_rhB, temp_eol)
+eol_ptb_temp_xts <- dplyr::select(combined5, datetime, mean_temp_rhBplus, temp_eol)
 eol_ptb_temp_xts <- as.xts(eol_ptb_temp_xts, order.by=combined5$datetime)
 
-dygraph(eol_ptb_temp_xts,  main = "Temperature 5m: EOL - PTB", ylab = "") %>%
-dySeries("mean_temp_rhB", drawPoints = TRUE, pointSize=4, label = "Temp PTB", color ="blue") %>%
+dygraph(eol_ptb_temp_xts,  main = "Temperature 5m: EOL - ptB+", ylab = "") %>%
+dySeries("mean_temp_rhBplus", drawPoints = TRUE, pointSize=4, label = "Temp ptB+", color ="blue") %>%
 dySeries("temp_eol", drawPoints = TRUE, pointSize=2, label = "Temp EOL", color ="red")%>%
  # dyLegend(show = "always", width = 600)%>%
  #dyAxis("y",valueRange = c(-0.1, 0.11))%>%
@@ -1237,11 +1246,11 @@ dyOptions(
   dyRangeSelector(height = 30)
 
 ###
-titre <- "Temperature 5m: EOL vs Point B"
-fit <- lmodel2(data = combined5, mean_temp_rhB ~ temp_eol, nperm = 99)
-p_Tptb_Teol_5m <-  ggreg2(fit, "temp_eol", "mean_temp_rhB") +
+titre <- "Temperature 5m: EOL vs ptB+"
+fit <- lmodel2(data = combined5, mean_temp_rhBplus ~ temp_eol, nperm = 99)
+p_Tptb_Teol_5m <-  ggreg2(fit, "temp_eol", "mean_temp_rhBplus") +
   geom_abline(aes(slope= 1, intercept =0), linetype = 2) +
-  mytheme+labs(x="T EOL", y="T Point B")
+  mytheme+labs(x="T EOL", y="T Point B+")
 
 print(p_Tptb_Teol_5m)
 ```
@@ -1252,11 +1261,11 @@ print(p_Tptb_Teol_5m)
 
 ```{r eol pointb comp Sal, echo=FALSE, message=FALSE, warning=FALSE, out.width='100%'}
 
-eol_ptb_sal_xts <- dplyr::select(combined1, datetime, mean_sal_rhB, sal_eol)
+eol_ptb_sal_xts <- dplyr::select(combined1, datetime, mean_sal_rhBplus, sal_eol)
 eol_ptb_sal_xts <- as.xts(eol_ptb_sal_xts, order.by=eol_ptb_sal_xts$datetime)
 
-dygraph(eol_ptb_sal_xts,  main = "Salinity comparaison: EOL - PTB", ylab = "") %>%
-    dySeries("mean_sal_rhB", drawPoints = TRUE, pointSize=4, label = "Sal PTB", color ="blue") %>%
+dygraph(eol_ptb_sal_xts,  main = "Salinity comparaison: EOL - ptB+", ylab = "") %>%
+    dySeries("mean_sal_rhBplus", drawPoints = TRUE, pointSize=4, label = "Sal ptB+", color ="blue") %>%
 dySeries("sal_eol", drawPoints = TRUE, pointSize=2, label = "Sal EOL", color ="red")%>%
  # dyLegend(show = "always", width = 600)%>%
   #dyAxis("y",valueRange = c(-0.1, 0.11))%>%
@@ -1267,11 +1276,11 @@ dyOptions(
   dyRangeSelector(height = 30)
 
 ###
-titre <- "Salinity: EOL vs Point B 1m"
-fit <- lmodel2(data = combined1, mean_sal_rhB ~ sal_eol, nperm = 99)
-p_Sptb_Seol <-  ggreg2(fit, "sal_eol", "mean_sal_rhB") +
+titre <- "Salinity: EOL vs ptB+ 1m"
+fit <- lmodel2(data = combined1, mean_sal_rhBplus ~ sal_eol, nperm = 99)
+p_Sptb_Seol <-  ggreg2(fit, "sal_eol", "mean_sal_rhBplus") +
   geom_abline(aes(slope= 1, intercept =0), linetype = 2) +
-  mytheme+labs(x="Sal EOL", y="Sal Point B")
+  mytheme+labs(x="Sal EOL", y="Sal Point B+")
 
 print(p_Sptb_Seol)
 ```
@@ -1288,13 +1297,13 @@ combined5 <- combined5 %>%
   dplyr::mutate(sal_eol_rhB_detla = mean_sal_rhB - sal_eol, 
                 sal_eol_rhBplus_detla = mean_sal_rhBplus - sal_eol)
 #plot
-sal_rhB_eol_xts <- dplyr::select(combined5,datetime, mean_sal_rhB, sal_eol, sal_eol_rhB_detla)
+sal_rhB_eol_xts <- dplyr::select(combined5,datetime, mean_sal_rhBplus, sal_eol, sal_eol_rhBplus_detla)
 sal_rhB_eol_xts <- as.xts(sal_rhB_eol_xts, order.by=sal_rhB_eol_xts$datetime)
 
-dygraph(sal_rhB_eol_xts,  main = "Salinity 5m EOL / radHydro", ylab = "") %>%
-    dySeries("mean_sal_rhB", drawPoints = TRUE, pointSize=4, label = "Sal rhB", color ="blue", axis="y2") %>%
+dygraph(sal_rhB_eol_xts,  main = "Salinity 5m EOL / ptB+", ylab = "") %>%
+    dySeries("mean_sal_rhBplus", drawPoints = TRUE, pointSize=4, label = "Sal ptB+", color ="blue", axis="y2") %>%
    dySeries("sal_eol", drawPoints = TRUE, pointSize=2, label = "Sal EOL", color="red", axis="y2")%>%
-     dySeries("sal_eol_rhB_detla", drawPoints = TRUE, pointSize=2, label = "delta", color="black")%>%
+     dySeries("sal_eol_rhBplus_detla", drawPoints = TRUE, pointSize=2, label = "delta", color="black")%>%
  # dyLegend(show = "always", width = 600)%>%
   #dyAxis("y",valueRange = c(-0.1, 0.11))%>%
 dyOptions(
@@ -1304,11 +1313,11 @@ dyOptions(
   dyRangeSelector(height = 30)
 
 
-titre <- "Salinity: EOL vs Point B 5m"
-fit <- lmodel2(data = combined5, mean_sal_rhB ~ sal_eol, nperm = 99)
-p_Sptb_Seol5 <-  ggreg2(fit, "sal_eol", "mean_sal_rhB") +
+titre <- "Salinity: EOL vs Point B+ 5m"
+fit <- lmodel2(data = combined5, mean_sal_rhBplus ~ sal_eol, nperm = 99)
+p_Sptb_Seol5 <-  ggreg2(fit, "sal_eol", "mean_sal_rhBplus") +
   geom_abline(aes(slope= 1, intercept =0), linetype = 2) +
-  mytheme+labs(x="Sal EOL", y="Sal Point B")
+  mytheme+labs(x="Sal EOL", y="Sal Point B+")
 
 print(p_Sptb_Seol5)
 ```
@@ -1345,11 +1354,11 @@ setkey( wink_1m, datetime )
 combined1 <- wink_1m[ combined1, roll = "nearest" ]
 
 # PLOT all oxyegen data as time series
-eol_ptb_oxy_xts <- dplyr::select(combined1, datetime, mean_oxy_mll_rhB, oxy_eol, ptb_oxy_wink)
+eol_ptb_oxy_xts <- dplyr::select(combined1, datetime, mean_oxy_mll_rhBplus, oxy_eol, ptb_oxy_wink)
 eol_ptb_oxy_xts <- as.xts(eol_ptb_oxy_xts, order.by=eol_ptb_oxy_xts$datetime)
 
-dygraph(eol_ptb_oxy_xts,  main = "Oxygen (ml/l) 1m: EOL - PTB (CTD + Winkler)", ylab = "") %>%
-dySeries("mean_oxy_mll_rhB", drawPoints = TRUE, pointSize=4, label = "Oxy PTB", color ="blue") %>%
+dygraph(eol_ptb_oxy_xts,  main = "Oxygen (ml/l) 1m: EOL - ptB+ - Winkler ptB)", ylab = "") %>%
+dySeries("mean_oxy_mll_rhBplus", drawPoints = TRUE, pointSize=4, label = "Oxy ptB+", color ="blue") %>%
 dySeries("oxy_eol", drawPoints = TRUE, pointSize=2, label = "Oxy EOL", color ="red")%>%
 dySeries("ptb_oxy_wink", drawPoints = TRUE, pointSize=2, label = "Oxy winkler PTB", color ="green")%>%
  # dyLegend(show = "always", width = 600)%>%
@@ -1363,9 +1372,9 @@ dyOptions(
 ###
 titre <- "Oxygen 1m: EOL vs Point B CTD"
 fit <- lmodel2(data = combined1, mean_oxy_mll_rhB ~ oxy_eol, nperm = 99)
-p_Oxyptb_Oxyeol <-  ggreg2(fit, "oxy_eol", "mean_oxy_mll_rhB") +
+p_Oxyptb_Oxyeol <-  ggreg2(fit, "oxy_eol", "mean_oxy_mll_rhBplus") +
   geom_abline(aes(slope= 1, intercept =0), linetype = 2) +
-  mytheme+labs(x="Oxy EOL", y="Oxy Point B CTD")
+  mytheme+labs(x="Oxy EOL", y="Oxy Point B+ CTD")
 print(p_Oxyptb_Oxyeol)
 
 titre <- "Oxygen 1m: EOL vs Point B Winkler"
@@ -1375,11 +1384,11 @@ p_Oxyptbwink_Oxyeol <-  ggreg2(fit, "oxy_eol", "ptb_oxy_wink") +
   mytheme+labs(x="Oxy EOL", y="Oxy Point B Winkler")
 print(p_Oxyptbwink_Oxyeol)
 
-titre <- "Oxygen 1m: Point B CTD vs Point B Winkler"
-fit <- lmodel2(data = combined1, ptb_oxy_wink ~ mean_oxy_mll_rhB, nperm = 99)
-p_Oxyptbwink_Oxyptb <-  ggreg2(fit, "mean_oxy_mll_rhB", "ptb_oxy_wink") +
+titre <- "Oxygen 1m: Point B+ CTD vs Point B Winkler"
+fit <- lmodel2(data = combined1, ptb_oxy_wink ~ mean_oxy_mll_rhBplus, nperm = 99)
+p_Oxyptbwink_Oxyptb <-  ggreg2(fit, "mean_oxy_mll_rhBplus", "ptb_oxy_wink") +
   geom_abline(aes(slope= 1, intercept =0), linetype = 2) +
-  mytheme+labs(x="Oxy Point B CTD", y="Oxy Point B Winkler")
+  mytheme+labs(x="Oxy Point B+ CTD", y="Oxy Point B Winkler")
 print(p_Oxyptbwink_Oxyptb)
 ```
 
