@@ -876,7 +876,8 @@ pangaea <- dplyr::select(dat, sampling_date, depth, CSC_flag, salinity,
                   pH_insi, ta, dic, OmegaCalcite,
                   OmegaAragonite, pCO2, fCO2) %>%
   dplyr::mutate(depth = replace(depth, depth == 0, 1),
-                sampling_date = as.character(dat$sampling_date))
+                sampling_date = as.character(dat$sampling_date)) %>% 
+  dplyr::filter(sampling_date <= as.POSIXct("2020-06-09"))
 #Prepare SOMLIT data 
 # pH25
 pH25 <- dat %>%   
@@ -910,7 +911,7 @@ write_csv(pangaea, file="output_jp/data/output_pangaea.csv")
 write_csv(vlfrcc, file="output_jp/data/output_vlfrcc.csv")
 write_rds(dat, "output_jp/data/output.rds")
 ```
-
+ 
 ```{r Uncertainties, include=FALSE, echo=FALSE}
 dat_no_NA <- dat %>%
   dplyr::filter(!is.na(ta) & !is.na(dic) & !is.na(salinity) & !is.na(temperature))
