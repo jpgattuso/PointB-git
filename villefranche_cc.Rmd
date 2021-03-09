@@ -709,7 +709,7 @@ saveRDS(eol, file = paste0(path, "data/eol/eol_data.rds"))
 
 Time is not included in dataset. Thus, we decided to add a local time of 09:00, then converted in UTC.
 
-```{r ctd_hydro, echo=FALSE, warning = FALSE, message = FALSE, out.width='100%'}
+```{r ctd_hydro, echo=TRUE, warning = FALSE, message = FALSE, out.width='100%'}
 dat <-  read_delim("http://www.obs-vlfr.fr/data/files/~radehydro/radehydro_ctd.csv.gz", delim = ",", col_names = TRUE, col_types = cols(id = "c", date = "D", date_time = "T", fluo_calib = "d", fluorescence="d", oxygen_mll="d", oxygen_sat="d", oxygen_umolkg="d", par="d", v0="d", v2="d", v3="d"), na = c("NA")) %>%
     dplyr::select(-date_time) %>%
 #  dplyr::mutate(date = dmy(date)) %>%
@@ -742,7 +742,7 @@ dat <- bind_rows(dat, supp) %>%
   arrange(date)
 ```
 
-```{r ctd_hydro 1m, echo=FALSE, warning = FALSE, message = FALSE, out.width='100%'}
+```{r ctd_hydro 1m, echo=TRUE, warning = FALSE, message = FALSE, out.width='100%'}
 # select surface (1 m to 3 m) for B or B+ data
 # B
 rh_B_1m <- dat %>%
@@ -783,7 +783,7 @@ rh_B_Bplus_1m_mean$datetime <- ymd_hms(rh_B_Bplus_1m_mean$datetime, tz="Europe/P
 rh_B_Bplus_1m_mean$datetime <- with_tz(rh_B_Bplus_1m_mean$datetime, "UTC")
 ```
 
-```{r ctd_hydro 50m, echo=FALSE, warning = FALSE, message = FALSE, out.width='100%'}
+```{r ctd_hydro 50m, echo=TRUE, warning = FALSE, message = FALSE, out.width='100%'}
 # select deep (49 m to 51 m) for B or B+ data
 # B
 rh_B_50m <- dat %>%
@@ -824,7 +824,7 @@ rh_B_Bplus_50m_mean$datetime <- with_tz(rh_B_Bplus_50m_mean$datetime, "UTC")
 
 ```
 
-```{r ctd_hydro 5m, echo=FALSE, warning = FALSE, message = FALSE, out.width='100%'}
+```{r ctd_hydro 5m, echo=TRUE, warning = FALSE, message = FALSE, out.width='100%'}
 # select deep 5 m for B or B+ data
 # B
 rh_B_5m <- dat %>%
@@ -868,7 +868,7 @@ rh_B_Bplus_5m_mean$datetime <- with_tz(rh_B_Bplus_5m_mean$datetime, "UTC")
 
 ### **1 m**
 
-```{r plot ctd_hydro 1m Temp, echo=FALSE, warning = FALSE, message = FALSE, out.width='100%'}
+```{r plot ctd_hydro 1m Temp, echo=TRUE, warning = FALSE, message = FALSE, out.width='100%'}
 ## Temp 1m
 rh_temp_xts <- dplyr::select(rh_B_Bplus_1m_mean, date, mean_temp_rhBplus, mean_temp_rhB)
 rh_temp_xts <- as.xts(rh_temp_xts, order.by=rh_temp_xts$date)
@@ -895,7 +895,7 @@ print(p_rh_temp)
 
 ### **5 m**
 
-```{r plot ctd_hydro 5m Temp, echo=FALSE, warning = FALSE, message = FALSE, out.width='100%'}
+```{r plot ctd_hydro 5m Temp, echo=TRUE, warning = FALSE, message = FALSE, out.width='100%'}
 ## Temp 5m
 rh_temp_xts <- dplyr::select(rh_B_Bplus_5m_mean, date, mean_temp_rhBplus, mean_temp_rhB)
 rh_temp_xts <- as.xts(rh_temp_xts, order.by=rh_temp_xts$date)
@@ -921,7 +921,7 @@ print(p_rh_temp)
 
 ### **50 m**
 
-```{r plot ctd_hydro 50m Temp, echo=FALSE, warning = FALSE, message = FALSE, out.width='100%'}
+```{r plot ctd_hydro 50m Temp, echo=TRUE, warning = FALSE, message = FALSE, out.width='100%'}
 ## Temp 50m
 rh_temp_xts <- dplyr::select(rh_B_Bplus_50m_mean, date, mean_temp_rhBplus, mean_temp_rhB)
 rh_temp_xts <- as.xts(rh_temp_xts, order.by=rh_temp_xts$date)
@@ -948,7 +948,7 @@ print(p_rh_temp)
 ## **Salinity**
 
 ### **1 m**
-```{r plot ctd_hydro 1m Sal, echo=FALSE, warning = FALSE, message = FALSE, out.width='100%'}
+```{r plot ctd_hydro 1m Sal, echo=TRUE, warning = FALSE, message = FALSE, out.width='100%'}
 ## Sal 1m
 rh_sal_xts <- dplyr::select(rh_B_Bplus_1m_mean, date, mean_sal_rhBplus, mean_sal_rhB)
 rh_sal_xts <- as.xts(rh_sal_xts, order.by=rh_sal_xts$date)
@@ -976,7 +976,7 @@ print(p_rh_sal)
 
 ### **5 m**
 
-```{r plot ctd_hydro 5m Sal, echo=FALSE, warning = FALSE, message = FALSE, out.width='100%'}
+```{r plot ctd_hydro 5m Sal, echo=TRUE, warning = FALSE, message = FALSE, out.width='100%'}
 ## Sal
 rh_sal_xts <- dplyr::select(rh_B_Bplus_5m_mean, date, mean_sal_rhBplus, mean_sal_rhB)
 rh_sal_xts <- as.xts(rh_sal_xts, order.by=rh_sal_xts$date)
@@ -1003,7 +1003,7 @@ print(p_rh_sal)
 
 ### **50 m**
 
-```{r plot ctd_hydro 50m Sal, echo=FALSE, warning = FALSE, message = FALSE, out.width='100%'}
+```{r plot ctd_hydro 50m Sal, echo=TRUE, warning = FALSE, message = FALSE, out.width='100%'}
 ## Sal
 rh_sal_xts <- dplyr::select(rh_B_Bplus_50m_mean, date, mean_sal_rhBplus, mean_sal_rhB)
 rh_sal_xts <- as.xts(rh_sal_xts, order.by=rh_sal_xts$date)
@@ -1032,7 +1032,7 @@ print(p_rh_sal)
 
 ### **1 m**
 
-```{r plot ctd_hydro 1m Oxy, echo=FALSE, warning = FALSE, message = FALSE, out.width='100%'}
+```{r plot ctd_hydro 1m Oxy, echo=TRUE, warning = FALSE, message = FALSE, out.width='100%'}
 ## Oxy umolkg 1m
 rh_oxyumolkg_xts <- dplyr::select(rh_B_Bplus_1m_mean, date, mean_oxy_umolkg_rhBplus, mean_oxy_umolkg_rhB)
 rh_oxyumolkg_xts <- as.xts(rh_oxyumolkg_xts, order.by=rh_oxyumolkg_xts$date)
@@ -1059,7 +1059,7 @@ print(p_rh_oxy_umolkg)
 
 ### **5 m**
 
-```{r plot ctd_hydro 5m Oxy, echo=FALSE, warning = FALSE, message = FALSE, out.width='100%'}
+```{r plot ctd_hydro 5m Oxy, echo=TRUE, warning = FALSE, message = FALSE, out.width='100%'}
 ## Oxy umolkg 5m
 rh_oxyumolkg_xts <- dplyr::select(rh_B_Bplus_5m_mean, date, mean_oxy_umolkg_rhBplus, mean_oxy_umolkg_rhB)
 rh_oxyumolkg_xts <- as.xts(rh_oxyumolkg_xts, order.by=rh_oxyumolkg_xts$date)
@@ -1086,7 +1086,7 @@ print(p_rh_oxy_umolkg)
 
 ### **50 m**
 
-```{r plot ctd_hydro 50m Oxy, echo=FALSE, warning = FALSE, message = FALSE, out.width='100%'}
+```{r plot ctd_hydro 50m Oxy, echo=TRUE, warning = FALSE, message = FALSE, out.width='100%'}
 ## Oxy umolkg 50m
 rh_oxyumolkg_xts <- dplyr::select(rh_B_Bplus_50m_mean, date, mean_oxy_umolkg_rhBplus, mean_oxy_umolkg_rhB)
 rh_oxyumolkg_xts <- as.xts(rh_oxyumolkg_xts, order.by=rh_oxyumolkg_xts$date)
@@ -1111,7 +1111,7 @@ p_rh_oxy_umolkg <-  ggreg2(fit, "mean_oxy_umolkg_rhB", "mean_oxy_umolkg_rhBplus"
 print(p_rh_oxy_umolkg)
 ```
 
-```{r eol pointb Oxy 50m, echo=FALSE, warning = FALSE, message = FALSE, out.width='100%'}
+```{r eol pointb Oxy 50m, echo=TRUE, warning = FALSE, message = FALSE, out.width='100%'}
 # Reading the Winkler PointB data perweek.
 winkler<- tbl_df(
   read_delim(file=paste0(path,"/data/data_ptb_winkler.txt"), 
@@ -1169,7 +1169,7 @@ Here, SOMLIT data were used and binded with EOL data by datetime in order to com
 
 ### **EOL / Point B 1 m**
 
-```{r eol pointb 1m Temp, echo=FALSE, warning = FALSE, message = FALSE, out.width='100%'}
+```{r eol pointb 1m Temp, echo=TRUE, warning = FALSE, message = FALSE, out.width='100%'}
 # with pointB data from "rade hydro" 
 #eol_ptb <- left_join(mean_eol, continuous_discrete, by="datetime_round")
 #eol_ptb <- left_join(  mean_eol%>%select(datetime, mean_temp_eol), rh_B_Bplus_mean%>%select(datetime, mean_temp_rhB),  by="datetime")
@@ -1234,7 +1234,7 @@ print(p_Tptb_Teol)
 
 ### **EOL / Point B 5 m**
 
-```{r eol pointb 5m Temp, echo=FALSE, warning = FALSE, message = FALSE, out.width='100%'}
+```{r eol pointb 5m Temp, echo=TRUE, warning = FALSE, message = FALSE, out.width='100%'}
 #eol_ptb_5m <- full_join(rh_B_Bplus_5m_mean, eol , by="datetime")
 
 ###########
@@ -1283,7 +1283,7 @@ print(p_Tptb_Teol_5m)
 
 ### **EOL / Point B 1 m**
 
-```{r eol pointb comp Sal, echo=FALSE, message=FALSE, warning=FALSE, out.width='100%'}
+```{r eol pointb comp Sal, echo=TRUE, message=FALSE, warning=FALSE, out.width='100%'}
 
 eol_ptb_sal_xts <- dplyr::select(combined1, datetime, mean_sal_rhBplus, sal_eol)
 eol_ptb_sal_xts <- as.xts(eol_ptb_sal_xts, order.by=eol_ptb_sal_xts$datetime)
@@ -1311,7 +1311,7 @@ print(p_Sptb_Seol)
 
 ### **EOL / Point B 5 m**
 
-```{r comparaison sal 5m / sal EOL, echo=FALSE, warning = FALSE, message = FALSE, out.width='100%'}
+```{r comparaison sal 5m / sal EOL, echo=TRUE, warning = FALSE, message = FALSE, out.width='100%'}
 # #add the EoL data.
 # rh_B_Bplus_eol_5m_mean <-  left_join(rh_B_Bplus_5m_mean, eol, by="datetime")
 
@@ -1350,7 +1350,7 @@ print(p_Sptb_Seol5)
 
 ###  **EOL / Point B 1 m**
 
-```{r eol pointb Oxy 1m, echo=FALSE, warning = FALSE, message = FALSE, out.width='100%'}
+```{r eol pointb Oxy 1m, echo=TRUE, warning = FALSE, message = FALSE, out.width='100%'}
 # Reading the Winkler dataframe created before.
 # Select 1m ptb_oxy_wink data 
 wink_1m <- winkler %>%
