@@ -154,50 +154,6 @@ mytheme <- theme_bw() +
 )
 ```
 
-# **Material and methods** {.tabset .tabset-pills}
-
-Samples were collected from XX-l Niskin bottles, transferred to glass bottles, overfilled and then poisoned to maintain the integrity of the sample chemistry as recommended by Dickson et al. (2007).  The _Service National d'Analyse des Paramètres Océaniques du CO$_2$_, at the _Université Pierre et Marie Curie_, determined the concentration of dissolved inorganic carbon ($C_\mathrm{T}$) and total alkalinity ($A_\mathrm{T}$), by potentiometric titration, following the methods described by (Edmond1970) and (DOE1994).
-
-Calculations of the carbonate system parameters were performed using the R package \emph{seacarb} (Lavigne2014). The total concentrations of silicate and phosphate were used when available. Otherwise they were set to 0. The total boron concentration was calculated using the formulation of (Lee2010b). The following constants were used: $K_1$ and $K_2$ from (Lueker2000, $K_f$ from (Perez1987b) and $K_s$ from (Dickson1990).
-
-## **Data available and quality control**
-All data are used in the following; none were eliminated according to the quality flags (\textbf{this remains to be done}).
-
-## **Les codes du SNAPOCO2**
-
-Les "quality flags" "qflag\_sample", "qflag\_ta", "qflag\_DIC" qui apparaissent dans les fichiers de données du LOCEAN sont établis sur la base des codes WOCE (World Ocean Circulation Experiment) : WOCE Operations Manual (1994), WHP Office Report 90-1, WOCE Report N.67/91, p52-53. Woods Hole, Mass., USA.
-
-- Données AT et CT et water sample quality flag : (i.e pour les étapes : "qflag\_ta"et "qflag\_DIC")
-  - flag 0 : Dosage avorté (échantillon perdu),
-	- flag 2 : dosage correct,
-	- flag 3 : dosage douteux
-
-- Codification quality flag réception flacon : (i.e pour l'étape : "qflag\_sample")
-	- A : OK;
-	- B : mal rempli;
-	- C : flacon cassé;
-	- D : bouchon cassé;
-	- E : dépôt, particule dans le flacon;
-	- F : sel au goulot;
-	- G : manque de graisse au goulot;
-	- H : pas d'élastique.
-
-
-## **Les codes de Villefranche (inspirés des codes SOMLIT)**
-
-- Codification qflag\_taking concernant le prélèvement des échantillons en mer : (i.e pour l'étape : "qflag\_taking")
-	- 0 : ancien code qui signifie OK
-	- 2 : nouveau code qui signifie OK
-	- 3 : prélèvement douteux
-	- 4 : prélèvement mauvais
-
-- Codification qflag\_final, qui correspond au code "final" des résultats TA et DIC (i.e pour l'étape : "qflag\_final"). Comme TA et DIC sont déterminés par la même titration, qflag\_ta et qflag\_DIC devrait être identiques. Ce n'est pas le cas en décembre 2009 où il manque des qflag\_DIC. On a alors considéré que qflag\_final = qflag\_ta.
-
-	- 0 : Dosage avorté (échantillon perdu)
-	- 2 : résultat OK
-	- 3 : résultat douteux
-	- 4 : résultat mauvais
-
 ```{r read data in output_vlfrcc, include=FALSE}
 dat_somlit <- readr::read_csv(file = "output_jp/data/output_vlfrcc.csv", col_names = TRUE, na = c("NA", "NaN"))
 
