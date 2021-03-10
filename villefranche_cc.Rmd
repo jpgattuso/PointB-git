@@ -513,7 +513,7 @@ saveRDS(eol, file = paste0(path, "data/eol/eol_data.rds"))
 
 Time is not included in dataset. Thus, we decided to add a local time of 09:00, then converted in UTC.
 
-```{r ctd_hydro, echo=TRUE, warning = FALSE, message = FALSE, out.width='100%'}
+```{r ctd_hydro, echo=TRUE, warning = FALSE, message = FALSE}
 dat <-  read_delim("http://www.obs-vlfr.fr/data/files/~radehydro/radehydro_ctd.csv.gz", delim = ",", col_names = TRUE, col_types = cols(id = "c", date = "D", date_time = "T", fluo_calib = "d", fluorescence="d", oxygen_mll="d", oxygen_sat="d", oxygen_umolkg="d", par="d", v0="d", v2="d", v3="d"), na = c("NA")) %>%
     dplyr::select(-date_time) %>%
 #  dplyr::mutate(date = dmy(date)) %>%
@@ -745,12 +745,12 @@ print(p_rh_sal)
 
 ```{r plot ctd_hydro 1m Oxy, echo=TRUE, warning = FALSE, message = FALSE, out.width='100%'}
 ## Oxy umolkg 1m
-rh_oxyumolkg_xts <- dplyr::select(rh_B_Bplus_1m_mean, date, mean_oxy_umolkg_rhBplus, mean_oxy_umolkg_rhB)
-rh_oxyumolkg_xts <- as.xts(rh_oxyumolkg_xts, order.by=rh_oxyumolkg_xts$date)
+rh_oxymll_xts <- dplyr::select(rh_B_Bplus_1m_mean, date, mean_oxy_mll_rhBplus, mean_oxy_mll_rhB)
+rh_oxymll_xts <- as.xts(rh_oxymll_xts, order.by=rh_oxymll_xts$date)
 
-dygraph(rh_oxyumolkg_xts,  main = "Oxygen (umol/kg) 1m Rade Hydro: B / B+", ylab = "") %>%
-    dySeries("mean_oxy_umolkg_rhB", drawPoints = TRUE, pointSize=4, label = "Oxy_umolkg B", color ="blue") %>%
-   dySeries("mean_oxy_umolkg_rhBplus", drawPoints = TRUE, pointSize=2, label = "Oxy_umolkg B+", color="red")%>%
+dygraph(rh_oxymll_xts,  main = "Oxygen (ml/l) 1m Rade Hydro: B / B+", ylab = "") %>%
+    dySeries("mean_oxy_mll_rhB", drawPoints = TRUE, pointSize=4, label = "Oxy_mll B", color ="red") %>%
+   dySeries("mean_oxy_mll_rhBplus", drawPoints = TRUE, pointSize=3, label = "Oxy_mll B+", color="blue")%>%
  # dyLegend(show = "always", width = 600)%>%
   #dyAxis("y",valueRange = c(-0.1, 0.11))%>%
 dyOptions(
@@ -760,42 +760,15 @@ dyOptions(
   dyRangeSelector(height = 30)
 
 # Property plot
-titre <- "Oxygen (umol/kg) 1m Rade Hydro: B vs B+"
-fit <- lmodel2(data = rh_B_Bplus_1m_mean, mean_oxy_umolkg_rhBplus ~ mean_oxy_umolkg_rhB, nperm = 99)
-p_rh_oxy_umolkg <-  ggreg2(fit, "mean_oxy_umolkg_rhB", "mean_oxy_umolkg_rhBplus") +
+titre <- "Oxygen (ml/l) 1m Rade Hydro: B vs B+"
+fit <- lmodel2(data = rh_B_Bplus_1m_mean, mean_oxy_mll_rhBplus ~ mean_oxy_mll_rhB, nperm = 99)
+p_rh_oxy_mll <-  ggreg2(fit, "mean_oxy_mll_rhB", "mean_oxy_mll_rhBplus") +
   geom_abline(aes(intercept = 0, slope = 1), linetype = 2) +
-  mytheme+labs(x="Oxy_umolkg Point B", y="Oxy_umolkg Point B+")
-print(p_rh_oxy_umolkg)
+  mytheme+labs(x="Oxy_mll Point B", y="Oxy_mll Point B+")
+print(p_rh_oxy_mll)
 ```
 
-### **50 m**
-
-```{r plot ctd_hydro 50m Oxy, echo=TRUE, warning = FALSE, message = FALSE, out.width='100%'}
-## Oxy umolkg 50m
-rh_oxyumolkg_xts <- dplyr::select(rh_B_Bplus_50m_mean, date, mean_oxy_umolkg_rhBplus, mean_oxy_umolkg_rhB)
-rh_oxyumolkg_xts <- as.xts(rh_oxyumolkg_xts, order.by=rh_oxyumolkg_xts$date)
-
-dygraph(rh_oxyumolkg_xts,  main = "Oxygen (umol/kg) 50m Rade Hydro: B / B+", ylab = "") %>%
-    dySeries("mean_oxy_umolkg_rhB", drawPoints = TRUE, pointSize=4, label = "Oxy_umolkg B", color ="blue") %>%
-   dySeries("mean_oxy_umolkg_rhBplus", drawPoints = TRUE, pointSize=2, label = "Oxy_umolkg B+", color="red")%>%
- # dyLegend(show = "always", width = 600)%>%
-  #dyAxis("y",valueRange = c(-0.1, 0.11))%>%
-dyOptions(
-    drawGrid = TRUE,
-    drawPoints = TRUE,
-    useDataTimezone = TRUE)%>%
-  dyRangeSelector(height = 30)
-
-# Property plot
-titre <- "Oxygen (umol/kg) 50m Rade Hydro: B vs B+"
-fit <- lmodel2(data = rh_B_Bplus_50m_mean, mean_oxy_umolkg_rhBplus ~ mean_oxy_umolkg_rhB, nperm = 99)
-p_rh_oxy_umolkg <-  ggreg2(fit, "mean_oxy_umolkg_rhB", "mean_oxy_umolkg_rhBplus") +
-  geom_abline(aes(intercept = 0, slope = 1), linetype = 2) +
-  mytheme+labs(x="Oxy_umolkg Point B", y="Oxy_umolkg Point B+")
-print(p_rh_oxy_umolkg)
-```
-
-```{r eol pointb Oxy 50m, echo=TRUE, warning = FALSE, message = FALSE, out.width='100%'}
+```{r oxy 1m ctd_hydro wink, echo=TRUE, warning = FALSE, message = FALSE, out.width='100%'}
 # Reading the Winkler PointB data perweek.
 winkler<- tbl_df(
   read_delim(file=paste0(path,"/data/data_ptb_winkler.txt"), 
@@ -807,23 +780,39 @@ dplyr::rename(date = DATE,
 winkler$date <- as.POSIXct(winkler$date)
 winkler$ptb_oxy_wink <- as.numeric(as.character(winkler$ptb_oxy_wink))
 
-# Select 50m ptb_oxy_wink data 
-wink_50m <- winkler %>%
+# Select 1m ptb_oxy_wink data 
+wink_1m <- winkler %>%
   dplyr::group_by(date) %>%
   dplyr::select(date,ptb_oxy_wink,qO, PROF_TEXT )%>%
-   dplyr::filter(PROF_TEXT == "F"& ptb_oxy_wink < 20)%>%
+   dplyr::filter(PROF_TEXT == "S" & ptb_oxy_wink < 20 )%>%
   dplyr::filter(qO == 2  |qO == 6)
+# put 09:00:00 as time (local time)
+wink_1m <- wink_1m %>%
+  dplyr::mutate(time = " 09:00:00") %>%
+  dplyr::mutate(datetime = paste0(date, time)) 
+wink_1m$datetime <- ymd_hms(wink_1m$datetime, tz="Europe/Paris")
 
-# Adding the Winkler PointB 50m data perweek to pointB CTD 50 m
-ptb_wink_ctd_50m <- left_join(rh_B_Bplus_50m_mean, wink_50m , by="date")
+# convert local time to UTC time
+wink_1m$datetime <- with_tz(wink_1m$datetime, "UTC")
 
-# PLOT all oxyegen data as time series
-ptb_wink_ctd_xts <- dplyr::select(ptb_wink_ctd_50m, datetime, mean_oxy_umolkg_rhB, ptb_oxy_wink)
+# Adding the Winkler PointB 1m data perweek to rh_B_Bplus_1m_mean
+#put wink_1m as data.table
+wink_1m <- as.data.table(wink_1m)
+rh_B_Bplus_1m_mean <- as.data.table(rh_B_Bplus_1m_mean)
+# set datetime column as key column, easy to bind
+setkey( wink_1m, datetime )
+setkey(rh_B_Bplus_1m_mean, datetime)
+# combine
+combined_1_B_Bplus_wink <- rh_B_Bplus_1m_mean[wink_1m, roll = "nearest" ]
+
+###
+# PLOT all oxygen data as time series
+ptb_wink_ctd_xts <- dplyr::select(combined_1_B_Bplus_wink, datetime, mean_oxy_mll_rhBplus, ptb_oxy_wink)
 ptb_wink_ctd_xts <- as.xts(ptb_wink_ctd_xts, order.by=ptb_wink_ctd_xts$datetime)
 
-dygraph(ptb_wink_ctd_xts,  main = "Oxygen (µmol/kg) 50m: PTB (CTD + Winkler)", ylab = "") %>%
-dySeries("mean_oxy_umolkg_rhB", drawPoints = TRUE, pointSize=4, label = "Oxy PTB", color ="blue") %>%
-dySeries("ptb_oxy_wink", drawPoints = TRUE, pointSize=2, label = "Oxy winkler PTB", color ="green")%>%
+dygraph(ptb_wink_ctd_xts,  main = "Oxygen (ml/l) 1m: PTB+ + Winkler", ylab = "") %>%
+dySeries("mean_oxy_mll_rhBplus", drawPoints = TRUE, pointSize=4, label = "Oxy PTB+", color ="blue") %>%
+dySeries("ptb_oxy_wink", drawPoints = TRUE, pointSize=3, label = "Oxy winkler PTB", color ="green")%>%
  # dyLegend(show = "always", width = 600)%>%
   #dyAxis("y",valueRange = c(-0.1, 0.11))%>%
 dyOptions(
@@ -832,11 +821,126 @@ dyOptions(
     useDataTimezone = TRUE)%>%
   dyRangeSelector(height = 30)
 ###
-titre <- "Oxygen 50m: Point B CTD vs Point B Winkler"
-fit <- lmodel2(data = ptb_wink_ctd_50m, ptb_oxy_wink ~ mean_oxy_umolkg_rhB, nperm = 99)
-p_Oxyptbwink_Oxyptb <-  ggreg2(fit, "mean_oxy_umolkg_rhB", "ptb_oxy_wink") +
+#delta oxy
+combined_1_B_Bplus_wink <- combined_1_B_Bplus_wink %>% 
+  dplyr::mutate(oxy_mll_rhBplus_wink_detla = mean_oxy_mll_rhBplus - ptb_oxy_wink, 
+                oxy_mll_rhB_wink_detla = mean_oxy_mll_rhB - ptb_oxy_wink)
+#plot
+oxy_rhBplus_wink_xts <- dplyr::select(combined_1_B_Bplus_wink,datetime, oxy_mll_rhBplus_wink_detla)
+oxy_rhBplus_wink_xts <- as.xts(oxy_rhBplus_wink_xts, order.by=oxy_rhBplus_wink_xts$datetime)
+
+dygraph(oxy_rhBplus_wink_xts,  main = "Delta Oxy ptB+ Winkler 1m", ylab = "") %>%
+     dySeries("oxy_mll_rhBplus_wink_detla", drawPoints = TRUE, pointSize=2, label = "delta Oxy ml/l", color="black")%>%
+   dyLimit(0,strokePattern = "dashed", color = "black") %>% 
+ # dyLegend(show = "always", width = 600)%>%
+  #dyAxis("y",valueRange = c(-0.1, 0.11))%>%
+dyOptions(
+    drawGrid = TRUE,
+    drawPoints = TRUE,
+    useDataTimezone = TRUE)%>%
+  dyRangeSelector(height = 30)
+###
+titre <- "Oxygen 1m: Point B+ CTD vs Point B Winkler"
+fit <- lmodel2(data = combined_1_B_Bplus_wink, ptb_oxy_wink ~ mean_oxy_mll_rhBplus, nperm = 99)
+p_Oxyptbwink_Oxyptb <-  ggreg2(fit, "mean_oxy_mll_rhBplus", "ptb_oxy_wink") +
   geom_abline(aes(slope= 1, intercept =0), linetype = 2) +
-  mytheme+labs(x="Oxy Point B CTD", y="Oxy Point B Winkler")
+  mytheme+labs(x="Oxy Point B+ CTD", y="Oxy Point B Winkler")
+print(p_Oxyptbwink_Oxyptb)
+```
+
+### **50 m**
+
+```{r plot ctd_hydro 50m Oxy, echo=TRUE, warning = FALSE, message = FALSE, out.width='100%'}
+## Oxy umolkg 50m
+rh_oxymll_xts <- dplyr::select(rh_B_Bplus_50m_mean, date, mean_oxy_mll_rhBplus, mean_oxy_mll_rhB)
+rh_oxymll_xts <- as.xts(rh_oxymll_xts, order.by=rh_oxymll_xts$date)
+
+dygraph(rh_oxyumolkg_xts,  main = "Oxygen (ml/l 50m Rade Hydro: B / B+", ylab = "") %>%
+  dySeries("mean_oxy_mll_rhB", drawPoints = TRUE, pointSize=4, label = "Oxy_mll B", color ="blue") %>%
+  dySeries("mean_oxy_mll_rhBplus", drawPoints = TRUE, pointSize=2, label = "Oxy_mll B+", color="red")%>%
+ # dyLegend(show = "always", width = 600)%>%
+  #dyAxis("y",valueRange = c(-0.1, 0.11))%>%
+dyOptions(
+    drawGrid = TRUE,
+    drawPoints = TRUE,
+    useDataTimezone = TRUE)%>%
+  dyRangeSelector(height = 30)
+
+# Property plot
+titre <- "Oxygen (ml/l) 50m Rade Hydro: B vs B+"
+fit <- lmodel2(data = rh_B_Bplus_50m_mean, mean_oxy_mll_rhBplus ~ mean_oxy_mll_rhB, nperm = 99)
+p_rh_oxy_mll <-  ggreg2(fit, "mean_oxy_mll_rhB", "mean_oxy_mll_rhBplus") +
+  geom_abline(aes(intercept = 0, slope = 1), linetype = 2) +
+  mytheme+labs(x="Oxy_mll Point B", y="Oxy_mll Point B+")
+print(p_rh_oxy_mll)
+```
+
+```{r  oxy 50m ctd_hydro wink, echo=TRUE, warning = FALSE, message = FALSE, out.width='100%'}
+# Select 50m ptb_oxy_wink data 
+wink_50m <- winkler %>%
+  dplyr::group_by(date) %>%
+  dplyr::select(date,ptb_oxy_wink,qO, PROF_TEXT )%>%
+   dplyr::filter(PROF_TEXT == "F"& ptb_oxy_wink < 20)%>%
+  dplyr::filter(qO == 2  |qO == 6)
+# put 09:00:00 as time (local time)
+wink_50m <- wink_50m %>%
+  dplyr::mutate(time = " 09:00:00") %>%
+  dplyr::mutate(datetime = paste0(date, time)) 
+wink_50m$datetime <- ymd_hms(wink_50m$datetime, tz="Europe/Paris")
+# convert local time to UTC time
+wink_50m$datetime <- with_tz(wink_50m$datetime, "UTC")
+####
+
+# Adding the Winkler PointB 50m data perweek to rh_B_Bplus_50m_mean
+#put data as data.table
+wink_50m <- as.data.table(wink_50m)
+rh_B_Bplus_50m_mean<- as.data.table(rh_B_Bplus_50m_mean)
+# set datetime column as key column, easy to bind
+setkey(wink_50m, datetime)
+setkey(rh_B_Bplus_50m_mean, datetime)
+# combine
+combined_50_B_Bplus_wink <- rh_B_Bplus_50m_mean[wink_50m, roll = "nearest" ]
+
+###
+# PLOT all oxygen data as time series
+ptb_wink_ctd_xts <- dplyr::select(combined_50_B_Bplus_wink, datetime, mean_oxy_mll_rhBplus, ptb_oxy_wink)
+ptb_wink_ctd_xts <- as.xts(ptb_wink_ctd_xts, order.by=ptb_wink_ctd_xts$datetime)
+
+dygraph(ptb_wink_ctd_xts,  main = "Oxygen (ml/l) 50m: PTB+ + Winkler", ylab = "") %>%
+dySeries("mean_oxy_mll_rhBplus", drawPoints = TRUE, pointSize=4, label = "Oxy PTB+", color ="blue") %>%
+dySeries("ptb_oxy_wink", drawPoints = TRUE, pointSize=3, label = "Oxy winkler PTB", color ="green")%>%
+ # dyLegend(show = "always", width = 600)%>%
+  #dyAxis("y",valueRange = c(-0.1, 0.11))%>%
+dyOptions(
+    drawGrid = TRUE,
+    drawPoints = TRUE,
+    useDataTimezone = TRUE)%>%
+  dyRangeSelector(height = 30)
+###
+#delta oxy
+combined_50_B_Bplus_wink <- combined_50_B_Bplus_wink %>% 
+  dplyr::mutate(oxy_mll_rhBplus_wink_detla = mean_oxy_mll_rhBplus - ptb_oxy_wink, 
+                oxy_mll_rhB_wink_detla = mean_oxy_mll_rhB - ptb_oxy_wink)
+#plot
+oxy_rhBplus_wink_xts <- dplyr::select(combined_50_B_Bplus_wink,datetime, oxy_mll_rhBplus_wink_detla)
+oxy_rhBplus_wink_xts <- as.xts(oxy_rhBplus_wink_xts, order.by=oxy_rhBplus_wink_xts$datetime)
+
+dygraph(oxy_rhBplus_wink_xts,  main = "Delta Oxy ptB+ Winkler 50m", ylab = "") %>%
+     dySeries("oxy_mll_rhBplus_wink_detla", drawPoints = TRUE, pointSize=2, label = "delta Oxy ml/l", color="black")%>%
+   dyLimit(0,strokePattern = "dashed", color = "black") %>% 
+ # dyLegend(show = "always", width = 600)%>%
+  #dyAxis("y",valueRange = c(-0.1, 0.11))%>%
+dyOptions(
+    drawGrid = TRUE,
+    drawPoints = TRUE,
+    useDataTimezone = TRUE)%>%
+  dyRangeSelector(height = 30)
+###
+titre <- "Oxygen 50m: Point B+ CTD vs Point B Winkler"
+fit <- lmodel2(data = combined_50_B_Bplus_wink, ptb_oxy_wink ~ mean_oxy_mll_rhBplus, nperm = 99)
+p_Oxyptbwink_Oxyptb <-  ggreg2(fit, "mean_oxy_mll_rhBplus", "ptb_oxy_wink") +
+  geom_abline(aes(slope= 1, intercept =0), linetype = 2) +
+  mytheme+labs(x="Oxy Point B+ CTD", y="Oxy Point B Winkler")
 print(p_Oxyptbwink_Oxyptb)
 ```
 
@@ -851,7 +955,7 @@ Here, SOMLIT data were used and binded with EOL data by datetime in order to com
 
 ## **Temperature** 
 
-### **EOL / Point B 1 m**
+### **1 m**
 
 ```{r eol pointb 1m Temp, echo=TRUE, warning = FALSE, message = FALSE, out.width='100%'}
 # with pointB data from "rade hydro" 
@@ -916,7 +1020,7 @@ p_Tptb_Teol <-  ggreg2(fit, "temp_eol", "mean_temp_rhBplus") +
 print(p_Tptb_Teol)
 ```
 
-### **EOL / Point B 5 m**
+### **5 m**
 
 ```{r eol pointb 5m Temp, echo=TRUE, warning = FALSE, message = FALSE, out.width='100%'}
 #eol_ptb_5m <- full_join(rh_B_Bplus_5m_mean, eol , by="datetime")
@@ -965,7 +1069,7 @@ print(p_Tptb_Teol_5m)
 
 ## **Salinity**
 
-### **EOL / Point B 1 m**
+### **1 m**
 
 ```{r eol pointb comp Sal, echo=TRUE, message=FALSE, warning=FALSE, out.width='100%'}
 
@@ -993,7 +1097,7 @@ p_Sptb_Seol <-  ggreg2(fit, "sal_eol", "mean_sal_rhBplus") +
 print(p_Sptb_Seol)
 ```
 
-### **EOL / Point B 5 m**
+### **5 m**
 
 ```{r comparaison sal 5m / sal EOL, echo=TRUE, warning = FALSE, message = FALSE, out.width='100%'}
 # #add the EoL data.
@@ -1032,7 +1136,7 @@ print(p_Sptb_Seol5)
 
 ## **Oxygen**
 
-###  **EOL / Point B 1 m**
+###  **1 m**
 
 ```{r eol pointb Oxy 1m, echo=TRUE, warning = FALSE, message = FALSE, out.width='100%'}
 # Reading the Winkler dataframe created before.
