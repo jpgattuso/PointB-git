@@ -1050,43 +1050,6 @@ p_Sptb_Seol <-  ggreg2(fit, "sal_eol", "mean_sal_rhBplus") +
 print(p_Sptb_Seol)
 ```
 
-### **5 m**
-
-```{r comparaison sal 5m / sal EOL, echo=TRUE, warning = FALSE, message = FALSE, out.width='100%'}
-# #add the EoL data.
-# rh_B_Bplus_eol_5m_mean <-  left_join(rh_B_Bplus_5m_mean, eol, by="datetime")
-
-
-# delta between salinities pB / eol
-combined5 <- combined5 %>% 
-  dplyr::mutate(sal_eol_rhB_detla = mean_sal_rhB - sal_eol, 
-                sal_eol_rhBplus_detla = mean_sal_rhBplus - sal_eol)
-#plot
-sal_rhB_eol_xts <- dplyr::select(combined5,datetime, mean_sal_rhBplus, sal_eol, sal_eol_rhBplus_detla)
-sal_rhB_eol_xts <- as.xts(sal_rhB_eol_xts, order.by=sal_rhB_eol_xts$datetime)
-
-dygraph(sal_rhB_eol_xts,  main = "Salinity 5m EOL / ptB+", ylab = "") %>%
-    dySeries("mean_sal_rhBplus", drawPoints = TRUE, pointSize=4, label = "Sal ptB+", color ="blue", axis="y2") %>%
-   dySeries("sal_eol", drawPoints = TRUE, pointSize=2, label = "Sal EOL", color="red", axis="y2")%>%
-     dySeries("sal_eol_rhBplus_detla", drawPoints = TRUE, pointSize=2, label = "delta", color="black")%>%
- # dyLegend(show = "always", width = 600)%>%
-  #dyAxis("y",valueRange = c(-0.1, 0.11))%>%
-dyOptions(
-    drawGrid = TRUE,
-    drawPoints = TRUE,
-    useDataTimezone = TRUE)%>%
-  dyRangeSelector(height = 30)
-
-
-titre <- "Salinity: EOL vs Point B+ 5m"
-fit <- lmodel2(data = combined5, mean_sal_rhBplus ~ sal_eol, nperm = 99)
-p_Sptb_Seol5 <-  ggreg2(fit, "sal_eol", "mean_sal_rhBplus") +
-  geom_abline(aes(slope= 1, intercept =0), linetype = 2) +
-  mytheme+labs(x="Sal EOL", y="Sal Point B+")
-
-print(p_Sptb_Seol5)
-```
-
 ## **Oxygen**
 
 ###  **1 m**
