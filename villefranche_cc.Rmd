@@ -628,46 +628,6 @@ rh_B_Bplus_50m_mean$datetime <- with_tz(rh_B_Bplus_50m_mean$datetime, "UTC")
 
 ```
 
-```{r ctd_hydro 5m, echo=TRUE, warning = FALSE, message = FALSE, out.width='100%'}
-# select deep 5 m for B or B+ data
-# B
-rh_B_5m <- dat %>%
-  dplyr::select(station, date , depth, salinity, temperature, oxygen_mll, oxygen_umolkg) %>%
-  dplyr::filter( (depth == 5))%>%
-  dplyr::filter( station == "B")
-
-rh_B_5m_mean <- rh_B_5m %>%
-  dplyr::group_by(date) %>%
-  dplyr::summarise(mean_sal_rhB = mean(salinity, na.rm=TRUE),
-                   mean_temp_rhB = mean(temperature, na.rm=TRUE),
-                   mean_oxy_mll_rhB = mean(oxygen_mll, na.rm=TRUE),
-                   mean_oxy_umolkg_rhB = mean(oxygen_umolkg, na.rm=TRUE))
-# B+
-rh_Bplus_5m <- dat %>%
-  dplyr::select(station, date , depth, salinity, temperature, oxygen_mll, oxygen_umolkg) %>%
-  dplyr::filter( (depth == 5))%>%
-  dplyr::filter( station == "B+")
-
-rh_Bplus_5m_mean <- rh_Bplus_5m %>%
-  dplyr::group_by(date) %>%
-  dplyr::summarise(mean_sal_rhBplus = mean(salinity, na.rm=TRUE),
-                   mean_temp_rhBplus = mean(temperature, na.rm=TRUE),
-                   mean_oxy_mll_rhBplus = mean(oxygen_mll, na.rm=TRUE),
-                   mean_oxy_umolkg_rhBplus = mean(oxygen_umolkg, na.rm=TRUE))
-# bind the 2 df (B and B+)
-rh_B_Bplus_5m_mean <- full_join(rh_B_5m_mean, rh_Bplus_5m_mean, by=NULL)
-rh_B_Bplus_5m_mean$date <- as.POSIXct(rh_B_Bplus_5m_mean$date)
-
-# put 09:00:00 as time (local time)
-rh_B_Bplus_5m_mean <- rh_B_Bplus_5m_mean %>%
-  dplyr::mutate(time = " 09:00:00") %>%
-  dplyr::mutate(datetime = paste0(date, time)) 
-rh_B_Bplus_5m_mean$datetime <- ymd_hms(rh_B_Bplus_5m_mean$datetime, tz="Europe/Paris")
-
-# convert local time to UTC time
-rh_B_Bplus_5m_mean$datetime <- with_tz(rh_B_Bplus_5m_mean$datetime, "UTC")
-```
-
 ## **Temperature**
 
 ### **1 m**
