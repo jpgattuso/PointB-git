@@ -202,6 +202,17 @@ dyOptions(
   dyRangeSelector(height = 30)
 ```
 
+## **Logs - Informations**
+
+```{r kable log par}
+## Open the first spreadsheet of the "PlanktonChange_data" googlesheet (need to go to File/Publish to the web and publish as csv)
+
+url_par_log <- "https://docs.google.com/spreadsheets/d/e/2PACX-1vRKsEOg29pe4RdV8W5Cz8lMFhm-lllLy66Z7t6qRjw3ueF1sHVcSbmVgozttv3LGQ/pub?gid=485625929&single=true&output=csv"
+par_log <- read.csv(url(url_par_log), header=T, stringsAsFactors = FALSE)
+#replade dots with spaces in column names.
+kable(par_log, col.names = gsub("[.]", " ", names(par_log)), align ="c", caption="**piSAMI logs (metadata)**")
+```
+
 # **seafet pH**  {.tabset .tabset-pills}
 
 ## **Deployment**
@@ -303,8 +314,15 @@ dyOptions(
 
 ## **Logs - Informations**
 
-Put here log data files
+```{r kable log sami}
+## Open the first spreadsheet of the "PlanktonChange_data" googlesheet (need to go to File/Publish to the web and publish as csv)
 
+url_sami_log <- "https://docs.google.com/spreadsheets/d/e/2PACX-1vSmth08Q-Tw1RFznKeStSMJkKeFgYZac9WIR3ETLYWkznouAD6A-1n2uza1YgotXQ/pub?gid=798409504&single=true&output=csv"
+sami_log <- read.csv(url(url_sami_log), header=T, stringsAsFactors = FALSE)
+#replade dots with spaces in column names.
+kable(sami_log, col.names = gsub("[.]", " ", names(sami_log)), align ="c", caption="**piSAMI logs (metadata)**")
+```
+ 
 ## **Sunburst - TRIS info**
  
  Here are gathered important emails from Sunburst concerning SAMI handling (reggie@sunburstsensors.com):
