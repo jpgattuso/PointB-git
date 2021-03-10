@@ -768,33 +768,6 @@ p_rh_oxy_umolkg <-  ggreg2(fit, "mean_oxy_umolkg_rhB", "mean_oxy_umolkg_rhBplus"
 print(p_rh_oxy_umolkg)
 ```
 
-### **5 m**
-
-```{r plot ctd_hydro 5m Oxy, echo=TRUE, warning = FALSE, message = FALSE, out.width='100%'}
-## Oxy umolkg 5m
-rh_oxyumolkg_xts <- dplyr::select(rh_B_Bplus_5m_mean, date, mean_oxy_umolkg_rhBplus, mean_oxy_umolkg_rhB)
-rh_oxyumolkg_xts <- as.xts(rh_oxyumolkg_xts, order.by=rh_oxyumolkg_xts$date)
-
-dygraph(rh_oxyumolkg_xts,  main = "Oxygen (umol/kg) 5m Rade Hydro: B / B+", ylab = "") %>%
-    dySeries("mean_oxy_umolkg_rhB", drawPoints = TRUE, pointSize=4, label = "Oxy_umolkg B", color ="blue") %>%
-   dySeries("mean_oxy_umolkg_rhBplus", drawPoints = TRUE, pointSize=2, label = "Oxy_umolkg B+", color="red")%>%
- # dyLegend(show = "always", width = 600)%>%
-  #dyAxis("y",valueRange = c(-0.1, 0.11))%>%
-dyOptions(
-    drawGrid = TRUE,
-    drawPoints = TRUE,
-    useDataTimezone = TRUE)%>%
-  dyRangeSelector(height = 30)
-
-# Property plot
-titre <- "Oxygen (umol/kg) 5m Rade Hydro: B vs B+"
-fit <- lmodel2(data = rh_B_Bplus_5m_mean, mean_oxy_umolkg_rhBplus ~ mean_oxy_umolkg_rhB, nperm = 99)
-p_rh_oxy_umolkg <-  ggreg2(fit, "mean_oxy_umolkg_rhB", "mean_oxy_umolkg_rhBplus") +
-  geom_abline(aes(intercept = 0, slope = 1), linetype = 2) +
-  mytheme+labs(x="Oxy_umolkg Point B", y="Oxy_umolkg Point B+")
-print(p_rh_oxy_umolkg)
-```
-
 ### **50 m**
 
 ```{r plot ctd_hydro 50m Oxy, echo=TRUE, warning = FALSE, message = FALSE, out.width='100%'}
