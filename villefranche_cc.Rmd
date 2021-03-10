@@ -388,7 +388,7 @@ It is possible that when the mesh corrodes significantly from the seawater that 
 
 # **EOL raw data** {.tabset .tabset-pills}
 
-Temperature (in blue, °C), salinity (in purple, PSU) and oxygen (in green, ml/l) data from the EOL ctd. We also compare salinity and temperature with the SOMLIT data.
+Temperature (in blue, °C), salinity (in purple, PSU) and oxygen (in green, ml/l) data from the EOL ctd.
 
 ```{r EOL data, echo=FALSE, warning = FALSE, message = FALSE, out.width='100%'}
 # url <- "http://obs-vlfr.fr/data/files/~eol/somlit/"
@@ -480,9 +480,6 @@ eol <- dplyr::mutate(eol, O2 = case_when(O2 > 6 ~ NA_real_,
                         Fluo = case_when(Fluo > 999 ~ NA_real_,
                                         TRUE ~ Fluo)
 )
-
-#round time to nearest hour and take it in considetation as datetime.
-eol$datetime <-round_date(eol$datetime,unit = "30 mins" )
 
 eol <- eol%>%
   dplyr::rename(temp_eol = T,
