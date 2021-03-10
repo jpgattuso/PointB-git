@@ -855,7 +855,7 @@ print(p_Oxyptbwink_Oxyptb)
 rh_oxymll_xts <- dplyr::select(rh_B_Bplus_50m_mean, date, mean_oxy_mll_rhBplus, mean_oxy_mll_rhB)
 rh_oxymll_xts <- as.xts(rh_oxymll_xts, order.by=rh_oxymll_xts$date)
 
-dygraph(rh_oxyumolkg_xts,  main = "Oxygen (ml/l 50m Rade Hydro: B / B+", ylab = "") %>%
+dygraph(rh_oxymll_xts,  main = "Oxygen (ml/l 50m Rade Hydro: B / B+", ylab = "") %>%
   dySeries("mean_oxy_mll_rhB", drawPoints = TRUE, pointSize=4, label = "Oxy_mll B", color ="blue") %>%
   dySeries("mean_oxy_mll_rhBplus", drawPoints = TRUE, pointSize=2, label = "Oxy_mll B+", color="red")%>%
  # dyLegend(show = "always", width = 600)%>%
