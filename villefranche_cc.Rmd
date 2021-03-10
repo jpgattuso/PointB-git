@@ -1020,53 +1020,6 @@ p_Tptb_Teol <-  ggreg2(fit, "temp_eol", "mean_temp_rhBplus") +
 print(p_Tptb_Teol)
 ```
 
-### **5 m**
-
-```{r eol pointb 5m Temp, echo=TRUE, warning = FALSE, message = FALSE, out.width='100%'}
-#eol_ptb_5m <- full_join(rh_B_Bplus_5m_mean, eol , by="datetime")
-
-###########
-#put rh_B_Bplus_1m_mean as data.table
-rh_B_Bplus_5m_mean <- as.data.table(rh_B_Bplus_5m_mean)
-# set datetime column as key column, easy to bind
-setkey( eol, datetime )
-setkey( rh_B_Bplus_5m_mean, datetime)
-# combine
-combined5 <- eol[ rh_B_Bplus_5m_mean, roll = "nearest" ]
-
-# set a datetime column for eol
-combined5 <- dplyr::mutate(combined5, datetime_eol=str_c(Date, " ", Heure) %>% parse_datetime(format="%Y%m%d %H%M%S"))
-#calcul the difference between time and keep only closest time <6 hours.
-combined5 <- dplyr::mutate(combined5,delta_datetime = abs(difftime(datetime, datetime_eol, units="hours")))
-#keep only <6 hours
-combined5 <-  combined5    %>%    
- dplyr::filter(delta_datetime <= 6)
-########
-
-eol_ptb_temp_xts <- dplyr::select(combined5, datetime, mean_temp_rhBplus, temp_eol)
-eol_ptb_temp_xts <- as.xts(eol_ptb_temp_xts, order.by=combined5$datetime)
-
-dygraph(eol_ptb_temp_xts,  main = "Temperature 5m: EOL - ptB+", ylab = "") %>%
-dySeries("mean_temp_rhBplus", drawPoints = TRUE, pointSize=4, label = "Temp ptB+", color ="blue") %>%
-dySeries("temp_eol", drawPoints = TRUE, pointSize=2, label = "Temp EOL", color ="red")%>%
- # dyLegend(show = "always", width = 600)%>%
- #dyAxis("y",valueRange = c(-0.1, 0.11))%>%
-dyOptions(
-    drawGrid = TRUE,
-    drawPoints = TRUE,
-    useDataTimezone = TRUE)%>%
-  dyRangeSelector(height = 30)
-
-###
-titre <- "Temperature 5m: EOL vs ptB+"
-fit <- lmodel2(data = combined5, mean_temp_rhBplus ~ temp_eol, nperm = 99)
-p_Tptb_Teol_5m <-  ggreg2(fit, "temp_eol", "mean_temp_rhBplus") +
-  geom_abline(aes(slope= 1, intercept =0), linetype = 2) +
-  mytheme+labs(x="T EOL", y="T Point B+")
-
-print(p_Tptb_Teol_5m)
-```
-
 ## **Salinity**
 
 ### **1 m**
