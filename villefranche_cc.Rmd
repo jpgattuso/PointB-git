@@ -657,32 +657,6 @@ p_rh_temp <-  ggreg2(fit, "mean_temp_rhB", "mean_temp_rhBplus") +
 print(p_rh_temp)
 ```
 
-### **5 m**
-
-```{r plot ctd_hydro 5m Temp, echo=TRUE, warning = FALSE, message = FALSE, out.width='100%'}
-## Temp 5m
-rh_temp_xts <- dplyr::select(rh_B_Bplus_5m_mean, date, mean_temp_rhBplus, mean_temp_rhB)
-rh_temp_xts <- as.xts(rh_temp_xts, order.by=rh_temp_xts$date)
-
-dygraph(rh_temp_xts,  main = "Temperature 5m Rade Hydro: B / B+", ylab = "") %>%
-    dySeries("mean_temp_rhB", drawPoints = TRUE, pointSize=4, label = "Temp B", color ="blue") %>%
-   dySeries("mean_temp_rhBplus", drawPoints = TRUE, pointSize=2, label = "Temp B+", color="red")%>%
- # dyLegend(show = "always", width = 600)%>%
-  #dyAxis("y",valueRange = c(-0.1, 0.11))%>%
-dyOptions(
-    drawGrid = TRUE,
-    drawPoints = TRUE,
-    useDataTimezone = TRUE)%>%
-  dyRangeSelector(height = 30)
-# Property plot
-titre <- "Temperature 5m Rade Hydro: B vs B+"
-fit <- lmodel2(data = rh_B_Bplus_5m_mean, mean_temp_rhBplus ~ mean_temp_rhB, nperm = 99)
-p_rh_temp <-  ggreg2(fit, "mean_temp_rhB", "mean_temp_rhBplus") +
-  geom_abline(aes(intercept = 0, slope = 1), linetype = 2) +
-  mytheme+labs(x="Temp Point B", y="Temp Point B+")
-print(p_rh_temp)
-```
-
 ### **50 m**
 
 ```{r plot ctd_hydro 50m Temp, echo=TRUE, warning = FALSE, message = FALSE, out.width='100%'}
