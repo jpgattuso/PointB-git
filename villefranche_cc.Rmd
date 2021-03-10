@@ -1,5 +1,5 @@
 ---
-title: "Time series of the carbonate chemistry at Point B"
+title: "Time series and comparison for Point B/B+ and EOL data"
 author: "Samir Alliouane, Frederic Gazeau, Steeve Comeau, Jean-Pierre Gattuso, CNRS-UPMC."
 date: '`r format(Sys.Date(), "%d %B %Y")`'
 output:
@@ -387,7 +387,8 @@ The mesh could be removed, if you prefer. The filter might need more frequent re
 It is possible that when the mesh corrodes significantly from the seawater that it becomes less porous. I'm not confident on which option is the best. If you are deploying at a sight that is cold and low fouling/low dissolved solids, you could go without the entire filter. Since every site is different, it is difficult to predict the outcome.
 
 # **EOL raw data** {.tabset .tabset-pills}
-Here we read data from the EOL ctd and calculate total alkalinity using the relationship with salinity. We also compare salinity and temperature with the SOMLIT data.
+
+Temperature (in blue, °C), salinity (in purple, PSU) and oxygen (in green, ml/l) data from the EOL ctd. We also compare salinity and temperature with the SOMLIT data.
 
 ```{r EOL data, echo=FALSE, warning = FALSE, message = FALSE, out.width='100%'}
 # url <- "http://obs-vlfr.fr/data/files/~eol/somlit/"
@@ -496,10 +497,10 @@ dygraph(eol_xts, main = "EOL S T data: all depths", ylab = "") %>%
   dySeries("temp_eol", drawPoints = TRUE, pointSize=2, label = "Temp")%>%
   dySeries("oxy_eol", drawPoints = TRUE, pointSize=2, label = "oxy")%>%
   dySeries(axis = "y2","sal_eol", drawPoints = TRUE, pointSize=2, label = "Sal") %>%
+  dyAxis(name = "y2", axisLineColor = "purple", axisLabelColor = "purple") %>% 
  # dyLegend(show = "always", width = 600)%>%
   #dyAxis("y",valueRange = c(-0.1, 0.11))%>%
-dyOptions(
-    drawGrid = TRUE,
+dyOptions(drawGrid = TRUE,
     drawPoints = TRUE,
     useDataTimezone = TRUE)%>%
   dyRangeSelector(height = 30)
