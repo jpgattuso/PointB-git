@@ -827,7 +827,7 @@ oxy_rhBplus_wink_xts <- dplyr::select(combined_1_B_Bplus_wink,datetime, oxy_mll_
 oxy_rhBplus_wink_xts <- as.xts(oxy_rhBplus_wink_xts, order.by=oxy_rhBplus_wink_xts$datetime)
 
 dygraph(oxy_rhBplus_wink_xts,  main = "Delta Oxy ptB+ Winkler 1m", ylab = "") %>%
-     dySeries("oxy_mll_rhBplus_wink_detla", drawPoints = TRUE, pointSize=2, label = "delta Oxy ml/l", color="black")%>%
+     dySeries("oxy_mll_rhBplus_wink_detla", drawPoints = TRUE, pointSize=2, label = "delta (ml/l)", color="black")%>%
    dyLimit(0,strokePattern = "dashed", color = "black") %>% 
  # dyLegend(show = "always", width = 600)%>%
   #dyAxis("y",valueRange = c(-0.1, 0.11))%>%
@@ -941,29 +941,18 @@ p_Oxyptbwink_Oxyptb <-  ggreg2(fit, "mean_oxy_mll_rhBplus", "ptb_oxy_wink") +
 print(p_Oxyptbwink_Oxyptb)
 ```
 
-# **Comparaison EOL - SOMLIT (Point B)**  {.tabset .tabset-pills}
+# **Comparison EOL - SOMLIT (Point B)**  {.tabset .tabset-pills}
 
 In this section, T, S and Oxy are compared between EOL and SOMLIT data. 
 
 - SOMLIT data are filtered in the "Rade hydro, SOMLIT" section above. Data from B+ station (not B) and from 1 m to 3 m were selected. Gaps in B+ data were filled up with B data.
 Time was not available at the beginning. We decided to add 09:00:00 as a local time. It was convert to UTC time in order to make the comparison with EOL data.
 
-Here, SOMLIT data were used and binded with EOL data by datetime in order to compare.
-
 ## **Temperature** 
 
 ### **1 m**
 
 ```{r eol pointb 1m Temp, echo=TRUE, warning = FALSE, message = FALSE, out.width='100%'}
-# with pointB data from "rade hydro" 
-#eol_ptb <- left_join(mean_eol, continuous_discrete, by="datetime_round")
-#eol_ptb <- left_join(  mean_eol%>%select(datetime, mean_temp_eol), rh_B_Bplus_mean%>%select(datetime, mean_temp_rhB),  by="datetime")
-######
-# eol_ptb_1m <- full_join(rh_B_Bplus_1m_mean, eol , by="datetime")
-# #create the eol datetime column to keep the real hours and make the difference for the matching
-# eol_ptb_1m <- dplyr::mutate(eol_ptb_1m, datetime_eol=str_c(Date, " ", Heure) %>% parse_datetime(format="%Y%m%d %H%M%S"))
-# #####
-
 #combiine the 2 data frame by nearest time with package data.table
 #put rh_B_Bplus_1m_mean as data.table
 rh_B_Bplus_1m_mean <- as.data.table(rh_B_Bplus_1m_mean)
@@ -981,7 +970,6 @@ combined1 <- dplyr::mutate(combined1,delta_datetime = abs(difftime(datetime, dat
 #keep only <6 hours
 combined1 <-  combined1    %>%    
  dplyr::filter(delta_datetime <= 6)
-
 ###
 #Fill ptB+ gaps with ptB data
 combined1 <- combined1 %>% 
@@ -993,7 +981,7 @@ combined1 <- combined1 %>%
 
 #eol_ptb_1m
 eol_ptb_temp_xts <- dplyr::select(combined1, datetime, mean_temp_rhBplus, temp_eol)
-eol_ptb_temp_xts <- as.xts(eol_ptb_temp_xts, order.by=combined1$datetime)
+eol_ptb_temp_xts <- as.xts(eol_ptb_temp_xts, order.by=combined_1_B_Bplus_wink_eol$datetime)
 
 dygraph(eol_ptb_temp_xts,  main = "Temperature 1m: EOL - PTB", ylab = "") %>%
 dySeries("temp_eol", drawPoints = TRUE, pointSize=4, label = "Temp EOL", color ="red")%>%
@@ -1037,6 +1025,24 @@ dyOptions(
     useDataTimezone = TRUE)%>%
   dyRangeSelector(height = 30)
 
+#delta sal
+combined1 <- combined1 %>% 
+  dplyr::mutate(sal_eol_rhBplus_detla = mean_sal_rhBplus - sal_eol)
+#plot
+oxy_eol_wink_xts <- dplyr::select(combined1,datetime, sal_eol_rhBplus_detla)
+oxy_eol_wink_xts <- as.xts(oxy_eol_wink_xts, order.by=oxy_eol_wink_xts$datetime)
+
+dygraph(oxy_eol_wink_xts,  main = "Delta Sal EOL / ptB+ 1m", ylab = "") %>%
+     dySeries("sal_eol_rhBplus_detla", drawPoints = TRUE, pointSize=2, label = "delta (PSU)", color="black")%>%
+   dyLimit(0,strokePattern = "dashed", color = "black") %>% 
+ # dyLegend(show = "always", width = 600)%>%
+  #dyAxis("y",valueRange = c(-0.1, 0.11))%>%
+dyOptions(
+    drawGrid = TRUE,
+    drawPoints = TRUE,
+    useDataTimezone = TRUE)%>%
+  dyRangeSelector(height = 30)
+
 ###
 titre <- "Salinity: EOL vs ptB+ 1m"
 fit <- lmodel2(data = combined1, mean_sal_rhBplus ~ sal_eol, nperm = 99)
@@ -1052,34 +1058,24 @@ print(p_Sptb_Seol)
 ###  **1 m**
 
 ```{r eol pointb Oxy 1m, echo=TRUE, warning = FALSE, message = FALSE, out.width='100%'}
-# Reading the Winkler dataframe created before.
-# Select 1m ptb_oxy_wink data 
-wink_1m <- winkler %>%
-  dplyr::group_by(date) %>%
-  dplyr::select(date,ptb_oxy_wink,qO, PROF_TEXT )%>%
-   dplyr::filter(PROF_TEXT == "S" & ptb_oxy_wink < 20 )%>%
-  dplyr::filter(qO == 2  |qO == 6)
-# put 09:00:00 as time (local time)
-wink_1m <- wink_1m %>%
-  dplyr::mutate(time = " 09:00:00") %>%
-  dplyr::mutate(datetime = paste0(date, time)) 
-wink_1m$datetime <- ymd_hms(wink_1m$datetime, tz="Europe/Paris")
-
-# convert local time to UTC time
-wink_1m$datetime <- with_tz(wink_1m$datetime, "UTC")
-
-# Adding the Winkler PointB 1m data perweek to eol_ptb_1m.
-#eol_ptb_1m <- left_join(eol_ptb_1m, wink_1m , by="date")
-
+# Reading the combined ptb + Winkler dataframe created before = combined_1_B_Bplus_wink.
 #put wink_1m as data.table
-wink_1m <- as.data.table(wink_1m)
+combined_1_B_Bplus_wink <- as.data.table(combined_1_B_Bplus_wink)
 # set datetime column as key column, easy to bind
-setkey( wink_1m, datetime )
-# combine
-combined1 <- wink_1m[ combined1, roll = "nearest" ]
+setkey( combined_1_B_Bplus_wink, datetime )
+# combine to eol
+combined_1_B_Bplus_wink_eol <- eol[ combined_1_B_Bplus_wink, roll = "nearest" ]
+# set a datetime column for eol
+combined_1_B_Bplus_wink_eol <- dplyr::mutate(combined_1_B_Bplus_wink_eol, datetime_eol=str_c(Date, " ", Heure) %>% parse_datetime(format="%Y%m%d %H%M%S"))
+#calculate the difference between time and keep only closest time <6 hours.
+combined_1_B_Bplus_wink_eol <- dplyr::mutate(combined_1_B_Bplus_wink_eol,delta_datetime = abs(difftime(datetime, datetime_eol, units="hours")))
+#keep only <6 hours
+combined_1_B_Bplus_wink_eol <-  combined_1_B_Bplus_wink_eol    %>%    
+ dplyr::filter(delta_datetime <= 6)
 
-# PLOT all oxyegen data as time series
-eol_ptb_oxy_xts <- dplyr::select(combined1, datetime, mean_oxy_mll_rhBplus, oxy_eol, ptb_oxy_wink)
+###
+# PLOT all oxygen data as time series
+eol_ptb_oxy_xts <- dplyr::select(combined_1_B_Bplus_wink_eol, datetime, mean_oxy_mll_rhBplus, oxy_eol, ptb_oxy_wink)
 eol_ptb_oxy_xts <- as.xts(eol_ptb_oxy_xts, order.by=eol_ptb_oxy_xts$datetime)
 
 dygraph(eol_ptb_oxy_xts,  main = "Oxygen (ml/l) 1m: EOL - ptB+ - Winkler ptB)", ylab = "") %>%
@@ -1095,6 +1091,25 @@ dyOptions(
   dyRangeSelector(height = 30)
 
 ###
+#delta oxy
+combined_1_B_Bplus_wink_eol <- combined_1_B_Bplus_wink_eol %>% 
+  dplyr::mutate(oxy_mll_eol_wink_detla = oxy_eol - ptb_oxy_wink)
+#plot
+oxy_eol_wink_xts <- dplyr::select(combined_1_B_Bplus_wink_eol,datetime, oxy_mll_eol_wink_detla)
+oxy_eol_wink_xts <- as.xts(oxy_eol_wink_xts, order.by=oxy_eol_wink_xts$datetime)
+
+dygraph(oxy_eol_wink_xts,  main = "Delta Oxy EOL / Winkler 1m", ylab = "") %>%
+     dySeries("oxy_mll_eol_wink_detla", drawPoints = TRUE, pointSize=2, label = "delta (ml/l)", color="black")%>%
+   dyLimit(0,strokePattern = "dashed", color = "black") %>% 
+ # dyLegend(show = "always", width = 600)%>%
+  #dyAxis("y",valueRange = c(-0.1, 0.11))%>%
+dyOptions(
+    drawGrid = TRUE,
+    drawPoints = TRUE,
+    useDataTimezone = TRUE)%>%
+  dyRangeSelector(height = 30)
+###
+
 titre <- "Oxygen 1m: EOL vs Point B CTD"
 fit <- lmodel2(data = combined1, mean_oxy_mll_rhB ~ oxy_eol, nperm = 99)
 p_Oxyptb_Oxyeol <-  ggreg2(fit, "oxy_eol", "mean_oxy_mll_rhBplus") +
