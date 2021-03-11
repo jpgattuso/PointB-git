@@ -1110,22 +1110,22 @@ dyOptions(
   dyRangeSelector(height = 30)
 ###
 
-titre <- "Oxygen 1m: EOL vs Point B CTD"
-fit <- lmodel2(data = combined1, mean_oxy_mll_rhB ~ oxy_eol, nperm = 99)
+titre <- "Oxygen 1m: EOL vs Point B+ CTD"
+fit <- lmodel2(data = combined_1_B_Bplus_wink_eol, mean_oxy_mll_rhBplus ~ oxy_eol, nperm = 99)
 p_Oxyptb_Oxyeol <-  ggreg2(fit, "oxy_eol", "mean_oxy_mll_rhBplus") +
   geom_abline(aes(slope= 1, intercept =0), linetype = 2) +
   mytheme+labs(x="Oxy EOL", y="Oxy Point B+ CTD")
 print(p_Oxyptb_Oxyeol)
 
 titre <- "Oxygen 1m: EOL vs Point B Winkler"
-fit <- lmodel2(data = combined1, ptb_oxy_wink ~ oxy_eol, nperm = 99)
+fit <- lmodel2(data = combined_1_B_Bplus_wink_eol, ptb_oxy_wink ~ oxy_eol, nperm = 99)
 p_Oxyptbwink_Oxyeol <-  ggreg2(fit, "oxy_eol", "ptb_oxy_wink") +
   geom_abline(aes(slope= 1, intercept =0), linetype = 2) +
   mytheme+labs(x="Oxy EOL", y="Oxy Point B Winkler")
 print(p_Oxyptbwink_Oxyeol)
 
 titre <- "Oxygen 1m: Point B+ CTD vs Point B Winkler"
-fit <- lmodel2(data = combined1, ptb_oxy_wink ~ mean_oxy_mll_rhBplus, nperm = 99)
+fit <- lmodel2(data = combined_1_B_Bplus_wink_eol, ptb_oxy_wink ~ mean_oxy_mll_rhBplus, nperm = 99)
 p_Oxyptbwink_Oxyptb <-  ggreg2(fit, "mean_oxy_mll_rhBplus", "ptb_oxy_wink") +
   geom_abline(aes(slope= 1, intercept =0), linetype = 2) +
   mytheme+labs(x="Oxy Point B+ CTD", y="Oxy Point B Winkler")
