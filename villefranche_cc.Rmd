@@ -1094,7 +1094,7 @@ dyOptions(connectSeparatedPoints = TRUE,
 #delta oxy
 combined_1_B_Bplus_wink_eol <- combined_1_B_Bplus_wink_eol %>% 
   dplyr::mutate(oxy_mll_Bplus_wink_detla = oxy_eol - mean_oxy_mll_rhBplus,
-  dplyr::mutate(oxy_mll_eol_wink_detla = oxy_eol - ptb_oxy_wink))
+                oxy_mll_eol_wink_detla = oxy_eol - ptb_oxy_wink)
 #plot
 oxy_eol_wink_xts <- dplyr::select(combined_1_B_Bplus_wink_eol,datetime, oxy_mll_eol_wink_detla)
 oxy_eol_wink_xts <- as.xts(oxy_eol_wink_xts, order.by=oxy_eol_wink_xts$datetime)
