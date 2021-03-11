@@ -1084,7 +1084,7 @@ dySeries("oxy_eol", drawPoints = TRUE, pointSize=2, label = "Oxy EOL", color ="r
 dySeries("ptb_oxy_wink", drawPoints = TRUE, pointSize=2, label = "Oxy winkler PTB", color ="green")%>%
  # dyLegend(show = "always", width = 600)%>%
   #dyAxis("y",valueRange = c(-0.1, 0.11))%>%
-dyOptions(
+dyOptions(connectSeparatedPoints = TRUE,
     drawGrid = TRUE,
     drawPoints = TRUE,
     useDataTimezone = TRUE)%>%
