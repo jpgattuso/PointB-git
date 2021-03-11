@@ -1093,7 +1093,8 @@ dyOptions(connectSeparatedPoints = TRUE,
 ###
 #delta oxy
 combined_1_B_Bplus_wink_eol <- combined_1_B_Bplus_wink_eol %>% 
-  dplyr::mutate(oxy_mll_eol_wink_detla = oxy_eol - ptb_oxy_wink)
+  dplyr::mutate(oxy_mll_Bplus_wink_detla = oxy_eol - mean_oxy_mll_rhBplus,
+  dplyr::mutate(oxy_mll_eol_wink_detla = oxy_eol - ptb_oxy_wink))
 #plot
 oxy_eol_wink_xts <- dplyr::select(combined_1_B_Bplus_wink_eol,datetime, oxy_mll_eol_wink_detla)
 oxy_eol_wink_xts <- as.xts(oxy_eol_wink_xts, order.by=oxy_eol_wink_xts$datetime)
@@ -1109,6 +1110,20 @@ dyOptions(
     useDataTimezone = TRUE)%>%
   dyRangeSelector(height = 30)
 ###
+#plot
+oxy_eol_wink_xts <- dplyr::select(combined_1_B_Bplus_wink_eol,datetime, oxy_mll_Bplus_wink_detla)
+oxy_eol_wink_xts <- as.xts(oxy_eol_wink_xts, order.by=oxy_eol_wink_xts$datetime)
+
+dygraph(oxy_eol_wink_xts,  main = "Delta Oxy EOL / ptB+ 1m", ylab = "") %>%
+     dySeries("oxy_mll_Bplus_wink_detla", drawPoints = TRUE, pointSize=2, label = "delta (ml/l)", color="black")%>%
+   dyLimit(0,strokePattern = "dashed", color = "black") %>% 
+ # dyLegend(show = "always", width = 600)%>%
+  #dyAxis("y",valueRange = c(-0.1, 0.11))%>%
+dyOptions(
+    drawGrid = TRUE,
+    drawPoints = TRUE,
+    useDataTimezone = TRUE)%>%
+  dyRangeSelector(height = 30)
 
 titre <- "Oxygen 1m: EOL vs Point B+ CTD"
 fit <- lmodel2(data = combined_1_B_Bplus_wink_eol, mean_oxy_mll_rhBplus ~ oxy_eol, nperm = 99)
