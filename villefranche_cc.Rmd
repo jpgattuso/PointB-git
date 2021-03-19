@@ -46,11 +46,11 @@ library(pander)
 #define who is the user and define path
 if (Sys.getenv("LOGNAME") == "gattuso") {
   path = "../../pCloud\ Sync/Documents/experiments/exp153_carbonates_point_B/"
-  path_sami = "../../pCloud\ Sync/Documents/experiments/exp176_sami/sami_data/sami_raw_export/Data_deployment/EOL/"
+  path_sami = "../../pCloud\ Sync/Documents/experiments/exp176_sami/vlfr_ph_data/3_out_ph_sami_seafet/out_deployment/"
 }
 if (Sys.getenv("LOGNAME") == "samir") {
   path = "../../pCloud Sync/exp153_carbonates_point_B/"
-  path_sami = "../../pCloud\ Sync/exp176_sami/sami_data/sami_raw_export/Data_deployment/EOL/"
+  path_sami = "../../pCloud\ Sync/exp176_sami/vlfr_ph_data/3_out_ph_sami_seafet/out_deployment/"
   path_par ="../../pCloud Sync/Light_Series_Odyssey/par_data/Villefranche/"
 }
 
@@ -253,14 +253,15 @@ if (length(file_list) == 0) {stop()} # script does not run if there is no data f
 ii <- 0
 for (file in file_list){
   ii <- ii + 1
-  tmp <- read.table(paste(path_sami, file, sep = ""), header = F, dec = ".", as.is = TRUE, sep = "\t", skip = 4, fill = TRUE)
+  tmp <- read.table(paste(path_sami, file, sep = ""), header = F, dec = ".", as.is = TRUE, sep = "\t", skip = 5, fill = TRUE)
 # YOU MUST add manually the deployement number in the title file
 # The following take last digit in the title file
   tmp$deployment_sami <- as.numeric(substr(str_extract(file, "-[0-9][0-9]\\."),2,3))
-  if (ii == 1) {sami <- tmp} else {sami <- rbind(sami, tmp)}
+  colnames(tmp)  <- c("datetime","ph_sami", "ph_error_sami", "temp_int_sami", "temp_ext_sami","flag_sami", "deployment_sami")
+  tmp$datetime <- mdy_hms(tmp$datetime, tz="UTC")
+  if (ii == 1) {sami <- tmp} 
+  else {sami <- rbind(sami, tmp)}
 }
-
-colnames(sami)  <- c("datetime","ph_sami", "ph_error_sami", "temp_int_sami", "temp_ext_sami","flag_sami", "deployment_sami")
 
 # # put the file in the processed file
 # if (length(file_list) > 0) {
@@ -271,11 +272,11 @@ colnames(sami)  <- c("datetime","ph_sami", "ph_error_sami", "temp_int_sami", "te
 # }
 
 # Convert datetime
-sami$datetime <- mdy_hms(sami$datetime, tz="UTC")
+#sami$datetime <- mdy_hms(sami$datetime, tz="UTC")
 
 # supprimer les données erronées
 sami <- sami %>%
-  dplyr::filter(flag_sami == 0 & ph_sami >= 7.95 & ph_sami <= 8.2)
+  dplyr::filter(flag_sami == 0 & ph_sami >= 7.8 & ph_sami <= 8.2)
 
 save(sami, file = paste0(path, "data/sami/sami_all_eol.csv"))
 
@@ -299,9 +300,7 @@ dygraph(sami_xts, ylab = "") %>%
     dyShading(from = sami_events[5], to = sami_events[6], color = "#E0E0E0") %>%
     dyShading(from = sami_events[6], to = sami_events[7], color = "#CCCCCC") %>%
     dyShading(from = sami_events[8], to = sami_events[9], color = "#E0E0E0") %>%
-    dyShading(from = sami_events[9], to = sami_events[10], color = "#E0E0E0") %>%
-
-
+    dyShading(from = sami_events[9], to = sami_events[10], color = "#CCCCCC") %>%
  # dyLegend(show = "always", width = 600)%>%
   #dyAxis("y",valueRange = c(-0.1, 0.11))%>%
 dyOptions(
