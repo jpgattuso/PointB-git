@@ -287,13 +287,26 @@ sami_events <- c("2019-12-16 11:00:00", "2020-02-25 16:00:00","2020-06-17 08:00:
 ## PLOT
 sami_xts <- dplyr::select(sami, datetime, ph_sami, temp_int_sami, temp_ext_sami)
 sami_xts <- as.xts(sami_xts, order.by=sami_xts$datetime)
-dygraph(sami_xts, ylab = "") %>%
+
+presAnnotation <- function(dygraph, x, text) {
+  dygraph %>%
+    dyAnnotation(x, text, attachAtBottom = TRUE, width = 100)
+}
+
+
+ dygraph(sami_xts, ylab = "") %>%
   dySeries("ph_sami", drawPoints = TRUE, pointSize=2, label = "ph_sami")%>%
   dySeries(axis = "y2","temp_int_sami", drawPoints = TRUE, pointSize=2, label = "temp_int_sami") %>%
   dySeries(axis = "y2", "temp_ext_sami", drawPoints = TRUE, pointSize=2, label = "temp_ext_sami") %>%
+
    dyEvent(as.POSIXct("2020-07-16 12:00:00", tz="GMT"), "reagent bag changed", labelLoc = "bottom", color="red") %>%
    dyEvent(as.POSIXct("2020-07-16 11:30:00", tz="GMT"), "end of TRIS calib", labelLoc = "top", color="red") %>%
    dyEvent(as.POSIXct("2019-12-05 11:00:00", tz="GMT"), "end of TRIS calib", labelLoc = "bottom", color="red") %>%
+   
+    dyEvent(as.POSIXct("2020-08-10 00:00:00", tz="GMT"), color="black") %>%
+  dyEvent(as.POSIXct("2020-10-12 11:00:00", tz="GMT"), color="black") %>%
+    dyEvent(as.POSIXct("2020-10-16 10:00:00", tz="GMT"), color="black") %>%
+  dyEvent(as.POSIXct("2020-12-09 10:00:00", tz="GMT"), color="black") %>%
   dyShading(from = sami_events[1], to = sami_events[2], color = "#CCCCCC") %>%
   dyShading(from = sami_events[2], to = sami_events[3], color = "#E0E0E0") %>%
    dyShading(from = sami_events[4], to = sami_events[5], color = "#CCCCCC") %>%
@@ -301,13 +314,14 @@ dygraph(sami_xts, ylab = "") %>%
     dyShading(from = sami_events[6], to = sami_events[7], color = "#CCCCCC") %>%
     dyShading(from = sami_events[8], to = sami_events[9], color = "#E0E0E0") %>%
     dyShading(from = sami_events[9], to = sami_events[10], color = "#CCCCCC") %>%
+
  # dyLegend(show = "always", width = 600)%>%
   #dyAxis("y",valueRange = c(-0.1, 0.11))%>%
 dyOptions(
     drawGrid = TRUE,
     drawPoints = TRUE,
     useDataTimezone = TRUE)%>%
-  dyRangeSelector(height = 30)
+  dyRangeSelector(height = 30) 
 ```
 
 ## **Logs - Informations**
