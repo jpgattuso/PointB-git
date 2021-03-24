@@ -119,6 +119,28 @@ mytheme <- theme_bw() +
 # **PAR EOL** {.tabset .tabset-pills}
 
 ## **Deployment**
+```{r PAR air, warning = FALSE}
+# YOU MUST add manually the "deployement"_calibrated" information in the end of the title file
+file_list_air <- list.files(path  = paste0(path_par, "EOL_air"), pattern = "*_calibrated.CSV")
+
+if (length(file_list_air) == 0) {stop()} # script does not run if there is no data file to read
+ii <- 0
+par_air <- NULL
+for (ii in 1:length(file_list_air)){
+  print(ii)
+  print(file_list_air[ii])
+
+tmp <- read.table(paste0(path_par, "EOL_air/", file_list_air[ii], sep = ""), header = F, dec = ".", as.is = TRUE, sep = ",", skip = 9, fill = TRUE)
+
+par_air <- rbind(par_air, tmp)
+}
+
+par_air <- par_air %>% 
+  dplyr::select(-c("V1")) %>% 
+  tidyr::unite(col="datetime", V2, V3, sep = " " )
+colnames(par_air)  <- c("datetime", "raw_value_air", "int_light_air")
+par_air$datetime <- dmy_hms(par_air$date)
+```
 
 ```{r PAR 10m, warning = FALSE}
 # YOU MUST add manually the "deployement"_calibrated" information in the end of the title file
@@ -126,57 +148,60 @@ file_list_10m <- list.files(path  = paste0(path_par, "EOL_10m"), pattern = "*_ca
 
 if (length(file_list_10m) == 0) {stop()} # script does not run if there is no data file to read
 ii <- 0
-for (file in file_list_10m){
-  ii <- ii + 1
-  tmp <- read.table(paste0(path_par, "EOL_10m/", file, sep = ""), header = F, dec = ".", as.is = TRUE, sep = ";", skip = 11, fill = TRUE)
+par_10m <- NULL
+for (ii in 1:length(file_list_10m)){
+   print(ii)
+  print(file_list_10m[ii])
+  
+tmp <- read.table(paste0(path_par, "EOL_10m/", file_list_10m[ii], sep = ""), header = F, dec = ".", as.is = TRUE, sep = ",", skip = 9, fill = TRUE)
 
-  if (ii == 1) {par_10m <- tmp} else {par_10m <- rbind(par_10m, tmp)}
-  #remove unused columns
-  par_10m <- par_10m %>% 
-    dplyr::select(-c("V1", "V6")) %>% 
-  tidyr::unite(col="datetime", V2, V3, sep = " " )
+par_10m <- rbind(par_10m, tmp)
 }
-
+par_10m <- par_10m %>% 
+    dplyr::select(-c("V1")) %>% 
+  tidyr::unite(col="datetime", V2, V3, sep = " " )
 colnames(par_10m)  <- c("datetime", "raw_value_10", "int_light_10")
 par_10m$datetime <- dmy_hms(par_10m$date)
 ```
 
 ```{r PAR 20m, warning = FALSE}
- file_list_20m <- list.files(path  = paste0(path_par, "EOL_20m"), pattern = "*_calibrated.CSV")
+file_list_20m <- list.files(path  = paste0(path_par, "EOL_20m"), pattern = "*_calibrated.CSV")
 
 if (length(file_list_20m) == 0) {stop()} # script does not run if there is no data file to read
 ii <- 0
-for (file in file_list_20m){
-  ii <- ii + 1
-  tmp <- read.table(paste0(path_par, "EOL_20m/", file, sep = ""), header = F, dec = ".", as.is = TRUE, sep = ";", skip = 11, fill = TRUE)
+par_20m <- NULL
+for (ii in 1:length(file_list_20m)){
+   print(ii)
+  print(file_list_20m[ii])
+  
+tmp <- read.table(paste0(path_par, "EOL_20m/", file_list_20m[ii], sep = ""), header = F, dec = ".", as.is = TRUE, sep = ",", skip = 9, fill = TRUE)
 
-  if (ii == 1) {par_20m <- tmp} else {par_20m <- rbind(par_20m, tmp)}
-  #remove unused columns
-  par_20m <- par_20m %>% 
-    dplyr::select(-c("V1", "V6")) %>% 
-  tidyr::unite(col="datetime", V2, V3, sep = " " )
+par_20m <- rbind(par_20m, tmp)
 }
-
+par_20m <- par_20m %>% 
+    dplyr::select(-c("V1")) %>% 
+  tidyr::unite(col="datetime", V2, V3, sep = " " )
 colnames(par_20m)  <- c("datetime", "raw_value_20", "int_light_20")
 par_20m$datetime <- dmy_hms(par_20m$date)
 ```
 
 ```{r PAR 30m, warning = FALSE}
- file_list_30m <- list.files(path  = paste0(path_par, "EOL_30m"), pattern = "*_calibrated.CSV")
+file_list_30m <- list.files(path  = paste0(path_par, "EOL_30m"), pattern = "*_calibrated.CSV")
 
 if (length(file_list_30m) == 0) {stop()} # script does not run if there is no data file to read
 ii <- 0
-for (file in file_list_30m){
-  ii <- ii + 1
-  tmp <- read.table(paste0(path_par, "EOL_30m/", file, sep = ""), header = F, dec = ".", as.is = TRUE, sep = ";", skip = 11, fill = TRUE)
+par_30m <- NULL
+for (ii in 1:length(file_list_30m)){
+   print(ii)
+  print(file_list_30m[ii])
+  
+tmp <- read.table(paste0(path_par, "EOL_30m/", file_list_30m[ii], sep = ""), header = F, dec = ".", as.is = TRUE, sep = ",", skip = 12, fill = TRUE)
 
-  if (ii == 1) {par_30m <- tmp} else {par_30m <- rbind(par_30m, tmp)}
-  #remove unused columns
-  par_30m <- par_30m %>% 
-    dplyr::select(-c("V1", "V6")) %>% 
-  tidyr::unite(col="datetime", V2, V3, sep = " " )
+par_30m <- rbind(par_30m, tmp)
 }
-
+par_30m <- par_30m %>% 
+    dplyr::select(-c("V1")) %>% 
+  tidyr::unite(col="datetime", V2, V3, sep = " " )
 colnames(par_30m)  <- c("datetime", "raw_value_30", "int_light_30")
 par_30m$datetime <- dmy_hms(par_30m$date)
 
@@ -185,7 +210,7 @@ par_30m$datetime <- dmy_hms(par_30m$date)
 ```{r PAR plot, warning = FALSE, out.width='100%'}
 par_all <- left_join(par_10m,par_20m,by="datetime")
 par_all <- left_join(par_all,par_30m,by="datetime")
-par_all <- par_all[-1, ]
+par_all <- left_join(par_all,par_air,by="datetime")
 
 par_xts <- dplyr::select(par_all, datetime, int_light_10, int_light_20, int_light_30)
 par_xts <- as.xts(par_xts, order.by=par_xts$datetime)
@@ -194,12 +219,29 @@ dygraph(par_xts, ylab = "") %>%
   dySeries("int_light_10", drawPoints = TRUE, pointSize=3, color="deepskyblue",label = "PAR 10m")%>%
   dySeries("int_light_20", drawPoints = TRUE, pointSize=3, color = "dodgerblue", label = "PAR 20m") %>%
   dySeries("int_light_30", drawPoints = TRUE, pointSize=3, color= "dodgerblue4", label = "PAR 30m") %>%
+
  # dyLegend(show = "always", width = 600)%>%
 dyOptions(
     drawGrid = TRUE,
     drawPoints = TRUE,
     useDataTimezone = TRUE)%>%
   dyRangeSelector(height = 30)
+
+####### AIR
+par_air_xts <- dplyr::select(par_all, datetime,int_light_air)
+par_air_xts <- as.xts(par_air_xts, order.by=par_air_xts$datetime)
+
+dygraph(par_air_xts, ylab = "") %>%
+   dySeries("int_light_air", drawPoints = TRUE, pointSize=3, color = "orange", label = "PAR air") %>%
+
+ # dyLegend(show = "always", width = 600)%>%
+dyOptions(
+    drawGrid = TRUE,
+    drawPoints = TRUE,
+    useDataTimezone = TRUE)%>%
+  dyRangeSelector(height = 30)
+
+
 ```
 
 ## **Logs - Informations**
