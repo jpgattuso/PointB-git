@@ -46,11 +46,11 @@ library(pander)
 #define who is the user and define path
 if (Sys.getenv("LOGNAME") == "gattuso") {
   path = "../../pCloud\ Sync/Documents/experiments/exp153_carbonates_point_B/"
-  path_sami = "../../pCloud\ Sync/Documents/experiments/exp176_sami/sami_data/sami_raw_export/Data_deployment/EOL/"
+  path_sami = "../../pCloud\ Sync/Documents/experiments/exp176_sami/vlfr_ph_data/3_out_ph_sami_seafet/out_deployment/"
 }
 if (Sys.getenv("LOGNAME") == "samir") {
   path = "../../pCloud Sync/exp153_carbonates_point_B/"
-  path_sami = "../../pCloud\ Sync/exp176_sami/sami_data/sami_raw_export/Data_deployment/EOL/"
+  path_sami = "../../pCloud\ Sync/exp176_sami/vlfr_ph_data/3_out_ph_sami_seafet/out_deployment/"
   path_par ="../../pCloud Sync/Light_Series_Odyssey/par_data/Villefranche/"
 }
 
@@ -119,6 +119,28 @@ mytheme <- theme_bw() +
 # **PAR EOL** {.tabset .tabset-pills}
 
 ## **Deployment**
+```{r PAR air, warning = FALSE}
+# YOU MUST add manually the "deployement"_calibrated" information in the end of the title file
+file_list_air <- list.files(path  = paste0(path_par, "EOL_air"), pattern = "*_calibrated.CSV")
+
+if (length(file_list_air) == 0) {stop()} # script does not run if there is no data file to read
+ii <- 0
+par_air <- NULL
+for (ii in 1:length(file_list_air)){
+  print(ii)
+  print(file_list_air[ii])
+
+tmp <- read.table(paste0(path_par, "EOL_air/", file_list_air[ii], sep = ""), header = F, dec = ".", as.is = TRUE, sep = ",", skip = 9, fill = TRUE)
+
+par_air <- rbind(par_air, tmp)
+}
+
+par_air <- par_air %>% 
+  dplyr::select(-c("V1")) %>% 
+  tidyr::unite(col="datetime", V2, V3, sep = " " )
+colnames(par_air)  <- c("datetime", "raw_value_air", "int_light_air")
+par_air$datetime <- dmy_hms(par_air$date)
+```
 
 ```{r PAR 10m, warning = FALSE}
 # YOU MUST add manually the "deployement"_calibrated" information in the end of the title file
@@ -126,57 +148,60 @@ file_list_10m <- list.files(path  = paste0(path_par, "EOL_10m"), pattern = "*_ca
 
 if (length(file_list_10m) == 0) {stop()} # script does not run if there is no data file to read
 ii <- 0
-for (file in file_list_10m){
-  ii <- ii + 1
-  tmp <- read.table(paste0(path_par, "EOL_10m/", file, sep = ""), header = F, dec = ".", as.is = TRUE, sep = ";", skip = 11, fill = TRUE)
+par_10m <- NULL
+for (ii in 1:length(file_list_10m)){
+   print(ii)
+  print(file_list_10m[ii])
+  
+tmp <- read.table(paste0(path_par, "EOL_10m/", file_list_10m[ii], sep = ""), header = F, dec = ".", as.is = TRUE, sep = ",", skip = 9, fill = TRUE)
 
-  if (ii == 1) {par_10m <- tmp} else {par_10m <- rbind(par_10m, tmp)}
-  #remove unused columns
-  par_10m <- par_10m %>% 
-    dplyr::select(-c("V1", "V6")) %>% 
-  tidyr::unite(col="datetime", V2, V3, sep = " " )
+par_10m <- rbind(par_10m, tmp)
 }
-
+par_10m <- par_10m %>% 
+    dplyr::select(-c("V1")) %>% 
+  tidyr::unite(col="datetime", V2, V3, sep = " " )
 colnames(par_10m)  <- c("datetime", "raw_value_10", "int_light_10")
 par_10m$datetime <- dmy_hms(par_10m$date)
 ```
 
 ```{r PAR 20m, warning = FALSE}
- file_list_20m <- list.files(path  = paste0(path_par, "EOL_20m"), pattern = "*_calibrated.CSV")
+file_list_20m <- list.files(path  = paste0(path_par, "EOL_20m"), pattern = "*_calibrated.CSV")
 
 if (length(file_list_20m) == 0) {stop()} # script does not run if there is no data file to read
 ii <- 0
-for (file in file_list_20m){
-  ii <- ii + 1
-  tmp <- read.table(paste0(path_par, "EOL_20m/", file, sep = ""), header = F, dec = ".", as.is = TRUE, sep = ";", skip = 11, fill = TRUE)
+par_20m <- NULL
+for (ii in 1:length(file_list_20m)){
+   print(ii)
+  print(file_list_20m[ii])
+  
+tmp <- read.table(paste0(path_par, "EOL_20m/", file_list_20m[ii], sep = ""), header = F, dec = ".", as.is = TRUE, sep = ",", skip = 9, fill = TRUE)
 
-  if (ii == 1) {par_20m <- tmp} else {par_20m <- rbind(par_20m, tmp)}
-  #remove unused columns
-  par_20m <- par_20m %>% 
-    dplyr::select(-c("V1", "V6")) %>% 
-  tidyr::unite(col="datetime", V2, V3, sep = " " )
+par_20m <- rbind(par_20m, tmp)
 }
-
+par_20m <- par_20m %>% 
+    dplyr::select(-c("V1")) %>% 
+  tidyr::unite(col="datetime", V2, V3, sep = " " )
 colnames(par_20m)  <- c("datetime", "raw_value_20", "int_light_20")
 par_20m$datetime <- dmy_hms(par_20m$date)
 ```
 
 ```{r PAR 30m, warning = FALSE}
- file_list_30m <- list.files(path  = paste0(path_par, "EOL_30m"), pattern = "*_calibrated.CSV")
+file_list_30m <- list.files(path  = paste0(path_par, "EOL_30m"), pattern = "*_calibrated.CSV")
 
 if (length(file_list_30m) == 0) {stop()} # script does not run if there is no data file to read
 ii <- 0
-for (file in file_list_30m){
-  ii <- ii + 1
-  tmp <- read.table(paste0(path_par, "EOL_30m/", file, sep = ""), header = F, dec = ".", as.is = TRUE, sep = ";", skip = 11, fill = TRUE)
+par_30m <- NULL
+for (ii in 1:length(file_list_30m)){
+   print(ii)
+  print(file_list_30m[ii])
+  
+tmp <- read.table(paste0(path_par, "EOL_30m/", file_list_30m[ii], sep = ""), header = F, dec = ".", as.is = TRUE, sep = ",", skip = 12, fill = TRUE)
 
-  if (ii == 1) {par_30m <- tmp} else {par_30m <- rbind(par_30m, tmp)}
-  #remove unused columns
-  par_30m <- par_30m %>% 
-    dplyr::select(-c("V1", "V6")) %>% 
-  tidyr::unite(col="datetime", V2, V3, sep = " " )
+par_30m <- rbind(par_30m, tmp)
 }
-
+par_30m <- par_30m %>% 
+    dplyr::select(-c("V1")) %>% 
+  tidyr::unite(col="datetime", V2, V3, sep = " " )
 colnames(par_30m)  <- c("datetime", "raw_value_30", "int_light_30")
 par_30m$datetime <- dmy_hms(par_30m$date)
 
@@ -185,7 +210,7 @@ par_30m$datetime <- dmy_hms(par_30m$date)
 ```{r PAR plot, warning = FALSE, out.width='100%'}
 par_all <- left_join(par_10m,par_20m,by="datetime")
 par_all <- left_join(par_all,par_30m,by="datetime")
-par_all <- par_all[-1, ]
+par_all <- left_join(par_all,par_air,by="datetime")
 
 par_xts <- dplyr::select(par_all, datetime, int_light_10, int_light_20, int_light_30)
 par_xts <- as.xts(par_xts, order.by=par_xts$datetime)
@@ -194,12 +219,29 @@ dygraph(par_xts, ylab = "") %>%
   dySeries("int_light_10", drawPoints = TRUE, pointSize=3, color="deepskyblue",label = "PAR 10m")%>%
   dySeries("int_light_20", drawPoints = TRUE, pointSize=3, color = "dodgerblue", label = "PAR 20m") %>%
   dySeries("int_light_30", drawPoints = TRUE, pointSize=3, color= "dodgerblue4", label = "PAR 30m") %>%
+
  # dyLegend(show = "always", width = 600)%>%
 dyOptions(
     drawGrid = TRUE,
     drawPoints = TRUE,
     useDataTimezone = TRUE)%>%
   dyRangeSelector(height = 30)
+
+####### AIR
+par_air_xts <- dplyr::select(par_all, datetime,int_light_air)
+par_air_xts <- as.xts(par_air_xts, order.by=par_air_xts$datetime)
+
+dygraph(par_air_xts, ylab = "") %>%
+   dySeries("int_light_air", drawPoints = TRUE, pointSize=3, color = "orange", label = "PAR air") %>%
+
+ # dyLegend(show = "always", width = 600)%>%
+dyOptions(
+    drawGrid = TRUE,
+    drawPoints = TRUE,
+    useDataTimezone = TRUE)%>%
+  dyRangeSelector(height = 30)
+
+
 ```
 
 ## **Logs - Informations**
@@ -253,14 +295,15 @@ if (length(file_list) == 0) {stop()} # script does not run if there is no data f
 ii <- 0
 for (file in file_list){
   ii <- ii + 1
-  tmp <- read.table(paste(path_sami, file, sep = ""), header = F, dec = ".", as.is = TRUE, sep = "\t", skip = 4, fill = TRUE)
+  tmp <- read.table(paste(path_sami, file, sep = ""), header = F, dec = ".", as.is = TRUE, sep = "\t", skip = 5, fill = TRUE)
 # YOU MUST add manually the deployement number in the title file
 # The following take last digit in the title file
   tmp$deployment_sami <- as.numeric(substr(str_extract(file, "-[0-9][0-9]\\."),2,3))
-  if (ii == 1) {sami <- tmp} else {sami <- rbind(sami, tmp)}
+  colnames(tmp)  <- c("datetime","ph_sami", "ph_error_sami", "temp_int_sami", "temp_ext_sami","flag_sami", "deployment_sami")
+  tmp$datetime <- mdy_hms(tmp$datetime, tz="UTC")
+  if (ii == 1) {sami <- tmp} 
+  else {sami <- rbind(sami, tmp)}
 }
-
-colnames(sami)  <- c("datetime","ph_sami", "ph_error_sami", "temp_int_sami", "temp_ext_sami","flag_sami", "deployment_sami")
 
 # # put the file in the processed file
 # if (length(file_list) > 0) {
@@ -271,37 +314,48 @@ colnames(sami)  <- c("datetime","ph_sami", "ph_error_sami", "temp_int_sami", "te
 # }
 
 # Convert datetime
-sami$datetime <- mdy_hms(sami$datetime, tz="UTC")
+#sami$datetime <- mdy_hms(sami$datetime, tz="UTC")
 
 # supprimer les données erronées
 sami <- sami %>%
-  dplyr::filter(flag_sami == 0 & ph_sami >= 7.95 & ph_sami <= 8.2)
+  dplyr::filter(flag_sami == 0 & ph_sami >= 7.8 & ph_sami <= 8.2)
 
 save(sami, file = paste0(path, "data/sami/sami_all_eol.csv"))
 
 ## Add event periodes manually
 ## Events
-sami_events <- c("2019-12-16 11:00:00", "2020-02-25 16:00:00","2020-06-17 08:00:00","2020-06-19 10:00:00","2020-07-15 10:00:00","2020-07-17 18:00:00", "2020-09-21 09:00:00", "2020-12-10 13:00:00","2020-12-17 08:00:00")
+sami_events <- c("2019-12-16 11:00:00", "2020-02-25 16:00:00","2020-06-17 08:00:00","2020-06-19 10:00:00","2020-07-15 10:00:00","2020-07-17 18:00:00", "2020-08-10 00:00:00", "2020-12-10 13:00:00","2020-12-17 09:00:00","2021-02-17 09:00:00")
 
 ## PLOT
 sami_xts <- dplyr::select(sami, datetime, ph_sami, temp_int_sami, temp_ext_sami)
 sami_xts <- as.xts(sami_xts, order.by=sami_xts$datetime)
-dygraph(sami_xts, ylab = "") %>%
+
+presAnnotation <- function(dygraph, x, text) {
+  dygraph %>%
+    dyAnnotation(x, text, attachAtBottom = TRUE, width = 100)
+}
+
+
+ dygraph(sami_xts, ylab = "") %>%
   dySeries("ph_sami", drawPoints = TRUE, pointSize=2, label = "ph_sami")%>%
   dySeries(axis = "y2","temp_int_sami", drawPoints = TRUE, pointSize=2, label = "temp_int_sami") %>%
   dySeries(axis = "y2", "temp_ext_sami", drawPoints = TRUE, pointSize=2, label = "temp_ext_sami") %>%
+
    dyEvent(as.POSIXct("2020-07-16 12:00:00", tz="GMT"), "reagent bag changed", labelLoc = "bottom", color="red") %>%
-   dyEvent(as.POSIXct("2020-07-16 11:30:00", tz="GMT"), "end of TRIS calib", labelLoc = "bottom", color="red") %>%
+   dyEvent(as.POSIXct("2020-07-16 11:30:00", tz="GMT"), "end of TRIS calib", labelLoc = "top", color="red") %>%
    dyEvent(as.POSIXct("2019-12-05 11:00:00", tz="GMT"), "end of TRIS calib", labelLoc = "bottom", color="red") %>%
+   
+    dyEvent(as.POSIXct("2020-08-10 00:00:00", tz="GMT"), color="black") %>%
+  dyEvent(as.POSIXct("2020-10-12 11:00:00", tz="GMT"), color="black") %>%
+    dyEvent(as.POSIXct("2020-10-16 10:00:00", tz="GMT"), color="black") %>%
+  dyEvent(as.POSIXct("2020-12-09 10:00:00", tz="GMT"), color="black") %>%
   dyShading(from = sami_events[1], to = sami_events[2], color = "#CCCCCC") %>%
   dyShading(from = sami_events[2], to = sami_events[3], color = "#E0E0E0") %>%
-  dyShading(from = sami_events[3], to = sami_events[4], color = "white") %>%
    dyShading(from = sami_events[4], to = sami_events[5], color = "#CCCCCC") %>%
     dyShading(from = sami_events[5], to = sami_events[6], color = "#E0E0E0") %>%
     dyShading(from = sami_events[6], to = sami_events[7], color = "#CCCCCC") %>%
-    dyShading(from = sami_events[7], to = sami_events[8], color = "white") %>%
     dyShading(from = sami_events[8], to = sami_events[9], color = "#E0E0E0") %>%
-
+    dyShading(from = sami_events[9], to = sami_events[10], color = "#CCCCCC") %>%
 
  # dyLegend(show = "always", width = 600)%>%
   #dyAxis("y",valueRange = c(-0.1, 0.11))%>%
@@ -309,7 +363,7 @@ dyOptions(
     drawGrid = TRUE,
     drawPoints = TRUE,
     useDataTimezone = TRUE)%>%
-  dyRangeSelector(height = 30)
+  dyRangeSelector(height = 30) 
 ```
 
 ## **Logs - Informations**
