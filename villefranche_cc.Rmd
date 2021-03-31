@@ -1,6 +1,6 @@
 ---
 title: "Time series and comparison for Point B/B+ and EOL data"
-author: "Samir Alliouane, Frederic Gazeau, Steeve Comeau, Jean-Pierre Gattuso, CNRS-UPMC."
+author: "Samir Alliouane, Frederic Gazeau, Steeve Comeau, Jean-Pierre Gattuso,Nuria Teixido, CNRS-SU."
 date: '`r format(Sys.Date(), "%d %B %Y")`'
 output:
   rmarkdown::html_document:
@@ -119,7 +119,7 @@ mytheme <- theme_bw() +
 # **PAR EOL** {.tabset .tabset-pills}
 
 ## **Deployment**
-```{r PAR air, warning = FALSE}
+```{r PAR air, warning = FALSE, message=FALSE}
 # YOU MUST add manually the "deployement"_calibrated" information in the end of the title file
 file_list_air <- list.files(path  = paste0(path_par, "EOL_air"), pattern = "*_calibrated.CSV")
 
@@ -142,7 +142,7 @@ colnames(par_air)  <- c("datetime", "raw_value_air", "int_light_air")
 par_air$datetime <- dmy_hms(par_air$date)
 ```
 
-```{r PAR 10m, warning = FALSE}
+```{r PAR 10m, warning = FALSE, message=FALSE}
 # YOU MUST add manually the "deployement"_calibrated" information in the end of the title file
 file_list_10m <- list.files(path  = paste0(path_par, "EOL_10m"), pattern = "*_calibrated.CSV")
 
@@ -164,7 +164,7 @@ colnames(par_10m)  <- c("datetime", "raw_value_10", "int_light_10")
 par_10m$datetime <- dmy_hms(par_10m$date)
 ```
 
-```{r PAR 20m, warning = FALSE}
+```{r PAR 20m, warning = FALSE, message=FALSE}
 file_list_20m <- list.files(path  = paste0(path_par, "EOL_20m"), pattern = "*_calibrated.CSV")
 
 if (length(file_list_20m) == 0) {stop()} # script does not run if there is no data file to read
@@ -185,7 +185,7 @@ colnames(par_20m)  <- c("datetime", "raw_value_20", "int_light_20")
 par_20m$datetime <- dmy_hms(par_20m$date)
 ```
 
-```{r PAR 30m, warning = FALSE}
+```{r PAR 30m, warning = FALSE, message=FALSE}
 file_list_30m <- list.files(path  = paste0(path_par, "EOL_30m"), pattern = "*_calibrated.CSV")
 
 if (length(file_list_30m) == 0) {stop()} # script does not run if there is no data file to read
@@ -208,9 +208,14 @@ par_30m$datetime <- dmy_hms(par_30m$date)
 ```
 
 ```{r PAR plot, warning = FALSE, out.width='100%'}
-par_all <- left_join(par_10m,par_20m,by="datetime")
+par_all <- left_join(par_20m,par_10m,by="datetime") #put 20m BEFORE because data are missing in 10m (stops on 28dec only)
 par_all <- left_join(par_all,par_30m,by="datetime")
 par_all <- left_join(par_all,par_air,by="datetime")
+# remove outliers due to end of periode (raising to the surface + lab manipulations)
+par_all <- par_all %>% 
+  dplyr::filter(datetime < as.POSIXct("2021-03-16 10:00:00") | datetime > as.POSIXct("2021-03-16 14:00:00"))
+
+par_periode <- c("2020-10-29 14:20:00", "2020-12-09 09:00:00","2020-12-17 11:00:00","2021-03-16 13:00:00")
 
 par_xts <- dplyr::select(par_all, datetime, int_light_10, int_light_20, int_light_30)
 par_xts <- as.xts(par_xts, order.by=par_xts$datetime)
@@ -219,7 +224,11 @@ dygraph(par_xts, ylab = "") %>%
   dySeries("int_light_10", drawPoints = TRUE, pointSize=3, color="deepskyblue",label = "PAR 10m")%>%
   dySeries("int_light_20", drawPoints = TRUE, pointSize=3, color = "dodgerblue", label = "PAR 20m") %>%
   dySeries("int_light_30", drawPoints = TRUE, pointSize=3, color= "dodgerblue4", label = "PAR 30m") %>%
-
+    dyEvent(as.POSIXct("2020-12-28 09:10:00"), "par_10m stops", labelLoc = "top", color="red",strokePattern = "dashed") %>% 
+  dyEvent(as.POSIXct("2021-02-17 11:00:00"), "cleanning", labelLoc = "top", color="red",strokePattern = "dashed") %>% 
+  dyEvent(as.POSIXct("2021-03-30 09:50:00"), "cleanning", labelLoc = "top", color="red",strokePattern = "dashed") %>% 
+dyShading(from = par_periode[1], to = par_periode[2], color = "#CCCCCC") %>%
+  dyShading(from = par_periode[3], to = par_periode[4], color = "#E0E0E0") %>%
  # dyLegend(show = "always", width = 600)%>%
 dyOptions(
     drawGrid = TRUE,
@@ -228,20 +237,17 @@ dyOptions(
   dyRangeSelector(height = 30)
 
 ####### AIR
-par_air_xts <- dplyr::select(par_all, datetime,int_light_air)
+par_air_xts <- dplyr::select(par_air, datetime,int_light_air)
 par_air_xts <- as.xts(par_air_xts, order.by=par_air_xts$datetime)
 
 dygraph(par_air_xts, ylab = "") %>%
    dySeries("int_light_air", drawPoints = TRUE, pointSize=3, color = "orange", label = "PAR air") %>%
-
  # dyLegend(show = "always", width = 600)%>%
 dyOptions(
     drawGrid = TRUE,
     drawPoints = TRUE,
     useDataTimezone = TRUE)%>%
-  dyRangeSelector(height = 30)
-
-
+dyRangeSelector(height = 30)
 ```
 
 ## **Logs - Informations**
@@ -366,6 +372,19 @@ dyOptions(
   dyRangeSelector(height = 30) 
 ```
 
+```{r sami pH normalized 18C, echo=FALSE, warning = FALSE, message = FALSE, out.width='100%'}
+# ## add alcalinity data from discrete sampling
+# 
+# ## add column normalized 18°C
+# sami <- sami %>% 
+#   dplyr::mutate(ph_sami_18C = pHinsi(pH = ph_sami, ALK=ta,
+#                              Tinsi = 18,
+#                              Tlab =temp_lab_eol,
+#                              Pinsi = depth/10, S = salinity_field,
+#                              Pt = 1e-6*PO4, Sit = 1e-6*SIOH4,
+#                              k1k2 = "l", kf = "pf", ks = "d",
+#                              pHscale = "T", b = "l10"))
+```
 ## **Logs - Informations**
 
 ```{r kable log sami}
