@@ -906,10 +906,15 @@ somlit <- dplyr::left_join(dat, pH25, by = c("sampling_date", "depth")) %>%
 vlfrcc <- left_join(dat, eol_ptb %>% dplyr::select(sampling_date, depth, pH_s_eol_temp_insi, pH_s_ptb_temp_insi), by=c("sampling_date", "depth"))
 #save data
 write_csv(somlit, file = "output_jp/data/output_somlit.csv")
+write_csv(somlit, file = paste0(path, "output_jp/output/output_somlit.csv"))
 write_csv(dat, file="output_jp/data/output.csv")
+write_csv(somlit, file = paste0(path, "output_jp/output/output.csv"))
 write_csv(pangaea, file="output_jp/data/output_pangaea.csv")
+write_csv(somlit, file = paste0(path, "output_jp/output/output_pangaea.csv"))
 write_csv(vlfrcc, file="output_jp/data/output_vlfrcc.csv")
+write_csv(somlit, file = paste0(path, "output_jp/output/output_vlfrcc.csv"))
 write_rds(dat, "output_jp/data/output.rds")
+write_csv(somlit, file = paste0(path, "output_jp/output/output.rds"))
 ```
  
 ```{r Uncertainties, include=FALSE, echo=FALSE}
