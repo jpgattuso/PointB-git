@@ -208,7 +208,7 @@ Les "quality flags" "qflag\_sample", "qflag\_ta", "qflag\_DIC" qui apparaissent 
 ```{r Initialization Point B, include=TRUE, message = FALSE}
 z <-  read_delim(
   paste0(path, "data/Data_DIC.csv"),
-  delim = ",",
+  delim = ";",
   col_names = TRUE,
   col_types = "ccccdddddddddddcddddddddddddddd",
   na = c("NA", "999999")
