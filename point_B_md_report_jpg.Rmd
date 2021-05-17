@@ -678,17 +678,22 @@ dat1 <- dplyr::full_join(mean_sal_temp, mean_at_dic)  %>%
 
 ```{r Calculate and compare spec pH, include=FALSE}
 #First, create df with pH variables plus mean ta
+# add the mean when NA exist in "ta"
 tmp <- z %>% 
   dplyr::select(sampling_date, depth, salinity_field, temp_field, contains("eol"), contains("ptb")) %>% 
-  dplyr::left_join(dat1, by = c("sampling_date", "depth"))
+  dplyr::left_join(dat1, by = c("sampling_date", "depth")) %>% 
+  dplyr::mutate(fill = mean(ta, na.rm=TRUE), # value to fill in blanks
+  ta_filled_mean = case_when(!is.na(ta) ~ ta,
+                    TRUE ~ fill)
+  )   
 # set to NA qglags = 3; calculate in situ spec pH at eol
 eol <- tmp %>%
-  dplyr::select(sampling_date, depth, ta, dic, salinity_field, temp_field, 
+  dplyr::select(sampling_date, depth, ta_filled_mean, dic, salinity_field, temp_field, 
                 pH_s_eol_temp_lab, temp_lab_eol, PO4, SIOH4) %>%
-  tidyr::drop_na(sampling_date, depth, ta, salinity_field, temp_field, 
+  tidyr::drop_na(sampling_date, depth, ta_filled_mean, salinity_field, temp_field, 
                 pH_s_eol_temp_lab, temp_lab_eol) %>%
   #dplyr::filter(qflag_pH_s_eol != 3) %>% 
-  dplyr::mutate(pH_s_eol_temp_insi = pHinsi(pH = pH_s_eol_temp_lab, ALK=ta,
+  dplyr::mutate(pH_s_eol_temp_insi = pHinsi(pH = pH_s_eol_temp_lab, ALK=ta_filled_mean,
                              Tinsi = temp_field,
                              Tlab =temp_lab_eol,
                              Pinsi = depth/10, S = salinity_field,
@@ -701,21 +706,22 @@ eol <- tmp %>%
   # longer needed and prevents efficient unique()
   dplyr::ungroup() %>% 
   dplyr::distinct()
+
 # calculate in situ spec pH at Point B
 ptb <- tmp %>%
-  dplyr::select(sampling_date, depth, ta, dic, salinity_field, temp_field, 
+  dplyr::select(sampling_date, depth, ta_filled_mean, dic, salinity_field, temp_field, 
                 pH_s_ptb_temp_lab, temp_lab_ptb, PO4, SIOH4) %>%
-  tidyr::drop_na(sampling_date, depth, ta, salinity_field, temp_field, 
+  tidyr::drop_na(sampling_date, depth, ta_filled_mean, salinity_field, temp_field, 
                 pH_s_ptb_temp_lab, temp_lab_ptb) %>%
   #dplyr::filter(qflag_pH_s_ptb != 3) %>% 
-  dplyr::mutate(pH_s_ptb_temp_insi = pHinsi(pH=pH_s_ptb_temp_lab, ALK=ta,
+  dplyr::mutate(pH_s_ptb_temp_insi = pHinsi(pH=pH_s_ptb_temp_lab, ALK=ta_filled_mean,
                              Tinsi=temp_field,
                              Tlab=temp_lab_ptb,
                              Pinsi=depth/10, S=salinity_field,
                              Pt=1e-6*PO4, Sit=1e-6*SIOH4,
                              k1k2 = "l", kf = "pf", ks="d",
                              pHscale = "T", b="l10")) %>% 
-  dplyr::mutate(pH_s_somlit_temp_25 = pHinsi(pH = pH_s_ptb_temp_lab, ALK = ta,
+  dplyr::mutate(pH_s_somlit_temp_25 = pHinsi(pH = pH_s_ptb_temp_lab, ALK = ta_filled_mean,
   #somlit rather than ptb in name because "ptb" removed later
                              Tinsi=25,
                              Tlab=temp_lab_ptb,
