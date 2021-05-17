@@ -205,10 +205,10 @@ Les "quality flags" "qflag\_sample", "qflag\_ta", "qflag\_DIC" qui apparaissent 
 
 **Statistics on input data are:**
 
-```{r Initialization Point B, include=TRUE, message = FALSE}
+```{r Initialization Point B, message=FALSE, include=TRUE}
 z <-  read_delim(
   paste0(path, "data/Data_DIC.csv"),
-  delim = ";",
+  delim = ",",
   col_names = TRUE,
   col_types = "ccccdddddddddddcddddddddddddddd",
   na = c("NA", "999999")
@@ -677,14 +677,13 @@ dat1 <- dplyr::full_join(mean_sal_temp, mean_at_dic)  %>%
 ```
 
 ```{r Calculate and compare spec pH, include=FALSE}
-#First, create df with pH variables plus mean ta
-# add the mean when NA exist in "ta"
+#First, create df with pH variables plus mean ta to calculate pH when at is still unknown
+# add the mean when ta = NA
 tmp <- z %>% 
   dplyr::select(sampling_date, depth, salinity_field, temp_field, contains("eol"), contains("ptb")) %>% 
   dplyr::left_join(dat1, by = c("sampling_date", "depth")) %>% 
-  dplyr::mutate(fill = mean(ta, na.rm=TRUE), # value to fill in blanks
-  ta_filled_mean = case_when(!is.na(ta) ~ ta,
-                    TRUE ~ fill)
+  dplyr::mutate(ta_filled_mean = case_when(!is.na(ta) ~ ta,
+                    TRUE ~ mean(ta, na.rm=TRUE))
   )   
 # set to NA qglags = 3; calculate in situ spec pH at eol
 eol <- tmp %>%
