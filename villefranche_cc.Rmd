@@ -120,7 +120,7 @@ mytheme <- theme_bw() +
 
 ## **Deployment**
 ```{r PAR air, warning = FALSE, message=FALSE}
-# YOU MUST add manually the "deployement"_calibrated" information in the end of the title file
+# YOU MUST add manually: "_calibrated" in the end of the title file's data.
 file_list_air <- list.files(path  = paste0(path_par, "EOL_air"), pattern = "*_calibrated.CSV")
 
 if (length(file_list_air) == 0) {stop()} # script does not run if there is no data file to read
@@ -212,10 +212,12 @@ par_all <- left_join(par_20m,par_10m,by="datetime") #put 20m BEFORE because data
 par_all <- left_join(par_all,par_30m,by="datetime")
 par_all <- left_join(par_all,par_air,by="datetime")
 # remove outliers due to end of periode (raising to the surface + lab manipulations)
+# add each periode of time to be removed
 par_all <- par_all %>% 
-  dplyr::filter(datetime < as.POSIXct("2021-03-16 10:00:00") | datetime > as.POSIXct("2021-03-16 14:00:00"))
-
-par_periode <- c("2020-10-29 14:20:00", "2020-12-09 09:00:00","2020-12-17 11:00:00","2021-03-16 13:00:00")
+  dplyr::filter(datetime < as.POSIXct("2021-03-16 10:00:00") | datetime > as.POSIXct("2021-03-16 14:00:00") &
+                datetime < as.POSIXct("2021-05-25 08:00:00") | datetime > as.POSIXct("2021-06-11 12:00:00") )
+# add each periode here
+par_periode <- c("2020-10-29 14:20:00", "2020-12-09 09:00:00","2020-12-17 11:00:00","2021-03-16 13:00:00", "2021-05-25 08:00:00")
 
 par_xts <- dplyr::select(par_all, datetime, int_light_10, int_light_20, int_light_30)
 par_xts <- as.xts(par_xts, order.by=par_xts$datetime)
