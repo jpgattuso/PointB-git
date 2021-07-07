@@ -349,13 +349,18 @@ for (file in file_list){
 
 # supprimer les données erronées
 sami <- sami %>%
-  dplyr::filter(flag_sami == 0 & ph_sami >= 7.8 & ph_sami <= 8.2)
+  dplyr::filter(flag_sami == 0 & ph_sami >= 7.8 & ph_sami <= 8.4)
+# remove outliers due to end of periode (raising to the surface + lab manipulations)
+# add each periode of time to be removed
+sami <- sami %>% 
+  dplyr::filter(datetime < as.POSIXct("2021-04-04 12:00:00") | datetime > as.POSIXct("2021-04-22 10:00:00")  )
+
 
 save(sami, file = paste0(path, "data/sami/sami_all_eol.csv"))
 
 ## Add event periodes manually
 ## Events
-sami_events <- c("2019-12-16 11:00:00", "2020-02-25 16:00:00","2020-06-17 08:00:00","2020-06-19 10:00:00","2020-07-15 10:00:00","2020-07-17 18:00:00", "2020-08-10 00:00:00", "2020-12-10 13:00:00","2020-12-17 09:00:00","2021-02-17 09:00:00","2021-03-17 12:00:00","2021-03-30 09:30:00","2021-04-21 08:30:00","2021-04-22 10:00:00")
+sami_events <- c("2019-12-16 11:00:00", "2020-02-25 16:00:00","2020-06-17 08:00:00","2020-06-19 10:00:00","2020-07-15 10:00:00","2020-07-17 18:00:00", "2020-08-10 00:00:00", "2020-12-10 13:00:00","2020-12-17 09:00:00","2021-02-17 09:00:00","2021-03-17 12:00:00","2021-03-30 09:30:00","2021-04-22 10:30:00","2021-06-11 08:00:00")
 
 ## PLOT
 sami_xts <- dplyr::select(sami, datetime, ph_sami, temp_int_sami, temp_ext_sami)
@@ -389,6 +394,8 @@ presAnnotation <- function(dygraph, x, text) {
     dyShading(from = sami_events[9], to = sami_events[10], color = "#CCCCCC") %>%
  dyShading(from = sami_events[11], to = sami_events[12], color = "#E0E0E0") %>%
     dyShading(from = sami_events[12], to = sami_events[13], color = "#CCCCCC") %>%
+       dyShading(from = sami_events[13], to = sami_events[14], color = "#E0E0E0") %>%
+
  # dyLegend(show = "always", width = 600)%>%
   #dyAxis("y",valueRange = c(-0.1, 0.11))%>%
 dyOptions(
