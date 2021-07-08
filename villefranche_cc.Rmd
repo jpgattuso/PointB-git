@@ -426,7 +426,11 @@ dyOptions(
 url_sami_log <- "https://docs.google.com/spreadsheets/d/e/2PACX-1vSmth08Q-Tw1RFznKeStSMJkKeFgYZac9WIR3ETLYWkznouAD6A-1n2uza1YgotXQ/pub?gid=798409504&single=true&output=csv"
 sami_log <- read.csv(url(url_sami_log), header=T, stringsAsFactors = FALSE)
 #replade dots with spaces in column names.
-kable(sami_log, col.names = gsub("[.]", " ", names(sami_log)), align ="c", caption="**piSAMI logs (metadata)**")
+#kable(sami_log, col.names = gsub("[.]", " ", names(sami_log)), align ="c", caption="**piSAMI logs (metadata)**")
+kbl(sami_log)%>%
+    kable_paper() %>% 
+    kable_styling(fixed_thead = T)%>%
+  row_spec(c(2:3, 7:8, 12:15, 17:19, 21:22), bold = T, color = "white", background = "#97C7FA")
 ```
  
 ## **Sunburst - TRIS info**
