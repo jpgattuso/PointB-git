@@ -20,6 +20,7 @@ require(pander)
 require(seacarb)
 library(cowplot)
 library(scales)
+library(kableExtra)
 library(RColorBrewer)
 library(gridExtra)
 library(reshape2)
@@ -139,7 +140,13 @@ par_air <- par_air %>%
   dplyr::select(-c("V1")) %>% 
   tidyr::unite(col="datetime", V2, V3, sep = " " )
 colnames(par_air)  <- c("datetime", "raw_value_air", "int_light_air")
-par_air$datetime <- dmy_hms(par_air$date)
+# PAR data are in local France time
+par_air$datetime <- dmy_hms(par_air$datetime, tz="Europe/Paris")
+# Convert to UTC
+par_air$datetime <- with_tz(par_air$datetime, tzone = "UTC")
+# Remove NA 
+par_air <- par_air%>%
+  dplyr::filter(!is.na(datetime))
 ```
 
 ```{r PAR 10m, warning = FALSE, message=FALSE}
@@ -161,7 +168,10 @@ par_10m <- par_10m %>%
     dplyr::select(-c("V1")) %>% 
   tidyr::unite(col="datetime", V2, V3, sep = " " )
 colnames(par_10m)  <- c("datetime", "raw_value_10", "int_light_10")
-par_10m$datetime <- dmy_hms(par_10m$date)
+# PAR data are in local France time
+par_10m$datetime <- dmy_hms(par_10m$datetime, tz="Europe/Paris")
+# Convert to UTC
+par_10m$datetime <- with_tz(par_10m$datetime, tzone = "UTC")
 ```
 
 ```{r PAR 20m, warning = FALSE, message=FALSE}
@@ -182,7 +192,10 @@ par_20m <- par_20m %>%
     dplyr::select(-c("V1")) %>% 
   tidyr::unite(col="datetime", V2, V3, sep = " " )
 colnames(par_20m)  <- c("datetime", "raw_value_20", "int_light_20")
-par_20m$datetime <- dmy_hms(par_20m$date)
+# PAR data are in local France time
+par_20m$datetime <- dmy_hms(par_20m$datetime, tz="Europe/Paris")
+# Convert to UTC
+par_20m$datetime <- with_tz(par_20m$datetime, tzone = "UTC")
 ```
 
 ```{r PAR 30m, echo=FALSE, message=FALSE, warning=FALSE}
@@ -203,8 +216,10 @@ par_30m <- par_30m %>%
     dplyr::select(-c("V1")) %>% 
   tidyr::unite(col="datetime", V2, V3, sep = " " )
 colnames(par_30m)  <- c("datetime", "raw_value_30", "int_light_30")
-par_30m$datetime <- dmy_hms(par_30m$date)
-
+# PAR data are in local France time
+par_30m$datetime <- dmy_hms(par_30m$datetime, tz="Europe/Paris")
+# Convert to UTC
+par_30m$datetime <- with_tz(par_30m$datetime, tzone = "UTC")
 ```
 
 ```{r PAR plot, warning = FALSE, out.width='100%'}
@@ -213,10 +228,10 @@ par_all <- left_join(par_all,par_30m,by="datetime")
 # remove outliers due to end of periode (raising to the surface + lab manipulations)
 # add each periode of time to be removed
 par_all <- par_all %>% 
-  dplyr::filter(datetime < as.POSIXct("2021-03-16 10:00:00") | datetime > as.POSIXct("2021-03-16 14:00:00") &
-                datetime < as.POSIXct("2021-05-21 06:50:00") | datetime > as.POSIXct("2021-06-11 10:00:00") )
+  dplyr::filter(datetime < as.POSIXct("2021-03-16 09:00:00") | datetime > as.POSIXct("2021-03-16 13:00:00") &
+                datetime < as.POSIXct("2021-05-21 04:50:00") | datetime > as.POSIXct("2021-06-11 09:00:00") )
 # add each periode here
-par_periode <- c("2020-10-29 14:20:00", "2020-12-09 09:00:00","2020-12-17 11:00:00","2021-03-16 13:00:00", "2021-05-25 08:00:00")
+par_periode <- c("2020-10-29 12:20:00", "2020-12-09 08:00:00","2020-12-17 10:00:00","2021-03-16 11:00:00", "2021-05-25 06:00:00")
 
 par_xts <- dplyr::select(par_all, datetime, int_light_10, int_light_20, int_light_30)
 par_xts <- as.xts(par_xts, order.by=par_xts$datetime)
@@ -237,7 +252,9 @@ dyOptions(
     drawPoints = TRUE,
     useDataTimezone = TRUE)%>%
   dyRangeSelector(height = 30)
+```
 
+```{r PAR plot AIR, warning = FALSE, out.width='100%'}
 ####### AIR
 par_air_xts <- dplyr::select(par_air, datetime,int_light_air)
 par_air_xts <- as.xts(par_air_xts, order.by=par_air_xts$datetime)
@@ -262,7 +279,11 @@ dyRangeSelector(height = 30)
 url_par_log <- "https://docs.google.com/spreadsheets/d/e/2PACX-1vRKsEOg29pe4RdV8W5Cz8lMFhm-lllLy66Z7t6qRjw3ueF1sHVcSbmVgozttv3LGQ/pub?gid=485625929&single=true&output=csv"
 par_log <- read.csv(url(url_par_log), header=T, stringsAsFactors = FALSE)
 #replade dots with spaces in column names.
-kable(par_log, col.names = gsub("[.]", " ", names(par_log)), align ="c", caption="**piSAMI logs (metadata)**")
+kbl(par_log)%>%
+    kable_paper() %>% 
+    kable_styling(fixed_thead = T)%>%
+  row_spec(c(1:12, 25:36), bold = T, color = "white", background = "#97C7FA")
+
 ```
 
 # **seafet pH**  {.tabset .tabset-pills}
@@ -328,13 +349,18 @@ for (file in file_list){
 
 # supprimer les données erronées
 sami <- sami %>%
-  dplyr::filter(flag_sami == 0 & ph_sami >= 7.8 & ph_sami <= 8.2)
+  dplyr::filter(flag_sami == 0 & ph_sami >= 7.8 & ph_sami <= 8.4)
+# remove outliers due to end of periode (raising to the surface + lab manipulations)
+# add each periode of time to be removed
+sami <- sami %>% 
+  dplyr::filter(datetime < as.POSIXct("2021-04-04 12:00:00") | datetime > as.POSIXct("2021-04-22 10:00:00")  )
+
 
 save(sami, file = paste0(path, "data/sami/sami_all_eol.csv"))
 
 ## Add event periodes manually
 ## Events
-sami_events <- c("2019-12-16 11:00:00", "2020-02-25 16:00:00","2020-06-17 08:00:00","2020-06-19 10:00:00","2020-07-15 10:00:00","2020-07-17 18:00:00", "2020-08-10 00:00:00", "2020-12-10 13:00:00","2020-12-17 09:00:00","2021-02-17 09:00:00","2021-03-17 12:00:00","2021-03-30 09:30:00","2021-04-21 08:30:00","2021-04-22 10:00:00")
+sami_events <- c("2019-12-16 11:00:00", "2020-02-25 16:00:00","2020-06-17 08:00:00","2020-06-19 10:00:00","2020-07-15 10:00:00","2020-07-17 18:00:00", "2020-08-10 00:00:00", "2020-12-10 13:00:00","2020-12-17 09:00:00","2021-02-17 09:00:00","2021-03-17 12:00:00","2021-03-30 09:30:00","2021-04-22 10:30:00","2021-06-11 08:00:00")
 
 ## PLOT
 sami_xts <- dplyr::select(sami, datetime, ph_sami, temp_int_sami, temp_ext_sami)
@@ -368,6 +394,8 @@ presAnnotation <- function(dygraph, x, text) {
     dyShading(from = sami_events[9], to = sami_events[10], color = "#CCCCCC") %>%
  dyShading(from = sami_events[11], to = sami_events[12], color = "#E0E0E0") %>%
     dyShading(from = sami_events[12], to = sami_events[13], color = "#CCCCCC") %>%
+       dyShading(from = sami_events[13], to = sami_events[14], color = "#E0E0E0") %>%
+
  # dyLegend(show = "always", width = 600)%>%
   #dyAxis("y",valueRange = c(-0.1, 0.11))%>%
 dyOptions(
@@ -398,7 +426,11 @@ dyOptions(
 url_sami_log <- "https://docs.google.com/spreadsheets/d/e/2PACX-1vSmth08Q-Tw1RFznKeStSMJkKeFgYZac9WIR3ETLYWkznouAD6A-1n2uza1YgotXQ/pub?gid=798409504&single=true&output=csv"
 sami_log <- read.csv(url(url_sami_log), header=T, stringsAsFactors = FALSE)
 #replade dots with spaces in column names.
-kable(sami_log, col.names = gsub("[.]", " ", names(sami_log)), align ="c", caption="**piSAMI logs (metadata)**")
+#kable(sami_log, col.names = gsub("[.]", " ", names(sami_log)), align ="c", caption="**piSAMI logs (metadata)**")
+kbl(sami_log)%>%
+    kable_paper() %>% 
+    kable_styling(fixed_thead = T)%>%
+  row_spec(c(2:3, 7:8, 12:15, 17:19, 21:22), bold = T, color = "white", background = "#97C7FA")
 ```
  
 ## **Sunburst - TRIS info**
