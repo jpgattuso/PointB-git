@@ -877,16 +877,37 @@ print(p_rh_oxy_mll)
 
 ```{r oxy 1m ctd_hydro wink, echo=TRUE, warning = FALSE, message = FALSE, out.width='100%'}
 # Reading the Winkler PointB data perweek.
-winkler<- tbl_df(
-  read_delim(file=paste0(path,"/data/data_ptb_winkler.txt"), 
-delim = "\t", 
-col_names = TRUE,# col_types = typ,
-na = c("NA", "999999.00")) %>%
-dplyr::rename(date = DATE, 
-              ptb_oxy_wink= "O (Oxygène)")) 
-winkler$date <- as.POSIXct(winkler$date)
-winkler$ptb_oxy_wink <- as.numeric(as.character(winkler$ptb_oxy_wink))
+#Winkler SURFACE
+winkler_surface<- tbl_df(
+  read_delim(file=paste0(path,"/data/Somlit_Extraction_hydro_surface_1997-2021.csv"),
+delim = ";", 
+skip= 4,
+col_names = FALSE,# col_types = typ,
+na = c("NA", "999999")) )#%>%
+#dplyr::rename(ptb_oxy_wink= "O")%>%
+#tidyr::unite(col="datetime", DATE, HEURE, sep = " " ))
+colnames(winkler_surface) <- c("site","date","time", "coef_maree","maree","prof_text","prof_num" ,"nomSite","gpsLat","gpsLong","ptb_oxy_wink" ,"qO" )
+winkler_surface <- winkler_surface%>%
+  tidyr::unite(col="datetime", date, time, sep = " " )
+winkler_surface$datetime <- ymd_hms(winkler_surface$datetime)
 
+#Winkler FOND
+winkler_fond<- tbl_df(
+  read_delim(file=paste0(path,"/data/Somlit_Extraction_hydro_fond_1997-2021.csv"), 
+delim = ";", 
+skip= 4,
+col_names = FALSE,# col_types = typ,
+na = c("NA", "999999")) )#%>%
+#dplyr::rename(ptb_oxy_wink= "O")%>%
+#tidyr::unite(col="datetime", DATE, HEURE, sep = " " ))
+colnames(winkler_fond) <- c("site","date","time", "coef_maree","maree","prof_text","prof_num" ,"nomSite","gpsLat","gpsLong","ptb_oxy_wink" ,"qO" )
+winkler_fond <- winkler_fond%>%
+  tidyr::unite(col="datetime", date, time, sep = " " )
+winkler_fond$datetime <- ymd_hms(winkler_fond$datetime)
+#winkler_fond$ptb_oxy_wink <- as.numeric(as.character(winkler_fond$ptb_oxy_wink))
+
+#bind 2 dataframe
+winkler <- rbind(winkler_surface, winkler_fond)
 # Select 1m ptb_oxy_wink data 
 wink_1m <- winkler %>%
   dplyr::group_by(date) %>%
