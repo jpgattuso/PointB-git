@@ -888,7 +888,7 @@ na = c("NA", "999999")) )#%>%
 #tidyr::unite(col="datetime", DATE, HEURE, sep = " " ))
 colnames(winkler_surface) <- c("site","date","time", "coef_maree","maree","prof_text","prof_num" ,"nomSite","gpsLat","gpsLong","ptb_oxy_wink" ,"qO" )
 winkler_surface <- winkler_surface%>%
-  tidyr::unite(col="datetime", date, time, sep = " " )
+  tidyr::unite(col="datetime", date, time, sep = " " ,remove=FALSE)
 winkler_surface$datetime <- ymd_hms(winkler_surface$datetime)
 
 #Winkler FOND
@@ -902,17 +902,19 @@ na = c("NA", "999999")) )#%>%
 #tidyr::unite(col="datetime", DATE, HEURE, sep = " " ))
 colnames(winkler_fond) <- c("site","date","time", "coef_maree","maree","prof_text","prof_num" ,"nomSite","gpsLat","gpsLong","ptb_oxy_wink" ,"qO" )
 winkler_fond <- winkler_fond%>%
-  tidyr::unite(col="datetime", date, time, sep = " " )
+  tidyr::unite(col="datetime", date, time, sep = " " ,remove=FALSE)
 winkler_fond$datetime <- ymd_hms(winkler_fond$datetime)
 #winkler_fond$ptb_oxy_wink <- as.numeric(as.character(winkler_fond$ptb_oxy_wink))
 
 #bind 2 dataframe
 winkler <- rbind(winkler_surface, winkler_fond)
+winkler <- winkler%>%
+  dplyr::arrange(datetime)
 # Select 1m ptb_oxy_wink data 
 wink_1m <- winkler %>%
-  dplyr::group_by(date) %>%
-  dplyr::select(date,ptb_oxy_wink,qO, PROF_TEXT )%>%
-   dplyr::filter(PROF_TEXT == "S" & ptb_oxy_wink < 20 )%>%
+  dplyr::group_by(datetime) %>%
+  dplyr::select(datetime,date, time, ptb_oxy_wink,qO, prof_num )%>%
+   dplyr::filter(prof_num == 1 & ptb_oxy_wink < 20 )%>%
   dplyr::filter(qO == 2  |qO == 6)
 # put 09:00:00 as time (local time)
 wink_1m <- wink_1m %>%
