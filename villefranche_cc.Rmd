@@ -564,21 +564,35 @@ Temperature (in blue, °C), salinity (in purple, PSU) and oxygen (in green, ml/l
 #   dyRangeSelector(height = 30)
 # ### SAVE
 # saveRDS(eol, file = paste0(path, "data/eol/eol_data.rds"))
+
+
 url <- "http://obs-vlfr.fr/data/files/~eol/somlit/"
+# YAERS 2013
 files <- httr::GET(url) %>%
   httr::content(as="parsed") %>%
   # get all links containing villefranche-eol
-  xml2::xml_find_all("//a[contains(.,'villefranche-eol')]") %>%
+  xml2::xml_find_all("//a[contains(.,'villefranche-eol-20')]") %>%
   # in a flat vector
   xml2::as_list() %>%
   unlist()
-urls <- str_c(url, files)
-eol <- purrr::map_dfr(urls, read_csv, comment="#", col_types=cols(Date="c", Heure="c"))
-#backup eol
+
+urls_1 <- str_c(url, files[1:800])
+urls_2 <- str_c(url, files[801:1600])
+urls_3 <- str_c(url, files[1601:2400])
+urls_4 <- str_c(url, files[2401:length(files)])
+
+eol_1 <- purrr::map_dfr(urls_1, read_csv, comment="#", col_types=cols(Date="c", Heure="c"))
+eol_2 <- purrr::map_dfr(urls_2, read_csv, comment="#", col_types=cols(Date="c", Heure="c"))
+eol_3 <- purrr::map_dfr(urls_3, read_csv, comment="#", col_types=cols(Date="c", Heure="c"))
+eol_4 <- purrr::map_dfr(urls_4, read_csv, comment="#", col_types=cols(Date="c", Heure="c"))
+
+eol <- rbind(eol_1, eol_2)
+eol <- rbind(eol, eol_3)
+eol <- rbind(eol, eol_4)
+eol <- dplyr::mutate(eol, datetime=str_c(Date, " ", Heure) %>% parse_datetime(format="%Y%m%d %H%M%S"))
+###backup eol
 eol1 <- eol
 eol1 <- dplyr::mutate(eol1, datetime=str_c(Date, " ", Heure) %>% parse_datetime(format="%Y%m%d %H%M%S"))
-
-eol <- dplyr::mutate(eol, datetime=str_c(Date, " ", Heure) %>% parse_datetime(format="%Y%m%d %H%M%S"))
 
 # replace outliers O2 data by NA + remove O2 > 6 units
 eol <- dplyr::mutate(eol, O2 = case_when(O2 > 6 ~ NA_real_,
@@ -1009,8 +1023,8 @@ print(p_rh_oxy_mll)
 # Select 50m ptb_oxy_wink data 
 wink_50m <- winkler %>%
   dplyr::group_by(date) %>%
-  dplyr::select(date,ptb_oxy_wink,qO, PROF_TEXT )%>%
-   dplyr::filter(PROF_TEXT == "F"& ptb_oxy_wink < 20)%>%
+  dplyr::select(date,ptb_oxy_wink,qO, prof_num )%>%
+   dplyr::filter(prof_num == 50 & ptb_oxy_wink < 20)%>%
   dplyr::filter(qO == 2  |qO == 6)
 # put 09:00:00 as time (local time)
 wink_50m <- wink_50m %>%
