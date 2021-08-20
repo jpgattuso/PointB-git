@@ -205,7 +205,7 @@ Les "quality flags" "qflag\_sample", "qflag\_ta", "qflag\_DIC" qui apparaissent 
 
 **Statistics on input data are:**
 
-```{r Initialization Point B, include=TRUE, message = FALSE}
+```{r Initialization Point B, message=FALSE, include=TRUE}
 z <-  read_delim(
   paste0(path, "data/Data_DIC.csv"),
   delim = ",",
@@ -677,14 +677,13 @@ dat1 <- dplyr::full_join(mean_sal_temp, mean_at_dic)  %>%
 ```
 
 ```{r Calculate and compare spec pH, include=FALSE}
-#First, create df with pH variables plus mean ta
-# add the mean when NA exist in "ta"
+#First, create df with pH variables plus mean ta to calculate pH when at is still unknown
+# add the mean when ta = NA
 tmp <- z %>% 
   dplyr::select(sampling_date, depth, salinity_field, temp_field, contains("eol"), contains("ptb")) %>% 
   dplyr::left_join(dat1, by = c("sampling_date", "depth")) %>% 
-  dplyr::mutate(fill = mean(ta, na.rm=TRUE), # value to fill in blanks
-  ta_filled_mean = case_when(!is.na(ta) ~ ta,
-                    TRUE ~ fill)
+  dplyr::mutate(ta_filled_mean = case_when(!is.na(ta) ~ ta,
+                    TRUE ~ mean(ta, na.rm=TRUE))
   )   
 # set to NA qglags = 3; calculate in situ spec pH at eol
 eol <- tmp %>%
@@ -876,14 +875,7 @@ dat3 <- left_join(dat2, tmp, by = c("sampling_date", "depth"))
 dat3 %>% # this is to get rid of NaN; ugly but it works!
   readr::write_csv(file = "output_jp/data/output.csv")
 dat <- readr::read_csv(file = "output_jp/data/output.csv", col_names = TRUE, na = c("NA", "NaN"), guess_max = 30000)
-#Prepare data to upload to Pangaea 
-pangaea <- dplyr::select(dat, sampling_date, depth, CSC_flag, salinity,
-                  temperature, HCO3, CO3,
-                  pH_insi, ta, dic, OmegaCalcite,
-                  OmegaAragonite, pCO2, fCO2) %>%
-  dplyr::mutate(depth = replace(depth, depth == 0, 1),
-                sampling_date = as.character(dat$sampling_date)) %>% 
-  dplyr::filter(sampling_date <= as.POSIXct("2020-06-09"))
+
 #Prepare SOMLIT data 
 # pH25
 pH25 <- dat %>%   
@@ -908,19 +900,31 @@ somlit <- dplyr::left_join(dat, pH25, by = c("sampling_date", "depth")) %>%
                 PO4 = Pt, 
                 SIOH4 = Sit) #%>% 
   #tidyr::drop_na(c(salinity, temperature, dic, ta, pH_calc_insitu, pH_spec_insitu, pH_spec_25))
+
+#Prepare data to upload to Pangaea 
+dat <- dat %>% 
+  dplyr::filter(!is.na(ta)) # to eliminate when there is no at values 
+                            #  pH spec was calculated using mean ta when at was not yer available)
+  pangaea <- dplyr::select(dat, sampling_date, depth, CSC_flag, salinity,
+                  temperature, HCO3, CO3,
+                  pH_insi, ta, dic, OmegaCalcite,
+                  OmegaAragonite, pCO2, fCO2) %>%
+  dplyr::mutate(depth = replace(depth, depth == 0, 1),
+                sampling_date = as.character(dat$sampling_date))
+
 #Prepare data for villefranche_CC 
-vlfrcc <- left_join(dat, eol_ptb %>% dplyr::select(sampling_date, depth, pH_s_eol_temp_insi, pH_s_ptb_temp_insi), by=c("sampling_date", "depth"))
+#vlfrcc <- left_join(dat, eol_ptb %>% dplyr::select(sampling_date, depth, pH_s_eol_temp_insi, pH_s_ptb_temp_insi), by=c("sampling_date", "depth"))
 #save data
 write_csv(somlit, file = "output_jp/data/output_somlit.csv")
 write_csv(somlit, file = paste0(path, "output_jp/output/output_somlit.csv"))
-write_csv(dat, file="output_jp/data/output.csv")
-write_csv(somlit, file = paste0(path, "output_jp/output/output.csv"))
+#write_csv(dat, file="output_jp/data/output.csv")
+#write_csv(somlit, file = paste0(path, "output_jp/output/output.csv"))
 write_csv(pangaea, file="output_jp/data/output_pangaea.csv")
-write_csv(somlit, file = paste0(path, "output_jp/output/output_pangaea.csv"))
-write_csv(vlfrcc, file="output_jp/data/output_vlfrcc.csv")
-write_csv(somlit, file = paste0(path, "output_jp/output/output_vlfrcc.csv"))
-write_rds(dat, "output_jp/data/output.rds")
-write_csv(somlit, file = paste0(path, "output_jp/output/output.rds"))
+#write_csv(somlit, file = paste0(path, "output_jp/output/output_pangaea.csv"))
+#write_csv(vlfrcc, file="output_jp/data/output_vlfrcc.csv")
+#write_csv(somlit, file = paste0(path, "output_jp/output/output_vlfrcc.csv"))
+#write_rds(dat, "output_jp/data/output.rds")
+#write_csv(somlit, file = paste0(path, "output_jp/output/output.rds"))
 ```
  
 ```{r Uncertainties, include=FALSE, echo=FALSE}
