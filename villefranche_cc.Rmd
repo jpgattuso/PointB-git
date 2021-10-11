@@ -8,6 +8,8 @@ output:
     fig_caption: yes
     toc: yes
     toc_float: yes
+editor_options: 
+  chunk_output_type: console
 ---
 
 
@@ -1157,8 +1159,14 @@ print(p_Tptb_Teol)
 ### **1 m**
 
 ```{r eol pointb comp Sal, echo=TRUE, message=FALSE, warning=FALSE, out.width='100%'}
+# periodes 
+sal_periode <- c("2014-08-19 00:00:00","2015-06-16 00:00:00","2015-06-22 00:00:00", "2016-03-22 23:59:59","2017-01-10 00:00:00","2017-07-04 00:00:00", "2017-10-10 00:00:00", "2019-03-19 00:00:00","2019-07-09 00:00:00", "2020-03-10 00:00:00", "2020-04-23 00:00:00", "2020-11-17 00:00:00", "2020-11-24 00:00:00")
 
-eol_ptb_sal_xts <- dplyr::select(combined1, datetime, mean_sal_rhBplus, sal_eol)
+
+# take only sal data when both mean_sal_rhBplus and sal_eol are present.
+eol_ptb_sal_xts <-  combined1%>%
+  dplyr::filter((!is.na(combined1$mean_sal_rhBplus)))%>%
+  dplyr::select(datetime, mean_sal_rhBplus, sal_eol)
 eol_ptb_sal_xts <- as.xts(eol_ptb_sal_xts, order.by=eol_ptb_sal_xts$datetime)
 
 dygraph(eol_ptb_sal_xts,  main = "Salinity comparaison: EOL - ptB+", ylab = "") %>%
@@ -1166,6 +1174,14 @@ dygraph(eol_ptb_sal_xts,  main = "Salinity comparaison: EOL - ptB+", ylab = "") 
 dySeries("sal_eol", drawPoints = TRUE, pointSize=2, label = "Sal EOL", color ="red")%>%
  # dyLegend(show = "always", width = 600)%>%
   #dyAxis("y",valueRange = c(-0.1, 0.11))%>%
+dyShading(from =  sal_periode[1], to= sal_periode[2], color = "#CCCCCC") %>%
+dyShading(from =  sal_periode[3], to= sal_periode[4], color = "#CCCCCC") %>%
+dyShading(from =  sal_periode[5], to= sal_periode[6], color = "#CCCCCC") %>%
+dyShading(from =  sal_periode[7], to= sal_periode[8], color = "#CCCCCC") %>%
+dyShading(from =  sal_periode[9], to= sal_periode[10], color = "#CCCCCC") %>%
+dyShading(from =  sal_periode[11], to= sal_periode[12], color = "#CCCCCC") %>%
+dyShading(from =  sal_periode[13], to= Sys.Date() , color = "#CCCCCC") %>%
+
 dyOptions(
     drawGrid = TRUE,
     drawPoints = TRUE,
@@ -1189,6 +1205,7 @@ dyOptions(
     drawPoints = TRUE,
     useDataTimezone = TRUE)%>%
   dyRangeSelector(height = 30)
+### Remove data if delta -/+ 0.3
 
 ###
 titre <- "Salinity: EOL vs ptB+ 1m"
@@ -1196,7 +1213,7 @@ fit <- lmodel2(data = combined1, mean_sal_rhBplus ~ sal_eol, nperm = 99)
 p_Sptb_Seol <-  ggreg2(fit, "sal_eol", "mean_sal_rhBplus") +
   geom_abline(aes(slope= 1, intercept =0), linetype = 2) +
   mytheme+labs(x="Sal EOL", y="Sal Point B+")
-
+###
 print(p_Sptb_Seol)
 ```
 
