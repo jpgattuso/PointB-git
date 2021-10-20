@@ -1191,6 +1191,7 @@ dyOptions(
 #delta sal
 combined1 <- combined1 %>% 
   dplyr::mutate(sal_eol_rhBplus_detla = mean_sal_rhBplus - sal_eol)
+
 #plot
 oxy_eol_wink_xts <- dplyr::select(combined1,datetime, sal_eol_rhBplus_detla)
 oxy_eol_wink_xts <- as.xts(oxy_eol_wink_xts, order.by=oxy_eol_wink_xts$datetime)
@@ -1198,7 +1199,9 @@ oxy_eol_wink_xts <- as.xts(oxy_eol_wink_xts, order.by=oxy_eol_wink_xts$datetime)
 dygraph(oxy_eol_wink_xts,  main = "Delta Sal EOL / ptB+ 1m", ylab = "") %>%
      dySeries("sal_eol_rhBplus_detla", drawPoints = TRUE, pointSize=2, label = "delta (PSU)", color="black")%>%
    dyLimit(0,strokePattern = "dashed", color = "black") %>% 
- # dyLegend(show = "always", width = 600)%>%
+     dyLimit(0.3,strokePattern = "dashed", color = "red") %>% 
+       dyLimit(-0.3,strokePattern = "dashed", color = "red") %>% 
+# dyLegend(show = "always", width = 600)%>%
   #dyAxis("y",valueRange = c(-0.1, 0.11))%>%
 dyOptions(
     drawGrid = TRUE,
@@ -1215,6 +1218,32 @@ p_Sptb_Seol <-  ggreg2(fit, "sal_eol", "mean_sal_rhBplus") +
   mytheme+labs(x="Sal EOL", y="Sal Point B+")
 ###
 print(p_Sptb_Seol)
+
+### Plot with data if delta is -0.3 / +0.3
+eol_ptb_sal_delta_xts <-  combined1%>%
+  dplyr::filter((!is.na(combined1$mean_sal_rhBplus)))%>%
+  dplyr::filter(sal_eol_rhBplus_detla > -0.3 & sal_eol_rhBplus_detla < 0.3 )%>%
+  dplyr::select(datetime, mean_sal_rhBplus, sal_eol)
+eol_ptb_sal_delta_xts <- as.xts(eol_ptb_sal_delta_xts, order.by=eol_ptb_sal_delta_xts$datetime)
+
+dygraph(eol_ptb_sal_delta_xts,  main = "Salinity comparaison: EOL - ptB+, data with delta -0.3/+0.3", ylab = "") %>%
+    dySeries("mean_sal_rhBplus", drawPoints = TRUE, pointSize=4, label = "Sal ptB+", color ="blue") %>%
+dySeries("sal_eol", drawPoints = TRUE, pointSize=2, label = "Sal EOL", color ="red")%>%
+ # dyLegend(show = "always", width = 600)%>%
+  #dyAxis("y",valueRange = c(-0.1, 0.11))%>%
+dyShading(from =  sal_periode[1], to= sal_periode[2], color = "#CCCCCC") %>%
+dyShading(from =  sal_periode[3], to= sal_periode[4], color = "#CCCCCC") %>%
+dyShading(from =  sal_periode[5], to= sal_periode[6], color = "#CCCCCC") %>%
+dyShading(from =  sal_periode[7], to= sal_periode[8], color = "#CCCCCC") %>%
+dyShading(from =  sal_periode[9], to= sal_periode[10], color = "#CCCCCC") %>%
+dyShading(from =  sal_periode[11], to= sal_periode[12], color = "#CCCCCC") %>%
+dyShading(from =  sal_periode[13], to= Sys.Date() , color = "#CCCCCC") %>%
+
+dyOptions(
+    drawGrid = TRUE,
+    drawPoints = TRUE,
+    useDataTimezone = TRUE)%>%
+  dyRangeSelector(height = 30)
 ```
 
 ## **Oxygen**
@@ -1303,7 +1332,7 @@ p_Oxyptbwink_Oxyeol <-  ggreg2(fit, "ptb_oxy_wink", "oxy_eol") +
   mytheme+labs(y="Oxy EOL", x="Oxy Point B Winkler")
 print(p_Oxyptbwink_Oxyeol)
 
-combined_1_B_Bplus_wink_eol$oxy_eol_calc = 0.926 * combined_1_B_Bplus_wink_eol$ptb_oxy_wink + 0.211
+combined_1_B_Bplus_wink_eol$oxy_eol_calc = fit$regression.results[[3]][2] * combined_1_B_Bplus_wink_eol$ptb_oxy_wink + fit$regression.results[[2]][2]
 
 eol_ptb_oxy_xts <- dplyr::select(combined_1_B_Bplus_wink_eol, datetime, mean_oxy_mll_rhBplus, oxy_eol, ptb_oxy_wink, oxy_eol_calc)
 eol_ptb_oxy_xts <- as.xts(eol_ptb_oxy_xts, order.by=eol_ptb_oxy_xts$datetime)
