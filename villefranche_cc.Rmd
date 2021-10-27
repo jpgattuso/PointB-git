@@ -289,9 +289,9 @@ kbl(par_log)%>%
 
 ```
 
-# **seafet pH**  {.tabset .tabset-pills}
+# **seaFET pH**  {.tabset .tabset-pills}
 
-## **Deployment**
+## **Before 2016 deployment**
 
 ```{r seafet pH download and plot, echo=FALSE, warning = FALSE, message = FALSE, out.width='100%'}
 continuous_discrete <- read.table(paste0(path, "data/continuous_discrete.csv"), header=TRUE, sep=",", dec=".", as.is=TRUE)
@@ -316,6 +316,12 @@ dyOptions(
     useDataTimezone = TRUE)%>%
   dyRangeSelector(height = 30)
 ```
+
+## **October 2021 deployment** 
+
+This deployement was done to check if the #0057 seaFET that have been shelded for 1 year and half is still OK.
+
+E0int, 25 and E0ext, 25 were calculated with a mean of 4 pH spectro measurements from the tuesdays.
 
 ```{r seafet pH , echo=FALSE, warning = FALSE, message = FALSE, out.width='100%'}
 # read deployment file
@@ -440,6 +446,35 @@ dySeries(axis = "y2","temp_field", drawPoints = TRUE, pointSize=3, label = "temp
 dySeries(axis = "y2","T_seaF_sf", drawPoints = TRUE, pointSize=2, label = "temp sf", color="grey")%>%
 dyOptions(
     drawGrid = TRUE,
+    drawPoints = TRUE,
+    useDataTimezone = TRUE,
+    digitsAfterDecimal = 4) %>%
+  dyRangeSelector(height = 30)
+```
+
+Quality control plots :
+
+- Offset between calibrated seaFET data and pH spectro. The offset must fit between -0.2/0.2 pH units.
+
+```{r seaFET quality control pH, echo=FALSE, warning = FALSE, message = FALSE, out.width='100%'}
+#Offset between seafet pH and spec pH (Fig. 2 Kapsenberg et al.)
+library(scales)
+ph_sf <- ph_sf%>%
+  mutate( diff_pH = ph_s_sf_temp_insi - pHint_tot_sf)
+average_offset <- mean(abs(ph_sf$diff_pH), na.rm=TRUE)
+
+offset_xts <- dplyr::select(ph_sf%>%dplyr::filter(!is.na(diff_pH)), datetime, diff_pH)
+offset_xts <- as.xts(offset_xts, order.by=offset_xts$datetime)
+
+dygraph(offset_xts, ylab = "") %>%
+dySeries("diff_pH", drawPoints = TRUE, pointSize=3, label = "pH INT", color="green")%>%
+    dyLimit(0,strokePattern = "dashed", color = "black") %>% 
+  dyAxis("y",valueRange = c(-0.004, 0.004))%>%
+  dyAxis("x",valueRange = c("2021-09-28 04:00:00", "2021-10-19 12:00:00"
+))%>%
+dyOptions(
+    drawGrid = TRUE,
+    strokeWidth= 0,
     drawPoints = TRUE,
     useDataTimezone = TRUE,
     digitsAfterDecimal = 4) %>%
