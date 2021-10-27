@@ -467,10 +467,10 @@ offset_xts <- dplyr::select(ph_sf%>%dplyr::filter(!is.na(diff_pH)), datetime, di
 offset_xts <- as.xts(offset_xts, order.by=offset_xts$datetime)
 
 dygraph(offset_xts, ylab = "") %>%
-dySeries("diff_pH", drawPoints = TRUE, pointSize=3, label = "pH INT", color="green")%>%
+dySeries("diff_pH", drawPoints = TRUE, pointSize=3, label = "delta pHINT", color="green")%>%
     dyLimit(0,strokePattern = "dashed", color = "black") %>% 
   dyAxis("y",valueRange = c(-0.004, 0.004))%>%
-  dyAxis("x",valueRange = c("2021-09-28 04:00:00", "2021-10-19 12:00:00"
+  dyAxis("x",valueRange = c(as.POSIXct("2021-09-28"), as.POSIXct("2021-10-19")
 ))%>%
 dyOptions(
     drawGrid = TRUE,
