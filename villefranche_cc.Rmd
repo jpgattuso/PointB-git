@@ -1691,8 +1691,35 @@ dyOptions(
     drawPoints = TRUE,
     useDataTimezone = TRUE)%>%
   dyRangeSelector(height = 30)
+```
 
+##**Correction of High Frequency data**
 
+```{r eol pointb comp correction EOL HF, echo=TRUE, warning = FALSE, message = FALSE, out.width='100%'}
+#add slope and intercpt from each LowFrequency data to eol data  HighFrequency.
+eol <- eol%>%
+  dplyr::mutate(correction = case_when(datetime >"2014-05-06 00:00:00" & datetime <"2014-10-07 23:59:00" ~ slope_p1 * unclass(datetime) + intercept_p1, 
+                                       datetime >"2015-06-22 00:00:00" & datetime <"2016-03-16 23:59:00" ~ slope_p2 * unclass(datetime) + intercept_p2,
+                                       datetime >"2017-01-10 00:00:00" & datetime <"2017-07-04 23:59:00" ~ slope_p3 * unclass(datetime) + intercept_p3,
+                                       datetime >"2017-11-07 00:00:00" & datetime <"2020-03-10 23:59:00" ~ slope_p4 * unclass(datetime) + intercept_p4,
+                                       datetime >"2020-04-23 00:00:00" & datetime <"2020-11-17 23:59:00" ~ slope_p5 * unclass(datetime) + intercept_p5,
+                                       TRUE ~ 0),
+                sal_eol_corr = sal_eol + correction)
+
+## PLOT
+eol_corr_xts <- dplyr::select(eol, datetime, sal_eol, sal_eol_corr)
+eol_corr_xts <- as.xts(eol_corr_xts, order.by=eol_corr_xts$datetime)
+
+dygraph(eol_corr_xts, main = "EOL sal", ylab = "") %>%
+  dySeries("sal_eol_corr", drawPoints = TRUE, pointSize=2,  color = "green", label = "sal EOL corr")%>%
+  dySeries("sal_eol", drawPoints = TRUE, pointSize=2, color = "blue",label = "sal EOL") %>%
+dyOptions(drawGrid = TRUE,
+    drawPoints = TRUE,
+    useDataTimezone = TRUE)%>%
+  dyRangeSelector(height = 30)
+
+### SAVE
+saveRDS(eol, file = paste0(path, "data/eol/eol_data.rds"))
 ```
 
 ## **Oxygen**
