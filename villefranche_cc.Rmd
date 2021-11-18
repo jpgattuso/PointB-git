@@ -1373,7 +1373,6 @@ dyOptions(
     drawPoints = TRUE,
     useDataTimezone = TRUE)%>%
   dyRangeSelector(height = 30)
-### Remove data if delta -/+ 0.3
 
 ###
 titre <- "Salinity: EOL vs ptB+ 1m"
@@ -1383,7 +1382,16 @@ p_Sptb_Seol <-  ggreg2(fit, "sal_eol", "mean_sal_rhBplus") +
   mytheme+labs(x="Sal EOL", y="Sal Point B+")
 ###
 print(p_Sptb_Seol)
+```
 
+## **EOL sal correction**
+
+### **Definition of drifting periodes**
+
+Drifting periodes have been define according to the delta (drift) between sal Ptb+ and sal EOL.
+Deltas out of range (± 0.3 PSU) have been considered as outliers.
+
+```{r eol pointb comp Sal delta 0.3, echo=TRUE, message=FALSE, warning=FALSE, out.width='100%'}
 ### Plot with data if delta is -0.3 / +0.3
 eol_ptb_sal_delta_xts <-  combined1%>%
   dplyr::filter((!is.na(combined1$mean_sal_rhBplus)))%>%
@@ -1403,12 +1411,288 @@ dyShading(from =  sal_periode[7], to= sal_periode[8], color = "#CCCCCC") %>%
 dyShading(from =  sal_periode[9], to= sal_periode[10], color = "#CCCCCC") %>%
 dyShading(from =  sal_periode[11], to= sal_periode[12], color = "#CCCCCC") %>%
 dyShading(from =  sal_periode[13], to= Sys.Date() , color = "#CCCCCC") %>%
-
 dyOptions(
     drawGrid = TRUE,
     drawPoints = TRUE,
     useDataTimezone = TRUE)%>%
   dyRangeSelector(height = 30)
+
+#### Delta with -0.3/+0.3
+oxy_eol_wink_xts <- dplyr::select(combined1%>%filter(sal_eol_rhBplus_detla > -0.3 & sal_eol_rhBplus_detla < 0.3 ),datetime, sal_eol_rhBplus_detla)
+oxy_eol_wink_xts <- as.xts(oxy_eol_wink_xts, order.by=oxy_eol_wink_xts$datetime)
+
+dygraph(oxy_eol_wink_xts,  main = "Delta Sal EOL / ptB+ 1m, data with delta -0.3/+0.3", ylab = "") %>%
+     dySeries("sal_eol_rhBplus_detla", drawPoints = TRUE, pointSize=2, label = "delta (PSU)", color="black")%>%
+   dyLimit(0,strokePattern = "dashed", color = "black") %>% 
+     dyLimit(0.3,strokePattern = "dashed", color = "red") %>% 
+       dyLimit(-0.3,strokePattern = "dashed", color = "red") %>% 
+# dyLegend(show = "always", width = 600)%>%
+  #dyAxis("y",valueRange = c(-0.1, 0.11))%>%
+dyOptions(
+    drawGrid = TRUE,
+    drawPoints = TRUE,
+    useDataTimezone = TRUE)%>%
+  dyRangeSelector(height = 30)
+```
+
+### **Correction of drifting periodes**
+
+```{r eol pointb comp Sal periodes, echo=TRUE, message=FALSE, warning=FALSE, out.width='100%'}
+######## p1 #########
+
+#Select drifting periodes
+p1 <- combined1%>%
+  dplyr::select(datetime, mean_sal_rhBplus, sal_eol,sal_eol_rhBplus_detla )%>%
+    dplyr::filter(sal_eol_rhBplus_detla > -0.3 & sal_eol_rhBplus_detla < 0.3 )%>%
+  dplyr::filter(datetime >"2014-05-06 00:00:00" & datetime <"2014-10-07 23:59:00" )
+
+##Plot
+p1_xts <-p1%>%
+  dplyr::select(datetime, sal_eol_rhBplus_detla)
+
+p1_xts <- as.xts(p1_xts, order.by=p1_xts$datetime)
+
+dygraph(p1_xts,  main = "p1, delta Sal EOL / ptB+ 1m, data with delta -0.3/+0.3", ylab = "") %>%
+     dySeries("sal_eol_rhBplus_detla", drawPoints = TRUE, pointSize=2, label = "delta", color="black")%>%
+dyOptions(
+    drawGrid = TRUE,
+    drawPoints = TRUE,
+    useDataTimezone = TRUE)%>%
+  dyRangeSelector(height = 30)
+## Regression lineaire avec le temps
+fit_p1 <- lm(data = p1, sal_eol_rhBplus_detla ~ unclass(datetime) )
+slope_p1 <- fit_p1$coefficients[[2]]
+intercept_p1 <- fit_p1$coefficients[[1]]
+
+p1_plot <-  ggplot(data=p1, aes(x=datetime, y=sal_eol_rhBplus_detla), col="black") +  geom_point()+ geom_line()+ geom_abline(aes(slope= slope_p1, intercept =intercept_p1), linetype = 1, col="red") +
+  mytheme+labs(y="delta Sal EOL/PtB", x="") + scale_x_datetime(date_breaks="month",  labels=date_format("%b %Y")) + theme(axis.text.x = element_text(angle = 90, vjust = 1, hjust=1))
+print(p1_plot)
+
+#correction des valeurs EOL avec la regression
+p1 <- p1%>%
+  dplyr::mutate(correction = slope_p1 * unclass(datetime) + intercept_p1,
+                sal_eol_corr = sal_eol + correction )
+
+# plot
+ p1_corr_xts <-p1%>%
+   dplyr::select(datetime, mean_sal_rhBplus, sal_eol, sal_eol_corr)
+
+p1_corr_xts <- as.xts(p1_corr_xts, order.by=p1_corr_xts$datetime)
+
+dygraph(p1_corr_xts,  main = "p1, delta Sal EOL / ptB+ 1m, data with delta -0.3/+0.3", ylab = "") %>%
+     dySeries("mean_sal_rhBplus", drawPoints = TRUE, pointSize=2, label = "sal ptB+", color="blue")%>%
+       dySeries("sal_eol", drawPoints = TRUE, pointSize=2, label = "sal EOL", color="red")%>%
+       dySeries("sal_eol_corr", drawPoints = TRUE, pointSize=2, label = "sal EOL corr", color="green")%>%
+dyOptions(
+    drawGrid = TRUE,
+    drawPoints = TRUE,
+    useDataTimezone = TRUE)%>%
+  dyRangeSelector(height = 30)
+
+#### p2 #####
+#Select drifting periodes
+p2 <- combined1%>%
+  dplyr::select(datetime, mean_sal_rhBplus, sal_eol,sal_eol_rhBplus_detla )%>%
+    dplyr::filter(sal_eol_rhBplus_detla > -0.3 & sal_eol_rhBplus_detla < 0.3 )%>%
+  dplyr::filter(datetime >"2015-06-22 00:00:00" & datetime <"2016-03-16 23:59:00" )
+
+##Plot
+p2_xts <-p2%>%
+  dplyr::select(datetime, sal_eol_rhBplus_detla)
+
+p2_xts <- as.xts(p2_xts, order.by=p2_xts$datetime)
+
+dygraph(p2_xts,  main = "p2, delta Sal EOL / ptB+ 1m, data with delta -0.3/+0.3", ylab = "") %>%
+     dySeries("sal_eol_rhBplus_detla", drawPoints = TRUE, pointSize=2, label = "delta", color="black")%>%
+dyOptions(
+    drawGrid = TRUE,
+    drawPoints = TRUE,
+    useDataTimezone = TRUE)%>%
+  dyRangeSelector(height = 30)
+## Regression lineaire avec le temps
+fit_p2 <- lm(data = p2, sal_eol_rhBplus_detla ~ unclass(datetime) )
+slope_p2 <- fit_p2$coefficients[[2]]
+intercept_p2 <- fit_p2$coefficients[[1]]
+
+p2_plot <-  ggplot(data=p2, aes(x=datetime, y=sal_eol_rhBplus_detla), col="black") +  geom_point()+ geom_line()+ geom_abline(aes(slope= slope_p2, intercept =intercept_p2), linetype = 1, col="red") +
+  mytheme+labs(y="delta Sal EOL/PtB", x="") + scale_x_datetime(date_breaks="month",  labels=date_format("%b %Y")) + theme(axis.text.x = element_text(angle = 90, vjust = 1, hjust=1))
+print(p2_plot)
+
+#correction des valeurs EOL avec la regression
+p2 <- p2%>%
+  dplyr::mutate(correction = slope_p2 * unclass(datetime) + intercept_p2,
+                sal_eol_corr = sal_eol + correction )
+
+# plot
+ p2_corr_xts <-p2%>%
+   dplyr::select(datetime, mean_sal_rhBplus, sal_eol, sal_eol_corr)
+
+p2_corr_xts <- as.xts(p2_corr_xts, order.by=p2_corr_xts$datetime)
+
+dygraph(p2_corr_xts,  main = "p2, delta Sal EOL / ptB+ 1m, data with delta -0.3/+0.3", ylab = "") %>%
+     dySeries("mean_sal_rhBplus", drawPoints = TRUE, pointSize=2, label = "sal ptB+", color="blue")%>%
+       dySeries("sal_eol", drawPoints = TRUE, pointSize=2, label = "sal EOL", color="red")%>%
+       dySeries("sal_eol_corr", drawPoints = TRUE, pointSize=2, label = "sal EOL corr", color="green")%>%
+dyOptions(
+    drawGrid = TRUE,
+    drawPoints = TRUE,
+    useDataTimezone = TRUE)%>%
+  dyRangeSelector(height = 30)
+
+######## p3 #########
+
+#Select drifting periodes
+p3 <- combined1%>%
+  dplyr::select(datetime, mean_sal_rhBplus, sal_eol,sal_eol_rhBplus_detla )%>%
+    dplyr::filter(sal_eol_rhBplus_detla > -0.3 & sal_eol_rhBplus_detla < 0.3 )%>%
+  dplyr::filter(datetime >"2017-01-10 00:00:00" & datetime <"2017-07-04 23:59:00" )
+
+##Plot
+p3_xts <-p3%>%
+  dplyr::select(datetime, sal_eol_rhBplus_detla)
+
+p3_xts <- as.xts(p3_xts, order.by=p3_xts$datetime)
+
+dygraph(p3_xts,  main = "p3, delta Sal EOL / ptB+ 1m, data with delta -0.3/+0.3", ylab = "") %>%
+     dySeries("sal_eol_rhBplus_detla", drawPoints = TRUE, pointSize=2, label = "delta", color="black")%>%
+dyOptions(
+    drawGrid = TRUE,
+    drawPoints = TRUE,
+    useDataTimezone = TRUE)%>%
+  dyRangeSelector(height = 30)
+## Regression lineaire avec le temps
+fit_p3 <- lm(data = p3, sal_eol_rhBplus_detla ~ unclass(datetime) )
+slope_p3 <- fit_p3$coefficients[[2]]
+intercept_p3 <- fit_p3$coefficients[[1]]
+
+p3_plot <-  ggplot(data=p3, aes(x=datetime, y=sal_eol_rhBplus_detla), col="black") +  geom_point()+ geom_line()+ geom_abline(aes(slope= slope_p3, intercept =intercept_p3), linetype = 1, col="red") +
+  mytheme+labs(y="delta Sal EOL/PtB", x="") + scale_x_datetime(date_breaks="month",  labels=date_format("%b %Y")) + theme(axis.text.x = element_text(angle = 90, vjust = 1, hjust=1))
+print(p3_plot)
+
+#correction des valeurs EOL avec la regression
+p3 <- p3%>%
+  dplyr::mutate(correction = slope_p3 * unclass(datetime) + intercept_p3,
+                sal_eol_corr = sal_eol + correction )
+
+# plot
+ p3_corr_xts <-p3%>%
+   dplyr::select(datetime, mean_sal_rhBplus, sal_eol, sal_eol_corr)
+
+p3_corr_xts <- as.xts(p3_corr_xts, order.by=p3_corr_xts$datetime)
+
+dygraph(p3_corr_xts,  main = "p3, delta Sal EOL / ptB+ 1m, data with delta -0.3/+0.3", ylab = "") %>%
+     dySeries("mean_sal_rhBplus", drawPoints = TRUE, pointSize=2, label = "sal ptB+", color="blue")%>%
+       dySeries("sal_eol", drawPoints = TRUE, pointSize=2, label = "sal EOL", color="red")%>%
+       dySeries("sal_eol_corr", drawPoints = TRUE, pointSize=2, label = "sal EOL corr", color="green")%>%
+dyOptions(
+    drawGrid = TRUE,
+    drawPoints = TRUE,
+    useDataTimezone = TRUE)%>%
+  dyRangeSelector(height = 30)
+
+######## p4 #########
+
+#Select drifting periodes
+p4 <- combined1%>%
+  dplyr::select(datetime, mean_sal_rhBplus, sal_eol,sal_eol_rhBplus_detla )%>%
+    dplyr::filter(sal_eol_rhBplus_detla > -0.3 & sal_eol_rhBplus_detla < 0.3 )%>%
+  dplyr::filter(datetime >"2017-11-07 00:00:00" & datetime <"2020-03-10 23:59:00" )
+
+##Plot
+p4_xts <-p4%>%
+  dplyr::select(datetime, sal_eol_rhBplus_detla)
+
+p4_xts <- as.xts(p4_xts, order.by=p4_xts$datetime)
+
+dygraph(p4_xts,  main = "p4, delta Sal EOL / ptB+ 1m, data with delta -0.3/+0.3", ylab = "") %>%
+     dySeries("sal_eol_rhBplus_detla", drawPoints = TRUE, pointSize=2, label = "delta", color="black")%>%
+dyOptions(
+    drawGrid = TRUE,
+    drawPoints = TRUE,
+    useDataTimezone = TRUE)%>%
+  dyRangeSelector(height = 30)
+## Regression lineaire avec le temps
+fit_p4 <- lm(data = p4, sal_eol_rhBplus_detla ~ unclass(datetime) )
+slope_p4 <- fit_p4$coefficients[[2]]
+intercept_p4 <- fit_p4$coefficients[[1]]
+
+p4_plot <-  ggplot(data=p4, aes(x=datetime, y=sal_eol_rhBplus_detla), col="black") +  geom_point()+ geom_line()+ geom_abline(aes(slope= slope_p4, intercept =intercept_p4), linetype = 1, col="red") +
+  mytheme+labs(y="delta Sal EOL/PtB", x="") + scale_x_datetime(date_breaks="month",  labels=date_format("%b %Y")) + theme(axis.text.x = element_text(angle = 90, vjust = 1, hjust=1))
+print(p4_plot)
+
+#correction des valeurs EOL avec la regression
+p4 <- p4%>%
+  dplyr::mutate(correction = slope_p4 * unclass(datetime) + intercept_p4,
+                sal_eol_corr = sal_eol + correction )
+
+# plot
+ p4_corr_xts <-p4%>%
+   dplyr::select(datetime, mean_sal_rhBplus, sal_eol, sal_eol_corr)
+
+p4_corr_xts <- as.xts(p4_corr_xts, order.by=p4_corr_xts$datetime)
+
+dygraph(p4_corr_xts,  main = "p4, delta Sal EOL / ptB+ 1m, data with delta -0.3/+0.3", ylab = "") %>%
+     dySeries("mean_sal_rhBplus", drawPoints = TRUE, pointSize=2, label = "sal ptB+", color="blue")%>%
+       dySeries("sal_eol", drawPoints = TRUE, pointSize=2, label = "sal EOL", color="red")%>%
+       dySeries("sal_eol_corr", drawPoints = TRUE, pointSize=2, label = "sal EOL corr", color="green")%>%
+dyOptions(
+    drawGrid = TRUE,
+    drawPoints = TRUE,
+    useDataTimezone = TRUE)%>%
+  dyRangeSelector(height = 30)
+
+######## p5 #########
+
+#Select drifting periodes
+p5 <- combined1%>%
+  dplyr::select(datetime, mean_sal_rhBplus, sal_eol,sal_eol_rhBplus_detla )%>%
+    dplyr::filter(sal_eol_rhBplus_detla > -0.3 & sal_eol_rhBplus_detla < 0.3 )%>%
+  dplyr::filter(datetime >"2020-04-23 00:00:00" & datetime <"2020-11-17 23:59:00" )
+
+##Plot
+p5_xts <-p5%>%
+  dplyr::select(datetime, sal_eol_rhBplus_detla)
+
+p5_xts <- as.xts(p5_xts, order.by=p5_xts$datetime)
+
+dygraph(p5_xts,  main = "p5, delta Sal EOL / ptB+ 1m, data with delta -0.3/+0.3", ylab = "") %>%
+     dySeries("sal_eol_rhBplus_detla", drawPoints = TRUE, pointSize=2, label = "delta", color="black")%>%
+dyOptions(
+    drawGrid = TRUE,
+    drawPoints = TRUE,
+    useDataTimezone = TRUE)%>%
+  dyRangeSelector(height = 30)
+## Regression lineaire avec le temps
+fit_p5 <- lm(data = p5, sal_eol_rhBplus_detla ~ unclass(datetime) )
+slope_p5 <- fit_p5$coefficients[[2]]
+intercept_p5 <- fit_p5$coefficients[[1]]
+
+p5_plot <-  ggplot(data=p5, aes(x=datetime, y=sal_eol_rhBplus_detla), col="black") +  geom_point()+ geom_line()+ geom_abline(aes(slope= slope_p5, intercept =intercept_p5), linetype = 1, col="red") +
+  mytheme+labs(y="delta Sal EOL/PtB", x="") + scale_x_datetime(date_breaks="month",  labels=date_format("%b %Y")) + theme(axis.text.x = element_text(angle = 90, vjust = 1, hjust=1))
+print(p5_plot)
+
+#correction des valeurs EOL avec la regression
+p5 <- p5%>%
+  dplyr::mutate(correction = slope_p5 * unclass(datetime) + intercept_p5,
+                sal_eol_corr = sal_eol + correction )
+
+# plot
+ p5_corr_xts <-p5%>%
+   dplyr::select(datetime, mean_sal_rhBplus, sal_eol, sal_eol_corr)
+
+p5_corr_xts <- as.xts(p5_corr_xts, order.by=p5_corr_xts$datetime)
+
+dygraph(p5_corr_xts,  main = "p5, delta Sal EOL / ptB+ 1m, data with delta -0.3/+0.3", ylab = "") %>%
+     dySeries("mean_sal_rhBplus", drawPoints = TRUE, pointSize=2, label = "sal ptB+", color="blue")%>%
+       dySeries("sal_eol", drawPoints = TRUE, pointSize=2, label = "sal EOL", color="red")%>%
+       dySeries("sal_eol_corr", drawPoints = TRUE, pointSize=2, label = "sal EOL corr", color="green")%>%
+dyOptions(
+    drawGrid = TRUE,
+    drawPoints = TRUE,
+    useDataTimezone = TRUE)%>%
+  dyRangeSelector(height = 30)
+
+
 ```
 
 ## **Oxygen**
