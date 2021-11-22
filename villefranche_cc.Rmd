@@ -1685,7 +1685,7 @@ dyOptions(
 
 ## **Correction of High Frequency data**
 
-Parameters from drifting periodes have been applied to same periodes in high frequency dataset.
+Parameters from drifting periodes found in Low Frequency dataset have been applied to same periodes in High Frequency dataset.
 
 ```{r eol pointb comp correction EOL HF, echo=TRUE, warning = FALSE, message = FALSE, out.width='100%'}
 #add slope and intercpt from each LowFrequency data to eol data  HighFrequency.
@@ -1795,7 +1795,7 @@ oxy_eol_wink_xts <- as.xts(oxy_eol_wink_xts, order.by=oxy_eol_wink_xts$datetime)
 
 dygraph(oxy_eol_wink_xts,  main = "Delta Winkler / EOL 1m", ylab = "") %>%
      dySeries("oxy_mll_eol_wink_detla", drawPoints = TRUE, pointSize=2, label = "delta (ml/l)", color="black")%>%
-  dyShading(from =  sal_periode[1], to= sal_periode[2], color = "#CCCCCC") %>%
+dyShading(from =  oxy_periode[1], to= oxy_periode[2], color = "#CCCCCC") %>%
 
    dyLimit(0,strokePattern = "dashed", color = "black") %>% 
  # dyLegend(show = "always", width = 600)%>%
@@ -1836,6 +1836,8 @@ dySeries("oxy_eol", drawPoints = TRUE, pointSize=2, label = "Oxy EOL", color ="r
   dySeries("oxy_eol_corr", drawPoints = TRUE, pointSize=2, label = "Oxy EOL corr", color ="orange")%>%
 
 dySeries("ptb_oxy_wink", drawPoints = TRUE, pointSize=2, label = "Oxy winkler PTB", color ="green")%>%
+  dyShading(from =  oxy_periode[1], to= oxy_periode[2], color = "#CCCCCC") %>%
+
  # dyLegend(show = "always", width = 600)%>%
   #dyAxis("y",valueRange = c(-0.1, 0.11))%>%
 dyOptions(connectSeparatedPoints = TRUE,
@@ -1904,7 +1906,8 @@ dyEvent(as.POSIXct("2021-08-18 12:00:00"), "SBE37 #9506 IN", labelLoc = "bottom"
   dyOptions(drawGrid = TRUE,
     drawPoints = TRUE,
     useDataTimezone = TRUE)%>%
-  dyRangeSelector(height = 30)
+  dyRangeSelector(height = 30  )%>%
+  dyLegend(labelsDiv  =)
 
 ### SAVE
 saveRDS(eol, file = paste0(path, "data/eol/eol_data.rds"))
