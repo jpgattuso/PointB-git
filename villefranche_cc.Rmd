@@ -1344,30 +1344,6 @@ dyEvent(as.POSIXct("2021-08-18 12:00:00"), "SBE37 #9506 IN", labelLoc = "top", c
     useDataTimezone = TRUE)%>%
   dyRangeSelector(height = 30)
 
-#delta sal
-combined1 <- combined1 %>% 
-  dplyr::mutate(sal_eol_rhBplus_detla = mean_sal_rhBplus - sal_eol)
-
-#plot
-sal_eol_xts <- dplyr::select(combined1,datetime, sal_eol_rhBplus_detla)
-sal_eol_xts <- as.xts(sal_eol_xts, order.by=sal_eol_xts$datetime)
-
-dygraph(sal_eol_xts,  main = "Delta Sal EOL / ptB+ 1m", ylab = "") %>%
-     dySeries("sal_eol_rhBplus_detla", drawPoints = TRUE, pointSize=2, label = "delta (PSU)", color="black")%>%
-   dyLimit(0,strokePattern = "dashed", color = "black") %>% 
-     dyLimit(0.3,strokePattern = "dashed", color = "red") %>% 
-       dyLimit(-0.3,strokePattern = "dashed", color = "red") %>% 
-dyEvent(as.POSIXct("2020-07-15 12:00:00"), "SBE37 #9509 IN", labelLoc = "top", color="red",strokePattern = "dashed") %>% 
-dyEvent(as.POSIXct("2021-08-18 12:00:00"), "SBE37 #9506 IN", labelLoc = "top", color="red",strokePattern = "dashed") %>% 
-  dyEvent(as.POSIXct("2020-12-09 12:00:00"), "underwater clean", labelLoc = "top", color="blue",strokePattern = "dashed") %>% 
-    dyEvent(as.POSIXct("2021-02-17 12:00:00"), "underwater clean", labelLoc = "top", color="blue",strokePattern = "dashed") %>% 
-      dyEvent(as.POSIXct("2021-03-16 12:00:00"), "outside clean", labelLoc = "top", color="green",strokePattern = "dashed") %>% 
-dyOptions(
-    drawGrid = TRUE,
-    drawPoints = TRUE,
-    useDataTimezone = TRUE)%>%
-  dyRangeSelector(height = 30)
-
 ###
 titre <- "Salinity: EOL vs ptB+ 1m"
 fit <- lmodel2(data = combined1, mean_sal_rhBplus ~ sal_eol, nperm = 99)
@@ -1385,6 +1361,10 @@ Drifting periodes have been defined according to the delta (drift) between sal P
 Deltas out of range (± 0.3 PSU) have been considered as outliers.
 
 ```{r eol pointb comp Sal delta 0.3, echo=TRUE, message=FALSE, warning=FALSE, out.width='100%'}
+#delta sal
+combined1 <- combined1 %>% 
+  dplyr::mutate(sal_eol_rhBplus_detla = mean_sal_rhBplus - sal_eol)
+
 ### Plot with data if delta is -0.3 / +0.3
 eol_ptb_sal_delta_xts <-  combined1%>%
   dplyr::filter((!is.na(combined1$mean_sal_rhBplus)))%>%
@@ -1434,6 +1414,9 @@ dyOptions(
 ```
 
 ### **Correction of drifting periodes**
+
+Drifting periodes in grey have been selected and a trend with time has been exctracted. The parameters of the trend have been used to correct EOL data (green lines) according to SOMLIT data takken as reference.
+
 
 ```{r eol pointb comp Sal periodes, echo=TRUE, message=FALSE, warning=FALSE, out.width='100%'}
 ######## p1 #########
@@ -1781,6 +1764,14 @@ dyOptions(connectSeparatedPoints = TRUE,
     drawPoints = TRUE,
     useDataTimezone = TRUE)%>%
   dyRangeSelector(height = 30)
+
+# Regression lineaire entre EOL/WINK
+titre <- "Oxygen 1m: EOL vs Point B Winkler"
+fit <- lmodel2(data = combined_1_B_Bplus_wink_eol, oxy_eol ~ ptb_oxy_wink, nperm = 99)
+p_Oxyptbwink_Oxyeol <-  ggreg2(fit, "ptb_oxy_wink", "oxy_eol") +
+  geom_abline(aes(slope= 1, intercept =0), linetype = 2) +
+  mytheme+labs(y="Oxy EOL", x="Oxy Point B Winkler")
+print(p_Oxyptbwink_Oxyeol)
 ```
 
 ## **Oxygen EOL correction**
@@ -1795,12 +1786,17 @@ Drifting periodes have been defined according to the delta (drift) between: Wink
 combined_1_B_Bplus_wink_eol <- combined_1_B_Bplus_wink_eol %>% 
   dplyr::mutate(oxy_mll_Bplus_wink_detla = ptb_oxy_wink - mean_oxy_mll_rhBplus,
                 oxy_mll_eol_wink_detla =   ptb_oxy_wink - oxy_eol)
+
+oxy_periode <- c("2017-07-11 00:00:00","2021-05-25 23:59:00")
+
 #plot
 oxy_eol_wink_xts <- dplyr::select(combined_1_B_Bplus_wink_eol,datetime, oxy_mll_eol_wink_detla)
 oxy_eol_wink_xts <- as.xts(oxy_eol_wink_xts, order.by=oxy_eol_wink_xts$datetime)
 
 dygraph(oxy_eol_wink_xts,  main = "Delta Winkler / EOL 1m", ylab = "") %>%
      dySeries("oxy_mll_eol_wink_detla", drawPoints = TRUE, pointSize=2, label = "delta (ml/l)", color="black")%>%
+  dyShading(from =  sal_periode[1], to= sal_periode[2], color = "#CCCCCC") %>%
+
    dyLimit(0,strokePattern = "dashed", color = "black") %>% 
  # dyLegend(show = "always", width = 600)%>%
   #dyAxis("y",valueRange = c(-0.1, 0.11))%>%
@@ -1810,13 +1806,7 @@ dyOptions(
     useDataTimezone = TRUE)%>%
   dyRangeSelector(height = 30)
 
-# Regression lineaire entre EOL/WINK
-titre <- "Oxygen 1m: EOL vs Point B Winkler"
-fit <- lmodel2(data = combined_1_B_Bplus_wink_eol, oxy_eol ~ ptb_oxy_wink, nperm = 99)
-p_Oxyptbwink_Oxyeol <-  ggreg2(fit, "ptb_oxy_wink", "oxy_eol") +
-  geom_abline(aes(slope= 1, intercept =0), linetype = 2) +
-  mytheme+labs(y="Oxy EOL", x="Oxy Point B Winkler")
-print(p_Oxyptbwink_Oxyeol)
+
 
 # Regression lineaire avec le temps
 wink_delta <- combined_1_B_Bplus_wink_eol%>%
@@ -1854,7 +1844,7 @@ dyOptions(connectSeparatedPoints = TRUE,
     useDataTimezone = TRUE)%>%
   dyRangeSelector(height = 30)
 
-oxy_periode <- c("2017-07-11 00:00:00","2021-05-25 23:59:00")
+
 # #---------------------------- 
 # titre <- "Oxygen 1m: Point B+ CTD vs Point B Winkler"
 # fit <- lmodel2(data = combined_1_B_Bplus_wink_eol, ptb_oxy_wink ~ mean_oxy_mll_rhBplus, nperm = 99)
