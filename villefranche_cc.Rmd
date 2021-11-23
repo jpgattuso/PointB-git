@@ -19,6 +19,7 @@ require(tidyverse)
 require(data.table)
 require(readxl)
 require(pander)
+library(scales)
 require(seacarb)
 library(cowplot)
 library(scales)
@@ -45,7 +46,8 @@ library(broom)
 library("lmodel2") # modele II regression
 #library(plyr)
 library(pander)
-
+library(lubridate)
+library(tidyr)
 
 #define who is the user and define path
 if (Sys.getenv("LOGNAME") == "gattuso") {
@@ -458,7 +460,7 @@ Quality control plots :
 
 ```{r seaFET quality control pH, echo=FALSE, warning = FALSE, message = FALSE, out.width='100%'}
 #Offset between seafet pH and spec pH (Fig. 2 Kapsenberg et al.)
-library(scales)
+
 ph_sf <- ph_sf%>%
   mutate( diff_pH = ph_s_sf_temp_insi - pHint_tot_sf)
 average_offset <- mean(abs(ph_sf$diff_pH), na.rm=TRUE)
@@ -479,6 +481,70 @@ dyOptions(
     useDataTimezone = TRUE,
     digitsAfterDecimal = 4) %>%
   dyRangeSelector(height = 30)
+```
+
+## **TEST Roscoff Deployment**
+
+New seaFET tested for few days in the pool. 
+No correction, Only raw data.
+
+```{r test seafet pH , echo=FALSE, warning = FALSE, message = FALSE, out.width='100%'}
+# read deployment file
+file_list_rf <- list.files(path  = "../../pCloud Sync/exp176_sami/vlfr_ph_data/3_out_ph_sami_seafet/out_test/", pattern = "SeaFET2-0002276-Data-20211122.*.csv")
+
+if (length(file_list_rf) == 0) {stop()} # script does not run if there is no data file to read
+ii <- 0
+for (file in file_list_rf){
+  ii <- ii + 1
+  tmp <- read.table(paste0("../../pCloud Sync/exp176_sami/vlfr_ph_data/3_out_ph_sami_seafet/out_test/",  file_list_rf[ii], sep = ""), header = F, dec = ".", as.is = TRUE, sep = ",", skip = 1, fill = TRUE)
+# YOU MUST add manually the deployement number in the title file
+# The following take last digit in the title file
+  tmp$deployment <- as.numeric(substr(str_extract(file_list_rf[ii], "-[0-9][0-9]\\."),2,3))
+  colnames(tmp)  <- c("seafet_id_sf","datetime", "sample_num", "error", "phEXT_sf","phINT_sf",  "voltEXT_sf","voltINT_sf","T_seaF_sf","Humidity_sf", "T_int_sf","deployment_sf" )
+tmp$datetime <- mdy_hms(tmp$datetime,tz="UTC")
+ 
+  if (ii == 1) {ph_test <- tmp} 
+  else {ph_test <- rbind(ph_test, tmp)}
+}
+
+
+## PLOT  
+rf_xts <- dplyr::select(ph_test, datetime, phINT_sf , phEXT_sf,T_seaF_sf)
+rf_xts <- as.xts(rf_xts, order.by=rf_xts$datetime)
+
+dygraph(rf_xts, ylab = "") %>%
+dySeries("phINT_sf", drawPoints = TRUE, pointSize=2, label = "pH INT", color="purple")%>%
+dySeries("phEXT_sf", drawPoints = TRUE, pointSize=2, label = "pH EXT", color="#9999CC")%>%
+dySeries(axis = "y2","T_seaF_sf", drawPoints = TRUE, pointSize=2, label = "temp sf", color="black")%>%
+dyOptions(
+    drawGrid = TRUE,
+    drawPoints = TRUE,
+    useDataTimezone = TRUE,
+    digitsAfterDecimal = 4) %>%
+  dyRangeSelector(height = 30)
+
+# Quality control
+ph_test <- ph_test%>%
+  mutate( diff_pH = phEXT_sf - phINT_sf)
+average_offset <- mean(abs(ph_test$diff_pH), na.rm=TRUE)
+
+offset_xts <- dplyr::select(ph_test%>%dplyr::filter(!is.na(diff_pH)), datetime, diff_pH)
+offset_xts <- as.xts(offset_xts, order.by=offset_xts$datetime)
+
+dygraph(offset_xts, main = "Difference pH EXT - INT") %>%
+dySeries("diff_pH", drawPoints = TRUE, pointSize=3, label = "delta pHINT", color="green")%>%
+    dyLimit(0,strokePattern = "dashed", color = "black") %>% 
+  dyAxis("y",valueRange = c(-0.045,0.01 ))%>%
+ # dyAxis("x",valueRange = c(as.POSIXct("2021-09-28"), as.POSIXct("2021-10-19")))%>%
+dyOptions(
+    drawGrid = TRUE,
+    strokeWidth= 1,
+    drawPoints = TRUE,
+    useDataTimezone = TRUE,
+    digitsAfterDecimal = 4) %>%
+  dyRangeSelector(height = 30)
+
+
 ```
 
 # **SAMI pH**  {.tabset .tabset-pills}
