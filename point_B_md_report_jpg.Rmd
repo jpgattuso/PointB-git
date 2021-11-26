@@ -1260,7 +1260,7 @@ T1p <- ggplot(dat0m, aes(x = sampling_date, y = temperature), na.rm=TRUE) +
   geom_point(colour="black", na.rm=TRUE, size=size_point) + 
   labs(title=NULL,x="", y="Temp. (°C)") +
   coord_fixed() +
-  Mytheme(size_labs = 8) +
+  Mytheme(size_labs = 8) #+
   theme(axis.text.x=element_blank())
 S1p <- ggplot(dat0m, aes(x = sampling_date, y = salinity), na.rm=TRUE) +
   scale_x_datetime(date_breaks="4 year", date_minor_breaks="1 years", labels = date_format("%Y")) +
@@ -1287,7 +1287,7 @@ AT1p <- ggplot(dat0m, aes(x = sampling_date, y = ta), na.rm=TRUE) +
 pH1p <- ggplot(dat0m, aes(x = sampling_date, y = pH_calc), na.rm=TRUE) +
   scale_x_datetime(date_breaks="4 year", date_minor_breaks="1 years", labels = date_format("%Y")) +
   geom_point(colour="black", na.rm=TRUE, size=size_point) + 
-  geom_point(data=dat0m, aes(x = sampling_date, y = pH_calc), color= "blue", size=size_point) +
+  #geom_point(data=dat0m, aes(x = sampling_date, y = pH_calc), color= "blue", size=size_point) +
  labs(title=NULL, x="", y=expression(paste(pH[T]," calculated"))) +
   coord_fixed() +
   Mytheme(size_labs = 8) #+
@@ -1316,6 +1316,26 @@ ATvsCT1p <- ggplot(dat0m, aes(x = sampling_date, y = ta/dic), na.rm=TRUE) +
   coord_fixed() +
   Mytheme(size_labs = 8)
 ggsave(filename = "output_jp/figures/ATvsCT1p.png", plot = ATvsCT1p)
+
+# Individual plots for presentations
+T1p_pres <- ggplot(dat0m, aes(x = sampling_date, y = temperature), na.rm=TRUE) +
+  scale_x_datetime(date_breaks="3 year", date_minor_breaks="1 year", labels = date_format("%Y")) +
+  geom_point(colour="blue", na.rm=TRUE, size=size_point) + 
+  labs(title=NULL,x="", y="Temperature (°C)") +
+  coord_fixed() +
+  Mytheme(size_labs = 8) +
+  theme(plot.margin = margin(r = 0.5,
+                             l = 0.5, unit = "cm"))
+
+pH1p_pres <- ggplot(dat0m, aes(x = sampling_date, y = pH_calc), na.rm=TRUE) +
+  scale_x_datetime(date_breaks="3 year", date_minor_breaks="1 year", labels = date_format("%Y")) +
+  geom_point(colour="blue", na.rm=TRUE, size=size_point) + 
+  labs(title=NULL,x="", y=expression(paste(pH[T]," calculated"))) +
+  coord_fixed() +
+  Mytheme(size_labs = 8) +
+  theme(plot.margin = margin(r = 0.5,
+                             l = 0.5, unit = "cm"))
+
 # Calculate anomalies
 # At 1 m
 # Calculate monthly means
@@ -1554,7 +1574,8 @@ anOa1p <- ggplot(data = ano_month0m, aes(x = sampling_date, y = OmegaAragonite_a
 g <- T1p + anT1p + S1p + anS1p + AT1p + anAT1p + CT1p + anCT1p + pH1p + anpH1p + pCO21p + anpCO21p + Oa1p + anOa1p + 
   patchwork::plot_layout(ncol = 2, guides="collect")
 ggsave("output_jp/figures/fig_paper_interannual_1m.png", g, width=15, height = 17, units = "cm")
-ggsave("output_jp/figures/fig_pH1p.png", pH1p, width=15, height = 17, units = "cm")
+ggsave("output_jp/figures/fig_pH1p_pres.png", pH1p_pres, width=15, height = 10, units = "cm")
+ggsave("output_jp/figures/fig_T1p_pres.png", T1p_pres, width=15, height = 10, units = "cm")
 
 # POC and PON
 pom_l <-pom %>% 
