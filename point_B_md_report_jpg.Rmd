@@ -24,7 +24,7 @@ if (Sys.getenv("LOGNAME") == "samir") {
   path = "../../pCloud Sync/exp153_carbonates_point_B/"
   path_sami = "../../pCloud\ Sync/exp176_sami/sami_data/sami_raw_export/Data_deployment/EOL"
 }
-cutoff_date <- "2020-01-01" #to limit regressions on complete years
+cutoff_date <- "2022-01-01" #to limit regressions on complete years
 #cutoff_date <- "2020-09-01" #to limit regressions on complete years
 require(readxl)
 require(seacarb)
@@ -208,7 +208,7 @@ Les "quality flags" "qflag\_sample", "qflag\_ta", "qflag\_DIC" qui apparaissent 
 ```{r Initialization Point B, message=FALSE, include=TRUE}
 z <-  read_delim(
   paste0(path, "data/Data_DIC.csv"),
-  delim = ",",
+  delim = "\t",
   col_names = TRUE,
   col_types = "ccccdddddddddddcddddddddddddddd",
   na = c("NA", "999999")
@@ -1554,6 +1554,8 @@ anOa1p <- ggplot(data = ano_month0m, aes(x = sampling_date, y = OmegaAragonite_a
 g <- T1p + anT1p + S1p + anS1p + AT1p + anAT1p + CT1p + anCT1p + pH1p + anpH1p + pCO21p + anpCO21p + Oa1p + anOa1p + 
   patchwork::plot_layout(ncol = 2, guides="collect")
 ggsave("output_jp/figures/fig_paper_interannual_1m.png", g, width=15, height = 17, units = "cm")
+ggsave("output_jp/figures/fig_pH1p.png", pH1p, width=15, height = 17, units = "cm")
+
 # POC and PON
 pom_l <-pom %>% 
   filter(depth==1 | depth==50) %>%
