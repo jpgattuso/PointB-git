@@ -260,6 +260,8 @@ dygraph(par_xts, ylab = "") %>%
   dySeries("int_light_20", drawPoints = TRUE, pointSize=3, color = "dodgerblue", label = "PAR 20m") %>%
   dySeries("int_light_30", drawPoints = TRUE, pointSize=3, color= "dodgerblue4", label = "PAR 30m") %>%
     dyEvent(as.POSIXct("2020-12-28 09:10:00"), "par_10m stops", labelLoc = "top", color="black",strokePattern = "dashed") %>% 
+      dyEvent(as.POSIXct("2021-10-03 03:15:00"), "dirty - data removing", labelLoc = "top", color="black",strokePattern = "dashed") %>% 
+
   dyEvent(as.POSIXct("2021-02-17 10:00:00"), "cleaning", labelLoc = "top", color="red",strokePattern = "dashed") %>% 
     dyEvent(as.POSIXct("2021-03-16 10:00:00"), "cleaning", labelLoc = "top", color="red",strokePattern = "dashed") %>% 
   dyEvent(as.POSIXct("2021-03-30 09:50:00"), "cleaning", labelLoc = "top", color="red",strokePattern = "dashed") %>% 
@@ -617,7 +619,7 @@ save(sami, file = paste0(path, "data/sami/sami_all_eol.csv"))
 
 ## Add event periodes manually
 ## Events
-sami_events <- c("2019-12-16 11:00:00", "2020-02-25 16:00:00","2020-06-17 08:00:00","2020-06-19 10:00:00","2020-07-15 10:00:00","2020-07-17 18:00:00", "2020-08-10 00:00:00", "2020-12-10 13:00:00","2020-12-17 09:00:00","2021-02-17 09:00:00","2021-03-17 12:00:00","2021-03-30 09:30:00","2021-04-22 10:30:00","2021-06-11 08:00:00","2021-07-20 07:00:00","2021-09-24 14:00:00","2021-10-19 09:00:00", "2021-11-26 08:00:00")
+sami_events <- c("2019-12-16 11:00:00", "2020-02-25 16:00:00","2020-06-17 08:00:00","2020-06-19 10:00:00","2020-07-15 10:00:00","2020-07-17 18:00:00", "2020-08-10 00:00:00", "2020-12-10 13:00:00","2020-12-17 09:00:00","2021-02-17 09:00:00","2021-03-17 12:00:00","2021-03-30 09:30:00","2021-04-22 12:00:00","2021-06-11 08:00:00","2021-07-20 07:00:00","2021-09-24 13:00:00","2021-10-19 09:00:00", "2021-11-26 08:00:00","2021-11-26 10:00:00")
 
 ## PLOT
 sami_xts <- dplyr::select(sami, datetime, ph_sami, temp_int_sami, temp_ext_sami)
@@ -637,27 +639,22 @@ presAnnotation <- function(dygraph, x, text) {
    dyEvent(as.POSIXct("2020-07-16 12:00:00", tz="GMT"), "reagent bag changed", labelLoc = "bottom", color="red") %>%
    dyEvent(as.POSIXct("2020-07-16 11:30:00", tz="GMT"), "end of TRIS calib", labelLoc = "top", color="red") %>%
    dyEvent(as.POSIXct("2019-12-05 11:00:00", tz="GMT"), "end of TRIS calib", labelLoc = "bottom", color="red") %>%
-   
-    dyEvent(as.POSIXct("2020-08-10 00:00:00", tz="GMT"), color="black") %>%
-  dyEvent(as.POSIXct("2020-10-12 11:00:00", tz="GMT"), color="black") %>%
-    dyEvent(as.POSIXct("2020-10-16 10:00:00", tz="GMT"), color="black") %>%
-  dyEvent(as.POSIXct("2020-12-09 10:00:00", tz="GMT"), color="black") %>%
-  dyShading(from = sami_events[1], to = sami_events[2], color = "#CCCCCC") %>%
-  dyShading(from = sami_events[2], to = sami_events[3], color = "#E0E0E0") %>%
-   dyShading(from = sami_events[4], to = sami_events[5], color = "#CCCCCC") %>%
-    dyShading(from = sami_events[5], to = sami_events[6], color = "#E0E0E0") %>%
-    dyShading(from = sami_events[6], to = sami_events[7], color = "#CCCCCC") %>%
-    dyShading(from = sami_events[8], to = sami_events[9], color = "#E0E0E0") %>%
-    dyShading(from = sami_events[9], to = sami_events[10], color = "#CCCCCC") %>%
- dyShading(from = sami_events[11], to = sami_events[12], color = "#E0E0E0") %>%
-    dyShading(from = sami_events[12], to = sami_events[13], color = "#CCCCCC") %>%
-       dyShading(from = sami_events[13], to = sami_events[14], color = "#E0E0E0") %>%
-   dyShading(from = sami_events[15], to = sami_events[16], color = "#CCCCCC") %>%
-          dyShading(from = sami_events[17], to = sami_events[18], color = "#E0E0E0") %>%
+   dyEvent(as.POSIXct("2021-04-04 10:00:00", tz="GMT"), "SAMI stops", labelLoc = "top", color="black") %>%
 
- # dyLegend(show = "always", width = 600)%>%
-  #dyAxis("y",valueRange = c(-0.1, 0.11))%>%
-dyOptions(
+  dyShading(from = sami_events[1], to = sami_events[2], color = "#B7B7B7") %>%
+  dyShading(from = sami_events[2], to = sami_events[3], color = "#E0E0E0") %>%
+   dyShading(from = sami_events[4], to = sami_events[5], color = "#B7B7B7") %>%
+    dyShading(from = sami_events[5], to = sami_events[6], color = "#E0E0E0") %>%
+    dyShading(from = sami_events[6], to = sami_events[7], color = "#B7B7B7") %>%
+    dyShading(from = sami_events[8], to = sami_events[9], color = "#E0E0E0") %>%
+    dyShading(from = sami_events[9], to = sami_events[10], color = "#B7B7B7") %>%
+ dyShading(from = sami_events[11], to = sami_events[12], color = "#E0E0E0") %>%
+    dyShading(from = sami_events[12], to = sami_events[13], color = "#B7B7B7") %>%
+       dyShading(from = sami_events[13], to = sami_events[14], color = "#E0E0E0") %>%
+    dyShading(from = sami_events[14], to = sami_events[15], color = "#B7B7B7") %>%
+   dyShading(from = sami_events[16], to = sami_events[17], color = "#E0E0E0") %>%
+          dyShading(from = sami_events[17], to = sami_events[18], color = "#B7B7B7") %>%
+   dyOptions(
     drawGrid = TRUE,
     drawPoints = TRUE,
     useDataTimezone = TRUE)%>%
@@ -680,10 +677,7 @@ dyOptions(
 ## **Logs - Informations**
 
 ```{r kable log sami}
-## Open the first spreadsheet of the "PlanktonChange_data" googlesheet (need to go to File/Publish to the web and publish as csv)
-
-url_sami_log <- "https://docs.google.com/spreadsheets/d/e/2PACX-1vSmth08Q-Tw1RFznKeStSMJkKeFgYZac9WIR3ETLYWkznouAD6A-1n2uza1YgotXQ/pub?gid=798409504&single=true&output=csv"
-sami_log <- read.csv(url(url_sami_log), header=T, stringsAsFactors = FALSE)
+sami_log <- read_excel(paste0(path_sami, "../../Sami_SeaFet_log_metadata_vlfr.xlsx"), sheet = 2)
 #replade dots with spaces in column names.
 #kable(sami_log, col.names = gsub("[.]", " ", names(sami_log)), align ="c", caption="**piSAMI logs (metadata)**")
 kbl(sami_log)%>%
@@ -1487,13 +1481,13 @@ dygraph(sal_eol_delta_xts,  main = "Delta Sal EOL / ptB+ 1m, data with delta -0.
    dyLimit(0,strokePattern = "dashed", color = "black") %>% 
      dyLimit(0.3,strokePattern = "dashed", color = "red") %>% 
        dyLimit(-0.3,strokePattern = "dashed", color = "red") %>% 
-dyShading(from =  sal_periode[1], to= sal_periode[2], color = "#CCCCCC") %>%
-dyShading(from =  sal_periode[3], to= sal_periode[4], color = "#CCCCCC") %>%
-dyShading(from =  sal_periode[5], to= sal_periode[6], color = "#CCCCCC") %>%
-dyShading(from =  sal_periode[7], to= sal_periode[8], color = "#CCCCCC") %>%
-dyShading(from =  sal_periode[9], to= sal_periode[10], color = "#CCCCCC") %>%
-dyShading(from =  sal_periode[11], to= sal_periode[12], color = "#CCCCCC") %>%
-  dyShading(from =  sal_periode[13], to= sal_periode[14], color = "#CCCCCC") %>%
+dyShading(from =  sal_periode[1], to= sal_periode[2], color = "#B7B7B7") %>%
+dyShading(from =  sal_periode[3], to= sal_periode[4], color = "#B7B7B7") %>%
+dyShading(from =  sal_periode[5], to= sal_periode[6], color = "#B7B7B7") %>%
+dyShading(from =  sal_periode[7], to= sal_periode[8], color = "#B7B7B7") %>%
+dyShading(from =  sal_periode[9], to= sal_periode[10], color = "#B7B7B7") %>%
+dyShading(from =  sal_periode[11], to= sal_periode[12], color = "#B7B7B7") %>%
+  dyShading(from =  sal_periode[13], to= sal_periode[14], color = "#B7B7B7") %>%
 dyEvent(as.POSIXct("2020-07-15 12:00:00"), "SBE37 #9509 IN", labelLoc = "top", color="red",strokePattern = "dashed") %>% 
 dyEvent(as.POSIXct("2021-08-18 12:00:00"), "SBE37 #9506 IN", labelLoc = "top", color="red",strokePattern = "dashed") %>% 
   dyEvent(as.POSIXct("2020-12-09 12:00:00"), "underwater clean", labelLoc = "top", color="blue",strokePattern = "dashed") %>% 
@@ -1803,13 +1797,13 @@ eol_corr_xts <- as.xts(eol_corr_xts, order.by=eol_corr_xts$datetime)
 dygraph(eol_corr_xts, main = "EOL sal", ylab = "") %>%
   dySeries("sal_eol_corr", drawPoints = TRUE, pointSize=2,  color = "green", label = "sal EOL corr")%>%
   dySeries("sal_eol", drawPoints = TRUE, pointSize=2, color = "blue",label = "sal EOL") %>%
-dyShading(from =  sal_periode[1], to= sal_periode[2], color = "#CCCCCC") %>%
-dyShading(from =  sal_periode[3], to= sal_periode[4], color = "#CCCCCC") %>%
-dyShading(from =  sal_periode[5], to= sal_periode[6], color = "#CCCCCC") %>%
-dyShading(from =  sal_periode[7], to= sal_periode[8], color = "#CCCCCC") %>%
-dyShading(from =  sal_periode[9], to= sal_periode[10], color = "#CCCCCC") %>%
-dyShading(from =  sal_periode[11], to= sal_periode[12], color = "#CCCCCC") %>%
-  dyShading(from =  sal_periode[13], to= sal_periode[14], color = "#CCCCCC") %>%
+dyShading(from =  sal_periode[1], to= sal_periode[2], color = "#B7B7B7") %>%
+dyShading(from =  sal_periode[3], to= sal_periode[4], color = "#B7B7B7") %>%
+dyShading(from =  sal_periode[5], to= sal_periode[6], color = "#B7B7B7") %>%
+dyShading(from =  sal_periode[7], to= sal_periode[8], color = "#B7B7B7") %>%
+dyShading(from =  sal_periode[9], to= sal_periode[10], color = "#B7B7B7") %>%
+dyShading(from =  sal_periode[11], to= sal_periode[12], color = "#B7B7B7") %>%
+  dyShading(from =  sal_periode[13], to= sal_periode[14], color = "#B7B7B7") %>%
 dyEvent(as.POSIXct("2020-07-15 12:00:00"), "SBE37 #9509 IN", labelLoc = "bottom", color="red",strokePattern = "dashed") %>% 
 dyEvent(as.POSIXct("2021-08-18 12:00:00"), "SBE37 #9506 IN", labelLoc = "bottom", color="red",strokePattern = "dashed") %>% 
   dyEvent(as.POSIXct("2020-12-09 12:00:00"), "underwater clean", labelLoc = "bottom", color="blue",strokePattern = "dashed") %>% 
@@ -1889,7 +1883,7 @@ oxy_eol_wink_xts <- as.xts(oxy_eol_wink_xts, order.by=oxy_eol_wink_xts$datetime)
 
 dygraph(oxy_eol_wink_xts,  main = "Delta Winkler / EOL 1m", ylab = "") %>%
      dySeries("oxy_mll_eol_wink_detla", drawPoints = TRUE, pointSize=2, label = "delta (ml/l)", color="black")%>%
-dyShading(from =  oxy_periode[1], to= oxy_periode[2], color = "#CCCCCC") %>%
+dyShading(from =  oxy_periode[1], to= oxy_periode[2], color = "#B7B7B7") %>%
 
    dyLimit(0,strokePattern = "dashed", color = "black") %>% 
  # dyLegend(show = "always", width = 600)%>%
@@ -1930,7 +1924,7 @@ dySeries("oxy_eol", drawPoints = TRUE, pointSize=2, label = "Oxy EOL", color ="r
   dySeries("oxy_eol_corr", drawPoints = TRUE, pointSize=2, label = "Oxy EOL corr", color ="orange")%>%
 
 dySeries("ptb_oxy_wink", drawPoints = TRUE, pointSize=2, label = "Oxy winkler PTB", color ="green")%>%
-  dyShading(from =  oxy_periode[1], to= oxy_periode[2], color = "#CCCCCC") %>%
+  dyShading(from =  oxy_periode[1], to= oxy_periode[2], color = "#B7B7B7") %>%
 
  # dyLegend(show = "always", width = 600)%>%
   #dyAxis("y",valueRange = c(-0.1, 0.11))%>%
@@ -1991,7 +1985,7 @@ eol_corr_xts <- as.xts(eol_corr_xts, order.by=eol_corr_xts$datetime)
 dygraph(eol_corr_xts, main = "EOL oxy", ylab = "") %>%
   dySeries("oxy_eol_corr", drawPoints = TRUE, pointSize=2,  color = "green", label = "oxy EOL corr")%>%
   dySeries("oxy_eol", drawPoints = TRUE, pointSize=2, color = "blue",label = "oxy EOL") %>%
-dyShading(from =  oxy_periode[1], to= oxy_periode[2], color = "#CCCCCC") %>%
+dyShading(from =  oxy_periode[1], to= oxy_periode[2], color = "#B7B7B7") %>%
 dyEvent(as.POSIXct("2020-07-15 12:00:00"), "SBE37 #9509 IN", labelLoc = "bottom", color="red",strokePattern = "dashed") %>% 
 dyEvent(as.POSIXct("2021-08-18 12:00:00"), "SBE37 #9506 IN", labelLoc = "bottom", color="red",strokePattern = "dashed") %>% 
   dyEvent(as.POSIXct("2020-12-09 12:00:00"), "underwater clean", labelLoc = "bottom", color="blue",strokePattern = "dashed") %>% 
