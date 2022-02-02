@@ -343,233 +343,233 @@ dyOptions(
   dyRangeSelector(height = 30)
 ```
 
-## **October 2021 deployment** 
+<!-- ## **October 2021 deployment**  -->
 
-This deployement was done to check if the #0057 seaFET that have been shelded for 1 year and half is still OK.
+<!-- This deployement was done to check if the #0057 seaFET that have been shelded for 1 year and half is still OK. -->
 
-E0int, 25 and E0ext, 25 were calculated with a mean of 4 pH spectro measurements from the tuesdays.
+<!-- E0int, 25 and E0ext, 25 were calculated with a mean of 4 pH spectro measurements from the tuesdays. -->
 
-```{r seafet pH , echo=FALSE, warning = FALSE, message = FALSE, out.width='100%'}
-# read deployment file
-file_list_sf <- list.files(path  = "../../pCloud Sync/exp176_sami/vlfr_ph_data/3_out_ph_sami_seafet/out_deployment/", pattern = "SeaFET057.*.CSV")
-library(lubridate)
-library(tidyr)
-if (length(file_list_sf) == 0) {stop()} # script does not run if there is no data file to read
-ii <- 0
-for (file in file_list_sf){
-  ii <- ii + 1
-  tmp <- read.table(paste0("../../pCloud Sync/exp176_sami/vlfr_ph_data/3_out_ph_sami_seafet/out_deployment/",  file_list_sf[ii], sep = ""), header = F, dec = ".", as.is = TRUE, sep = ",", skip = 8, fill = TRUE)
-# YOU MUST add manually the deployement number in the title file
-# The following take last digit in the title file
-  tmp$deployment <- as.numeric(substr(str_extract(file_list_sf[ii], "-[0-9][0-9]\\."),2,3))
-  colnames(tmp)  <- c("seafet_id_sf","date","time", "phINT_sf", "phEXT_sf","T_seaF_sf","voltINT_sf","voltEXT_sf","volt_therm_sf","volt_supply_sf", "no", "current_mA","Humidity_sf", "volt_5V","volt_mainbattery","checksum_sf","deployment_sf" )
-  #tmp$date <- date_decimal(tmp$date,tz="UTC")
-   tmp$hour <-  trunc(tmp$time)
-    tmp$minute <-  trunc((tmp$time - trunc(tmp$time))*60)
-   tmp <- tmp%>%
-     unite("time", hour, minute, sep=":", remove=TRUE)%>%
-     unite("datetime",date, time, sep = " ", remove =TRUE)
-  tmp$datetime <- as.POSIXct(tmp$datetime, format="%Y%j %H:%M")
- 
-  if (ii == 1) {ph_sf <- tmp} 
-  else {ph_sf <- rbind(ph_sf, tmp)}
-}
-ph_sf <- ph_sf%>%
-  dplyr::filter(datetime >= "2021-09-25 00:00:00")
+<!-- ```{r seafet pH , echo=FALSE, warning = FALSE, message = FALSE, out.width='100%'} -->
+<!-- # read deployment file -->
+<!-- file_list_sf <- list.files(path  = "../../pCloud Sync/exp176_sami/vlfr_ph_data/3_out_ph_sami_seafet/out_deployment/", pattern = "SeaFET057.*.CSV") -->
+<!-- library(lubridate) -->
+<!-- library(tidyr) -->
+<!-- if (length(file_list_sf) == 0) {stop()} # script does not run if there is no data file to read -->
+<!-- ii <- 0 -->
+<!-- for (file in file_list_sf){ -->
+<!--   ii <- ii + 1 -->
+<!--   tmp <- read.table(paste0("../../pCloud Sync/exp176_sami/vlfr_ph_data/3_out_ph_sami_seafet/out_deployment/",  file_list_sf[ii], sep = ""), header = F, dec = ".", as.is = TRUE, sep = ",", skip = 8, fill = TRUE) -->
+<!-- # YOU MUST add manually the deployement number in the title file -->
+<!-- # The following take last digit in the title file -->
+<!--   tmp$deployment <- as.numeric(substr(str_extract(file_list_sf[ii], "-[0-9][0-9]\\."),2,3)) -->
+<!--   colnames(tmp)  <- c("seafet_id_sf","date","time", "phINT_sf", "phEXT_sf","T_seaF_sf","voltINT_sf","voltEXT_sf","volt_therm_sf","volt_supply_sf", "no", "current_mA","Humidity_sf", "volt_5V","volt_mainbattery","checksum_sf","deployment_sf" ) -->
+<!--   #tmp$date <- date_decimal(tmp$date,tz="UTC") -->
+<!--    tmp$hour <-  trunc(tmp$time) -->
+<!--     tmp$minute <-  trunc((tmp$time - trunc(tmp$time))*60) -->
+<!--    tmp <- tmp%>% -->
+<!--      unite("time", hour, minute, sep=":", remove=TRUE)%>% -->
+<!--      unite("datetime",date, time, sep = " ", remove =TRUE) -->
+<!--   tmp$datetime <- as.POSIXct(tmp$datetime, format="%Y%j %H:%M") -->
 
-```
+<!--   if (ii == 1) {ph_sf <- tmp}  -->
+<!--   else {ph_sf <- rbind(ph_sf, tmp)} -->
+<!-- } -->
+<!-- ph_sf <- ph_sf%>% -->
+<!--   dplyr::filter(datetime >= "2021-09-25 00:00:00") -->
 
-```{r read and prepare discrete pH spectro, echo=FALSE, warning=FALSE, message=FALSE}
-library(seacarb)
-library(dplyr)
+<!-- ``` -->
 
-spectro <- read.table( "../../pCloud Sync/exp176_sami/vlfr_ph_data/4_spectro_ph_seafet/spectro_oct_2021.csv", header = T, dec = ".", as.is = T, sep = ";", fill = TRUE)%>% 
-  tidyr::unite("datetime", sampling_date, sampling_hour, sep=" ", remove =T) %>% 
-  dplyr::mutate(datetime = dmy_hms(datetime, tz="Europe/Paris"))
-# convert local time to UTC time
-spectro$datetime <- with_tz(spectro$datetime, "UTC")
-# add the ALK
-spectro <- spectro%>%
-  dplyr::mutate(at= 2560)%>%
-    dplyr::mutate(depth= 1)
-# remove NA lines
-spectro <- spectro %>% 
-  tidyr::drop_na(pH_s_ptb_temp_lab)%>%
-  dplyr::select(datetime, salinity_field, temp_field,at, pH_s_ptb_temp_lab, temp_lab_ptb, depth)
-#Convert to insitu Temp pH
-spectro <- spectro%>%
-  dplyr::mutate( ph_s_sf_temp_insi = pHinsi(pH = spectro$pH_s_ptb_temp_lab, 
-                         ALK = spectro$at*1e-6, Tinsi = spectro$temp_field, 
-                         Tlab = spectro$temp_lab_ptb, Pinsi = spectro$depth/10, 
-                         S = spectro$salinity_field, Pt = 0, Sit = 0, k1k2 = "l", kf = "dg", ks="d", pHscale = "T", b="u74"))
-# Make mean for replicates + SD in function of watersampling (datetime)
-spectro_mean <- spectro %>%
-  dplyr::group_by(datetime) %>% 
-  dplyr::summarise(ph_s_sf_temp_insi_sd = sd(ph_s_sf_temp_insi, na.rm = TRUE),
-                   ph_s_sf_temp_insi = mean(ph_s_sf_temp_insi, na.rm = TRUE),
-                   salinity_field = mean(salinity_field, na.rm = TRUE),
-                   temp_field = mean(temp_field, na.rm = TRUE)
-                    )
-# add spectro T insi to seaFET data for EXTLOW
-ph_sf <- left_join(ph_sf, spectro_mean%>%dplyr::select(datetime,ph_s_sf_temp_insi, temp_field,salinity_field),by="datetime")
-```
+<!-- ```{r read and prepare discrete pH spectro, echo=FALSE, warning=FALSE, message=FALSE} -->
+<!-- library(seacarb) -->
+<!-- library(dplyr) -->
 
-```{r seafet calibration sf_calib, echo=FALSE, warning = FALSE, message = FALSE, out.width='100%'}
-## calculation of E0INT25/E0EXT25 ##
-##     new sf_calib function      ##
-calib_spectro<- sf_calib(calEint = ph_sf$voltINT_sf , calEext = ph_sf$voltEXT_sf, calpH = ph_sf$ph_s_sf_temp_insi, calT = ph_sf$temp_field, calSal = ph_sf$salinity_field)
-# put number of deployment 
-calib_spectro$deployment_sf<- ph_sf$deployment_sf 
-# calcule percentage
-#calib_spectroo<- calib_spectro%>%
-#   tidyr::drop_na(E0int25)%>%
-#   dplyr::mutate(delta_E0int_percent = (E0int25 - lag(E0int25))/E0int25)*100
+<!-- spectro <- read.table( "../../pCloud Sync/exp176_sami/vlfr_ph_data/4_spectro_ph_seafet/spectro_oct_2021.csv", header = T, dec = ".", as.is = T, sep = ";", fill = TRUE)%>%  -->
+<!--   tidyr::unite("datetime", sampling_date, sampling_hour, sep=" ", remove =T) %>%  -->
+<!--   dplyr::mutate(datetime = dmy_hms(datetime, tz="Europe/Paris")) -->
+<!-- # convert local time to UTC time -->
+<!-- spectro$datetime <- with_tz(spectro$datetime, "UTC") -->
+<!-- # add the ALK -->
+<!-- spectro <- spectro%>% -->
+<!--   dplyr::mutate(at= 2560)%>% -->
+<!--     dplyr::mutate(depth= 1) -->
+<!-- # remove NA lines -->
+<!-- spectro <- spectro %>%  -->
+<!--   tidyr::drop_na(pH_s_ptb_temp_lab)%>% -->
+<!--   dplyr::select(datetime, salinity_field, temp_field,at, pH_s_ptb_temp_lab, temp_lab_ptb, depth) -->
+<!-- #Convert to insitu Temp pH -->
+<!-- spectro <- spectro%>% -->
+<!--   dplyr::mutate( ph_s_sf_temp_insi = pHinsi(pH = spectro$pH_s_ptb_temp_lab,  -->
+<!--                          ALK = spectro$at*1e-6, Tinsi = spectro$temp_field,  -->
+<!--                          Tlab = spectro$temp_lab_ptb, Pinsi = spectro$depth/10,  -->
+<!--                          S = spectro$salinity_field, Pt = 0, Sit = 0, k1k2 = "l", kf = "dg", ks="d", pHscale = "T", b="u74")) -->
+<!-- # Make mean for replicates + SD in function of watersampling (datetime) -->
+<!-- spectro_mean <- spectro %>% -->
+<!--   dplyr::group_by(datetime) %>%  -->
+<!--   dplyr::summarise(ph_s_sf_temp_insi_sd = sd(ph_s_sf_temp_insi, na.rm = TRUE), -->
+<!--                    ph_s_sf_temp_insi = mean(ph_s_sf_temp_insi, na.rm = TRUE), -->
+<!--                    salinity_field = mean(salinity_field, na.rm = TRUE), -->
+<!--                    temp_field = mean(temp_field, na.rm = TRUE) -->
+<!--                     ) -->
+<!-- # add spectro T insi to seaFET data for EXTLOW -->
+<!-- ph_sf <- left_join(ph_sf, spectro_mean%>%dplyr::select(datetime,ph_s_sf_temp_insi, temp_field,salinity_field),by="datetime") -->
+<!-- ``` -->
 
-# make the mean of E0 by period of deployement
-calib_spectro <- group_by(calib_spectro, deployment_sf) %>%
-  summarise(E0int25 = mean(E0int25, na.rm = TRUE),
-            E0ext25 = mean(E0ext25, na.rm = TRUE) 
-            )
-names(calib_spectro) <- c("deployment_sf", "E0int25_sf", "E0ext25_sf")
+<!-- ```{r seafet calibration sf_calib, echo=FALSE, warning = FALSE, message = FALSE, out.width='100%'} -->
+<!-- ## calculation of E0INT25/E0EXT25 ## -->
+<!-- ##     new sf_calib function      ## -->
+<!-- calib_spectro<- sf_calib(calEint = ph_sf$voltINT_sf , calEext = ph_sf$voltEXT_sf, calpH = ph_sf$ph_s_sf_temp_insi, calT = ph_sf$temp_field, calSal = ph_sf$salinity_field) -->
+<!-- # put number of deployment  -->
+<!-- calib_spectro$deployment_sf<- ph_sf$deployment_sf  -->
+<!-- # calcule percentage -->
+<!-- #calib_spectroo<- calib_spectro%>% -->
+<!-- #   tidyr::drop_na(E0int25)%>% -->
+<!-- #   dplyr::mutate(delta_E0int_percent = (E0int25 - lag(E0int25))/E0int25)*100 -->
 
-# add E0 mean to seaFET data per deployment
-ph_sf <-left_join(ph_sf, calib_spectro,by="deployment_sf" )
+<!-- # make the mean of E0 by period of deployement -->
+<!-- calib_spectro <- group_by(calib_spectro, deployment_sf) %>% -->
+<!--   summarise(E0int25 = mean(E0int25, na.rm = TRUE), -->
+<!--             E0ext25 = mean(E0ext25, na.rm = TRUE)  -->
+<!--             ) -->
+<!-- names(calib_spectro) <- c("deployment_sf", "E0int25_sf", "E0ext25_sf") -->
 
-library(ggplot2)
-#### plot
-kk <- tidyr::pivot_longer(calib_spectro, cols = starts_with("E0"), names_to = "variable", values_to = "value")
-p_calib <- ggplot(kk) + geom_point(aes(x=deployment_sf, y=value, color=variable), size=2) +
-  facet_grid(variable ~ ., scales="free_y") + theme_bw() +
-  scale_colour_discrete(guide="none")
-print(p_calib)
-```
+<!-- # add E0 mean to seaFET data per deployment -->
+<!-- ph_sf <-left_join(ph_sf, calib_spectro,by="deployment_sf" ) -->
 
-```{r seafet pH calculation sf_calc, echo=FALSE, message= FALSE, warning=FALSE}
-#interpolation salinity
-library(imputeTS)
-ph_sf <- ph_sf%>%
-  dplyr::mutate( sal_int = na_interpolation(salinity_field, option = "linear") )
-## calculation of the calibrated pH ##
-##       new sf_calc function       ##
-####
-seafet_calib <- sf_calc(calEint = ph_sf$voltINT_sf, calEext = ph_sf$voltEXT_sf, E0int25 = ph_sf$E0int25_sf,  E0ext25 = ph_sf$E0ext25_sf, calT = ph_sf$T_seaF_sf, calSal = ph_sf$sal_int)
+<!-- library(ggplot2) -->
+<!-- #### plot -->
+<!-- kk <- tidyr::pivot_longer(calib_spectro, cols = starts_with("E0"), names_to = "variable", values_to = "value") -->
+<!-- p_calib <- ggplot(kk) + geom_point(aes(x=deployment_sf, y=value, color=variable), size=2) + -->
+<!--   facet_grid(variable ~ ., scales="free_y") + theme_bw() + -->
+<!--   scale_colour_discrete(guide="none") -->
+<!-- print(p_calib) -->
+<!-- ``` -->
 
-# bind new calibrated pH data to the seafet data set.
-names(seafet_calib) <- c("pHint_tot_sf", "pHext_tot_sf")
-ph_sf <- dplyr::bind_cols(ph_sf, seafet_calib )
-```
+<!-- ```{r seafet pH calculation sf_calc, echo=FALSE, message= FALSE, warning=FALSE} -->
+<!-- #interpolation salinity -->
+<!-- library(imputeTS) -->
+<!-- ph_sf <- ph_sf%>% -->
+<!--   dplyr::mutate( sal_int = na_interpolation(salinity_field, option = "linear") ) -->
+<!-- ## calculation of the calibrated pH ## -->
+<!-- ##       new sf_calc function       ## -->
+<!-- #### -->
+<!-- seafet_calib <- sf_calc(calEint = ph_sf$voltINT_sf, calEext = ph_sf$voltEXT_sf, E0int25 = ph_sf$E0int25_sf,  E0ext25 = ph_sf$E0ext25_sf, calT = ph_sf$T_seaF_sf, calSal = ph_sf$sal_int) -->
 
-```{r plot all, echo=FALSE, message=FALSE, warning=FALSE, out.width='100%'}
-## PLOT  
-all_xts <- dplyr::select(ph_sf, datetime, ph_s_sf_temp_insi , pHint_tot_sf, pHext_tot_sf, temp_field,T_seaF_sf)
-all_xts <- as.xts(all_xts, order.by=all_xts$datetime)
+<!-- # bind new calibrated pH data to the seafet data set. -->
+<!-- names(seafet_calib) <- c("pHint_tot_sf", "pHext_tot_sf") -->
+<!-- ph_sf <- dplyr::bind_cols(ph_sf, seafet_calib ) -->
+<!-- ``` -->
 
-dygraph(all_xts, ylab = "") %>%
-dySeries("pHint_tot_sf", drawPoints = TRUE, pointSize=2, label = "pH INT", color="purple")%>%
-dySeries("pHext_tot_sf", drawPoints = TRUE, pointSize=2, label = "pH EXT", color="#9999CC")%>%
-dySeries("ph_s_sf_temp_insi", drawPoints = TRUE, pointSize=3, label = "spectro", color="green")%>%
-dySeries(axis = "y2","temp_field", drawPoints = TRUE, pointSize=3, label = "temp ptB", color="black")%>%
-dySeries(axis = "y2","T_seaF_sf", drawPoints = TRUE, pointSize=2, label = "temp sf", color="grey")%>%
-dyOptions(
-    drawGrid = TRUE,
-    drawPoints = TRUE,
-    useDataTimezone = TRUE,
-    digitsAfterDecimal = 4) %>%
-  dyRangeSelector(height = 30)
-```
+<!-- ```{r plot all, echo=FALSE, message=FALSE, warning=FALSE, out.width='100%'} -->
+<!-- ## PLOT   -->
+<!-- all_xts <- dplyr::select(ph_sf, datetime, ph_s_sf_temp_insi , pHint_tot_sf, pHext_tot_sf, temp_field,T_seaF_sf) -->
+<!-- all_xts <- as.xts(all_xts, order.by=all_xts$datetime) -->
 
-Quality control plots :
+<!-- dygraph(all_xts, ylab = "") %>% -->
+<!-- dySeries("pHint_tot_sf", drawPoints = TRUE, pointSize=2, label = "pH INT", color="purple")%>% -->
+<!-- dySeries("pHext_tot_sf", drawPoints = TRUE, pointSize=2, label = "pH EXT", color="#9999CC")%>% -->
+<!-- dySeries("ph_s_sf_temp_insi", drawPoints = TRUE, pointSize=6, label = "spectro", color="green")%>% -->
+<!-- dySeries(axis = "y2","temp_field", drawPoints = TRUE, pointSize=3, label = "temp ptB", color="black")%>% -->
+<!-- dySeries(axis = "y2","T_seaF_sf", drawPoints = TRUE, pointSize=2, label = "temp sf", color="grey")%>% -->
+<!-- dyOptions( -->
+<!--     drawGrid = TRUE, -->
+<!--     drawPoints = TRUE, -->
+<!--     useDataTimezone = TRUE, -->
+<!--     digitsAfterDecimal = 4) %>% -->
+<!--   dyRangeSelector(height = 30) -->
+<!-- ``` -->
 
-- Offset between calibrated seaFET data and pH spectro. The offset must fit between -0.2/0.2 pH units.
+<!-- Quality control plots : -->
 
-```{r seaFET quality control pH, echo=FALSE, warning = FALSE, message = FALSE, out.width='100%'}
-#Offset between seafet pH and spec pH (Fig. 2 Kapsenberg et al.)
+<!-- - Offset between calibrated seaFET data and pH spectro. The offset must fit between -0.2/0.2 pH units. -->
 
-ph_sf <- ph_sf%>%
-  mutate( diff_pH = ph_s_sf_temp_insi - pHint_tot_sf)
-average_offset <- mean(abs(ph_sf$diff_pH), na.rm=TRUE)
+<!-- ```{r seaFET quality control pH, echo=FALSE, warning = FALSE, message = FALSE, out.width='100%'} -->
+<!-- #Offset between seafet pH and spec pH (Fig. 2 Kapsenberg et al.) -->
 
-offset_xts <- dplyr::select(ph_sf%>%dplyr::filter(!is.na(diff_pH)), datetime, diff_pH)
-offset_xts <- as.xts(offset_xts, order.by=offset_xts$datetime)
+<!-- ph_sf <- ph_sf%>% -->
+<!--   mutate( diff_pH = ph_s_sf_temp_insi - pHint_tot_sf) -->
+<!-- average_offset <- mean(abs(ph_sf$diff_pH), na.rm=TRUE) -->
 
-dygraph(offset_xts, ylab = "") %>%
-dySeries("diff_pH", drawPoints = TRUE, pointSize=3, label = "delta pHINT", color="green")%>%
-    dyLimit(0,strokePattern = "dashed", color = "black") %>% 
-  dyAxis("y",valueRange = c(-0.004, 0.004))%>%
-  dyAxis("x",valueRange = c(as.POSIXct("2021-09-28"), as.POSIXct("2021-10-19")
-))%>%
-dyOptions(
-    drawGrid = TRUE,
-    strokeWidth= 0,
-    drawPoints = TRUE,
-    useDataTimezone = TRUE,
-    digitsAfterDecimal = 4) %>%
-  dyRangeSelector(height = 30)
-```
+<!-- offset_xts <- dplyr::select(ph_sf%>%dplyr::filter(!is.na(diff_pH)), datetime, diff_pH) -->
+<!-- offset_xts <- as.xts(offset_xts, order.by=offset_xts$datetime) -->
 
-## **TEST Roscoff Deployment**
+<!-- dygraph(offset_xts, ylab = "") %>% -->
+<!-- dySeries("diff_pH", drawPoints = TRUE, pointSize=3, label = "delta pHINT", color="green")%>% -->
+<!--     dyLimit(0,strokePattern = "dashed", color = "black") %>%  -->
+<!--   dyAxis("y",valueRange = c(-0.004, 0.004))%>% -->
+<!--   dyAxis("x",valueRange = c(as.POSIXct("2021-09-28"), as.POSIXct("2021-10-19") -->
+<!-- ))%>% -->
+<!-- dyOptions( -->
+<!--     drawGrid = TRUE, -->
+<!--     strokeWidth= 0, -->
+<!--     drawPoints = TRUE, -->
+<!--     useDataTimezone = TRUE, -->
+<!--     digitsAfterDecimal = 4) %>% -->
+<!--   dyRangeSelector(height = 30) -->
+<!-- ``` -->
 
-New seaFET tested for few days in the pool. 
-No correction, Only raw data.
+<!-- ## **TEST Roscoff Deployment** -->
 
-```{r test seafet pH , echo=FALSE, warning = FALSE, message = FALSE, out.width='100%'}
-# read deployment file
-file_list_rf <- list.files(path  = "../../pCloud Sync/exp176_sami/vlfr_ph_data/3_out_ph_sami_seafet/out_test/", pattern = "SeaFET2-0002276-Data-20211122.*.csv")
+<!-- New seaFET tested for few days in the pool.  -->
+<!-- No correction, Only raw data. -->
 
-if (length(file_list_rf) == 0) {stop()} # script does not run if there is no data file to read
-ii <- 0
-for (file in file_list_rf){
-  ii <- ii + 1
-  tmp <- read.table(paste0("../../pCloud Sync/exp176_sami/vlfr_ph_data/3_out_ph_sami_seafet/out_test/",  file_list_rf[ii], sep = ""), header = F, dec = ".", as.is = TRUE, sep = ",", skip = 1, fill = TRUE)
-# YOU MUST add manually the deployement number in the title file
-# The following take last digit in the title file
-  tmp$deployment <- as.numeric(substr(str_extract(file_list_rf[ii], "-[0-9][0-9]\\."),2,3))
-  colnames(tmp)  <- c("seafet_id_sf","datetime", "sample_num", "error", "phEXT_sf","phINT_sf",  "voltEXT_sf","voltINT_sf","T_seaF_sf","Humidity_sf", "T_int_sf","deployment_sf" )
-tmp$datetime <- mdy_hms(tmp$datetime,tz="UTC")
- 
-  if (ii == 1) {ph_test <- tmp} 
-  else {ph_test <- rbind(ph_test, tmp)}
-}
+<!-- ```{r test seafet pH , echo=FALSE, warning = FALSE, message = FALSE, out.width='100%'} -->
+<!-- # read deployment file -->
+<!-- file_list_rf <- list.files(path  = "../../pCloud Sync/exp176_sami/vlfr_ph_data/3_out_ph_sami_seafet/out_test/", pattern = "SeaFET2-0002276-Data-20211122.*.csv") -->
 
+<!-- if (length(file_list_rf) == 0) {stop()} # script does not run if there is no data file to read -->
+<!-- ii <- 0 -->
+<!-- for (file in file_list_rf){ -->
+<!--   ii <- ii + 1 -->
+<!--   tmp <- read.table(paste0("../../pCloud Sync/exp176_sami/vlfr_ph_data/3_out_ph_sami_seafet/out_test/",  file_list_rf[ii], sep = ""), header = F, dec = ".", as.is = TRUE, sep = ",", skip = 1, fill = TRUE) -->
+<!-- # YOU MUST add manually the deployement number in the title file -->
+<!-- # The following take last digit in the title file -->
+<!--   tmp$deployment <- as.numeric(substr(str_extract(file_list_rf[ii], "-[0-9][0-9]\\."),2,3)) -->
+<!--   colnames(tmp)  <- c("seafet_id_sf","datetime", "sample_num", "error", "phEXT_sf","phINT_sf",  "voltEXT_sf","voltINT_sf","T_seaF_sf","Humidity_sf", "T_int_sf","deployment_sf" ) -->
+<!-- tmp$datetime <- mdy_hms(tmp$datetime,tz="UTC") -->
 
-## PLOT  
-rf_xts <- dplyr::select(ph_test, datetime, phINT_sf , phEXT_sf,T_seaF_sf)
-rf_xts <- as.xts(rf_xts, order.by=rf_xts$datetime)
-
-dygraph(rf_xts, ylab = "") %>%
-dySeries("phINT_sf", drawPoints = TRUE, pointSize=2, label = "pH INT", color="purple")%>%
-dySeries("phEXT_sf", drawPoints = TRUE, pointSize=2, label = "pH EXT", color="#9999CC")%>%
-dySeries(axis = "y2","T_seaF_sf", drawPoints = TRUE, pointSize=2, label = "temp sf", color="black")%>%
-dyOptions(
-    drawGrid = TRUE,
-    drawPoints = TRUE,
-    useDataTimezone = TRUE,
-    digitsAfterDecimal = 4) %>%
-  dyRangeSelector(height = 30)
-
-# Quality control
-ph_test <- ph_test%>%
-  mutate( diff_pH = phEXT_sf - phINT_sf)
-average_offset <- mean(abs(ph_test$diff_pH), na.rm=TRUE)
-
-offset_xts <- dplyr::select(ph_test%>%dplyr::filter(!is.na(diff_pH)), datetime, diff_pH)
-offset_xts <- as.xts(offset_xts, order.by=offset_xts$datetime)
-
-dygraph(offset_xts, main = "Difference pH EXT - INT") %>%
-dySeries("diff_pH", drawPoints = TRUE, pointSize=3, label = "delta pHINT", color="green")%>%
-    dyLimit(0,strokePattern = "dashed", color = "black") %>% 
-  dyAxis("y",valueRange = c(-0.045,0.01 ))%>%
- # dyAxis("x",valueRange = c(as.POSIXct("2021-09-28"), as.POSIXct("2021-10-19")))%>%
-dyOptions(
-    drawGrid = TRUE,
-    strokeWidth= 1,
-    drawPoints = TRUE,
-    useDataTimezone = TRUE,
-    digitsAfterDecimal = 4) %>%
-  dyRangeSelector(height = 30)
+<!--   if (ii == 1) {ph_test <- tmp}  -->
+<!--   else {ph_test <- rbind(ph_test, tmp)} -->
+<!-- } -->
 
 
-```
+<!-- ## PLOT   -->
+<!-- rf_xts <- dplyr::select(ph_test, datetime, phINT_sf , phEXT_sf,T_seaF_sf) -->
+<!-- rf_xts <- as.xts(rf_xts, order.by=rf_xts$datetime) -->
+
+<!-- dygraph(rf_xts, ylab = "") %>% -->
+<!-- dySeries("phINT_sf", drawPoints = TRUE, pointSize=2, label = "pH INT", color="purple")%>% -->
+<!-- dySeries("phEXT_sf", drawPoints = TRUE, pointSize=2, label = "pH EXT", color="#9999CC")%>% -->
+<!-- dySeries(axis = "y2","T_seaF_sf", drawPoints = TRUE, pointSize=2, label = "temp sf", color="black")%>% -->
+<!-- dyOptions( -->
+<!--     drawGrid = TRUE, -->
+<!--     drawPoints = TRUE, -->
+<!--     useDataTimezone = TRUE, -->
+<!--     digitsAfterDecimal = 4) %>% -->
+<!--   dyRangeSelector(height = 30) -->
+
+<!-- # Quality control -->
+<!-- ph_test <- ph_test%>% -->
+<!--   mutate( diff_pH = phEXT_sf - phINT_sf) -->
+<!-- average_offset <- mean(abs(ph_test$diff_pH), na.rm=TRUE) -->
+
+<!-- offset_xts <- dplyr::select(ph_test%>%dplyr::filter(!is.na(diff_pH)), datetime, diff_pH) -->
+<!-- offset_xts <- as.xts(offset_xts, order.by=offset_xts$datetime) -->
+
+<!-- dygraph(offset_xts, main = "Difference pH EXT - INT") %>% -->
+<!-- dySeries("diff_pH", drawPoints = TRUE, pointSize=3, label = "delta pHINT", color="green")%>% -->
+<!--     dyLimit(0,strokePattern = "dashed", color = "black") %>%  -->
+<!--   dyAxis("y",valueRange = c(-0.045,0.01 ))%>% -->
+<!--  # dyAxis("x",valueRange = c(as.POSIXct("2021-09-28"), as.POSIXct("2021-10-19")))%>% -->
+<!-- dyOptions( -->
+<!--     drawGrid = TRUE, -->
+<!--     strokeWidth= 1, -->
+<!--     drawPoints = TRUE, -->
+<!--     useDataTimezone = TRUE, -->
+<!--     digitsAfterDecimal = 4) %>% -->
+<!--   dyRangeSelector(height = 30) -->
+
+
+<!-- ``` -->
 
 # **SAMI pH**  {.tabset .tabset-pills}
 
@@ -616,7 +616,40 @@ sami <- sami %>%
 #We force a rounded time 
 sami$datetime <- floor_date(sami$datetime,unit = "hour" )
 save(sami, file = paste0(path, "data/sami/sami_all_eol.csv"))
+```
 
+```{r sami pH, echo=FALSE, warning = FALSE, message = FALSE, out.width='100%'}
+
+ spectro <- read.table( "../../pCloud Sync/exp153_carbonates_point_B/output_jp/output/output_somlit.csv", header = T, dec = ".", as.is = T, sep = ",", fill = TRUE)%>%  
+   tidyr::unite("datetime", sampling_date, sampling_hour, sep=" ", remove =T) %>%  
+   dplyr::mutate(datetime = dmy_hms(datetime, tz="Europe/Paris")) 
+ # convert local time to UTC time 
+ spectro$datetime <- with_tz(spectro$datetime, "UTC") 
+ # add the ALK 
+ spectro <- spectro%>% 
+   dplyr::mutate(at= 2560)%>% 
+     dplyr::mutate(depth= 1) 
+ # remove NA lines 
+ spectro <- spectro %>%  
+   tidyr::drop_na(pH_s_ptb_temp_lab)%>% 
+   dplyr::select(datetime, salinity_field, temp_field,at, pH_s_ptb_temp_lab, temp_lab_ptb, depth) 
+ #Convert to insitu Temp pH 
+ spectro <- spectro%>% 
+   dplyr::mutate( ph_s_sf_temp_insi = pHinsi(pH = spectro$pH_s_ptb_temp_lab,  
+                          ALK = spectro$at*1e-6, Tinsi = spectro$temp_field,  
+                          Tlab = spectro$temp_lab_ptb, Pinsi = spectro$depth/10,  
+                          S = spectro$salinity_field, Pt = 0, Sit = 0, k1k2 = "l", kf = "dg", ks="d", pHscale = "T", b="u74")) 
+ # Make mean for replicates + SD in function of watersampling (datetime) 
+ spectro_mean <- spectro %>% 
+   dplyr::group_by(datetime) %>%  
+   dplyr::summarise(ph_s_sf_temp_insi_sd = sd(ph_s_sf_temp_insi, na.rm = TRUE), 
+                    ph_s_sf_temp_insi = mean(ph_s_sf_temp_insi, na.rm = TRUE), 
+                    salinity_field = mean(salinity_field, na.rm = TRUE), 
+                    temp_field = mean(temp_field, na.rm = TRUE) 
+                     ) 
+ # add spectro T insi to seaFET data for EXTLOW 
+ ph_sf <- left_join(ph_sf, spectro_mean%>%dplyr::select(datetime,ph_s_sf_temp_insi, temp_field,salinity_field),by="datetime") 
+ 
 ## Add event periodes manually
 ## Events
 sami_events <- c("2019-12-16 11:00:00", "2020-02-25 16:00:00","2020-06-17 08:00:00","2020-06-19 10:00:00","2020-07-15 10:00:00","2020-07-17 18:00:00", "2020-08-10 00:00:00", "2020-12-10 13:00:00","2020-12-17 09:00:00","2021-02-17 09:00:00","2021-03-17 12:00:00","2021-03-30 09:30:00","2021-04-22 12:00:00","2021-06-11 08:00:00","2021-07-20 07:00:00","2021-09-24 13:00:00","2021-10-19 09:00:00", "2021-11-26 08:00:00","2021-11-26 10:00:00")
@@ -864,6 +897,19 @@ eol <- eol%>%
   dplyr::rename(temp_eol = T,
                 sal_eol = S,
                 oxy_eol = O2)
+# calculate time difference bettween 2 rows
+options(scipen = 999) 
+eol <- eol%>%
+dplyr::mutate(diff_time = as.numeric(as.numeric(datetime - lag(datetime))/60))
+
+diff_eol_xts <- dplyr::select(eol, datetime, diff_time)
+diff_eol_xts <- as.xts(diff_eol_xts, order.by=diff_eol_xts$datetime)
+dygraph(diff_eol_xts, main = "", ylab = "") %>%
+  dySeries("diff_time", drawPoints = TRUE, pointSize=2, label = "Temp")%>%
+dyOptions(drawGrid = TRUE,
+    drawPoints = TRUE,
+    useDataTimezone = TRUE)%>%
+  dyRangeSelector(height = 30)           
 
 ## PLOT 1 = all eol data S T
 eol_xts <- dplyr::select(eol, datetime, temp_eol, sal_eol, oxy_eol)
@@ -1205,6 +1251,19 @@ setkey(rh_B_Bplus_1m_mean, datetime)
 combined_1_B_Bplus_wink <- rh_B_Bplus_1m_mean[wink_1m, roll = "nearest" ]
 
 ###
+ptb_wink_ctd_xts <- dplyr::select(rh_B_Bplus_1m_mean, date, mean_oxy_mll_rhBplus,mean_oxy_mll_rhB)
+ptb_wink_ctd_xts <- as.xts(ptb_wink_ctd_xts, order.by=ptb_wink_ctd_xts$datetime)
+dygraph(ptb_wink_ctd_xts,  main = "Oxygen (ml/l) 1m: PTB+ + Winkler", ylab = "") %>%
+dySeries("mean_oxy_mll_rhBplus", drawPoints = TRUE, pointSize=4, label = "Oxy PTB+", color ="blue") %>%
+dySeries("mean_oxy_mll_rhB", drawPoints = TRUE, pointSize=3, label = "Oxy winkler PTB", color ="green")%>%
+ # dyLegend(show = "always", width = 600)%>%
+  #dyAxis("y",valueRange = c(-0.1, 0.11))%>%
+dyOptions(
+    drawGrid = TRUE,
+    drawPoints = TRUE,
+    useDataTimezone = TRUE)%>%
+  dyRangeSelector(height = 30)
+
 # PLOT all oxygen data as time series
 ptb_wink_ctd_xts <- dplyr::select(combined_1_B_Bplus_wink, datetime, mean_oxy_mll_rhBplus, ptb_oxy_wink)
 ptb_wink_ctd_xts <- as.xts(ptb_wink_ctd_xts, order.by=ptb_wink_ctd_xts$datetime)
