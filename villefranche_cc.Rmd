@@ -898,7 +898,7 @@ eol <- eol%>%
                 sal_eol = S,
                 oxy_eol = O2)
 # calculate time difference bettween 2 rows
-options(scipen = 999) 
+options(scipen = 0) 
 eol <- eol%>%
 dplyr::mutate(diff_time = as.numeric(as.numeric(datetime - lag(datetime))/60))
 
@@ -1267,6 +1267,8 @@ winkler_fond$datetime <- ymd_hms(winkler_fond$datetime)
 winkler <- rbind(winkler_surface, winkler_fond)
 winkler <- winkler%>%
   dplyr::arrange(datetime)
+####
+
 # Select 1m ptb_oxy_wink data 
 wink_1m <- winkler %>%
   dplyr::group_by(datetime) %>%
@@ -1292,26 +1294,28 @@ setkey(rh_B_Bplus_1m_mean, datetime)
 # combine
 combined_1_B_Bplus_wink <- rh_B_Bplus_1m_mean[wink_1m, roll = "nearest" ]
 
-###
-ptb_wink_ctd_xts <- dplyr::select(rh_B_Bplus_1m_mean, date, mean_oxy_mll_rhBplus,mean_oxy_mll_rhB)
-ptb_wink_ctd_xts <- as.xts(ptb_wink_ctd_xts, order.by=ptb_wink_ctd_xts$datetime)
-dygraph(ptb_wink_ctd_xts,  main = "Oxygen (ml/l) 1m: PTB+ + Winkler", ylab = "") %>%
-dySeries("mean_oxy_mll_rhBplus", drawPoints = TRUE, pointSize=4, label = "Oxy PTB+", color ="blue") %>%
-dySeries("mean_oxy_mll_rhB", drawPoints = TRUE, pointSize=3, label = "Oxy winkler PTB", color ="green")%>%
- # dyLegend(show = "always", width = 600)%>%
-  #dyAxis("y",valueRange = c(-0.1, 0.11))%>%
-dyOptions(
-    drawGrid = TRUE,
-    drawPoints = TRUE,
-    useDataTimezone = TRUE)%>%
-  dyRangeSelector(height = 30)
+# ###
+# ptb_wink_ctd_xts <- dplyr::select(rh_B_Bplus_1m_mean, date, mean_oxy_mll_rhBplus,mean_oxy_mll_rhB, mean_oxy_mll_rhBplus_B)
+# ptb_wink_ctd_xts <- as.xts(ptb_wink_ctd_xts, order.by=ptb_wink_ctd_xts$datetime)
+# dygraph(ptb_wink_ctd_xts,  main = "Oxygen (ml/l) 1m: PTB+ + Winkler", ylab = "") %>%
+# dySeries("mean_oxy_mll_rhBplus", drawPoints = TRUE, pointSize=4, label = "Oxy PTB+", color ="blue") %>%
+# dySeries("mean_oxy_mll_rhB", drawPoints = TRUE, pointSize=3, label = "Oxy PTB", color ="green")%>%
+#   dySeries("mean_oxy_mll_rhBplus_B", drawPoints = TRUE, pointSize=3, label = "Oxy PTB + PTB+", color ="black")%>%
+# 
+#  # dyLegend(show = "always", width = 600)%>%
+#   #dyAxis("y",valueRange = c(-0.1, 0.11))%>%
+# dyOptions(
+#     drawGrid = TRUE,
+#     drawPoints = TRUE,
+#     useDataTimezone = TRUE)%>%
+#   dyRangeSelector(height = 30)
 
 # PLOT all oxygen data as time series
-ptb_wink_ctd_xts <- dplyr::select(combined_1_B_Bplus_wink, datetime, mean_oxy_mll_rhBplus, ptb_oxy_wink)
+ptb_wink_ctd_xts <- dplyr::select(combined_1_B_Bplus_wink, datetime, mean_oxy_mll_rhBplus_B, ptb_oxy_wink)
 ptb_wink_ctd_xts <- as.xts(ptb_wink_ctd_xts, order.by=ptb_wink_ctd_xts$datetime)
 
 dygraph(ptb_wink_ctd_xts,  main = "Oxygen (ml/l) 1m: PTB+ + Winkler", ylab = "") %>%
-dySeries("mean_oxy_mll_rhBplus", drawPoints = TRUE, pointSize=4, label = "Oxy PTB+", color ="blue") %>%
+dySeries("mean_oxy_mll_rhBplus_B", drawPoints = TRUE, pointSize=4, label = "Oxy PTB+/B", color ="blue") %>%
 dySeries("ptb_oxy_wink", drawPoints = TRUE, pointSize=3, label = "Oxy winkler PTB", color ="green")%>%
  # dyLegend(show = "always", width = 600)%>%
   #dyAxis("y",valueRange = c(-0.1, 0.11))%>%
@@ -1323,14 +1327,15 @@ dyOptions(
 ###
 #delta oxy
 combined_1_B_Bplus_wink <- combined_1_B_Bplus_wink %>% 
-  dplyr::mutate(oxy_mll_rhBplus_wink_detla = mean_oxy_mll_rhBplus - ptb_oxy_wink, 
-                oxy_mll_rhB_wink_detla = mean_oxy_mll_rhB - ptb_oxy_wink)
+  dplyr::mutate(oxy_mll_rhBplus_B_wink_detla = mean_oxy_mll_rhBplus_B - ptb_oxy_wink, 
+                oxy_mll_rhB_wink_detla = mean_oxy_mll_rhB - ptb_oxy_wink, 
+                oxy_mll_rhBplus_wink_detla = mean_oxy_mll_rhBplus - ptb_oxy_wink)
 #plot
-oxy_rhBplus_wink_xts <- dplyr::select(combined_1_B_Bplus_wink,datetime, oxy_mll_rhBplus_wink_detla)
+oxy_rhBplus_wink_xts <- dplyr::select(combined_1_B_Bplus_wink,datetime, oxy_mll_rhBplus_B_wink_detla)
 oxy_rhBplus_wink_xts <- as.xts(oxy_rhBplus_wink_xts, order.by=oxy_rhBplus_wink_xts$datetime)
 
 dygraph(oxy_rhBplus_wink_xts,  main = "Delta Oxy ptB+ Winkler 1m", ylab = "") %>%
-     dySeries("oxy_mll_rhBplus_wink_detla", drawPoints = TRUE, pointSize=2, label = "delta (ml/l)", color="black")%>%
+     dySeries("oxy_mll_rhBplus_B_wink_detla", drawPoints = TRUE, pointSize=2, label = "delta (ml/l)", color="black")%>%
    dyLimit(0,strokePattern = "dashed", color = "black") %>% 
  # dyLegend(show = "always", width = 600)%>%
   #dyAxis("y",valueRange = c(-0.1, 0.11))%>%
@@ -1341,8 +1346,8 @@ dyOptions(
   dyRangeSelector(height = 30)
 ###
 titre <- "Oxygen 1m: Point B+ CTD vs Point B Winkler"
-fit <- lmodel2(data = combined_1_B_Bplus_wink, ptb_oxy_wink ~ mean_oxy_mll_rhBplus, nperm = 99)
-p_Oxyptbwink_Oxyptb <-  ggreg2(fit, "mean_oxy_mll_rhBplus", "ptb_oxy_wink") +
+fit <- lmodel2(data = combined_1_B_Bplus_wink, ptb_oxy_wink ~ mean_oxy_mll_rhBplus_B, nperm = 99)
+p_Oxyptbwink_Oxyptb <-  ggreg2(fit, "mean_oxy_mll_rhBplus_B", "ptb_oxy_wink") +
   geom_abline(aes(slope= 1, intercept =0), linetype = 2) +
   mytheme+labs(x="Oxy Point B+ CTD", y="Oxy Point B Winkler")
 print(p_Oxyptbwink_Oxyptb)
@@ -1352,12 +1357,14 @@ print(p_Oxyptbwink_Oxyptb)
 
 ```{r plot ctd_hydro 50m Oxy, echo=TRUE, warning = FALSE, message = FALSE, out.width='100%'}
 ## Oxy umolkg 50m
-rh_oxymll_xts <- dplyr::select(rh_B_Bplus_50m_mean, date, mean_oxy_mll_rhBplus, mean_oxy_mll_rhB)
+rh_oxymll_xts <- dplyr::select(rh_B_Bplus_50m_mean, date, mean_oxy_mll_rhBplus_B, mean_oxy_mll_rhBplus,mean_oxy_mll_rhB)
 rh_oxymll_xts <- as.xts(rh_oxymll_xts, order.by=rh_oxymll_xts$date)
 
 dygraph(rh_oxymll_xts,  main = "Oxygen (ml/l 50m Rade Hydro: B / B+", ylab = "") %>%
   dySeries("mean_oxy_mll_rhB", drawPoints = TRUE, pointSize=4, label = "Oxy_mll B", color ="blue") %>%
   dySeries("mean_oxy_mll_rhBplus", drawPoints = TRUE, pointSize=2, label = "Oxy_mll B+", color="red")%>%
+    dySeries("mean_oxy_mll_rhBplus_B", drawPoints = TRUE, pointSize=2, label = "Oxy_mll B/B+", color="black")%>%
+
  # dyLegend(show = "always", width = 600)%>%
   #dyAxis("y",valueRange = c(-0.1, 0.11))%>%
 dyOptions(
@@ -1411,11 +1418,11 @@ combined_50_B_Bplus_wink <- rh_B_Bplus_50m_mean[wink_50m, roll = "nearest" ]
 
 ###
 # PLOT all oxygen data as time series
-ptb_wink_ctd_xts <- dplyr::select(combined_50_B_Bplus_wink, datetime, mean_oxy_mll_rhBplus, ptb_oxy_wink)
+ptb_wink_ctd_xts <- dplyr::select(combined_50_B_Bplus_wink, datetime, mean_oxy_mll_rhBplus_B, ptb_oxy_wink)
 ptb_wink_ctd_xts <- as.xts(ptb_wink_ctd_xts, order.by=ptb_wink_ctd_xts$datetime)
 
 dygraph(ptb_wink_ctd_xts,  main = "Oxygen (ml/l) 50m: PTB+ + Winkler", ylab = "") %>%
-dySeries("mean_oxy_mll_rhBplus", drawPoints = TRUE, pointSize=4, label = "Oxy PTB+", color ="blue") %>%
+dySeries("mean_oxy_mll_rhBplus_B", drawPoints = TRUE, pointSize=4, label = "Oxy PTB+/B", color ="blue") %>%
 dySeries("ptb_oxy_wink", drawPoints = TRUE, pointSize=3, label = "Oxy winkler PTB", color ="green")%>%
  # dyLegend(show = "always", width = 600)%>%
   #dyAxis("y",valueRange = c(-0.1, 0.11))%>%
@@ -1428,13 +1435,14 @@ dyOptions(
 #delta oxy
 combined_50_B_Bplus_wink <- combined_50_B_Bplus_wink %>% 
   dplyr::mutate(oxy_mll_rhBplus_wink_detla = mean_oxy_mll_rhBplus - ptb_oxy_wink, 
-                oxy_mll_rhB_wink_detla = mean_oxy_mll_rhB - ptb_oxy_wink)
+                oxy_mll_rhB_wink_detla = mean_oxy_mll_rhB - ptb_oxy_wink,
+                oxy_mll_rhBplus_B_wink_detla = mean_oxy_mll_rhBplus_B - ptb_oxy_wink)
 #plot
-oxy_rhBplus_wink_xts <- dplyr::select(combined_50_B_Bplus_wink,datetime, oxy_mll_rhBplus_wink_detla)
+oxy_rhBplus_wink_xts <- dplyr::select(combined_50_B_Bplus_wink,datetime, oxy_mll_rhBplus_B_wink_detla)
 oxy_rhBplus_wink_xts <- as.xts(oxy_rhBplus_wink_xts, order.by=oxy_rhBplus_wink_xts$datetime)
 
 dygraph(oxy_rhBplus_wink_xts,  main = "Delta Oxy ptB+ Winkler 50m", ylab = "") %>%
-     dySeries("oxy_mll_rhBplus_wink_detla", drawPoints = TRUE, pointSize=2, label = "delta Oxy ml/l", color="black")%>%
+     dySeries("oxy_mll_rhBplus_B_wink_detla", drawPoints = TRUE, pointSize=2, label = "delta Oxy ml/l", color="black")%>%
    dyLimit(0,strokePattern = "dashed", color = "black") %>% 
  # dyLegend(show = "always", width = 600)%>%
   #dyAxis("y",valueRange = c(-0.1, 0.11))%>%
@@ -1444,12 +1452,14 @@ dyOptions(
     useDataTimezone = TRUE)%>%
   dyRangeSelector(height = 30)
 ###
-titre <- "Oxygen 50m: Point B+ CTD vs Point B Winkler"
-fit <- lmodel2(data = combined_50_B_Bplus_wink, ptb_oxy_wink ~ mean_oxy_mll_rhBplus, nperm = 99)
-p_Oxyptbwink_Oxyptb <-  ggreg2(fit, "mean_oxy_mll_rhBplus", "ptb_oxy_wink") +
+titre <- "Oxygen 50m: Point B+/B CTD vs Point B Winkler"
+fit <- lmodel2(data = combined_50_B_Bplus_wink, ptb_oxy_wink ~ mean_oxy_mll_rhBplus_B, nperm = 99)
+p_Oxyptbwink_Oxyptb <-  ggreg2(fit, "mean_oxy_mll_rhBplus_B", "ptb_oxy_wink") +
   geom_abline(aes(slope= 1, intercept =0), linetype = 2) +
-  mytheme+labs(x="Oxy Point B+ CTD", y="Oxy Point B Winkler")
+  mytheme+labs(x="Oxy Point B+/B CTD", y="Oxy Point B Winkler")
 print(p_Oxyptbwink_Oxyptb)
+
+saveRDS(rh_B_Bplus_50m_mean, file = paste0(path, "data/eol/rh_B_Bplus_50m_mean.rds"))
 ```
 
 # **Comparison EOL - SOMLIT (Point B)**  {.tabset .tabset-pills}
