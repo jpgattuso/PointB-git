@@ -876,6 +876,9 @@ eol <- rbind(eol_1, eol_2)
 eol <- rbind(eol, eol_3)
 eol <- rbind(eol, eol_4)
 eol <- dplyr::mutate(eol, datetime=str_c(Date, " ", Heure) %>% parse_datetime(format="%Y%m%d %H%M%S"))
+# round time to closest 30 mins
+eol$datetime <- round_date(eol$datetime, "30 mins")
+
 ###backup eol
 eol1 <- eol
 eol1 <- dplyr::mutate(eol1, datetime=str_c(Date, " ", Heure) %>% parse_datetime(format="%Y%m%d %H%M%S"))
@@ -897,19 +900,20 @@ eol <- eol%>%
   dplyr::rename(temp_eol = T,
                 sal_eol = S,
                 oxy_eol = O2)
-# calculate time difference bettween 2 rows
-options(scipen = 0) 
-eol <- eol%>%
-dplyr::mutate(diff_time = as.numeric(as.numeric(datetime - lag(datetime))/60))
 
-diff_eol_xts <- dplyr::select(eol, datetime, diff_time)
-diff_eol_xts <- as.xts(diff_eol_xts, order.by=diff_eol_xts$datetime)
-dygraph(diff_eol_xts, main = "", ylab = "") %>%
-  dySeries("diff_time", drawPoints = TRUE, pointSize=2, label = "Temp")%>%
-dyOptions(drawGrid = TRUE,
-    drawPoints = TRUE,
-    useDataTimezone = TRUE)%>%
-  dyRangeSelector(height = 30)           
+# # calculate time difference bettween 2 rows
+# #options(scipen = 0) 
+# eol <- eol%>%
+# dplyr::mutate(diff_time = as.numeric(as.numeric(datetime - lag(datetime))/60))
+# 
+# diff_eol_xts <- dplyr::select(eol, datetime, diff_time)
+# diff_eol_xts <- as.xts(diff_eol_xts, order.by=diff_eol_xts$datetime)
+# dygraph(diff_eol_xts, main = "", ylab = "") %>%
+#   dySeries("diff_time", drawPoints = TRUE, pointSize=2, label = "Temp")%>%
+# dyOptions(drawGrid = TRUE,
+#     drawPoints = TRUE,
+#     useDataTimezone = TRUE)%>%
+#   dyRangeSelector(height = 30)           
 
 ## PLOT 1 = all eol data S T
 eol_xts <- dplyr::select(eol, datetime, temp_eol, sal_eol, oxy_eol)
@@ -926,6 +930,8 @@ dyOptions(drawGrid = TRUE,
     drawPoints = TRUE,
     useDataTimezone = TRUE)%>%
   dyRangeSelector(height = 30)
+
+
 
 ### SAVE
 saveRDS(eol, file = paste0(path, "data/eol/eol_data.rds"))
@@ -1285,14 +1291,15 @@ wink_1m$datetime <- ymd_hms(wink_1m$datetime, tz="Europe/Paris")
 wink_1m$datetime <- with_tz(wink_1m$datetime, "UTC")
 
 # Adding the Winkler PointB 1m data perweek to rh_B_Bplus_1m_mean
-#put wink_1m as data.table
-wink_1m <- as.data.table(wink_1m)
-rh_B_Bplus_1m_mean <- as.data.table(rh_B_Bplus_1m_mean)
-# set datetime column as key column, easy to bind
-setkey( wink_1m, datetime )
-setkey(rh_B_Bplus_1m_mean, datetime)
-# combine
-combined_1_B_Bplus_wink <- rh_B_Bplus_1m_mean[wink_1m, roll = "nearest" ]
+# #put wink_1m as data.table
+# wink_1m <- as.data.table(wink_1m)
+# rh_B_Bplus_1m_mean <- as.data.table(rh_B_Bplus_1m_mean)
+# # set datetime column as key column, easy to bind
+# setkey( wink_1m, datetime )
+# setkey(rh_B_Bplus_1m_mean, datetime)
+# # combine
+# combined_1_B_Bplus_wink <- rh_B_Bplus_1m_mean[wink_1m, roll = "nearest" ]
+rh_B_Bplus_1m_mean <- full_join(rh_B_Bplus_1m_mean, wink_1m, by="datetime")
 
 # ###
 # ptb_wink_ctd_xts <- dplyr::select(rh_B_Bplus_1m_mean, date, mean_oxy_mll_rhBplus,mean_oxy_mll_rhB, mean_oxy_mll_rhBplus_B)
@@ -1311,7 +1318,7 @@ combined_1_B_Bplus_wink <- rh_B_Bplus_1m_mean[wink_1m, roll = "nearest" ]
 #   dyRangeSelector(height = 30)
 
 # PLOT all oxygen data as time series
-ptb_wink_ctd_xts <- dplyr::select(combined_1_B_Bplus_wink, datetime, mean_oxy_mll_rhBplus_B, ptb_oxy_wink)
+ptb_wink_ctd_xts <- dplyr::select(rh_B_Bplus_1m_mean, datetime, mean_oxy_mll_rhBplus_B, ptb_oxy_wink)
 ptb_wink_ctd_xts <- as.xts(ptb_wink_ctd_xts, order.by=ptb_wink_ctd_xts$datetime)
 
 dygraph(ptb_wink_ctd_xts,  main = "Oxygen (ml/l) 1m: PTB+ + Winkler", ylab = "") %>%
@@ -1326,12 +1333,12 @@ dyOptions(
   dyRangeSelector(height = 30)
 ###
 #delta oxy
-combined_1_B_Bplus_wink <- combined_1_B_Bplus_wink %>% 
+rh_B_Bplus_1m_mean <- rh_B_Bplus_1m_mean %>% 
   dplyr::mutate(oxy_mll_rhBplus_B_wink_detla = mean_oxy_mll_rhBplus_B - ptb_oxy_wink, 
                 oxy_mll_rhB_wink_detla = mean_oxy_mll_rhB - ptb_oxy_wink, 
                 oxy_mll_rhBplus_wink_detla = mean_oxy_mll_rhBplus - ptb_oxy_wink)
 #plot
-oxy_rhBplus_wink_xts <- dplyr::select(combined_1_B_Bplus_wink,datetime, oxy_mll_rhBplus_B_wink_detla)
+oxy_rhBplus_wink_xts <- dplyr::select(rh_B_Bplus_1m_mean,datetime, oxy_mll_rhBplus_B_wink_detla)
 oxy_rhBplus_wink_xts <- as.xts(oxy_rhBplus_wink_xts, order.by=oxy_rhBplus_wink_xts$datetime)
 
 dygraph(oxy_rhBplus_wink_xts,  main = "Delta Oxy ptB+ Winkler 1m", ylab = "") %>%
@@ -1346,11 +1353,14 @@ dyOptions(
   dyRangeSelector(height = 30)
 ###
 titre <- "Oxygen 1m: Point B+ CTD vs Point B Winkler"
-fit <- lmodel2(data = combined_1_B_Bplus_wink, ptb_oxy_wink ~ mean_oxy_mll_rhBplus_B, nperm = 99)
-p_Oxyptbwink_Oxyptb <-  ggreg2(fit, "mean_oxy_mll_rhBplus_B", "ptb_oxy_wink") +
+fit <- lmodel2(data = rh_B_Bplus_1m_mean, ptb_oxy_wink ~ mean_oxy_mll_rhBplus_B, nperm = 99)
+p_Oxyptbwink_Oxyptb_1m <-  ggreg2(fit, "mean_oxy_mll_rhBplus_B", "ptb_oxy_wink") +
   geom_abline(aes(slope= 1, intercept =0), linetype = 2) +
   mytheme+labs(x="Oxy Point B+ CTD", y="Oxy Point B Winkler")
-print(p_Oxyptbwink_Oxyptb)
+print(p_Oxyptbwink_Oxyptb_1m)
+
+### SAVE
+saveRDS(rh_B_Bplus_1m_mean, file = paste0(path, "data/eol/rh_B_Bplus_1m_mean.rds"))
 ```
 
 ### **50 m**
@@ -1407,18 +1417,21 @@ wink_50m$datetime <- with_tz(wink_50m$datetime, "UTC")
 ####
 
 # Adding the Winkler PointB 50m data perweek to rh_B_Bplus_50m_mean
-#put data as data.table
-wink_50m <- as.data.table(wink_50m)
-rh_B_Bplus_50m_mean<- as.data.table(rh_B_Bplus_50m_mean)
-# set datetime column as key column, easy to bind
-setkey(wink_50m, datetime)
-setkey(rh_B_Bplus_50m_mean, datetime)
-# combine
-combined_50_B_Bplus_wink <- rh_B_Bplus_50m_mean[wink_50m, roll = "nearest" ]
+# #put data as data.table
+# wink_50m <- as.data.table(wink_50m)
+# rh_B_Bplus_50m_mean<- as.data.table(rh_B_Bplus_50m_mean)
+# # set datetime column as key column, easy to bind
+# setkey(wink_50m, datetime)
+# setkey(rh_B_Bplus_50m_mean, datetime)
+# # combine
+# combined_50_B_Bplus_wink <- rh_B_Bplus_50m_mean[wink_50m, roll = "nearest" ]
+
+rh_B_Bplus_50m_mean <- full_join(rh_B_Bplus_50m_mean, wink_50m, by="datetime")
+
 
 ###
 # PLOT all oxygen data as time series
-ptb_wink_ctd_xts <- dplyr::select(combined_50_B_Bplus_wink, datetime, mean_oxy_mll_rhBplus_B, ptb_oxy_wink)
+ptb_wink_ctd_xts <- dplyr::select(rh_B_Bplus_50m_mean, datetime, mean_oxy_mll_rhBplus_B, ptb_oxy_wink)
 ptb_wink_ctd_xts <- as.xts(ptb_wink_ctd_xts, order.by=ptb_wink_ctd_xts$datetime)
 
 dygraph(ptb_wink_ctd_xts,  main = "Oxygen (ml/l) 50m: PTB+ + Winkler", ylab = "") %>%
@@ -1433,12 +1446,12 @@ dyOptions(
   dyRangeSelector(height = 30)
 ###
 #delta oxy
-combined_50_B_Bplus_wink <- combined_50_B_Bplus_wink %>% 
+rh_B_Bplus_50m_mean <- rh_B_Bplus_50m_mean %>% 
   dplyr::mutate(oxy_mll_rhBplus_wink_detla = mean_oxy_mll_rhBplus - ptb_oxy_wink, 
                 oxy_mll_rhB_wink_detla = mean_oxy_mll_rhB - ptb_oxy_wink,
                 oxy_mll_rhBplus_B_wink_detla = mean_oxy_mll_rhBplus_B - ptb_oxy_wink)
 #plot
-oxy_rhBplus_wink_xts <- dplyr::select(combined_50_B_Bplus_wink,datetime, oxy_mll_rhBplus_B_wink_detla)
+oxy_rhBplus_wink_xts <- dplyr::select(rh_B_Bplus_50m_mean,datetime, oxy_mll_rhBplus_B_wink_detla)
 oxy_rhBplus_wink_xts <- as.xts(oxy_rhBplus_wink_xts, order.by=oxy_rhBplus_wink_xts$datetime)
 
 dygraph(oxy_rhBplus_wink_xts,  main = "Delta Oxy ptB+ Winkler 50m", ylab = "") %>%
@@ -1453,13 +1466,13 @@ dyOptions(
   dyRangeSelector(height = 30)
 ###
 titre <- "Oxygen 50m: Point B+/B CTD vs Point B Winkler"
-fit <- lmodel2(data = combined_50_B_Bplus_wink, ptb_oxy_wink ~ mean_oxy_mll_rhBplus_B, nperm = 99)
-p_Oxyptbwink_Oxyptb <-  ggreg2(fit, "mean_oxy_mll_rhBplus_B", "ptb_oxy_wink") +
+fit <- lmodel2(data = rh_B_Bplus_50m_mean, ptb_oxy_wink ~ mean_oxy_mll_rhBplus_B, nperm = 99)
+p_Oxyptbwink_Oxyptb_50m <-  ggreg2(fit, "mean_oxy_mll_rhBplus_B", "ptb_oxy_wink") +
   geom_abline(aes(slope= 1, intercept =0), linetype = 2) +
   mytheme+labs(x="Oxy Point B+/B CTD", y="Oxy Point B Winkler")
-print(p_Oxyptbwink_Oxyptb)
+print(p_Oxyptbwink_Oxyptb_50m)
 
-saveRDS(rh_B_Bplus_50m_mean, file = paste0(path, "data/eol/rh_B_Bplus_50m_mean.rds"))
+saveRDS(combined_50_B_Bplus_wink, file = paste0(path, "data/eol/rh_B_Bplus_50m_mean.rds"))
 ```
 
 # **Comparison EOL - SOMLIT (Point B)**  {.tabset .tabset-pills}
@@ -1492,21 +1505,21 @@ combined1 <- dplyr::mutate(combined1,delta_datetime = abs(difftime(datetime, dat
 combined1 <-  combined1    %>%    
  dplyr::filter(delta_datetime <= 6)
 ###
-#Fill ptB+ gaps with ptB data
-combined1 <- combined1 %>% 
-  dplyr::mutate(mean_temp_rhBplus = ifelse(is.na(mean_temp_rhBplus), mean_temp_rhB, mean_temp_rhBplus),
-                mean_sal_rhBplus = ifelse(is.na(mean_sal_rhBplus), mean_sal_rhB, mean_sal_rhBplus),
-                mean_oxy_mll_rhBplus = ifelse(is.na(mean_oxy_mll_rhBplus), mean_oxy_mll_rhB, mean_oxy_mll_rhBplus),
-                mean_oxy_umolkg_rhBplus = ifelse(is.na(mean_oxy_umolkg_rhBplus), mean_oxy_umolkg_rhB, mean_oxy_umolkg_rhBplus))
-###
+# #Fill ptB+ gaps with ptB data
+# combined1 <- combined1 %>% 
+#   dplyr::mutate(mean_temp_rhBplus = ifelse(is.na(mean_temp_rhBplus), mean_temp_rhB, mean_temp_rhBplus),
+#                 mean_sal_rhBplus = ifelse(is.na(mean_sal_rhBplus), mean_sal_rhB, mean_sal_rhBplus),
+#                 mean_oxy_mll_rhBplus = ifelse(is.na(mean_oxy_mll_rhBplus), mean_oxy_mll_rhB, mean_oxy_mll_rhBplus),
+#                 mean_oxy_umolkg_rhBplus = ifelse(is.na(mean_oxy_umolkg_rhBplus), mean_oxy_umolkg_rhB, mean_oxy_umolkg_rhBplus))
+# ###
 
 #eol_ptb_1m
-eol_ptb_temp_xts <- dplyr::select(combined1, datetime, mean_temp_rhBplus, temp_eol)
+eol_ptb_temp_xts <- dplyr::select(combined1, datetime, mean_temp_rhBplus_B, temp_eol)
 eol_ptb_temp_xts <- as.xts(eol_ptb_temp_xts, order.by=combined_1_B_Bplus_wink_eol$datetime)
 
 dygraph(eol_ptb_temp_xts,  main = "Temperature 1m: EOL - PTB", ylab = "") %>%
-dySeries("temp_eol", drawPoints = TRUE, pointSize=4, label = "Temp EOL", color ="red")%>%
-  dySeries("mean_temp_rhBplus", drawPoints = TRUE, pointSize=4, label = "Temp PTB+", color ="blue") %>%
+dySeries("temp_eol", drawPoints = TRUE, pointSize=3, label = "Temp EOL", color ="red")%>%
+  dySeries("mean_temp_rhBplus_B", drawPoints = TRUE, pointSize=2, label = "Temp PTB+", color ="blue") %>%
 
  # dyLegend(show = "always", width = 600)%>%
  #dyAxis("y",valueRange = c(-0.1, 0.11))%>%
@@ -1518,8 +1531,8 @@ dyOptions(
 
 ###
 titre <- "Temperature 1m: EOL vs Point B+"
-fit <- lmodel2(data = combined1, mean_temp_rhBplus ~ temp_eol, nperm = 99)
-p_Tptb_Teol <-  ggreg2(fit, "temp_eol", "mean_temp_rhBplus") +
+fit <- lmodel2(data = combined1, mean_temp_rhBplus_B ~ temp_eol, nperm = 99)
+p_Tptb_Teol <-  ggreg2(fit, "temp_eol", "mean_temp_rhBplus_B") +
   geom_abline(aes(slope= 1, intercept =0), linetype = 2) +
   mytheme+labs(x="T EOL", y="T Point B+")
 
@@ -1533,12 +1546,12 @@ print(p_Tptb_Teol)
 ```{r eol pointb comp Sal, echo=TRUE, message=FALSE, warning=FALSE, out.width='100%'}
 # take only sal data when both mean_sal_rhBplus and sal_eol are present.
 eol_ptb_sal_xts <-  combined1%>%
-  dplyr::filter((!is.na(combined1$mean_sal_rhBplus)))%>%
-  dplyr::select(datetime, mean_sal_rhBplus, sal_eol)
+  dplyr::filter((!is.na(combined1$mean_sal_rhBplus_B)))%>%
+  dplyr::select(datetime, mean_sal_rhBplus_B, sal_eol)
 eol_ptb_sal_xts <- as.xts(eol_ptb_sal_xts, order.by=eol_ptb_sal_xts$datetime)
 
 dygraph(eol_ptb_sal_xts,  main = "Salinity comparaison: EOL - ptB+", ylab = "") %>%
-    dySeries("mean_sal_rhBplus", drawPoints = TRUE, pointSize=4, label = "Sal ptB+", color ="blue") %>%
+    dySeries("mean_sal_rhBplus_B", drawPoints = TRUE, pointSize=4, label = "Sal ptB+", color ="blue") %>%
 dySeries("sal_eol", drawPoints = TRUE, pointSize=2, label = "Sal EOL", color ="red")%>%
 dyEvent(as.POSIXct("2020-07-15 12:00:00"), "SBE37 #9509 IN", labelLoc = "top", color="red",strokePattern = "dashed") %>% 
 dyEvent(as.POSIXct("2021-08-18 12:00:00"), "SBE37 #9506 IN", labelLoc = "top", color="red",strokePattern = "dashed") %>% 
@@ -1554,7 +1567,7 @@ dyEvent(as.POSIXct("2021-08-18 12:00:00"), "SBE37 #9506 IN", labelLoc = "top", c
 ###
 titre <- "Salinity: EOL vs ptB+ 1m"
 fit <- lmodel2(data = combined1, mean_sal_rhBplus ~ sal_eol, nperm = 99)
-p_Sptb_Seol <-  ggreg2(fit, "sal_eol", "mean_sal_rhBplus") +
+p_Sptb_Seol <-  ggreg2(fit, "sal_eol", "mean_sal_rhBplus_B") +
   geom_abline(aes(slope= 1, intercept =0), linetype = 2) +
   mytheme+labs(x="Sal EOL", y="Sal Point B+")
 print(p_Sptb_Seol)
@@ -1570,17 +1583,17 @@ Deltas out of range (± 0.3 PSU) have been considered as outliers.
 ```{r eol pointb comp Sal delta 0.3, echo=TRUE, message=FALSE, warning=FALSE, out.width='100%'}
 #delta sal
 combined1 <- combined1 %>% 
-  dplyr::mutate(sal_eol_rhBplus_detla = mean_sal_rhBplus - sal_eol)
+  dplyr::mutate(sal_eol_rhBplus_detla = mean_sal_rhBplus_B - sal_eol)
 
 ### Plot with data if delta is -0.3 / +0.3
 eol_ptb_sal_delta_xts <-  combined1%>%
-  dplyr::filter((!is.na(combined1$mean_sal_rhBplus)))%>%
+  dplyr::filter((!is.na(combined1$mean_sal_rhBplus_B)))%>%
   dplyr::filter(sal_eol_rhBplus_detla > -0.3 & sal_eol_rhBplus_detla < 0.3 )%>%
-  dplyr::select(datetime, mean_sal_rhBplus, sal_eol)
+  dplyr::select(datetime, mean_sal_rhBplus_B, sal_eol)
 eol_ptb_sal_delta_xts <- as.xts(eol_ptb_sal_delta_xts, order.by=eol_ptb_sal_delta_xts$datetime)
 
 dygraph(eol_ptb_sal_delta_xts,  main = "Salinity comparaison: EOL - ptB+, data with delta -0.3/+0.3", ylab = "") %>%
-    dySeries("mean_sal_rhBplus", drawPoints = TRUE, pointSize=4, label = "Sal ptB+", color ="blue") %>%
+    dySeries("mean_sal_rhBplus_B", drawPoints = TRUE, pointSize=4, label = "Sal ptB+", color ="blue") %>%
 dySeries("sal_eol", drawPoints = TRUE, pointSize=2, label = "Sal EOL", color ="red")%>%
 dyOptions(
     drawGrid = TRUE,
@@ -1590,7 +1603,7 @@ dyOptions(
 
 #### Delta with -0.3/+0.3
 # periodes 
-sal_periode <- c("2014-05-06 00:00:00","2014-10-07 23:59:00" ,"2015-06-22 00:00:00" ,"2016-03-22 23:59:00","2017-01-10 00:00:00" ,"2017-07-04 23:59:00" ,"2017-11-07 00:00:00", "2019-03-19 23:59:00","2019-07-09 00:00:00","2020-03-10 23:59:00" ,"2020-04-23 00:00:00","2020-06-30 23:59:00","2020-07-21 00:00:00", "2020-11-17 23:59:00")
+sal_periode <- c("2014-05-06 00:00:00","2014-10-07 23:59:00" ,"2014-10-14 00:00:00" ,"2015-06-16 23:59:00","2015-06-22 00:00:00" ,"2016-03-22 23:59:00","2017-01-10 00:00:00" ,"2017-07-04 23:59:00" ,"2017-11-07 00:00:00", "2019-03-19 23:59:00","2019-07-09 00:00:00","2020-03-10 23:59:00" ,"2020-04-23 00:00:00","2020-06-30 23:59:00","2020-07-21 00:00:00", "2020-11-17 23:59:00")
 
 sal_eol_delta_xts <- dplyr::select(combined1%>%filter(sal_eol_rhBplus_detla > -0.3 & sal_eol_rhBplus_detla < 0.3 ),datetime, sal_eol_rhBplus_detla)
 sal_eol_delta_xts <- as.xts(sal_eol_delta_xts, order.by=sal_eol_delta_xts$datetime)
@@ -1607,6 +1620,8 @@ dyShading(from =  sal_periode[7], to= sal_periode[8], color = "#B7B7B7") %>%
 dyShading(from =  sal_periode[9], to= sal_periode[10], color = "#B7B7B7") %>%
 dyShading(from =  sal_periode[11], to= sal_periode[12], color = "#B7B7B7") %>%
   dyShading(from =  sal_periode[13], to= sal_periode[14], color = "#B7B7B7") %>%
+    dyShading(from =  sal_periode[15], to= sal_periode[16], color = "#B7B7B7") %>%
+
 dyEvent(as.POSIXct("2020-07-15 12:00:00"), "SBE37 #9509 IN", labelLoc = "top", color="red",strokePattern = "dashed") %>% 
 dyEvent(as.POSIXct("2021-08-18 12:00:00"), "SBE37 #9506 IN", labelLoc = "top", color="red",strokePattern = "dashed") %>% 
   dyEvent(as.POSIXct("2020-12-09 12:00:00"), "underwater clean", labelLoc = "top", color="blue",strokePattern = "dashed") %>% 
@@ -1664,10 +1679,48 @@ dyOptions(
     useDataTimezone = TRUE)%>%
   dyRangeSelector(height = 30)
 
+######## p8 #########
+
+#Select drifting periodes
+p8 <- combined1%>%
+  dplyr::select(datetime, mean_sal_rhBplus_B, sal_eol,sal_eol_rhBplus_detla )%>%
+    dplyr::filter(sal_eol_rhBplus_detla > -0.3 & sal_eol_rhBplus_detla < 0.3 )%>%
+  dplyr::filter(datetime >"2014-10-14 00:00:00" & datetime <"2015-06-16 23:59:00" )
+
+## Regression lineaire avec le temps
+fit_p8 <- lm(data = p8, sal_eol_rhBplus_detla ~ unclass(datetime) )
+slope_p8 <- fit_p8$coefficients[[2]]
+intercept_p8 <- fit_p8$coefficients[[1]]
+
+p8_plot <-  ggplot(data=p8, aes(x=datetime, y=sal_eol_rhBplus_detla), col="black") +  geom_point()+ geom_line()+ geom_abline(aes(slope= slope_p8, intercept =intercept_p8), linetype = 1, col="red") +ggtitle("p8, delta Sal EOL / ptB+ 1m, data with delta -0.3/+0.3")+
+  mytheme+labs(y="delta Sal EOL/PtB", x="") + scale_x_datetime(date_breaks="month",  labels=date_format("%b %Y")) + theme(axis.text.x = element_text(angle = 90, vjust = 1, hjust=1))
+print(p8_plot)
+
+#correction des valeurs EOL avec la regression
+p8 <- p8%>%
+  dplyr::mutate(correction = slope_p8 * unclass(datetime) + intercept_p8,
+                sal_eol_corr = sal_eol + correction )
+
+# plot
+ p8_corr_xts <-p8%>%
+   dplyr::select(datetime, mean_sal_rhBplus_B, sal_eol, sal_eol_corr)
+
+p8_corr_xts <- as.xts(p8_corr_xts, order.by=p8_corr_xts$datetime)
+
+dygraph(p8_corr_xts,  main = "p8, delta Sal EOL / ptB+ 1m, data with delta -0.3/+0.3", ylab = "") %>%
+     dySeries("mean_sal_rhBplus_B", drawPoints = TRUE, pointSize=2, label = "sal ptB+", color="blue")%>%
+       dySeries("sal_eol", drawPoints = TRUE, pointSize=2, label = "sal EOL", color="red")%>%
+       dySeries("sal_eol_corr", drawPoints = TRUE, pointSize=2, label = "sal EOL corr", color="green")%>%
+dyOptions(
+    drawGrid = TRUE,
+    drawPoints = TRUE,
+    useDataTimezone = TRUE)%>%
+  dyRangeSelector(height = 30)
+
 #### p2 #####
 #Select drifting periodes
 p2 <- combined1%>%
-  dplyr::select(datetime, mean_sal_rhBplus, sal_eol,sal_eol_rhBplus_detla )%>%
+  dplyr::select(datetime, mean_sal_rhBplus_B, sal_eol,sal_eol_rhBplus_detla )%>%
     dplyr::filter(sal_eol_rhBplus_detla > -0.3 & sal_eol_rhBplus_detla < 0.3 )%>%
   dplyr::filter(datetime >"2015-06-22 00:00:00" & datetime <"2016-03-22 23:59:00" )
 
@@ -1687,12 +1740,12 @@ p2 <- p2%>%
 
 # plot
  p2_corr_xts <-p2%>%
-   dplyr::select(datetime, mean_sal_rhBplus, sal_eol, sal_eol_corr)
+   dplyr::select(datetime, mean_sal_rhBplus_B, sal_eol, sal_eol_corr)
 
 p2_corr_xts <- as.xts(p2_corr_xts, order.by=p2_corr_xts$datetime)
 
 dygraph(p2_corr_xts,  main = "p2, delta Sal EOL / ptB+ 1m, data with delta -0.3/+0.3", ylab = "") %>%
-     dySeries("mean_sal_rhBplus", drawPoints = TRUE, pointSize=2, label = "sal ptB+", color="blue")%>%
+     dySeries("mean_sal_rhBplus_B", drawPoints = TRUE, pointSize=2, label = "sal ptB+", color="blue")%>%
        dySeries("sal_eol", drawPoints = TRUE, pointSize=2, label = "sal EOL", color="red")%>%
        dySeries("sal_eol_corr", drawPoints = TRUE, pointSize=2, label = "sal EOL corr", color="green")%>%
 dyOptions(
@@ -1705,7 +1758,7 @@ dyOptions(
 
 #Select drifting periodes
 p3 <- combined1%>%
-  dplyr::select(datetime, mean_sal_rhBplus, sal_eol,sal_eol_rhBplus_detla )%>%
+  dplyr::select(datetime, mean_sal_rhBplus_B, sal_eol,sal_eol_rhBplus_detla )%>%
     dplyr::filter(sal_eol_rhBplus_detla > -0.3 & sal_eol_rhBplus_detla < 0.3 )%>%
   dplyr::filter(datetime >"2017-01-10 00:00:00" & datetime <"2017-07-04 23:59:00" )
 
@@ -1725,12 +1778,12 @@ p3 <- p3%>%
 
 # plot
  p3_corr_xts <-p3%>%
-   dplyr::select(datetime, mean_sal_rhBplus, sal_eol, sal_eol_corr)
+   dplyr::select(datetime, mean_sal_rhBplus_B, sal_eol, sal_eol_corr)
 
 p3_corr_xts <- as.xts(p3_corr_xts, order.by=p3_corr_xts$datetime)
 
 dygraph(p3_corr_xts,  main = "p3, delta Sal EOL / ptB+ 1m, data with delta -0.3/+0.3", ylab = "") %>%
-     dySeries("mean_sal_rhBplus", drawPoints = TRUE, pointSize=2, label = "sal ptB+", color="blue")%>%
+     dySeries("mean_sal_rhBplus_B", drawPoints = TRUE, pointSize=2, label = "sal ptB+", color="blue")%>%
        dySeries("sal_eol", drawPoints = TRUE, pointSize=2, label = "sal EOL", color="red")%>%
        dySeries("sal_eol_corr", drawPoints = TRUE, pointSize=2, label = "sal EOL corr", color="green")%>%
 dyOptions(
@@ -1743,7 +1796,7 @@ dyOptions(
 
 #Select drifting periodes
 p4 <- combined1%>%
-  dplyr::select(datetime, mean_sal_rhBplus, sal_eol,sal_eol_rhBplus_detla )%>%
+  dplyr::select(datetime, mean_sal_rhBplus_B, sal_eol,sal_eol_rhBplus_detla )%>%
     dplyr::filter(sal_eol_rhBplus_detla > -0.3 & sal_eol_rhBplus_detla < 0.3 )%>%
   dplyr::filter(datetime >"2017-11-07 00:00:00" & datetime <"2019-03-19 23:59:00 " ) 
 ## Regression lineaire avec le temps
@@ -1762,12 +1815,12 @@ p4 <- p4%>%
 
 # plot
  p4_corr_xts <-p4%>%
-   dplyr::select(datetime, mean_sal_rhBplus, sal_eol, sal_eol_corr)
+   dplyr::select(datetime, mean_sal_rhBplus_B, sal_eol, sal_eol_corr)
 
 p4_corr_xts <- as.xts(p4_corr_xts, order.by=p4_corr_xts$datetime)
 
 dygraph(p4_corr_xts,  main = "p4, delta Sal EOL / ptB+ 1m, data with delta -0.3/+0.3", ylab = "") %>%
-     dySeries("mean_sal_rhBplus", drawPoints = TRUE, pointSize=2, label = "sal ptB+", color="blue")%>%
+     dySeries("mean_sal_rhBplus_B", drawPoints = TRUE, pointSize=2, label = "sal ptB+", color="blue")%>%
        dySeries("sal_eol", drawPoints = TRUE, pointSize=2, label = "sal EOL", color="red")%>%
        dySeries("sal_eol_corr", drawPoints = TRUE, pointSize=2, label = "sal EOL corr", color="green")%>%
 dyOptions(
@@ -1780,7 +1833,7 @@ dyOptions(
 
 #Select drifting periodes
 p5 <- combined1%>%
-  dplyr::select(datetime, mean_sal_rhBplus, sal_eol,sal_eol_rhBplus_detla )%>%
+  dplyr::select(datetime, mean_sal_rhBplus_B, sal_eol,sal_eol_rhBplus_detla )%>%
     dplyr::filter(sal_eol_rhBplus_detla > -0.3 & sal_eol_rhBplus_detla < 0.3 )%>%
   dplyr::filter(datetime >"2019-07-09 00:00:00" & datetime <"2020-03-10 23:59:00" )
 
@@ -1800,12 +1853,12 @@ p5 <- p5%>%
 
 # plot
  p5_corr_xts <-p5%>%
-   dplyr::select(datetime, mean_sal_rhBplus, sal_eol, sal_eol_corr)
+   dplyr::select(datetime, mean_sal_rhBplus_B, sal_eol, sal_eol_corr)
 
 p5_corr_xts <- as.xts(p5_corr_xts, order.by=p5_corr_xts$datetime)
 
 dygraph(p5_corr_xts,  main = "p5, delta Sal EOL / ptB+ 1m, data with delta -0.3/+0.3", ylab = "") %>%
-     dySeries("mean_sal_rhBplus", drawPoints = TRUE, pointSize=2, label = "sal ptB+", color="blue")%>%
+     dySeries("mean_sal_rhBplus_B", drawPoints = TRUE, pointSize=2, label = "sal ptB+", color="blue")%>%
        dySeries("sal_eol", drawPoints = TRUE, pointSize=2, label = "sal EOL", color="red")%>%
        dySeries("sal_eol_corr", drawPoints = TRUE, pointSize=2, label = "sal EOL corr", color="green")%>%
 dyOptions(
@@ -1818,7 +1871,7 @@ dyOptions(
 
 #Select drifting periodes
 p6 <- combined1%>%
-  dplyr::select(datetime, mean_sal_rhBplus, sal_eol,sal_eol_rhBplus_detla )%>%
+  dplyr::select(datetime, mean_sal_rhBplus_B, sal_eol,sal_eol_rhBplus_detla )%>%
     dplyr::filter(sal_eol_rhBplus_detla > -0.3 & sal_eol_rhBplus_detla < 0.3 )%>%
   dplyr::filter(datetime >"2020-04-23 00:00:00" & datetime <"2020-06-30 23:59:00" )
 ## Regression lineaire avec le temps
@@ -1837,12 +1890,12 @@ p6 <- p6%>%
 
 # plot
  p6_corr_xts <-p6%>%
-   dplyr::select(datetime, mean_sal_rhBplus, sal_eol, sal_eol_corr)
+   dplyr::select(datetime, mean_sal_rhBplus_B, sal_eol, sal_eol_corr)
 
 p6_corr_xts <- as.xts(p6_corr_xts, order.by=p6_corr_xts$datetime)
 
 dygraph(p6_corr_xts,  main = "p6, delta Sal EOL / ptB+ 1m, data with delta -0.3/+0.3", ylab = "") %>%
-     dySeries("mean_sal_rhBplus", drawPoints = TRUE, pointSize=2, label = "sal ptB+", color="blue")%>%
+     dySeries("mean_sal_rhBplus_B", drawPoints = TRUE, pointSize=2, label = "sal ptB+", color="blue")%>%
        dySeries("sal_eol", drawPoints = TRUE, pointSize=2, label = "sal EOL", color="red")%>%
        dySeries("sal_eol_corr", drawPoints = TRUE, pointSize=2, label = "sal EOL corr", color="green")%>%
 dyOptions(
@@ -1855,7 +1908,7 @@ dyOptions(
 
 #Select drifting periodes
 p7 <- combined1%>%
-  dplyr::select(datetime, mean_sal_rhBplus, sal_eol,sal_eol_rhBplus_detla )%>%
+  dplyr::select(datetime, mean_sal_rhBplus_B, sal_eol,sal_eol_rhBplus_detla )%>%
     dplyr::filter(sal_eol_rhBplus_detla > -0.3 & sal_eol_rhBplus_detla < 0.3 )%>%
   dplyr::filter(datetime >"2020-07-21 00:00:00" & datetime <"2020-11-17 23:59:00" )
 
@@ -1875,12 +1928,12 @@ p7 <- p7%>%
 
 # plot
  p7_corr_xts <-p7%>%
-   dplyr::select(datetime, mean_sal_rhBplus, sal_eol, sal_eol_corr)
+   dplyr::select(datetime, mean_sal_rhBplus_B, sal_eol, sal_eol_corr)
 
 p7_corr_xts <- as.xts(p7_corr_xts, order.by=p7_corr_xts$datetime)
 
 dygraph(p7_corr_xts,  main = "p7, delta Sal EOL / ptB+ 1m, data with delta -0.3/+0.3", ylab = "") %>%
-     dySeries("mean_sal_rhBplus", drawPoints = TRUE, pointSize=2, label = "sal ptB+", color="blue")%>%
+     dySeries("mean_sal_rhBplus_B", drawPoints = TRUE, pointSize=2, label = "sal ptB+", color="blue")%>%
        dySeries("sal_eol", drawPoints = TRUE, pointSize=2, label = "sal EOL", color="red")%>%
        dySeries("sal_eol_corr", drawPoints = TRUE, pointSize=2, label = "sal EOL corr", color="green")%>%
 dyOptions(
