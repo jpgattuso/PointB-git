@@ -1917,6 +1917,7 @@ fit_p7 <- lm(data = p7, sal_eol_rhBplus_detla ~ unclass(datetime) )
 slope_p7 <- fit_p7$coefficients[[2]]
 intercept_p7 <- fit_p7$coefficients[[1]]
 
+
 p7_plot <-  ggplot(data=p7, aes(x=datetime, y=sal_eol_rhBplus_detla), col="black") +  geom_point()+ geom_line()+ geom_abline(aes(slope= slope_p7, intercept =intercept_p7), linetype = 1, col="red") + ggtitle("p7, delta Sal EOL / ptB+ 1m, data with delta -0.3/+0.3")+
   mytheme+labs(y="delta Sal EOL/PtB", x="") + scale_x_datetime(date_breaks="month",  labels=date_format("%b %Y")) + theme(axis.text.x = element_text(angle = 90, vjust = 1, hjust=1))
 print(p7_plot)
@@ -1957,9 +1958,23 @@ eol <- eol%>%
                                        datetime >"2019-07-09 00:00:00" & datetime <"2020-03-10 23:59:00" ~ slope_p5 * unclass(datetime) + intercept_p5,
                                        datetime >"2020-04-23 00:00:00" & datetime <"2020-06-30 23:59:00" ~ slope_p6 * unclass(datetime) + intercept_p6,
                                        datetime >"2020-07-21 00:00:00" & datetime <"2020-11-17 23:59:00" ~ slope_p7 * unclass(datetime) + intercept_p7,
-
-
-                                       TRUE ~ 0),
+                                       datetime >"2014-10-14 00:00:00" & datetime <"2015-06-16 23:59:00" ~ slope_p8 * unclass(datetime) + intercept_p8,TRUE ~ 0),
+                slope_sal = case_when(datetime >"2014-05-06 00:00:00" & datetime <"2014-10-07 23:59:00" ~ slope_p1 , 
+                                       datetime >"2015-06-22 00:00:00" & datetime <"2016-03-22 23:59:00" ~ slope_p2 ,
+                                       datetime >"2017-01-10 00:00:00" & datetime <"2017-07-04 23:59:00" ~ slope_p3 ,
+                                       datetime >"2017-11-07 00:00:00" & datetime <"2019-03-19 23:59:00" ~ slope_p4 ,
+                                       datetime >"2019-07-09 00:00:00" & datetime <"2020-03-10 23:59:00" ~ slope_p5 ,
+                                       datetime >"2020-04-23 00:00:00" & datetime <"2020-06-30 23:59:00" ~ slope_p6 ,
+                                       datetime >"2020-07-21 00:00:00" & datetime <"2020-11-17 23:59:00" ~ slope_p7 ,
+                                       datetime >"2014-10-14 00:00:00" & datetime <"2015-06-16 23:59:00" ~ slope_p8 ,TRUE ~ NA_real_),
+                 intercept_sal = case_when(datetime >"2014-05-06 00:00:00" & datetime <"2014-10-07 23:59:00" ~ intercept_p1 , 
+                                       datetime >"2015-06-22 00:00:00" & datetime <"2016-03-22 23:59:00" ~ intercept_p2 ,
+                                       datetime >"2017-01-10 00:00:00" & datetime <"2017-07-04 23:59:00" ~ intercept_p3 ,
+                                       datetime >"2017-11-07 00:00:00" & datetime <"2019-03-19 23:59:00" ~ intercept_p4 ,
+                                       datetime >"2019-07-09 00:00:00" & datetime <"2020-03-10 23:59:00" ~ intercept_p5 ,
+                                       datetime >"2020-04-23 00:00:00" & datetime <"2020-06-30 23:59:00" ~ intercept_p6 ,
+                                       datetime >"2020-07-21 00:00:00" & datetime <"2020-11-17 23:59:00" ~ intercept_p7 ,
+                                       datetime >"2014-10-14 00:00:00" & datetime <"2015-06-16 23:59:00" ~ intercept_p8 ,TRUE ~ NA_real_),
                 sal_eol_corr = sal_eol + correction_sal)
 
 ## PLOT
@@ -1976,6 +1991,7 @@ dyShading(from =  sal_periode[7], to= sal_periode[8], color = "#B7B7B7") %>%
 dyShading(from =  sal_periode[9], to= sal_periode[10], color = "#B7B7B7") %>%
 dyShading(from =  sal_periode[11], to= sal_periode[12], color = "#B7B7B7") %>%
   dyShading(from =  sal_periode[13], to= sal_periode[14], color = "#B7B7B7") %>%
+    dyShading(from =  sal_periode[15], to= sal_periode[16], color = "#B7B7B7") %>%
 dyEvent(as.POSIXct("2020-07-15 12:00:00"), "SBE37 #9509 IN", labelLoc = "bottom", color="red",strokePattern = "dashed") %>% 
 dyEvent(as.POSIXct("2021-08-18 12:00:00"), "SBE37 #9506 IN", labelLoc = "bottom", color="red",strokePattern = "dashed") %>% 
   dyEvent(as.POSIXct("2020-12-09 12:00:00"), "underwater clean", labelLoc = "bottom", color="blue",strokePattern = "dashed") %>% 
