@@ -575,7 +575,7 @@ dyOptions(
 
 ## **Deployment**
 
-```{r sami pH, echo=FALSE, warning = FALSE, message = FALSE, out.width='100%'}
+```{r sami pH data, echo=FALSE, warning = FALSE, message = FALSE, out.width='100%'}
 # read deployment file
 file_list <- list.files(path  = path_sami, pattern = "Raw_SAMI.*.txt")
 
@@ -620,36 +620,47 @@ save(sami, file = paste0(path, "data/sami/sami_all_eol.csv"))
 
 ```{r sami pH, echo=FALSE, warning = FALSE, message = FALSE, out.width='100%'}
 
- spectro <- read.table( "../../pCloud Sync/exp153_carbonates_point_B/output_jp/output/output_somlit.csv", header = T, dec = ".", as.is = T, sep = ",", fill = TRUE)%>%  
-   tidyr::unite("datetime", sampling_date, sampling_hour, sep=" ", remove =T) %>%  
-   dplyr::mutate(datetime = dmy_hms(datetime, tz="Europe/Paris")) 
- # convert local time to UTC time 
- spectro$datetime <- with_tz(spectro$datetime, "UTC") 
- # add the ALK 
- spectro <- spectro%>% 
-   dplyr::mutate(at= 2560)%>% 
-     dplyr::mutate(depth= 1) 
- # remove NA lines 
- spectro <- spectro %>%  
-   tidyr::drop_na(pH_s_ptb_temp_lab)%>% 
-   dplyr::select(datetime, salinity_field, temp_field,at, pH_s_ptb_temp_lab, temp_lab_ptb, depth) 
- #Convert to insitu Temp pH 
- spectro <- spectro%>% 
-   dplyr::mutate( ph_s_sf_temp_insi = pHinsi(pH = spectro$pH_s_ptb_temp_lab,  
-                          ALK = spectro$at*1e-6, Tinsi = spectro$temp_field,  
-                          Tlab = spectro$temp_lab_ptb, Pinsi = spectro$depth/10,  
-                          S = spectro$salinity_field, Pt = 0, Sit = 0, k1k2 = "l", kf = "dg", ks="d", pHscale = "T", b="u74")) 
+ spectro <- read.table( "../../pCloud Sync/exp153_carbonates_point_B/output_jp/output/output_somlit.csv", header = T, dec = ".", as.is = T, sep = ",", fill = TRUE) %>%
+  dplyr::filter(depth == 0)
+ spectro$datetime <- as.POSIXct(spectro$sampling_date, format="%Y-%m-%dT%H:%M:%SZ",tz="UTC" )
+# put 09:00:00 as time (local time)
+spectro <- spectro %>%
+  dplyr::mutate(time = " 09:00:00") %>%
+  dplyr::mutate(datetime = paste0(datetime, time)) 
+spectro$datetime <- ymd_hms(spectro$datetime, tz="Europe/Paris")
+
+# convert local time to UTC time
+spectro$datetime <- with_tz(spectro$datetime, "UTC")#  tidyr::unite("datetime", sampling_date, sampling_hour, sep=" ", remove =T) %>%  
+
+ #   dplyr::mutate(datetime = dmy_hms(datetime, tz="Europe/Paris")) 
+ # # convert local time to UTC time 
+ # spectro$datetime <- with_tz(spectro$datetime, "UTC") 
+ # # add the ALK 
+ # spectro <- spectro%>% 
+ #   dplyr::mutate(at= 2560)%>% 
+ #     dplyr::mutate(depth= 1) 
+ # # remove NA lines 
+ # spectro <- spectro %>%  
+ #   tidyr::drop_na(pH_s_ptb_temp_lab)%>% 
+ #   dplyr::select(datetime, salinity_field, temp_field,at, pH_s_ptb_temp_lab, temp_lab_ptb, depth) 
+ # #Convert to insitu Temp pH 
+ # spectro <- spectro%>% 
+ #   dplyr::mutate( ph_s_sf_temp_insi = pHinsi(pH = spectro$pH_s_ptb_temp_lab,  
+ #                          ALK = spectro$at*1e-6, Tinsi = spectro$temp_field,  
+ #                          Tlab = spectro$temp_lab_ptb, Pinsi = spectro$depth/10,  
+ #                          S = spectro$salinity_field, Pt = 0, Sit = 0, k1k2 = "l", kf = "dg", ks="d", pHscale = "T", b="u74")) 
  # Make mean for replicates + SD in function of watersampling (datetime) 
- spectro_mean <- spectro %>% 
-   dplyr::group_by(datetime) %>%  
-   dplyr::summarise(ph_s_sf_temp_insi_sd = sd(ph_s_sf_temp_insi, na.rm = TRUE), 
-                    ph_s_sf_temp_insi = mean(ph_s_sf_temp_insi, na.rm = TRUE), 
-                    salinity_field = mean(salinity_field, na.rm = TRUE), 
-                    temp_field = mean(temp_field, na.rm = TRUE) 
-                     ) 
- # add spectro T insi to seaFET data for EXTLOW 
- ph_sf <- left_join(ph_sf, spectro_mean%>%dplyr::select(datetime,ph_s_sf_temp_insi, temp_field,salinity_field),by="datetime") 
- 
+ # spectro_mean <- spectro %>% 
+ #   dplyr::group_by(datetime) %>%  
+ #   dplyr::summarise(ph_s_sf_temp_insi_sd = sd(ph_s_sf_temp_insi, na.rm = TRUE), 
+ #                    ph_s_sf_temp_insi = mean(ph_s_sf_temp_insi, na.rm = TRUE), 
+ #                    salinity_field = mean(salinity_field, na.rm = TRUE), 
+ #                    temp_field = mean(temp_field, na.rm = TRUE) 
+ #                     ) 
+ # add spectro T insi to seaFET data  
+ #ph_sf <- left_join(ph_sf, spectro_mean%>%dplyr::select(datetime,ph_s_sf_temp_insi, temp_field,salinity_field),by="datetime") 
+  ph_sf <- left_join(ph_sf, spectro%>%dplyr::select(datetime,ph_s_sf_temp_insi, temp_field,salinity_field),by="datetime") 
+
 ## Add event periodes manually
 ## Events
 sami_events <- c("2019-12-16 11:00:00", "2020-02-25 16:00:00","2020-06-17 08:00:00","2020-06-19 10:00:00","2020-07-15 10:00:00","2020-07-17 18:00:00", "2020-08-10 00:00:00", "2020-12-10 13:00:00","2020-12-17 09:00:00","2021-02-17 09:00:00","2021-03-17 12:00:00","2021-03-30 09:30:00","2021-04-22 12:00:00","2021-06-11 08:00:00","2021-07-20 07:00:00","2021-09-24 13:00:00","2021-10-19 09:00:00", "2021-11-26 08:00:00","2021-11-26 10:00:00")
@@ -2011,28 +2022,28 @@ saveRDS(eol, file = paste0(path, "data/eol/eol_data.rds"))
 ###  **1 m**
 
 ```{r eol pointb Oxy 1m, echo=TRUE, warning = FALSE, message = FALSE, out.width='100%'}
-# Reading the combined ptb + Winkler dataframe created before = combined_1_B_Bplus_wink.
-#put wink_1m as data.table
-combined_1_B_Bplus_wink <- as.data.table(combined_1_B_Bplus_wink)
-# set datetime column as key column, easy to bind
-setkey( combined_1_B_Bplus_wink, datetime )
-# combine to eol
-combined_1_B_Bplus_wink_eol <- eol[ combined_1_B_Bplus_wink, roll = "nearest" ]
-# set a datetime column for eol
-combined_1_B_Bplus_wink_eol <- dplyr::mutate(combined_1_B_Bplus_wink_eol, datetime_eol=str_c(Date, " ", Heure) %>% parse_datetime(format="%Y%m%d %H%M%S"))
-#calculate the difference between time and keep only closest time <6 hours.
-combined_1_B_Bplus_wink_eol <- dplyr::mutate(combined_1_B_Bplus_wink_eol,delta_datetime = abs(difftime(datetime, datetime_eol, units="hours")))
-#keep only <6 hours
-combined_1_B_Bplus_wink_eol <-  combined_1_B_Bplus_wink_eol    %>%    
- dplyr::filter(delta_datetime <= 6)
+# # Reading the combined ptb + Winkler dataframe created before = combined_1_B_Bplus_wink.
+# #put wink_1m as data.table
+# combined_1_B_Bplus_wink <- as.data.table(combined_1_B_Bplus_wink)
+# # set datetime column as key column, easy to bind
+# setkey( combined_1_B_Bplus_wink, datetime )
+# # combine to eol
+# combined_1_B_Bplus_wink_eol <- eol[ combined_1_B_Bplus_wink, roll = "nearest" ]
+# # set a datetime column for eol
+# combined_1_B_Bplus_wink_eol <- dplyr::mutate(combined_1_B_Bplus_wink_eol, datetime_eol=str_c(Date, " ", Heure) %>% parse_datetime(format="%Y%m%d %H%M%S"))
+# #calculate the difference between time and keep only closest time <6 hours.
+# combined_1_B_Bplus_wink_eol <- dplyr::mutate(combined_1_B_Bplus_wink_eol,delta_datetime = abs(difftime(datetime, datetime_eol, units="hours")))
+# #keep only <6 hours
+# combined_1_B_Bplus_wink_eol <-  combined_1_B_Bplus_wink_eol    %>%    
+#  dplyr::filter(delta_datetime <= 6)
 
 ###
 # PLOT all oxygen data as time series
-eol_ptb_oxy_xts <- dplyr::select(combined_1_B_Bplus_wink_eol, datetime, mean_oxy_mll_rhBplus, oxy_eol, ptb_oxy_wink)
+eol_ptb_oxy_xts <- dplyr::select(combined1, datetime, mean_oxy_mll_rhBplus_B, oxy_eol, ptb_oxy_wink)
 eol_ptb_oxy_xts <- as.xts(eol_ptb_oxy_xts, order.by=eol_ptb_oxy_xts$datetime)
 
 dygraph(eol_ptb_oxy_xts,  main = "Oxygen (ml/l) 1m: EOL - ptB+ - Winkler ptB)", ylab = "") %>%
-dySeries("mean_oxy_mll_rhBplus", drawPoints = TRUE, pointSize=4, label = "Oxy ptB+", color ="blue") %>%
+dySeries("mean_oxy_mll_rhBplus_B", drawPoints = TRUE, pointSize=4, label = "Oxy ptB+", color ="blue") %>%
 dySeries("oxy_eol", drawPoints = TRUE, pointSize=2, label = "Oxy EOL", color ="red")%>%
 dySeries("ptb_oxy_wink", drawPoints = TRUE, pointSize=2, label = "Oxy winkler PTB", color ="green")%>%
 dyOptions(connectSeparatedPoints = TRUE,
@@ -2043,7 +2054,7 @@ dyOptions(connectSeparatedPoints = TRUE,
 
 # Regression lineaire entre EOL/WINK
 titre <- "Oxygen 1m: EOL vs Point B Winkler"
-fit <- lmodel2(data = combined_1_B_Bplus_wink_eol, oxy_eol ~ ptb_oxy_wink, nperm = 99)
+fit <- lmodel2(data = combined1, oxy_eol ~ ptb_oxy_wink, nperm = 99)
 p_Oxyptbwink_Oxyeol <-  ggreg2(fit, "ptb_oxy_wink", "oxy_eol") +
   geom_abline(aes(slope= 1, intercept =0), linetype = 2) +
   mytheme+labs(y="Oxy EOL", x="Oxy Point B Winkler")
@@ -2059,14 +2070,14 @@ Drifting periodes have been defined according to the delta (drift) between: Wink
 ```{r eol pointb Oxy 1m correction, echo=TRUE, warning = FALSE, message = FALSE, out.width='100%'}
 ### Take WINKLER as reference
 #delta oxy
-combined_1_B_Bplus_wink_eol <- combined_1_B_Bplus_wink_eol %>% 
-  dplyr::mutate(oxy_mll_Bplus_wink_detla = ptb_oxy_wink - mean_oxy_mll_rhBplus,
+combined1 <- combined1 %>% 
+  dplyr::mutate(oxy_mll_Bplus_wink_detla = ptb_oxy_wink - mean_oxy_mll_rhBplus_B,
                 oxy_mll_eol_wink_detla =   ptb_oxy_wink - oxy_eol)
 
 oxy_periode <- c("2017-07-11 00:00:00","2021-05-25 23:59:00")
 
 #plot
-oxy_eol_wink_xts <- dplyr::select(combined_1_B_Bplus_wink_eol,datetime, oxy_mll_eol_wink_detla)
+oxy_eol_wink_xts <- dplyr::select(combined1,datetime, oxy_mll_eol_wink_detla)
 oxy_eol_wink_xts <- as.xts(oxy_eol_wink_xts, order.by=oxy_eol_wink_xts$datetime)
 
 dygraph(oxy_eol_wink_xts,  main = "Delta Winkler / EOL 1m", ylab = "") %>%
@@ -2085,43 +2096,46 @@ dyOptions(
 
 
 # Regression lineaire avec le temps
-wink_delta <- combined_1_B_Bplus_wink_eol%>%
-  tidyr::drop_na(oxy_mll_eol_wink_detla)
-
-fit_wink <- lm(data = wink_delta, oxy_mll_eol_wink_detla ~ unclass(datetime) )
+fit_wink <- lm(data = combined1, oxy_mll_eol_wink_detla ~ unclass(datetime) )
 slope_wink <- fit_wink$coefficients[[2]]
 intercept_wink <- fit_wink$coefficients[[1]]
 
-wink_plot <-  ggplot(data=wink_delta, aes(x=datetime, y=oxy_mll_eol_wink_detla), col="black") +  geom_point()+ geom_line()+ geom_abline(aes(slope= slope_wink, intercept =intercept_wink), linetype = 1, col="red") +
-  mytheme+labs(y="delta Sal EOL/PtB", x="") + scale_x_datetime(date_breaks="month",  labels=date_format("%b %Y")) + theme(axis.text.x = element_text(angle = 90, vjust = 1, hjust=1))
+lims <- as.POSIXct(strptime(c("2017-07-01 00:00:00","2021-05-30 23:00:00"), format = "%Y-%m-%d %H:%M:%S"))    
+wink_plot <-  ggplot(data=combined1, aes(x=datetime, y=oxy_mll_eol_wink_detla), col="black") +  geom_point()+ geom_line()+ geom_abline(aes(slope= slope_wink, intercept =intercept_wink), linetype = 1, col="red") + mytheme+labs(y="delta oxy EOL/Wink", x="") + scale_x_datetime(date_breaks="3 months",  labels=date_format("%b %Y"), limits =lims) + theme(axis.text.x = element_text(angle = 90, vjust = 1, hjust=1))
 print(wink_plot)
 
 #correction des valeurs EOL avec la regression temps
-wink_delta <- wink_delta%>%
-  dplyr::mutate(correction = slope_wink * unclass(datetime) + intercept_wink,
-                oxy_eol_corr = oxy_eol + correction )
+#add slope and intercpt from each LowFrequency data to eol data  HighFrequency.
+combined1 <- combined1%>%
+  dplyr::mutate(correction_oxy = case_when(datetime >"2017-07-11 00:00:00" & datetime < "2021-05-25 23:59:00" ~ slope_wink * unclass(datetime) + intercept_wink, 
+                                          TRUE ~ NA_real_),
+                slope_oxy = case_when(datetime >"2017-07-11 00:00:00" & datetime < "2021-05-25 23:59:00" ~ slope_wink, 
+                                          TRUE ~ NA_real_),
+                intercept_oxy = case_when(datetime >"2017-07-11 00:00:00" & datetime < "2021-05-25 23:59:00" ~  intercept_wink, 
+                                          TRUE ~ NA_real_),
+                oxy_eol_corr = oxy_eol + correction_oxy )
+
+                
 #combined_1_B_Bplus_wink_eol$oxy_eol_calc = fit$regression.results[[3]][2] * combined_1_B_Bplus_wink_eol$ptb_oxy_wink + fit$regression.results[[2]][2]
 
-eol_ptb_oxy_xts <- dplyr::select(wink_delta , datetime, mean_oxy_mll_rhBplus, oxy_eol, ptb_oxy_wink, oxy_eol_corr)
+eol_ptb_oxy_xts <- dplyr::select(combined1 , datetime, mean_oxy_mll_rhBplus_B, oxy_eol, ptb_oxy_wink, oxy_eol_corr)
 #eol_ptb_oxy_xts <- dplyr::select(combined_1_B_Bplus_wink_eol, datetime, mean_oxy_mll_rhBplus, oxy_eol, ptb_oxy_wink, oxy_eol_corr)
 eol_ptb_oxy_xts <- as.xts(eol_ptb_oxy_xts, order.by=eol_ptb_oxy_xts$datetime)
 
 dygraph(eol_ptb_oxy_xts,  main = "Oxygen (ml/l) 1m: EOL - ptB+ - Winkler ptB)", ylab = "") %>%
-dySeries("mean_oxy_mll_rhBplus", drawPoints = TRUE, pointSize=4, label = "Oxy ptB+", color ="blue") %>%
+dySeries("mean_oxy_mll_rhBplus_B", drawPoints = TRUE, pointSize=4, label = "Oxy ptB+", color ="blue") %>%
 dySeries("oxy_eol", drawPoints = TRUE, pointSize=2, label = "Oxy EOL", color ="red")%>%
-  dySeries("oxy_eol_corr", drawPoints = TRUE, pointSize=2, label = "Oxy EOL corr", color ="orange")%>%
-
+dySeries("oxy_eol_corr", drawPoints = TRUE, pointSize=2, label = "Oxy EOL corr", color ="orange")%>%
 dySeries("ptb_oxy_wink", drawPoints = TRUE, pointSize=2, label = "Oxy winkler PTB", color ="green")%>%
   dyShading(from =  oxy_periode[1], to= oxy_periode[2], color = "#B7B7B7") %>%
-
- # dyLegend(show = "always", width = 600)%>%
-  #dyAxis("y",valueRange = c(-0.1, 0.11))%>%
 dyOptions(connectSeparatedPoints = TRUE,
     drawGrid = TRUE,
     drawPoints = TRUE,
     useDataTimezone = TRUE)%>%
   dyRangeSelector(height = 30)
 
+### SAVE
+saveRDS(combined1, file = paste0(path, "data/eol/combined_eol_rh_data.rds"))
 
 # #---------------------------- 
 # titre <- "Oxygen 1m: Point B+ CTD vs Point B Winkler"
