@@ -659,7 +659,7 @@ spectro$datetime <- with_tz(spectro$datetime, "UTC")#  tidyr::unite("datetime", 
  #                     ) 
  # add spectro T insi to seaFET data  
  #ph_sf <- left_join(ph_sf, spectro_mean%>%dplyr::select(datetime,ph_s_sf_temp_insi, temp_field,salinity_field),by="datetime") 
-  ph_sf <- left_join(ph_sf, spectro%>%dplyr::select(datetime,ph_s_sf_temp_insi, temp_field,salinity_field),by="datetime") 
+ # ph_sf <- left_join(ph_sf, spectro%>%dplyr::select(datetime,ph_spec_insitu, temperature ,salinity),by="datetime") 
 
 ## Add event periodes manually
 ## Events
@@ -1378,14 +1378,12 @@ saveRDS(rh_B_Bplus_1m_mean, file = paste0(path, "data/eol/rh_B_Bplus_1m_mean.rds
 
 ```{r plot ctd_hydro 50m Oxy, echo=TRUE, warning = FALSE, message = FALSE, out.width='100%'}
 ## Oxy umolkg 50m
-rh_oxymll_xts <- dplyr::select(rh_B_Bplus_50m_mean, date, mean_oxy_mll_rhBplus_B, mean_oxy_mll_rhBplus,mean_oxy_mll_rhB)
-rh_oxymll_xts <- as.xts(rh_oxymll_xts, order.by=rh_oxymll_xts$date)
+rh_oxymll_xts <- dplyr::select(rh_B_Bplus_50m_mean, datetime, mean_oxy_mll_rhBplus,mean_oxy_mll_rhB)
+rh_oxymll_xts <- as.xts(rh_oxymll_xts, order.by=rh_oxymll_xts$datetime)
 
-dygraph(rh_oxymll_xts,  main = "Oxygen (ml/l 50m Rade Hydro: B / B+", ylab = "") %>%
+dygraph(rh_oxymll_xts,  main = "Oxygen (ml/l 50m Rade Hydro: B / B+)", ylab = "") %>%
   dySeries("mean_oxy_mll_rhB", drawPoints = TRUE, pointSize=4, label = "Oxy_mll B", color ="blue") %>%
   dySeries("mean_oxy_mll_rhBplus", drawPoints = TRUE, pointSize=2, label = "Oxy_mll B+", color="red")%>%
-    dySeries("mean_oxy_mll_rhBplus_B", drawPoints = TRUE, pointSize=2, label = "Oxy_mll B/B+", color="black")%>%
-
  # dyLegend(show = "always", width = 600)%>%
   #dyAxis("y",valueRange = c(-0.1, 0.11))%>%
 dyOptions(
@@ -1483,7 +1481,7 @@ p_Oxyptbwink_Oxyptb_50m <-  ggreg2(fit, "mean_oxy_mll_rhBplus_B", "ptb_oxy_wink"
   mytheme+labs(x="Oxy Point B+/B CTD", y="Oxy Point B Winkler")
 print(p_Oxyptbwink_Oxyptb_50m)
 
-saveRDS(combined_50_B_Bplus_wink, file = paste0(path, "data/eol/rh_B_Bplus_50m_mean.rds"))
+saveRDS(rh_B_Bplus_50m_mean, file = paste0(path, "data/eol/rh_B_Bplus_50m_mean.rds"))
 ```
 
 # **Comparison EOL - SOMLIT (Point B)**  {.tabset .tabset-pills}
