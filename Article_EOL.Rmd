@@ -213,12 +213,27 @@ dyEvent(as.POSIXct("2021-08-18 12:00:00"), "SBE37 #9506 IN", labelLoc = "top", c
   dyEvent(as.POSIXct("2020-12-09 12:00:00"), "underwater clean", labelLoc = "top", color="blue",strokePattern = "dashed") %>% 
     dyEvent(as.POSIXct("2021-02-17 12:00:00"), "underwater clean", labelLoc = "top", color="blue",strokePattern = "dashed") %>% 
       dyEvent(as.POSIXct("2021-03-16 12:00:00"), "outside clean", labelLoc = "top", color="green",strokePattern = "dashed") %>% 
-
 dyOptions(
     drawGrid = TRUE,
     drawPoints = TRUE,
     useDataTimezone = TRUE)%>%
   dyRangeSelector(height = 30)
+# wrap plot of drifts
+# combined_1m %>%
+#     ggplot(aes(datetime, sal_eol_rhBplus_detla)) +
+#     geom_point() +
+#     geom_smooth(method = "lm") +
+#     facet_wrap(~ periode_sal)
+
+library(tidyverse)
+test <- combined_1m %>%
+    group_by(periode_sal) %>%
+    nest() %>%
+    mutate(slope_by_year = (map_dbl(data, ~coef(lm(sal_eol_rhBplus_detla  ~ unclass(datetime) , data = .x))[2]) *60*60*24*365.24)
+           )
+
+
+
 
 tab_sal_drift <- combined_1m%>%
   group_by(periode_sal)%>%
@@ -228,7 +243,7 @@ tab_sal_drift <- combined_1m%>%
             intercept_sal=  mean(intercept_sal, na.rm = TRUE))
 tab_sal_drift <- tab_sal_drift[-9,]
 
-kbl(as.data.frame(tab_sal_drift), digits= c(1,1,1,11,2))%>%
+kbl(as.data.frame(tab_sal_drift), digits= c(1,1,1,11,2), caption = "Drifting periodes for salinity")%>%
     kable_paper() %>% 
     kable_styling(fixed_thead = T,full_width = T)
 ```
