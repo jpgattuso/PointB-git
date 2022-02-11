@@ -1959,7 +1959,7 @@ Parameters from drifting periodes found in Low Frequency dataset have been appli
 
 ```{r eol pointb comp correction EOL HF, echo=TRUE, warning = FALSE, message = FALSE, out.width='100%'}
 #add slope and intercpt from each LowFrequency data to eol data  HighFrequency.
-eol <- eol%>%
+combined1 <- combined1%>%
   dplyr::mutate(correction_sal = case_when(datetime >"2014-05-06 00:00:00" & datetime <"2014-10-07 23:59:00" ~ slope_p1 * unclass(datetime) + intercept_p1, 
                                        datetime >"2015-06-22 00:00:00" & datetime <"2016-03-22 23:59:00" ~ slope_p2 * unclass(datetime) + intercept_p2,
                                        datetime >"2017-01-10 00:00:00" & datetime <"2017-07-04 23:59:00" ~ slope_p3 * unclass(datetime) + intercept_p3,
@@ -1984,7 +1984,16 @@ eol <- eol%>%
                                        datetime >"2020-04-23 00:00:00" & datetime <"2020-06-30 23:59:00" ~ intercept_p6 ,
                                        datetime >"2020-07-21 00:00:00" & datetime <"2020-11-17 23:59:00" ~ intercept_p7 ,
                                        datetime >"2014-10-14 00:00:00" & datetime <"2015-06-16 23:59:00" ~ intercept_p8 ,TRUE ~ NA_real_),
+                 periode_sal = case_when(datetime >"2014-05-06 00:00:00" & datetime <"2014-10-07 23:59:00" ~ "p1" , 
+                                       datetime >"2015-06-22 00:00:00" & datetime <"2016-03-22 23:59:00" ~ "p3" ,
+                                       datetime >"2017-01-10 00:00:00" & datetime <"2017-07-04 23:59:00" ~ "p4" ,
+                                       datetime >"2017-11-07 00:00:00" & datetime <"2019-03-19 23:59:00" ~ "p5" ,
+                                       datetime >"2019-07-09 00:00:00" & datetime <"2020-03-10 23:59:00" ~ "p6" ,
+                                       datetime >"2020-04-23 00:00:00" & datetime <"2020-06-30 23:59:00" ~ "p7" ,
+                                       datetime >"2020-07-21 00:00:00" & datetime <"2020-11-17 23:59:00" ~ "p8" ,
+                                       datetime >"2014-10-14 00:00:00" & datetime <"2015-06-16 23:59:00" ~ "p2" ,TRUE ~ NA_character_),
                 sal_eol_corr = sal_eol + correction_sal)
+saveRDS(combined1, file = paste0(path, "data/eol/combined_eol_rh_data.rds"))
 
 ## PLOT
 eol_corr_xts <- dplyr::select(eol, datetime, sal_eol, sal_eol_corr)
@@ -2090,8 +2099,6 @@ dyOptions(
     drawPoints = TRUE,
     useDataTimezone = TRUE)%>%
   dyRangeSelector(height = 30)
-
-
 
 # Regression lineaire avec le temps
 fit_wink <- lm(data = combined1, oxy_mll_eol_wink_detla ~ unclass(datetime) )
