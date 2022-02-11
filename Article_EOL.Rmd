@@ -1,5 +1,5 @@
 ---
-title: "Article EOL"
+title: "Calibration and correction of high-frequency key surface marine time-series in the northwestern Mediterranean Sea"
 date: '`r format(Sys.Date(), "%d %B %Y")`'
 output:
   rmarkdown::html_document:
@@ -119,28 +119,117 @@ mytheme <- theme_bw() +
 )
 ```
 
-# **Introduction** {.tabset .tabset-pills}
+# **INTRODUCTION** {.tabset .tabset-pills}
 
-# **Material and methods** 
+# **MATERIALS AND METHODS** 
 
-## **Site description**
+## **Site description** {.tabset .tabset-pills}
+
 EOL buoy (43.682◦ N, 7.319◦ E, 80 m bottom depth) and Point B (43.686◦ N, 7.316◦ E, 85 m bottom depth) stations are located in the NW Mediterranean Sea in the Bay of Villefranche-Sur-Mer, France. The two sites are less than 500 m apart. The area is characterized by the passage of the northern current (Liguro-provencal current) offshore the Bay. This anticlockwise current can form meanders and eddies that can potentially bring open-ocean waters to this site (De Carlo et al., 2013).
 
 Point B station started to sample hydrological measurements in 1957 and integrated the French marine stations network SOMLIT (Service d’Observation en Milieu LITtoral) in 1995 (https://www.somlit.fr). Samplings are based on vertical profiles using a CTD and on discrete seawater samplings (see following part for details). All acquisition data regarding Point B station is weekly based.
 
-EOL (Environment Observable Littoral) buoy is part of the COAST-HF (Coastal OceAn observing SysTem – High Frequency) French national observation network of the physical and biogeochemical dynamics of the coastal ocean, at high frequency (https://coast-hf.fr/). Vertical profiles were used to collect data on a high frequency (≤ 1 hour) basis. 
+EOL (Environment Observable Littoral) buoy is part of the COAST-HF (Coastal OceAn observing SysTem – High Frequency) French national observation network of the physical and biogeochemical dynamics of the coastal ocean, at high frequency (https://coast-hf.fr/). Vertical profiles were used to collect data on a high frequency (30 minutes) basis. 
 
 
 ## **Parameters **
-In this study 3 main parameters were analysed: temperature (T, in °C), salinity (S, in PSU) and disolved oxygen (O2, in mL-1.L).
+In this study 3 main parameters were analysed: temperature (T, in °C), salinity (S, in PSU) and dissolved oxygen (O2, in mL-1.L).
 
+Temperature and salinity were measured using a CTD in the 2 sites. Data are available from May 1992 to November 2021 for Point B and from September 2013 to December 2021 for EOL for both parameters.
 
+Oxygen was also measured using a CTD in the 2 sites. Data are available from 1999 to 2021 for Point B and from 2017 to 2021 for EOL. An additional oxygen sampling was performed at Point B to collect surface seawater in order to analyse O2 using the winkler titration method (XXX).This parameter is available from 2002 to 2021 and it will be used as reference.
 
-## **Calibration**
+At EOL buoy, parameters were collected on a high frequency (HF) basis: less or equal to 1 hour whereas, parameters were collected on a low frequency (LF) basis at Point B: once a week at 07:00 AM UTC. Data that match the same overlapping periode, at the same time, for the same parameter between the 2 sites will be used.
 
-# **Results** 
-```{r ctd_hydro, echo=TRUE, warning = FALSE, message = FALSE}
-readRDS(file = paste0(path, "data/eol/eol_data.rds"))
+## **Correction**
+HF salinity CTD data (2013 to 2021) were corrected using LF data as reference, during the same periode. Eight drifting periodes were arbitrary defined using the delta between LF and HF salinity data (Fig XXX). Data showing a drift more than ± 0.3 PSU were not taking into consideration and were assigned as outliers.
+Within each drifting periode, a linear regression was calculated
+
+HF and LF oxygen CTD data were corrected against LF O2 Winkler data taken as reference. The drift from the CTD was corrected appliying a linear regression
+
+# **RESULTS** 
+```{r ctd_hydro, echo=TRUE, warning = FALSE, message = FALSE, out.width="100%"}
+rh_1m <- readRDS(file = paste0(path, "data/eol/rh_B_Bplus_1m_mean.rds"))
+eol_1m <- readRDS(file = paste0(path, "data/eol/eol_data.rds"))
+combined_1m <- readRDS(file = paste0(path, "data/eol/combined_eol_rh_data.rds"))
+# add site column
+rh_1m <- rh_1m%>%
+  mutate(site = "pointB")
+eol_1m <- eol_1m%>%
+  mutate(site = "eol")
+#all parameters
+temp <- full_join(rh_1m%>%dplyr::select(datetime,mean_temp_rhBplus_B,mean_sal_rhBplus_B, mean_oxy_mll_rhBplus_B, ptb_oxy_wink  ), 
+                  eol_1m%>%dplyr::select(datetime,temp_eol, sal_eol, oxy_eol), 
+                  by="datetime")
+# 
+# ## PLOT raw
+# temp_xts <- dplyr::select(temp, datetime, mean_temp_rhBplus_B)
+# temp_xts <- as.xts(temp_xts, order.by=temp_xts$datetime)
+# 
+# dygraph(temp_xts, main = "Temp", ylab = "") %>%
+#  # dySeries("temp_eol", drawPoints = TRUE, pointSize=2, label = "EOL")%>%
+#   dySeries("mean_temp_rhBplus_B", drawPoints = TRUE, pointSize=2, label = "ptB")%>%
+# dyOptions(drawGrid = TRUE,
+#     drawPoints = TRUE,
+#     useDataTimezone = TRUE)%>%
+#   dyRangeSelector(height = 30)
+
+melt_temp <- melt(temp, id.vars = c("datetime"))
+
+site.labs <- c("point B", "EOL")
+names(site.labs) <- c("mean_temp_rhBplus_B", "temp_eol")
+ggplot(data=melt_temp) +
+  geom_point(aes(x=datetime, y=value,  color=variable),size=0.3) + #facet_wrap(~ site)
+   facet_grid(variable~., scales="free") + 
+ theme_bw()+ xlab("Time")+ylab("Salinity, Temperature, Oxygen")+
+   scale_colour_discrete( guide="none",)
 ```
 
+Figure 1 : Time-series (raw data) showing surface CTD data for temperature (a), salinity (b) and dissolved oxygen (c) at Point B station. Dissolved oxygen Winkler data is also shown (d). CTD data at EOL buoy is shown for temperature (e), salinity (f) and dissolved oxygen (g).
+
+```{r rh sal drift, echo=TRUE, warning = FALSE, message = FALSE, out.width="100%"}
+
+sal_periode <- c("2014-05-06 00:00:00","2014-10-07 23:59:00" ,"2014-10-14 00:00:00" ,"2015-06-16 23:59:00","2015-06-22 00:00:00" ,"2016-03-22 23:59:00","2017-01-10 00:00:00" ,"2017-07-04 23:59:00" ,"2017-11-07 00:00:00", "2019-03-19 23:59:00","2019-07-09 00:00:00","2020-03-10 23:59:00" ,"2020-04-23 00:00:00","2020-06-30 23:59:00","2020-07-21 00:00:00", "2020-11-17 23:59:00")
+
+sal_eol_delta_xts <- dplyr::select(combined_1m%>%filter(sal_eol_rhBplus_detla > -0.3 & sal_eol_rhBplus_detla < 0.3 ),datetime, sal_eol_rhBplus_detla)
+sal_eol_delta_xts <- as.xts(sal_eol_delta_xts, order.by=sal_eol_delta_xts$datetime)
+
+dygraph(sal_eol_delta_xts,  main = "Delta salinity: ptB - EOL", ylab = "") %>%
+     dySeries("sal_eol_rhBplus_detla", drawPoints = TRUE, pointSize=2, label = "delta (PSU)", color="black")%>%
+   dyLimit(0,strokePattern = "dashed", color = "black") %>% 
+     dyLimit(0.3,strokePattern = "dashed", color = "red") %>% 
+       dyLimit(-0.3,strokePattern = "dashed", color = "red") %>% 
+dyShading(from =  sal_periode[1], to= sal_periode[2], color = "#B7B7B7") %>%
+dyShading(from =  sal_periode[3], to= sal_periode[4], color = "#B7B7B7") %>%
+dyShading(from =  sal_periode[5], to= sal_periode[6], color = "#B7B7B7") %>%
+dyShading(from =  sal_periode[7], to= sal_periode[8], color = "#B7B7B7") %>%
+dyShading(from =  sal_periode[9], to= sal_periode[10], color = "#B7B7B7") %>%
+dyShading(from =  sal_periode[11], to= sal_periode[12], color = "#B7B7B7") %>%
+  dyShading(from =  sal_periode[13], to= sal_periode[14], color = "#B7B7B7") %>%
+    dyShading(from =  sal_periode[15], to= sal_periode[16], color = "#B7B7B7") %>%
+
+dyEvent(as.POSIXct("2020-07-15 12:00:00"), "SBE37 #9509 IN", labelLoc = "top", color="red",strokePattern = "dashed") %>% 
+dyEvent(as.POSIXct("2021-08-18 12:00:00"), "SBE37 #9506 IN", labelLoc = "top", color="red",strokePattern = "dashed") %>% 
+  dyEvent(as.POSIXct("2020-12-09 12:00:00"), "underwater clean", labelLoc = "top", color="blue",strokePattern = "dashed") %>% 
+    dyEvent(as.POSIXct("2021-02-17 12:00:00"), "underwater clean", labelLoc = "top", color="blue",strokePattern = "dashed") %>% 
+      dyEvent(as.POSIXct("2021-03-16 12:00:00"), "outside clean", labelLoc = "top", color="green",strokePattern = "dashed") %>% 
+
+dyOptions(
+    drawGrid = TRUE,
+    drawPoints = TRUE,
+    useDataTimezone = TRUE)%>%
+  dyRangeSelector(height = 30)
+
+tab_sal_drift <- combined_1m%>%
+  group_by(periode_sal)%>%
+  summarise(date_start = min(datetime, na.rm = TRUE),
+            date_end = max(datetime, na.rm = TRUE),
+            slope_sal = mean(slope_sal, na.rm = TRUE),
+            intercept_sal=  mean(intercept_sal, na.rm = TRUE))
+tab_sal_drift <- tab_sal_drift[-9,]
+
+kbl(as.data.frame(tab_sal_drift), digits= c(1,1,1,11,2))%>%
+    kable_paper() %>% 
+    kable_styling(fixed_thead = T,full_width = T)
+```
 # **Discussion** 
