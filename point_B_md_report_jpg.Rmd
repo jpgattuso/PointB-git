@@ -17,8 +17,7 @@ output:
 rm(list = ls())
 #define who is the user and define path
 if (Sys.getenv("LOGNAME") == "gattuso") {
-  path = "../../pCloud\ Sync/Documents/experiments/exp153_carbonates_point_B/"
-  path_sami = "../../pCloud\ Sync/Documents/experiments/exp176_sami/sami_data/sami_raw_export/Data_deployment/EOL"
+  path = "data/"
 }
 if (Sys.getenv("LOGNAME") == "samir") {
   path = "../../pCloud Sync/exp153_carbonates_point_B/"
@@ -207,11 +206,11 @@ Les "quality flags" "qflag\_sample", "qflag\_ta", "qflag\_DIC" qui apparaissent 
 
 ```{r Initialization Point B, message=FALSE, include=TRUE}
 z <-  read_delim(
-  paste0(path, "data/Data_DIC.csv"),
-  delim = "\t",
+  paste0(path, "Data_DIC.csv"),
+  delim = ";",
   col_names = TRUE,
-  col_types = "ccccdddddddddddcddddddddddddddd",
-  na = c("NA", "999999")
+  col_types = "cccdddddddddddcddddddddddddddd",
+  na = c("NA", "999999", "")
   )
 #H <- NULL
 z <- z %>%
@@ -260,7 +259,7 @@ z <- z %>%
   )
 skim(z)
 # read POC and PON data
-pom <- read_csv(file = paste0(path, "data/POC-PON/POC-2007-2015_PtB_1m.csv"), comment="#")
+pom <- read_csv(file = paste0(path, "POC-2007-2015_PtB_1m.csv"), comment="#")
 pom$date <- as.POSIXct(pom$date)
 ```
 When the difference(s) between replicate values of AT and CT is larger than 15 umol/kg, the outlier(s) are visually identified in the plots below and assigned a flag value of 3 (shown in red in subsequent plots). 
@@ -916,7 +915,7 @@ dat <- dat %>%
 #vlfrcc <- left_join(dat, eol_ptb %>% dplyr::select(sampling_date, depth, pH_s_eol_temp_insi, pH_s_ptb_temp_insi), by=c("sampling_date", "depth"))
 #save data
 write_csv(somlit, file = "output_jp/data/output_somlit.csv")
-write_csv(somlit, file = paste0(path, "output_jp/output/output_somlit.csv"))
+#write_csv(somlit, file = paste0(path, "output_jp/output/output_somlit.csv"))
 #write_csv(dat, file="output_jp/data/output.csv")
 #write_csv(somlit, file = paste0(path, "output_jp/output/output.csv"))
 write_csv(pangaea, file="output_jp/data/output_pangaea.csv")
@@ -1966,7 +1965,7 @@ AT = `r round(reg_AT_S_all[4], digit=2)` + S x `r round(reg_AT_S_all[1], digit=2
 ## Daily and monthly changes in pH and T
 ```{r Daily and seasonal changes, include=FALSE}
 # Long series
-continuous_discrete <- read_csv(file = paste0(path, "data/continuous_discrete.csv"), 
+continuous_discrete <- read_csv(file = paste0(path, "continuous_discrete.csv"), 
                                 col_names = TRUE,
                                 col_types = "cdddddddddddddddddddd") %>% 
   dplyr::mutate(date = as.POSIXct(date))
@@ -2113,7 +2112,7 @@ The changes in the daily pH range do not seem to be driven by the concentration 
 ## CO2
 ```{r CO2, include=FALSE}
 CO2_pr <- tbl_df(
-  read_csv(file=paste0(path, "data/CO2_data_PlateauRosa_daily_1993-2015_R.csv"), col_names=TRUE, skip=7)
+  read_csv(file=paste0(path, "CO2_data_PlateauRosa_daily_1993-2015_R.csv"), col_names=TRUE, skip=7)
 ) %>%
   rename(dt=date) %>%
   mutate(year=year(dt)) %>%
