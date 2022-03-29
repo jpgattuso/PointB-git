@@ -49,4 +49,4 @@ figures/*.pdf
 old/
 figures/
 figures_jp
-output/
+output_jp/*.*
