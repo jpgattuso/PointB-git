@@ -41,7 +41,7 @@ rsconnect/
 *.html
 *.png
 *.pdf
-output_jp/data*.csv
+output_jp/data/*.csv
 figures/*.png
 figures/*.pdf
 *.rds
