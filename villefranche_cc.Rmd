@@ -250,15 +250,13 @@ par_all <- par_all %>%
   dplyr::filter(datetime < as.POSIXct("2021-03-16 09:00:00") | datetime > as.POSIXct("2021-03-16 13:00:00") &
                 datetime < as.POSIXct("2021-05-21 04:50:00") | datetime > as.POSIXct("2021-06-11 09:00:00") )
 # add each periode here
-par_periode <- c("2020-10-29 12:20:00", "2020-12-09 08:00:00","2020-12-17 10:00:00","2021-03-16 11:00:00","2021-03-17 11:00:00", "2021-05-21 06:50:00","2021-06-11 10:00:00", "2021-11-26 09:00:00", "2022-12-03 11:00:00", "2022-03-23 08:50:00")
+par_periode <- c("2020-10-29 12:20:00", "2020-12-09 08:00:00","2020-12-17 10:00:00","2021-03-16 11:00:00","2021-03-17 11:00:00", "2021-05-21 06:50:00","2021-06-11 10:00:00", "2021-11-26 09:00:00", "2021-12-03 11:00:00", "2022-03-23 08:50:00")
 
 par_xts <- dplyr::select(par_all, datetime, int_light_10, int_light_20, int_light_30)
 par_xts <- as.xts(par_xts, order.by=par_xts$datetime)
 
 dygraph(par_xts, ylab = "") %>%
-  dySeries("int_light_10", drawPoints = TRUE, pointSize=3, color="deepskyblue",label = "PAR 10m")%>%
-  dySeries("int_light_20", drawPoints = TRUE, pointSize=3, color = "dodgerblue", label = "PAR 20m") %>%
-  dySeries("int_light_30", drawPoints = TRUE, pointSize=3, color= "dodgerblue4", label = "PAR 30m") %>%
+  
     dyEvent(as.POSIXct("2020-12-28 09:10:00"), "par_10m stops", labelLoc = "top", color="black",strokePattern = "dashed") %>% 
       dyEvent(as.POSIXct("2021-10-03 03:15:00"), "dirty - data removing", labelLoc = "top", color="black",strokePattern = "dashed") %>% 
 
@@ -266,11 +264,18 @@ dygraph(par_xts, ylab = "") %>%
     dyEvent(as.POSIXct("2021-03-16 10:00:00"), "cleaning", labelLoc = "top", color="red",strokePattern = "dashed") %>% 
   dyEvent(as.POSIXct("2021-03-30 09:50:00"), "cleaning", labelLoc = "top", color="red",strokePattern = "dashed") %>% 
     dyEvent(as.POSIXct("2021-04-21 08:20:00"), "cleaning", labelLoc = "top", color="red",strokePattern = "dashed") %>% 
+      dyEvent(as.POSIXct("2021-06-11 10:00:00"), "cleaning", labelLoc = "top", color="red",strokePattern = "dashed") %>% 
+
       dyEvent(as.POSIXct("2021-08-17 08:00:00"), "cleaning", labelLoc = "top", color="red",strokePattern = "dashed") %>% 
         dyEvent(as.POSIXct("2021-09-24 08:30:00"), "cleaning", labelLoc = "top", color="red",strokePattern = "dashed") %>% 
         dyEvent(as.POSIXct("2021-10-19 08:30:00"), "cleaning", labelLoc = "top", color="red",strokePattern = "dashed") %>%
+            dyEvent(as.POSIXct("2021-12-03 11:00:00"), "cleaning", labelLoc = "top", color="red",strokePattern = "dashed") %>%
+
         dyEvent(as.POSIXct("2022-02-23 09:30:00"), "cleaning", labelLoc = "top", color="red",strokePattern = "dashed") %>%
           dyEvent(as.POSIXct("2022-03-07 09:30:00"), "cleaning", labelLoc = "top", color="red",strokePattern = "dashed") %>%
+  dySeries("int_light_10", drawPoints = TRUE, pointSize=3, color="deepskyblue",label = "PAR 10m")%>%
+  dySeries("int_light_20", drawPoints = TRUE, pointSize=3, color = "dodgerblue", label = "PAR 20m") %>%
+  dySeries("int_light_30", drawPoints = TRUE, pointSize=3, color= "dodgerblue4", label = "PAR 30m") %>%
 
 dyShading(from = par_periode[1], to = par_periode[2], color = "#C0C0C0") %>%
   dyShading(from = par_periode[3], to = par_periode[4], color = "#E0E0E0") %>%
@@ -286,7 +291,7 @@ dyOptions(
 ```
 
 ```{r PAR plot AIR, warning = FALSE, out.width='100%'}
-par_periode_air <- c("2020-12-17 10:00:00","2021-03-16 09:00:00","2021-03-17 13:00:00","2021-06-11 07:30:00", "2021-06-11 09:00:00","2021-11-26 09:00:00")
+par_periode_air <- c("2020-12-17 10:00:00","2021-03-16 09:00:00","2021-03-17 13:00:00","2021-06-11 07:30:00", "2021-06-11 09:00:00","2021-11-26 09:00:00","2021-12-03 11:00:00", "2022-03-23 08:50:00")
 ####### AIR
 par_air_xts <- dplyr::select(par_air, datetime,int_light_air)
 par_air_xts <- as.xts(par_air_xts, order.by=par_air_xts$datetime)
@@ -297,6 +302,8 @@ dygraph(par_air_xts, ylab = "") %>%
   dyShading(from = par_periode_air[3], to = par_periode_air[4], color = "#E0E0E0") %>%
    dyShading(from = par_periode_air[5], to = par_periode_air[6], color = "#C0C0C0") %>%
       dyEvent(as.POSIXct("2021-10-03 03:15:00"), "par_air stops", labelLoc = "top", color="black",strokePattern = "dashed") %>% 
+      dyEvent(as.POSIXct("2021-12-03 11:00:00"), "cleaning", labelLoc = "top", color="red",strokePattern = "dashed") %>% 
+
 
  # dyLegend(show = "always", width = 600)%>%
 dyOptions(
