@@ -17,7 +17,7 @@ output:
 rm(list = ls())
 #define who is the user and define path
 if (Sys.getenv("LOGNAME") == "gattuso") {
-  path = "../../pCloud\ Sync/Documents/experiments/exp153_carbonates_point_B/"
+  path = ""
   path_sami = "../../pCloud\ Sync/Documents/experiments/exp176_sami/sami_data/sami_raw_export/Data_deployment/EOL"
 }
 if (Sys.getenv("LOGNAME") == "samir") {
@@ -208,7 +208,7 @@ Les "quality flags" "qflag\_sample", "qflag\_ta", "qflag\_DIC" qui apparaissent 
 ```{r Initialization Point B, message=FALSE, include=TRUE}
 z <-  read_delim(
   paste0(path, "data/Data_DIC.csv"),
-  delim = "\t",
+  delim = ";",
   col_names = TRUE,
   col_types = "ccccdddddddddddcddddddddddddddd",
   na = c("NA", "999999")
@@ -916,7 +916,7 @@ dat <- dat %>%
 #vlfrcc <- left_join(dat, eol_ptb %>% dplyr::select(sampling_date, depth, pH_s_eol_temp_insi, pH_s_ptb_temp_insi), by=c("sampling_date", "depth"))
 #save data
 write_csv(somlit, file = "output_jp/data/output_somlit.csv")
-write_csv(somlit, file = paste0(path, "output_jp/output/output_somlit.csv"))
+write_csv(somlit, file = "output_jp/data/output_somlit.csv")
 #write_csv(dat, file="output_jp/data/output.csv")
 #write_csv(somlit, file = paste0(path, "output_jp/output/output.csv"))
 write_csv(pangaea, file="output_jp/data/output_pangaea.csv")
@@ -953,7 +953,7 @@ mean_err_percent <- data.frame(
 )
 ```
 
-The average uncertainties of the derived carbonate parameters were calculated according to the Gaussian method (Dickson & Riley, 1978) implemented in the "errors" function of the R package seacarb 3.1 (Gattuso et al., 2016). More detail is available in Orr et al. (2018). The uncertainties are `r format(mean_err$H, digits =1, scientific = TRUE)` mol H+, `r format(mean_err$pCO2, digits=0)` umol pCO2, and `r format(mean_err$OmegaAragonite, digits=1)` unit of the aragonite saturation state.
+The average uncertainties of the derived carbonate parameters were calculated according to the Gaussian method (Dickson & Riley, 1978) implemented in the "errors" function of the R package seacarb 3.1 (Gattuso et al., 2016). More detail is available in Orr et al. (2018). The uncertainties are `r format(mean_err$H, digits =1, scientific = TRUE)` mol H+, `r format(mean_err$pCO2, digits=1)` umol pCO2, and `r format(mean_err$OmegaAragonite, digits=1)` unit of the aragonite saturation state.
 
 ```{r Monthly means, include=TRUE, message= FALSE, }
 #separate each means_depth and handle last incomplete year
