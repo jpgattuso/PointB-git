@@ -48,7 +48,8 @@ library(colorspace)
 library(reshape2)
 
 #define who is the user and define path
-if (Sys.getenv("LOGNAME") == "gattuso") path = "../../pCloud\ Sync/Documents/experiments/exp153_carbonates_point_B/"
+#if (Sys.getenv("LOGNAME") == "gattuso") path = "../../pCloud\ Sync/Documents/experiments/exp153_carbonates_point_B/"
+if (Sys.getenv("LOGNAME") == "gattuso") path = "../../kDrive/Documents/experiments/exp153_carbonates_point_B/"
 if (Sys.getenv("LOGNAME") == "samir") path = "../../pCloud Sync/exp153_carbonates_point_B/"
 if (Sys.getenv("LOGNAME") == "") path = "../../pCloud_sync/exp153_carbonates_point_B/"
 
@@ -131,12 +132,20 @@ h5{ /* Header 5 */
 
 # {.tabset .tabset-fade .tabset-pills}
 
+
 ## Temperatures 
 
 
 There are 3 stations in the dataset: B (43°41'000 N, 7°19'000 E, depth 86 m), B+ (43°41'000 N, 7°18'830 E, depth 150/180 m) and C (43°40'580 N - 7°18'570 E). The temperature record starts at different dates : 
 
 ```{r read_data, include=TRUE, warning = FALSE, echo = FALSE, message = FALSE}
+# Temperatures (July 2022)
+dat <- read_delim(file = paste0(path, "data/Somlit/Somlit_export_hydro.csv"), delim = ";", skip = 3, col_names = TRUE)
+d <- dplyr::filter(dat, PROF_NUM == 1, T < 999999) %>% 
+max(d$T)
+d <- dplyr::filter(dat, T == 27.972)
+
+
 # read data and create a data frame tbl
 # dat <-  read_delim(
 #   paste0(path,"data/radehydro_ctd/", "radehydro_ctd_20191125.csv"),
