@@ -63,13 +63,8 @@ if (Sys.getenv("LOGNAME") == "samir") path = "../../pCloud Sync/exp153_carbonate
 url <- "Temperature_EOL/EOL.csv"
 drive_download(url, type = "csv", path="data/EOL.CSV", overwrite = TRUE)
 d <- readr::read_csv(file = "data/EOL.csv", col_names = TRUE) %>% 
-  #unique() %>% 
   dplyr::mutate(d, date_time = str_c(Date, " ", Heure) %>%
                   parse_datetime(format="%Y%m%d %H%M%S"))
-
-dt <- seq(from=as.POSIXct("2013-09-16 00:00:00", tz="UTC"),
-     to=as.POSIXct("2023-01-01 00:00:00", tz="UTC"),
-     by="hour")
 EOL_xts <- dplyr::select(d, date_time, T)
 EOL_xts <- xts::as.xts(EOL_xts, order.by = d$date_time)
 dygraph(EOL_xts,
@@ -78,7 +73,6 @@ dygraph(EOL_xts,
         ylab = "Temperature (°C)") %>%
   dySeries(
     "T",
-    #label = "Raw durafet pH",
     color = "blue",
     strokeWidth = 1,
     pointSize = 2
