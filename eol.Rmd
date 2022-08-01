@@ -1,6 +1,6 @@
 ---
 title: "EOL data" 
-author: "Jean-Pierre Gattuso and Samir Alliouane"
+author: "Jean-Pierre Gattuso"
 date: '`r format(Sys.Date(), "%d %B %Y")`'
 output:
   rmarkdown::html_document:
@@ -50,6 +50,9 @@ Sys.setenv(TZ='UTC') # on utilise UTC
 rm(list = ls())
 knitr::opts_chunk$set(echo = TRUE)
 library("tidyverse")
+library("dygraphs")
+library("xts")
+library("googledrive")
 
 #define who is the user and define path
 if (Sys.getenv("LOGNAME") == "gattuso") path = "../../pCloud\ Sync/Documents/experiments/exp153_carbonates_point_B/"
@@ -57,17 +60,29 @@ if (Sys.getenv("LOGNAME") == "samir") path = "../../pCloud Sync/exp153_carbonate
 ```
 
 ```{r read and clean data, echo=FALSE, warning=FALSE, message=FALSE}
-url <- "http://obs-vlfr.fr/data/files/~eol/somlit/"
-files <- httr::GET(url) %>%
-  httr::content(as="parsed") %>%
-  # get all links containing villefranche-eol
-  xml2::xml_find_all("//a[contains(.,'villefranche-eol')]") %>%
-  # in a flat vector
-  xml2::as_list() %>%
-  unlist()
-urls <- str_c(url, files)
-d <- purrr::map_dfr(urls, read_csv, comment="#", col_types=cols(Date="c", Heure="c"))
-d <- dplyr::mutate(d, date_time=str_c(Date, " ", Heure) %>% parse_datetime(format="%Y%m%d %H%M%S"))
+url <- "Temperature_EOL/EOL.csv"
+drive_download(url, type = "csv", path="data/EOL.CSV")
+d <- readr::read_csv(file = "data/EOL.csv", col_names = TRUE) %>% 
+  unique() %>% 
+  dplyr::mutate(d, date_time = str_c(Date, " ", Heure) %>%
+                  parse_datetime(format="%Y%m%d %H%M%S"))
+
+dt <- seq(from=as.POSIXct("2013-09-16 00:00:00", tz="UTC"),
+     to=as.POSIXct("2023-01-01 00:00:00", tz="UTC"),
+     by="hour")
+EOL_xts <- dplyr::select(d, date_time, T)
+EOL_xts <- xts::as.xts(EOL_xts, order.by = dt)
+dygraph(EOL_xts,
+        #group = "awipev",
+        main = "Temperature at EOL station, Villefranche-sur-mer",
+        ylab = "Temperature (°C)") %>%
+  dySeries(
+    "T",
+    #label = "Raw durafet pH",
+    color = "blue",
+    strokeWidth = 0,
+    pointSize = 2
+  )
 ggplot(d) + geom_point((aes(x=date_time, y=T)))
 saveRDS(d, file = "data/eol_data.rds")
 ```
