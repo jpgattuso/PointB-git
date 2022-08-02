@@ -11,39 +11,6 @@ fig_width: 12
 fig_height: 8     
 ---
 
-<style type="text/css">
-
-body{ /* Normal  */
-      font-size: 16px;
-  }
-td {  /* Table  */
-  font-size: 14px;
-}
-h1.title {
-  font-size: 38px;
-  color: DarkRed;
-}
-h1 { /* Header 1 */
-  font-size: 28px;
-  color: DarkBlue;
-}
-h2 { /* Header 2 */
-    font-size: 22px;
-  color: DarkBlue;
-}
-h3 { /* Header 3 */
-  font-size: 18px;
-  font-family: "Times New Roman", Times, serif;
-  color: DarkBlue;
-}
-code.r{ /* Code block */
-    font-size: 12px;
-}
-pre { /* Code block - determines code spacing between lines */
-    font-size: 14px;
-}
-</style>
-
 ```{r set-up, echo=FALSE, warning=FALSE, message=FALSE, include=FALSE}
 Sys.setlocale("LC_ALL", "en_US.UTF-8")
 Sys.setenv(TZ='UTC') # on utilise UTC
@@ -53,6 +20,9 @@ library("tidyverse")
 library("dygraphs")
 library("xts")
 library("googledrive")
+drive_auth(email = "jean-pierre.gattuso@gmail.com")
+#drive_deauth()
+
 
 #define who is the user and define path
 if (Sys.getenv("LOGNAME") == "gattuso") path = "../../pCloud\ Sync/Documents/experiments/exp153_carbonates_point_B/"
@@ -63,7 +33,7 @@ if (Sys.getenv("LOGNAME") == "samir") path = "../../pCloud Sync/exp153_carbonate
 url <- "Temperature_EOL/EOL.csv"
 drive_download(url, type = "csv", path="data/EOL.CSV", overwrite = TRUE)
 d <- readr::read_csv(file = "data/EOL.csv", col_names = TRUE) %>% 
-  dplyr::mutate(d, date_time = str_c(Date, " ", Heure) %>%
+  dplyr::mutate(date_time = str_c(Date, " ", Heure) %>%
                   parse_datetime(format="%Y%m%d %H%M%S"))
 EOL_xts <- dplyr::select(d, date_time, T)
 EOL_xts <- xts::as.xts(EOL_xts, order.by = d$date_time)
