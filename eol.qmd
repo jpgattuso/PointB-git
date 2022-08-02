@@ -1,26 +1,55 @@
 ---
-title: "Temperature_EOL"
-format: html
-editor: visual
+title: "EOL data" 
+author: "Jean-Pierre Gattuso"
+date: '`r format(Sys.Date(), "%d %B %Y")`'
+output:
+  rmarkdown::html_document:
+    theme: paper
+    number_sections: false
+    fig_width: 12
+    fig_height: 8
+theme: cerulean
 ---
 
-## Quarto
+```{r set-up, echo=FALSE, warning=FALSE, message=FALSE, include=FALSE}
+Sys.setlocale("LC_ALL", "en_US.UTF-8")
+Sys.setenv(TZ = 'UTC') # on utilise UTC
+rm(list = ls())
+knitr::opts_chunk$set(echo = TRUE)
+library("tidyverse")
+library("dygraphs")
+library("xts")
 
-Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
-
-## Running Code
-
-When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
-
-```{r}
-1 + 1
+# Define who is the user and define path
+if (Sys.getenv("LOGNAME") == "gattuso") path = "../../pCloud\ Sync/Documents/experiments/exp153_carbonates_point_B/"
+if (Sys.getenv("LOGNAME") == "samir") path = "../../pCloud Sync/exp153_carbonates_point_B/"
+if (Sys.getenv("LOGNAME") == "robert") path = "~/pCloudDrive/"
 ```
 
-You can add options to executable code like this
+```{r read and clean data, echo=FALSE, warning=FALSE, message=FALSE}
+# Download file directly from Google Drive without using a package
+download.file("https://drive.google.com/uc?id=1-0ZsGZr3XAAc9gXPUDiCUP9fa5Qxo6zJ&export=download", "data/EOL.csv")
 
-```{r}
-#| echo: false
-2 * 2
+# Create DIY graph
+d <- readr::read_csv(file = "data/EOL.csv", col_names = TRUE) %>% 
+  dplyr::mutate(date_time = str_c(Date, " ", Heure) %>%
+                  parse_datetime(format = "%Y%m%d %H%M%S"))
+EOL_xts <- dplyr::select(d, date_time, T)
+EOL_xts <- xts::as.xts(EOL_xts, order.by = d$date_time)
+dygraph(EOL_xts,
+        #group = "awipev",
+        main = "Temperature at EOL station, Villefranche-sur-mer",
+        ylab = "Temperature (°C)") %>%
+  dySeries(
+    "T",
+    color = "blue",
+    strokeWidth = 1,
+    pointSize = 2
+  )
+
+# Static graph
+#ggplot(d) + geom_point(aes(x = date_time, y = T))
+
+# Save results
+saveRDS(d, file = "data/eol_data.rds")
 ```
-
-The `echo: false` option disables the printing of code (only output is displayed).
