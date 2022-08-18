@@ -1,6 +1,6 @@
 ---
 title: "EOL data" 
-author: "Jean-Pierre Gattuso"
+author: "Frédéric Gazeau & Jean-Pierre Gattuso"
 date: '`r format(Sys.Date(), "%d %B %Y")`'
 output:
   rmarkdown::html_document:
@@ -42,9 +42,10 @@ dygraph(EOL_xts,
         ylab = "Temperature (°C)") %>%
   dySeries(
     "T",
+    drawPoints = TRUE,
     color = "blue",
-    strokeWidth = 1,
-    pointSize = 2
+    strokeWidth = 0,
+    pointSize = 1
   )
 
 # Static graph
@@ -52,4 +53,6 @@ dygraph(EOL_xts,
 
 # Save results
 saveRDS(d, file = "data/eol_data.rds")
+system("cp -r eol_files ../../kDrive/Documents/Sites/jpgattuso.github.io/")
+system("cp eol.html ../../kDrive/Documents/Sites/jpgattuso.github.io/")
 ```
