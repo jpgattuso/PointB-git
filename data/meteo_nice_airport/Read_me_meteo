@@ -1,0 +1,32 @@
+Données envoyées par Laurent Coppola en septembre 2015.
+
+La durée des précipitations n'est pas disponible pour la station Nice aéroport.
+Pas de TM avant 2012, donc prendre TNTXM à la place.
+
+date (YYYYMMDDhhmmss) : Climatological day (see below)
+poste : Station Number
+lat : Latitude (Degree between -90/90)
+lon : Longitude (Degree between -180/180)
+alti : Altitude (m)
+type_poste_actuel : Type of station (Code table, see below)
+tn : Minimum air temperature (°C)
+tx : Maximum air temperature (°C)
+tm : Mean air temperature (°C)
+un : Minimum humidity (%)
+ux : Maximum humidity (%)
+um : Mean humidity (%)
+ffm : Mean wind speed at 10 m (m.s-1)
+ff2m : Mean wind speed at 2 m (m.s-1)
+rr : Precipitation amount (mm)
+inst : Total sunshine (Minute)
+glot : Global solar radiation (J.m-2)
+dift : Diffuse solar radiation (J.m-2)
+dirt : Direct solar radiation (J.m-2)
+infrart : Infrared radiation (J.m-2)
+uv : Ultraviolet radiation (J.m-2)
+tmermin : Minimum Sea Temperature (°C)
+tmermax : Maximum Sea Temperature (°C)
+DXY :	DIRECTION VENT QUOTIDIEN MAXI MOYENNE SUR 10 MIN ROSE DE 360
+TNTXM	: MOYENNE DE TN ET TX QUOTIDIEN	DEG C ET 1/10	quotidien
+TN et TX :  min et max de la temperature de l’air.
+short_name : description (unit)
